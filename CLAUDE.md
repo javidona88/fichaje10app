@@ -100,8 +100,16 @@ elegir). **Las dos tienen que aplicar exactamente los mismos modificadores** —
 desincronizado varias veces (racha gafada, crisis) y el jugador veía un % más optimista del real.
 - **1 natural = FALLO automático, 20 natural = ÉXITO automático**, pase lo que pase con bono y
   dificultad (`exito = dado===1 ? false : (dado===20 ? true : total>=dificultad)`). Aplicado
-  también en `probabilidadExito`, en la pantalla de lesión y en `SCREENS.resultado`.
+  también en `probabilidadExito`, en la pantalla de lesión y en `SCREENS.resultado`. En 1/20
+  natural la UI NO muestra la suma `dado + bono = total`: `SCREENS.tirando` pone "20 natural ·
+  éxito automático" / "1 natural · fallo automático" (y el caption "un N natural decide solo"),
+  y `SCREENS.resultado` lo mismo en `.outcome-roll`.
 - `ventaja:true` → tira 2 dados y se queda con el mejor (objeto "Segunda Oportunidad").
+- El % de `probabilidadExito` siempre es múltiplo de 5 (probabilidad exacta de un d20). Verificado
+  con Monte Carlo que coincide con `tirar()` en todos los estados (crisis / racha gafada / salud
+  / forma). `etiquetaProbabilidad(pct)` mapea a 9 niveles deliberadamente conservadores:
+  Imposible (0) · Casi imposible (≤10) · Muy difícil (≤25) · Difícil (≤40) · Incierto (≤55) ·
+  Favorable (≤70) · Probable (≤85) · Muy probable (≤95) · Seguro (100).
 - Modificadores de dificultad (`calcModBono`): salud<50 (+2), forma<40 (+1), confianza<35 en
   tiradas de mentalidad (-2 al bono).
 - **Racha gafada** (`j.rachaGafada`, ex-malDeOjo): sacar un 1 natural la activa; la SIGUIENTE
@@ -142,6 +150,13 @@ Mismo diseño de tarjeta apilada (`estadoItem()` dentro de `cromo()`).
 ### Lesiones y recuperación
 - Solo cuentan como baja golpes de salud <= -20. `semanas = min(10, max(1, round(abs(v)/7 *
   variacion)))`, `variacion = 0.7 + random()*0.7`.
+- **Aviso de lesión** (`SCREENS.lesionReveal`, "Parte médico"): `generarLesion(j)` devuelve
+  `{ventanas, semanas, gravedad, dado...}`; si `ventanas >= 2` se guarda en
+  `S.pendienteLesionReveal` (si `ventanas === 1`, solo `mostrarNotificacion`). El check que
+  redirige a la pantalla está al final de `avanzarPaso` (`if(S.pendienteLesionReveal){ S.screen
+  = 'lesionReveal' }`). **NO borrar `S.pendienteLesionReveal` al principio de `avanzarPaso`** —
+  lo puso un evento (`efectosFn`) y tiene que sobrevivir; se limpia solo en `SCREENS.lesionReveal`
+  al pulsar "Entendido". (Bug corregido: las lesiones venidas de eventos no avisaban.)
 - Con `lesionSemanas > 0`: `avanzarPaso` redirige a `SCREENS.recuperacion`; eventos con
   `soloSiSano:true` se filtran; hay eventos `soloSiLesionado:true` (`aburrimiento_lesion`,
   `duda_tras_lesion`) y variantes de relleno propias (`EVENTO_RELLENO_VARIANTES_LESIONADO`).
@@ -256,8 +271,14 @@ en `j.promesasActivas`; `evaluarPromesas(j)` las comprueba en fin de temporada (
   extranjero: en cuanto expira un patrocinio, la temporada siguiente ya puede haber otra oferta.
 
 ### Objetivos de temporada
-`OBJETIVOS_DATA[categoria]` (3 niveles) + `OBJETIVOS_GRANDE` (4 niveles, solo `CLUBES_GRANDES`,
-techo en "campeón de Liga"; los LaLiga normales llegan a "pelear por Europa").
+`OBJETIVOS_DATA[categoria]` (3 niveles) + `OBJETIVOS_GRANDE` (4 niveles, para los clubes que
+pasan `esClubGrande(nombre)`; techo en liga+continental, los LaLiga normales llegan a "pelear
+por Europa"). Los textos de `OBJETIVOS_GRANDE` (niveles 4/3/2) son funciones `j => string` que
+mencionan la competición continental vía `competicionContinentalDeClub(j)` (usa
+`j.club.nivelEuropeo` si está, si no deduce por país; por defecto Champions League).
+`elegirObjetivo` resuelve el `texto` función a string antes de devolver `{texto, tipo}`.
+`SCREENS.ofertas` ordena las ofertas por prestigio del club desc y, a igualdad, por sueldo ×
+duración desc; las de `PRESTIGIO_CLUB` 4 llevan la clase `.oferta-card.elite` (borde dorado).
 `j.club.ambicionNivel` (1-4) elige (`elegirObjetivo`) y sube/baja según se cumpliera el anterior
 (`evaluarObjetivo` dentro de `calcularResumenTemporada`). Se resetea en cualquier cambio de club
 (`ambicionInicial(nombreClub)`). Declinar ofertas y quedarte sube el cariño +5 (solo si de
@@ -359,7 +380,25 @@ En `PANTALLAS_TAB`.
   escudo oficial. `PATRON_ESCUDO_LALIGA` da forma (escudo/círculo) y patrón (rayas/mitades/
   diagonal/sólido) por club de LaLiga. Excepción: escudo especial del Novelda CF por nombre.
   `inicialesClub`, `colorDesdeTexto`, `esColorClaro`.
-- `CLUBES_GRANDES`: FC Barcelona y Real Madrid CF. `CLUBES_EXTRANJERO`: clubes reales de varios
+- **Escudos "a medida"** de los clubes top: `escudoBarcelona/RealMadrid/Atletico/Bayern/ManCity/
+  PSG`, enganchados en `escudoSVG` por nombre. Son diseños propios mínimos (forma `FORMA_ESCUDO_OLLA`
+  vía `envolverEscudo()` + color + franjas/bandas + siglas), NO los emblemas reales. Al añadir
+  más, mismo criterio: nada de coronas/monogramas/animales/composiciones oficiales.
+- **Dos tramos de élite**:
+  - *Grandes* — `CLUBES_GRANDES` [Barça, Madrid, Atleti] + `CLUBES_GRANDES_EXTRANJERO` [Bayern,
+    Man City, PSG]; `esClubGrande(nombre)` cubre ambos: sueldo "Grande", `OBJETIVOS_GRANDE`,
+    techo de ambición 4, duración de contrato 1 año, escudo a medida. Los de fuera construyen
+    su `j.club` con `grande:true`.
+  - *Prestigio 4* (élite pero no grande) — además de los 6 grandes: Liverpool, Man United,
+    Chelsea, Arsenal, Juventus, Inter, AC Milan, Borussia Dortmund. `factorPrestigio` = x1.6 al
+    sueldo (x0.7/x1.0/x1.3 para niveles 1-3). Solo llegan como oferta a jugadores con
+    reputación >= 60 (`tierMax` = 4 en `procesarBanderasFichaje` / `generarOfertas`).
+- **Rivalidades directas** (`DERBIS` → `RIVAL_DIRECTO` → `esRivalDirecto(a,b)`): en `generarOfertas`
+  (loop local y extranjero) el rival directo se descarta el 93% de las veces; se excluye de
+  `candidatosGrandes` en `fichajeGrande`; si fichas por él, `iniciarFichaje` deja
+  `carinoAficion=2`, hunde el `carino` de la etapa anterior y lanza aviso `riesgo`
+  (`S.esFichajeRival`). Las ofertas de rival llevan `of.rivalDirecto` (badge en `SCREENS.ofertas`).
+- `CLUBES_EXTRANJERO`: clubes reales de varios
   países con `pais`/`liga`/`colores`; `COPA_NACIONAL_POR_PAIS` / `nombreCopaNacional()` para el
   nombre correcto de la copa (Copa del Rey solo en España). `FILIAL_DE_CLUB`,
   `primerEquipoDeFilial` / `primeraEquipoDeFilial` para no fichar por filiales.
@@ -382,9 +421,18 @@ efectos en la topbar.
 
 ### Interfaz
 - Logo "FICHAJE 10" (`.logo-wrap` > `.logo-badge` + `.logo-text` .top/.main) en la topbar y en
-  el tutorial. La camiseta usa `logoCamisetaCompacta(16)` (SVG de `logoCamiseta` con el viewBox
-  recortado a su dibujo y alto fijo) para que su altura case con las mayúsculas del texto. El
-  logo grande de la portada (`SCREENS.menu`) usa `logoCamiseta(74)` directamente.
+  el tutorial. La camiseta usa `logoCamisetaCompacta(19)` (SVG de `logoCamiseta` con el viewBox
+  recortado a su dibujo y alto fijo), centrada verticalmente con el texto vía `align-items:center`.
+  El logo grande de la portada (`SCREENS.menu`) usa `logoCamiseta(74)` directamente.
+- `pintar()` hace `window.scrollTo(0,0)` en cada cambio de pantalla, PERO si se repinta la
+  MISMA pantalla (`S.screen === _pantallaPintadaPrevia`, p. ej. togglear un servicio en
+  `SCREENS.gastos`) conserva el scroll donde estaba. Los reveals con `.press-headline` /
+  `.season-reveal .num` luego hacen `scrollIntoView` al dato.
+- `SCREENS.ajustes` tiene botón "← Volver" (`S.pantallaAnteriorAjustes` o menú/tabJugador) —
+  hace falta porque desde el menú no hay tabbar ni engranaje para salir.
+- **Creación** (`SCREENS.crear`): campos en filas (`.field-row`): Nombre+Apellidos, y
+  Localidad+Posición (Posición = input `disabled` con "Delantero"). Nombre/Apellidos arrancan
+  vacíos; el botón "Empezar carrera" exige nombre+apellidos+localidad+estilo.
 - `crearEyebrow(texto)` combina título/subtítulo de pantalla con el eyebrow de la tarjeta
   (usa `tituloPaginaPendiente` guardado por `topbar()`).
 - `PANTALLAS_TAB` (con barra de pestañas: tabJugador/tabClub/tabEstadisticas/tabEconomia/gastos/
@@ -421,6 +469,9 @@ efectos en la topbar.
 - Cifras fijas que envejecen mal cuando otra parte se reescala: preferir % sobre el estado
   actual del jugador.
 - No dejar cambios visibles sin notificar en pantalla (pasó con el contrato de emergencia).
+- Pantalla en blanco = normalmente un `ReferenceError` en el render de esa `SCREENS.x`. Ej.
+  corregido: `SCREENS.resultado` usaba `j.fichajeVeranoGarantizado` sin declarar `const j =
+  S.jugador;` — solo reventaba en ramas con `diferirVerano:true` (evento `oferta_club_superior`).
 - **Recordar subir la versión del `sw.js` al desplegar** (el service worker vive en el hosting,
   no en este `index.html`; irrelevante para pruebas locales).
 

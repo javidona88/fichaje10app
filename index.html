@@ -115,6 +115,7 @@ body.sin-topbar{ padding-top: calc(24px + env(safe-area-inset-top,0px)); }
 }
 .notif-toast.objeto{ border-color:var(--gold); }
 .notif-toast.atributo{ border-color:var(--gold); }
+.notif-toast.riesgo{ border-color:var(--red); }
 @keyframes notifIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
 .panel-entreno-overlay{
   position:fixed; inset:0; background:rgba(5,7,15,0); z-index:70;
@@ -212,6 +213,9 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   background: var(--bg2); font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--ink);
 }
 .field input[type=text]:focus{ outline:none; border-color:var(--gold); }
+.field input[type=text]:disabled{ opacity:.55; cursor:not-allowed; }
+.field-row{ display:flex; gap:12px; margin-bottom:16px; }
+.field-row .field{ flex:1; min-width:0; margin-bottom:0; }
 .field-hint{ font-size:11.5px; color:var(--ink-soft); margin-top:5px; }
 .points-header{ display:flex; justify-content:space-between; align-items:center; margin:20px 0 12px; }
 .attr-row button{
@@ -571,6 +575,12 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .oferta-card{
   border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:10px; background:var(--bg2);
 }
+.oferta-card.elite{
+  border-color:var(--gold);
+  box-shadow:0 0 0 1px rgba(212,175,55,0.35), 0 4px 16px rgba(212,175,55,0.12);
+  background:linear-gradient(180deg, rgba(212,175,55,0.07), var(--bg2) 55%);
+}
+.oferta-card.elite .oferta-club span{ color:var(--gold); }
 .oferta-club{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; }
 .oferta-meta{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); margin:4px 0 10px; }
 .oferta-lista{ list-style:none; margin:6px 0 12px; padding:0; }
@@ -817,20 +827,20 @@ const PRESTIGIO_CLUB = {
   "CD Tenerife":1, "CD Eldense":1, "RC Celta Fortuna":1, "CE Sabadell FC":1, "AD Ceuta FC":1,
   "Real Sociedad B":1, "CD Castellón":1, "Albacete Balompié":1, "FC Andorra":1,
   // Inglaterra — Premier League
-  "Manchester United":3, "Liverpool FC":3, "Manchester City":3, "Chelsea FC":3, "Arsenal FC":3,
+  "Manchester United":4, "Liverpool FC":4, "Manchester City":4, "Chelsea FC":4, "Arsenal FC":4,
   "Aston Villa":3, "Newcastle United":3, "Tottenham Hotspur":3,
   "Brighton & Hove Albion":2, "AFC Bournemouth":2, "Fulham FC":2, "Crystal Palace":2, "Everton FC":2,
   "Brentford FC":2, "Nottingham Forest":2, "Leeds United":2, "Sunderland AFC":2,
   "Coventry City":1, "Ipswich Town":1, "Hull City":1,
   // Italia — Serie A
-  "Juventus FC":3, "AC Milan":3, "Inter de Milán":3, "AS Roma":3, "SSC Nápoles":3, "Atalanta BC":3, "SS Lazio":3, "ACF Fiorentina":3,
+  "Juventus FC":4, "AC Milan":4, "Inter de Milán":4, "AS Roma":3, "SSC Nápoles":3, "Atalanta BC":3, "SS Lazio":3, "ACF Fiorentina":3,
   "Bologna FC":2, "Torino FC":2, "Udinese Calcio":2, "Genoa CFC":2, "Como 1907":2, "Cagliari Calcio":2, "Parma Calcio":2, "US Lecce":2, "Sassuolo Calcio":2,
   // Alemania — Bundesliga
-  "Bayern de Múnich":3, "Borussia Dortmund":3, "RB Leipzig":3, "Bayer Leverkusen":3, "VfB Stuttgart":3, "Eintracht Frankfurt":3,
+  "Bayern de Múnich":4, "Borussia Dortmund":4, "RB Leipzig":3, "Bayer Leverkusen":3, "VfB Stuttgart":3, "Eintracht Frankfurt":3,
   "Borussia Mönchengladbach":2, "Werder Bremen":2, "1. FSV Mainz 05":2, "SC Friburgo":2, "Union Berlín":2, "FC Augsburgo":2, "TSG Hoffenheim":2, "1. FC Colonia":2,
   "FC Schalke 04":1, "SV Elversberg":1, "SC Paderborn 07":1,
   // Francia — Ligue 1
-  "Paris Saint-Germain":3, "Olympique de Marsella":3, "Olympique de Lyon":3, "AS Mónaco":3, "LOSC Lille":3,
+  "Paris Saint-Germain":4, "Olympique de Marsella":3, "Olympique de Lyon":3, "AS Mónaco":3, "LOSC Lille":3,
   "RC Lens":2, "Stade Rennais":2, "RC Estrasburgo":2, "Toulouse FC":2, "Stade Brestois":2, "AJ Auxerre":2, "Angers SCO":2, "FC Lorient":2,
   "Le Havre AC":1, "Le Mans FC":1, "Paris FC":1, "ES Troyes":1, "Stade de Reims":1,
   // Portugal — Primeira Liga
@@ -1836,7 +1846,7 @@ const BANCO_EVENTOS = [
   },
   {
     id:"oferta_club_grande", cooldown:6,
-    trigger:{ edadMin:20, probabilidad:0.09, condicion: j => j.club.categoria === "LaLiga" && !j.club.extranjero && !CLUBES_GRANDES.includes(j.club.nombre) && j.stats.valorMercado >= 2500000 && j.stats.reputacion >= 40 },
+    trigger:{ edadMin:20, probabilidad:0.09, condicion: j => j.club.categoria === "LaLiga" && !j.club.extranjero && !esClubGrande(j.club.nombre) && j.stats.valorMercado >= 2500000 && j.stats.reputacion >= 40 },
     texto:"La llamada que sueña cualquier futbolista: uno de los grandes de la competición, de los que pelean títulos todos los años, pregunta formalmente por ti. Tu agente confirma que la propuesta es real y quieren sentarse a hablar cuanto antes.",
     opciones:[
       { texto:"Sentarte a negociar con ellos",
@@ -2319,7 +2329,8 @@ const BANCO_EVENTOS = [
   },
   {
     id:"adrian_ficha_tu_club", unico:true, soloSiSano:true, evitarTrasTitulo:true,
-    trigger:{ edadMax:21, probabilidad:0.3, condicion: j =>
+    trigger:{ edadMin:19, edadMax:22, probabilidad:0.3, condicion: j =>
+      S.temporada >= 3 &&
       j.rival.trayectoriaIniciada && j.rival.club && j.rival.club !== j.club.nombre &&
       !j.rival.compartiendoVestuario && !j.rival.yaCompartioVestuario &&
       !j.club.extranjero && CATEGORIAS.indexOf(j.club.categoria) <= 2 &&
@@ -3293,7 +3304,7 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.0';
+const VERSION_JUEGO = 'v1.1';
 
 const PARTIDOS_POR_CATEGORIA = {"Tercera RFEF":30,"Segunda RFEF":32,"Primera RFEF":34,"LaLiga2":36,"LaLiga":38};
 
@@ -3679,9 +3690,9 @@ const OBJETIVOS_DATA = {
   ]
 };
 const OBJETIVOS_GRANDE = [
-  { texto:"ser campeón de Liga", tipo:"campeon" },
-  { texto:"pelear por Europa y aspirar al título", tipo:"europa" },
-  { texto:"clasificarse para competición europea con solvencia", tipo:"consolidar" },
+  { texto: j => `ser campeón de Liga y llegar lejos en la ${competicionContinentalDeClub(j)}`, tipo:"campeon" },
+  { texto: j => `pelear el título de Liga hasta el final y volver a jugar la ${competicionContinentalDeClub(j)}`, tipo:"europa" },
+  { texto: j => `hacer una temporada digna y no quedarse fuera de la ${competicionContinentalDeClub(j)}`, tipo:"consolidar" },
   { texto:"evitar una temporada decepcionante para la afición", tipo:"supervivencia" }
 ];
 const OBJETIVOS_SUDAMERICA = [
@@ -3700,6 +3711,29 @@ const OBJETIVOS_ASIA = [
   { texto:"luchar por evitar el descenso", tipo:"supervivencia" }
 ];
 const CLUBES_GRANDES = ["FC Barcelona","Real Madrid CF","Atlético de Madrid"];
+// Gigantes de fuera que también cuentan como "grandes" (sueldo Grande, objetivos de grande...).
+const CLUBES_GRANDES_EXTRANJERO = ["Bayern de Múnich","Manchester City","Paris Saint-Germain"];
+function esClubGrande(nombre){ return CLUBES_GRANDES.includes(nombre) || CLUBES_GRANDES_EXTRANJERO.includes(nombre); }
+
+// Rivalidades directas (derbis / clásicos). Fichar por el rival directo es raro y, si pasa, la afición no lo perdona.
+const DERBIS = [
+  ["FC Barcelona","Real Madrid CF"], ["FC Barcelona","RCD Espanyol"], ["Real Madrid CF","Atlético de Madrid"],
+  ["Real Betis Balompié","Sevilla FC"], ["Athletic Club","Real Sociedad"],
+  ["Valencia CF","Villarreal CF"], ["Valencia CF","Levante UD"],
+  ["RC Celta de Vigo","RC Deportivo"], ["Real Sporting de Gijón","Real Oviedo"], ["Real Racing Club","Real Sporting de Gijón"],
+  ["Manchester United","Manchester City"], ["Manchester United","Liverpool FC"], ["Liverpool FC","Everton FC"],
+  ["Arsenal FC","Tottenham Hotspur"], ["Chelsea FC","Tottenham Hotspur"],
+  ["AC Milan","Inter de Milán"], ["AS Roma","SS Lazio"], ["Juventus FC","Inter de Milán"],
+  ["Bayern de Múnich","Borussia Dortmund"], ["Boca Juniors","River Plate"]
+];
+const RIVAL_DIRECTO = (() => {
+  const m = {};
+  DERBIS.forEach(([a,b]) => { (m[a] = m[a] || []).push(b); (m[b] = m[b] || []).push(a); });
+  return m;
+})();
+function esRivalDirecto(clubA, clubB){
+  return !!(clubA && clubB && (RIVAL_DIRECTO[clubA] || []).includes(clubB));
+}
 const CLUBES_EXTRANJERO = [
   // Inglaterra — Premier League (20)
   { nombre:"Manchester United", pais:"Inglaterra", liga:"Premier League", colores:['#DA291C','#000000'] },
@@ -4550,10 +4584,12 @@ const NOMBRES_PADRE = ["Antonio","Manuel","José","Francisco","Ángel","Rafael"]
 const NOMBRES_MADRE = ["Pilar","Rosario","Isabel","Dolores","Encarnación","Mercedes"];
 function generarPadreMadre(j){
   const partes = (j.nombre||'').trim().split(' ');
-  const apellido = partes.slice(1).join(' ') || 'Ramos';
+  const apellidoJugador = partes.slice(1).join(' ') || 'Ramos';
   const esMadre = Math.random() < 0.5;
   const pool = esMadre ? NOMBRES_MADRE : NOMBRES_PADRE;
   const nombre = pool[Math.floor(Math.random()*pool.length)];
+  // El padre comparte primer apellido contigo; la madre tiene el suyo propio.
+  const apellido = esMadre ? APELLIDOS_PROTEGIDO[Math.floor(Math.random()*APELLIDOS_PROTEGIDO.length)] : apellidoJugador;
   return { nombre: `${nombre} ${apellido}`, apodo: nombre, genero: esMadre ? 'f' : 'm' };
 }
 function generarNombrePareja(){
@@ -4689,8 +4725,88 @@ const PATRON_ESCUDO_LALIGA = {
   "RC Deportivo": { forma:'circulo', patron:'rayas_verticales' },
   "Málaga CF": { forma:'escudo', patron:'rayas_verticales' }
 };
+/* Escudos "a medida" de los clubes top del juego (CLUBES_GRANDES). Son interpretaciones
+   propias construidas con primitivas heráldicas genéricas (contorno de escudo, franjas,
+   bandas) + los colores del club + siglas. NO reproducen los emblemas oficiales: sin cruces,
+   coronas, monogramas, animales ni composiciones concretas de los escudos reales. */
+const FORMA_ESCUDO_OLLA = 'M4 6 Q4 2.6 8 2.6 L32 2.6 Q36 2.6 36 6 L36 22 Q36 33 27.5 39.6 Q23.6 42.8 20 42.8 Q16.4 42.8 12.5 39.6 Q4 33 4 22 Z';
+function envolverEscudo(tamano, clipId, contenido, sigla, colorSigla, strokeSigla, tamSigla){
+  return `<svg width="${tamano}" height="${tamano}" viewBox="0 0 40 44" xmlns="http://www.w3.org/2000/svg">
+    <defs><clipPath id="${clipId}"><path d="${FORMA_ESCUDO_OLLA}"/></clipPath></defs>
+    <g clip-path="url(#${clipId})">${contenido}</g>
+    <path d="${FORMA_ESCUDO_OLLA}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.4"/>
+    <text x="20" y="${tamSigla ? '31.4' : '31.6'}" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="${tamSigla || 10.5}" letter-spacing="0.3" fill="${colorSigla || '#fff'}" stroke="${strokeSigla || 'rgba(0,0,0,0.35)'}" stroke-width="0.5">${sigla}</text>
+  </svg>`;
+}
+function escudoBarcelona(tamano){
+  tamano = tamano || 30;
+  const AZUL = '#004D98', GRANA = '#A50044', ORO = '#FDE23E', ROJO = '#DA121A', LINEA = '#0A1633';
+  const bandaH = 14, sw = 40 / 9;
+  let senyera = '';
+  for(let i = 0; i < 9; i++) senyera += `<rect x="${(i*sw).toFixed(2)}" y="0" width="${(sw+0.4).toFixed(2)}" height="${bandaH}" fill="${i%2===0?ORO:ROJO}"/>`;
+  const cuerpo = senyera
+    + `<rect x="0"  y="${bandaH}" width="10" height="${44-bandaH}" fill="${AZUL}"/>`
+    + `<rect x="10" y="${bandaH}" width="10" height="${44-bandaH}" fill="${GRANA}"/>`
+    + `<rect x="20" y="${bandaH}" width="10" height="${44-bandaH}" fill="${AZUL}"/>`
+    + `<rect x="30" y="${bandaH}" width="10" height="${44-bandaH}" fill="${GRANA}"/>`
+    + `<rect x="0" y="${bandaH-0.9}" width="40" height="1.8" fill="${LINEA}"/>`;
+  return envolverEscudo(tamano, 'clip_FCBarcelona', cuerpo, 'FCB');
+}
+function escudoRealMadrid(tamano){
+  tamano = tamano || 30;
+  const MARFIL = '#F6F4EC', ORO = '#C9A227', MORADO = '#4B2E83', TINTA = '#12224F';
+  const cuerpo = `<rect x="0" y="0" width="40" height="44" fill="${MARFIL}"/>`
+    + `<polygon points="0,9 9,0 40,27 31,40" fill="${MORADO}"/>`
+    + `<polygon points="0,9 9,0 11,1.4 1.4,11" fill="${ORO}"/>`
+    + `<polygon points="31,40 40,27 38.6,25 29.6,38.6" fill="${ORO}"/>`;
+  return envolverEscudo(tamano, 'clip_RealMadrid', cuerpo, 'RM', TINTA, 'rgba(255,255,255,0.5)', 12);
+}
+function escudoAtletico(tamano){
+  tamano = tamano || 30;
+  const ROJO = '#C63328', BLANCO = '#FFFFFF', AZUL = '#1B2A63', LINEA = '#0C1230';
+  const bandaH = 12, n = 7, sw = 40 / n;
+  let franjas = '';
+  for(let i = 0; i < n; i++) franjas += `<rect x="${(i*sw).toFixed(2)}" y="${bandaH}" width="${(sw+0.4).toFixed(2)}" height="${44-bandaH}" fill="${i%2===0?ROJO:BLANCO}"/>`;
+  const cuerpo = franjas
+    + `<rect x="0" y="0" width="40" height="${bandaH}" fill="${AZUL}"/>`
+    + `<rect x="0" y="${bandaH-0.9}" width="40" height="1.8" fill="${LINEA}"/>`;
+  return envolverEscudo(tamano, 'clip_Atletico', cuerpo, 'ATM', '#fff', 'rgba(0,0,0,0.45)', 9.5);
+}
+function escudoBayern(tamano){
+  tamano = tamano || 30;
+  const ROJO = '#D50032', AZUL = '#0A2C63', BLANCO = '#FFFFFF', LINEA = '#0A1633';
+  const bandaH = 13, sw = 40 / 7;
+  let chief = '';
+  for(let i = 0; i < 7; i++) chief += `<rect x="${(i*sw).toFixed(2)}" y="0" width="${(sw+0.4).toFixed(2)}" height="${bandaH}" fill="${i%2===0?AZUL:BLANCO}"/>`;
+  const cuerpo = `<rect x="0" y="0" width="40" height="44" fill="${ROJO}"/>` + chief
+    + `<rect x="0" y="${bandaH-0.9}" width="40" height="1.8" fill="${LINEA}"/>`;
+  return envolverEscudo(tamano, 'clip_Bayern', cuerpo, 'BAY', '#fff', 'rgba(0,0,0,0.4)', 9.5);
+}
+function escudoManCity(tamano){
+  tamano = tamano || 30;
+  const CIELO = '#6CABDD', BLANCO = '#F4F8FB', TINTA = '#0A2240';
+  const cuerpo = `<rect x="0" y="0" width="40" height="44" fill="${CIELO}"/>`
+    + `<rect x="0" y="17" width="40" height="10" fill="${BLANCO}"/>`
+    + `<rect x="0" y="16" width="40" height="1.4" fill="${TINTA}"/>`
+    + `<rect x="0" y="26.6" width="40" height="1.4" fill="${TINTA}"/>`;
+  return envolverEscudo(tamano, 'clip_ManCity', cuerpo, 'MC', TINTA, 'rgba(255,255,255,0.5)', 12);
+}
+function escudoPSG(tamano){
+  tamano = tamano || 30;
+  const MARINO = '#0A1E46', ROJO = '#D4173A', BLANCO = '#FFFFFF';
+  const cuerpo = `<rect x="0" y="0" width="40" height="44" fill="${MARINO}"/>`
+    + `<rect x="14" y="0" width="12" height="44" fill="${BLANCO}"/>`
+    + `<rect x="16.5" y="0" width="7" height="44" fill="${ROJO}"/>`;
+  return envolverEscudo(tamano, 'clip_PSG', cuerpo, 'PSG', '#fff', 'rgba(0,0,0,0.4)', 9.5);
+}
 function escudoSVG(nombre, tamano, colores){
   tamano = tamano || 30;
+  if(nombre === 'Real Madrid CF') return escudoRealMadrid(tamano);
+  if(nombre === 'Atlético de Madrid') return escudoAtletico(tamano);
+  if(nombre === 'FC Barcelona') return escudoBarcelona(tamano);
+  if(nombre === 'Bayern de Múnich') return escudoBayern(tamano);
+  if(nombre === 'Manchester City') return escudoManCity(tamano);
+  if(nombre === 'Paris Saint-Germain') return escudoPSG(tamano);
   const primario = (colores && colores[0]) || colorDesdeTexto(nombre);
   const secundario = (colores && colores[1]) || '#fff';
   const iniciales = inicialesClub(nombre);
@@ -4988,15 +5104,16 @@ function procesarBanderasFichaje(j, rama){
   }
   if(rama.fichajeExtranjero){
     let tierMax;
-    if(j.club.categoria === "LaLiga") tierMax = j.stats.reputacion >= 35 ? 3 : 2;
+    if(j.club.categoria === "LaLiga") tierMax = j.stats.reputacion >= 60 ? 4 : (j.stats.reputacion >= 35 ? 3 : 2);
     else if(j.club.categoria === "LaLiga2") tierMax = 2;
     else tierMax = 1;
     const candidatosExt = CLUBES_EXTRANJERO.filter(c => (PRESTIGIO_CLUB[c.nombre]||2) <= tierMax);
     const clubExt = candidatosExt[Math.floor(Math.random()*candidatosExt.length)];
-    const nuevoClubObj = { nombre: clubExt.nombre, categoria:"LaLiga", extranjero:true, pais: clubExt.pais, liga: clubExt.liga, colores: clubExt.colores, ambicionNivel: ambicionInicial(clubExt.nombre) };
+    const esGrandeExt = CLUBES_GRANDES_EXTRANJERO.includes(clubExt.nombre);
+    const nuevoClubObj = { nombre: clubExt.nombre, categoria:"LaLiga", extranjero:true, pais: clubExt.pais, liga: clubExt.liga, colores: clubExt.colores, ambicionNivel: ambicionInicial(clubExt.nombre), ...(esGrandeExt ? { grande:true } : {}) };
     ofertaConstruida = {
       club: nuevoClubObj,
-      sueldo: calcularSueldoOferta(j, "Extranjero", clubExt.nombre, MULTIPLICADOR_SUELDO_LIGA[clubExt.liga] || 0.5),
+      sueldo: esGrandeExt ? calcularSueldoOferta(j, "Grande") : calcularSueldoOferta(j, "Extranjero", clubExt.nombre, MULTIPLICADOR_SUELDO_LIGA[clubExt.liga] || 0.5),
       duracion: calcularDuracionContrato(j)
     };
   }
@@ -5011,7 +5128,7 @@ function procesarBanderasFichaje(j, rama){
     };
   }
   if(rama.fichajeGrande){
-    const candidatosGrandes = CLUBES_GRANDES.filter(c => !(j.clubesEnfriados||{})[c] && c !== j.club.nombre);
+    const candidatosGrandes = CLUBES_GRANDES.filter(c => !(j.clubesEnfriados||{})[c] && c !== j.club.nombre && !esRivalDirecto(j.club.nombre, c));
     const nombreGrande = (candidatosGrandes.length ? candidatosGrandes : CLUBES_GRANDES)[Math.floor(Math.random()*(candidatosGrandes.length ? candidatosGrandes.length : CLUBES_GRANDES.length))];
     const nuevoClubObj = { nombre: nombreGrande, categoria:"LaLiga", grande:true, colores: coloresDeClub(nombreGrande, "LaLiga"), ambicionNivel: 3 };
     ofertaConstruida = {
@@ -5291,22 +5408,40 @@ function calcularResumenTemporada(j, ascensoPlayoff){
     objetivoTexto = j.club.objetivoActual.texto;
     objetivoTipo = j.club.objetivoActual.tipo;
     objetivoCumplido = evaluarObjetivo(j.club.objetivoActual.tipo, objetivoTmp);
-    const maxNivelClub = CLUBES_GRANDES.includes(j.club.nombre) ? 4 : 3;
+    const maxNivelClub = esClubGrande(j.club.nombre) ? 4 : 3;
     const prestigioClub = PRESTIGIO_CLUB[j.club.nombre] || 2;
     // Los clubes de más entidad no pierden su identidad tras una sola mala temporada: tienen un suelo de ambición
-    const sueloAmbicion = CLUBES_GRANDES.includes(j.club.nombre) ? 3 : (prestigioClub >= 3 ? 2 : 1);
+    const sueloAmbicion = esClubGrande(j.club.nombre) ? 3 : (prestigioClub >= 3 ? 2 : 1);
     // Jugar el playoff de ascenso es un buen año aunque no se acabe subiendo: no se penaliza como un objetivo fallido
     const cuentaComoNeutro = objetivoTipo === 'ascenso' && !objetivoCumplido && enPlayoff;
     if(!cuentaComoNeutro){
       j.club.ambicionNivel = Math.max(sueloAmbicion, Math.min(maxNivelClub, (j.club.ambicionNivel||2) + (objetivoCumplido ? 1 : -1)));
     }
     if(objetivoCumplido === false && !cuentaComoNeutro && tier !== 'campeon' && tier !== 'ascenso'){
+      const OBJ_FRASE = {
+        campeon:'ganar la Liga', europa:'meterse en puestos europeos',
+        libertadores:'clasificarse para la Libertadores', concacaf:'clasificarse para la fase continental',
+        afc:'clasificarse para la fase continental', consolidar:'firmar una temporada tranquila',
+        supervivencia:'asegurar la permanencia'
+      };
+      const objFrase = OBJ_FRASE[objetivoTipo] || objetivoTexto;
+      // ¿se ha quedado cerca? entonces el tono es de "a las puertas", no de "muy lejos"
+      let rozado = false;
+      if(objetivoTipo === 'campeon') rozado = posicionFinal <= 3;
+      else if(objetivoTipo === 'europa' || objetivoTipo === 'libertadores' || objetivoTipo === 'concacaf' || objetivoTipo === 'afc') rozado = !clasificacionEuropea && posicionFinal <= umbralContinental + 3;
+      else if(objetivoTipo === 'consolidar') rozado = posicionFinal <= 16;
+      const FRASES_OBJETIVO_ROZADO = [
+        d => `. Se queda a las puertas de ${d.objetivo}, para rabia de una grada que lo veía hecho.`,
+        d => `. Tan cerca de ${d.objetivo} y a la vez tan lejos: el club se queda con la miel en los labios.`,
+        d => `. Roza ${d.objetivo} pero no llega: una temporada de sensaciones agridulces.`
+      ];
       const FRASES_OBJETIVO_FALLIDO = [
         d => `. La directiva no oculta su malestar: lejos de ${d.objetivo} esta temporada.`,
         d => `. Año de decepción en las oficinas del club, muy lejos de ${d.objetivo}.`,
         d => `. La grada empieza a impacientarse: otra temporada sin acercarse a ${d.objetivo}.`
       ];
-      titular += FRASES_OBJETIVO_FALLIDO[Math.floor(Math.random()*FRASES_OBJETIVO_FALLIDO.length)]({ objetivo: objetivoTexto });
+      const pool = rozado ? FRASES_OBJETIVO_ROZADO : FRASES_OBJETIVO_FALLIDO;
+      titular += pool[Math.floor(Math.random()*pool.length)]({ objetivo: objFrase });
     }
   }
 
@@ -5395,12 +5530,14 @@ function probabilidadExito(jugador, tirada, bonoExtra){
 }
 function etiquetaProbabilidad(pct){
   const p = Math.round(pct);
-  if(pct <= 5) return `Imposible (${p}%)`;
-  if(pct <= 25) return `Muy difícil (${p}%)`;
-  if(pct <= 45) return `Difícil (${p}%)`;
-  if(pct <= 60) return `Factible (${p}%)`;
-  if(pct <= 80) return `Probable (${p}%)`;
-  if(pct <= 95) return `Casi seguro (${p}%)`;
+  if(p <= 0)  return `Imposible (${p}%)`;
+  if(p <= 10) return `Casi imposible (${p}%)`;
+  if(p <= 25) return `Muy difícil (${p}%)`;
+  if(p <= 40) return `Difícil (${p}%)`;
+  if(p <= 55) return `Incierto (${p}%)`;
+  if(p <= 70) return `Favorable (${p}%)`;
+  if(p <= 85) return `Probable (${p}%)`;
+  if(p <= 95) return `Muy probable (${p}%)`;
   return `Seguro (${p}%)`;
 }
 function tirar(jugador, tirada, bonoExtra, ventaja){
@@ -5722,7 +5859,9 @@ function avanzarPaso(j){
   if(j.tienePareja){
     j.stats.felicidadPareja = Math.max(0, (j.stats.felicidadPareja||0) - 3); // el fútbol absorbe tiempo; hay que dedicarle atención de verdad
   }
-  S.pendienteLesionReveal = null;
+  // OJO: no borrar S.pendienteLesionReveal aquí. Si un evento acaba de dejar una lesión
+  // pendiente (efectosFn), tiene que sobrevivir hasta el check de abajo. Se limpia sola en
+  // SCREENS.lesionReveal al pulsar "Entendido".
   if(!(j.lesionSemanas > 0)){
     const probLesion = Math.max(0.015, 0.05 - j.atributos.fisico*0.0015);
     if(Math.random() < probLesion){
@@ -5944,8 +6083,17 @@ function iniciarFichaje(j, nuevoClub, nuevoContrato, pantallaSiguiente){
   const etapasPrevias = (j.trayectoria||[]).filter(e => e.club === nuevoClub.nombre);
   const esRegreso = etapasPrevias.length > 0;
   const carinoPrevioMax = esRegreso ? Math.max(...etapasPrevias.map(e=>e.carino||0)) : 0;
-  const carinoInicial = esRegreso ? Math.max(40, Math.round(carinoPrevioMax * 0.65)) : 40;
+  const esFichajeRival = esRivalDirecto(clubAnteriorNombre, nuevoClub.nombre);
+  let carinoInicial = esRegreso ? Math.max(40, Math.round(carinoPrevioMax * 0.65)) : 40;
+  if(esFichajeRival) carinoInicial = 2; // fichar por el rival directo: llegas señalado
   abrirNuevaEtapa(j, nuevoClub, carinoInicial);
+  // La afición del club que dejas no perdona el paso al rival: esa etapa queda marcada.
+  if(esFichajeRival){
+    const etapaAnterior = (j.trayectoria||[]).slice().reverse().find(e => e.club === clubAnteriorNombre && e.temporadaFin === S.temporada);
+    if(etapaAnterior) etapaAnterior.carino = Math.min(etapaAnterior.carino||0, 3);
+    S.esFichajeRival = { desde: clubAnteriorNombre, hacia: nuevoClub.nombre };
+    mostrarNotificacion(`⚠️ Fichas por ${articuloClub(nuevoClub.nombre)} ${nuevoClub.nombre}, el rival directo ${articuloClub(clubAnteriorNombre)==='la'?'de la':'del'} ${clubAnteriorNombre}. La afición que dejas atrás no te lo va a perdonar.`, 'riesgo');
+  }
   j.club = nuevoClub;
   if(nuevoContrato) j.contrato = nuevoContrato;
   j.carinoAficion = carinoInicial;
@@ -5983,8 +6131,17 @@ function evaluarObjetivo(tipo, r){
   if(tipo === 'consolidar') return r.posicionFinal <= 14;
   return r.posicionFinal < 18; // supervivencia
 }
+// Nombre de la competición continental que le "toca" a un club (para los textos de objetivo).
+function competicionContinentalDeClub(j){
+  const club = (j && j.club) || {};
+  if(club.nivelEuropeo && NOMBRE_COMPETICION_CONTINENTAL[club.nivelEuropeo]) return NOMBRE_COMPETICION_CONTINENTAL[club.nivelEuropeo];
+  if(club.pais && PAISES_SUDAMERICANOS.includes(club.pais)) return NOMBRE_COMPETICION_CONTINENTAL.libertadores;
+  if(club.pais && PAISES_CONCACAF.includes(club.pais)) return NOMBRE_COMPETICION_CONTINENTAL.concacaf;
+  if(club.pais && PAISES_ASIA.includes(club.pais)) return NOMBRE_COMPETICION_CONTINENTAL.afc;
+  return NOMBRE_COMPETICION_CONTINENTAL.champions; // por defecto: todos los grandes actuales son de Champions
+}
 function elegirObjetivo(j){
-  const esGrande = CLUBES_GRANDES.includes(j.club.nombre);
+  const esGrande = esClubGrande(j.club.nombre);
   let pool;
   if(esGrande) pool = OBJETIVOS_GRANDE;
   else if(j.club.extranjero && PAISES_SUDAMERICANOS.includes(j.club.pais)) pool = OBJETIVOS_SUDAMERICA;
@@ -5995,7 +6152,9 @@ function elegirObjetivo(j){
   const maxNivel = pool.length;
   const nivel = Math.max(1, Math.min(maxNivel, j.club.ambicionNivel || 2));
   const idx = maxNivel - nivel; // nivel máximo -> idx0 (el objetivo más ambicioso)
-  return pool[idx];
+  const obj = pool[idx];
+  if(obj && typeof obj.texto === 'function') return { texto: obj.texto(j), tipo: obj.tipo };
+  return obj;
 }
 function nombreCopaNacional(pais){
   return COPA_NACIONAL_POR_PAIS[pais] || "Copa nacional";
@@ -6196,12 +6355,13 @@ function generarOfertas(j){
     }
     const nombre = clubElegido.nombre;
     if(nombresUsados.has(nombre)) continue;
+    if(esRivalDirecto(j.club.nombre, nombre) && Math.random() < 0.93) continue; // el rival directo casi nunca te tantea
     nombresUsados.add(nombre);
     const ascenso = idxObjetivo > idxActual;
     const duracion = calcularDuracionContrato(j);
     const objetivoReal = elegirObjetivo({ club: { nombre, categoria, ambicionNivel: ambicionInicial(nombre) } });
     ofertas.push({
-      nombre, categoria, ascenso, duracion, colores: clubElegido.colores,
+      nombre, categoria, ascenso, duracion, colores: clubElegido.colores, rivalDirecto: esRivalDirecto(j.club.nombre, nombre) || undefined,
       sueldo: calcularSueldoOferta(j, categoria, nombre),
       objetivo: objetivoReal ? objetivoReal.texto : OBJETIVOS_POR_CATEGORIA[categoria][1],
       minutos: expectativaMinutos(j, ascenso)
@@ -6213,7 +6373,7 @@ function generarOfertas(j){
   const maxOfertasExtranjero = (j.club.categoria === "LaLiga" && j.stats.reputacion >= 35) ? 2 : 1;
   if(idxActual >= 2){
     let tierMax;
-    if(j.club.categoria === "LaLiga") tierMax = j.stats.reputacion >= 35 ? 3 : 2;
+    if(j.club.categoria === "LaLiga") tierMax = j.stats.reputacion >= 60 ? 4 : (j.stats.reputacion >= 35 ? 3 : 2);
     else if(j.club.categoria === "LaLiga2") tierMax = 2;
     else tierMax = 1;
     const tierMin = Math.max(1, tierMax - 1); // suelo mínimo, para que un jugador de nivel alto no reciba ofertas de clubes extranjeros flojos
@@ -6223,13 +6383,15 @@ function generarOfertas(j){
       if(!candidatosExt.length) candidatosExt = CLUBES_EXTRANJERO.filter(c => (PRESTIGIO_CLUB[c.nombre]||2) <= tierMax);
       const clubExt = candidatosExt[Math.floor(Math.random()*candidatosExt.length)];
       if(nombresUsados.has(clubExt.nombre)) continue;
+      if(esRivalDirecto(j.club.nombre, clubExt.nombre) && Math.random() < 0.93) continue;
       nombresUsados.add(clubExt.nombre);
+      const esGrandeExt = CLUBES_GRANDES_EXTRANJERO.includes(clubExt.nombre);
       const duracion = calcularDuracionContrato(j);
-      const objetivoExt = elegirObjetivo({ club: { nombre: clubExt.nombre, categoria:"LaLiga", extranjero:true, pais: clubExt.pais, ambicionNivel: ambicionInicial(clubExt.nombre) } });
+      const objetivoExt = elegirObjetivo({ club: { nombre: clubExt.nombre, categoria:"LaLiga", extranjero:true, grande: esGrandeExt || undefined, pais: clubExt.pais, ambicionNivel: ambicionInicial(clubExt.nombre) } });
       ofertas.push({
         nombre: clubExt.nombre, pais: clubExt.pais, liga: clubExt.liga, colores: clubExt.colores,
-        categoria:"LaLiga", ascenso:false, duracion, extranjero:true,
-        sueldo: calcularSueldoOferta(j, "Extranjero", clubExt.nombre, MULTIPLICADOR_SUELDO_LIGA[clubExt.liga] || 0.5),
+        categoria:"LaLiga", ascenso:false, duracion, extranjero:true, grande: esGrandeExt || undefined, rivalDirecto: esRivalDirecto(j.club.nombre, clubExt.nombre) || undefined,
+        sueldo: esGrandeExt ? calcularSueldoOferta(j, "Grande") : calcularSueldoOferta(j, "Extranjero", clubExt.nombre, MULTIPLICADOR_SUELDO_LIGA[clubExt.liga] || 0.5),
         objetivo: objetivoExt ? objetivoExt.texto : OBJETIVOS_POR_CATEGORIA["Extranjero"][Math.floor(Math.random()*OBJETIVOS_POR_CATEGORIA["Extranjero"].length)],
         minutos: expectativaMinutos(j, true)
       });
@@ -6615,7 +6777,10 @@ function pintarTabbar(){
   });
   raiz.appendChild(bar);
 }
+let _pantallaPintadaPrevia = null;
 function pintar(){
+  const mismaPantalla = (S.screen === _pantallaPintadaPrevia);
+  const yScrollPrevio = window.scrollY;
   app.innerHTML = "";
   document.getElementById('topbar-root').innerHTML = ''; // la repuebla topbar() si la pantalla la llama; si no, queda vacía (menú)
   if(!SCREENS[S.screen]){
@@ -6639,6 +6804,10 @@ function pintar(){
   } else {
     document.body.classList.add('sin-topbar');
   }
+  // Al cambiar de pantalla, arriba del todo. Si es la MISMA pantalla repintándose
+  // (p. ej. activar/desactivar un servicio), se mantiene el scroll donde estaba.
+  window.scrollTo(0, mismaPantalla ? yScrollPrevio : 0);
+  _pantallaPintadaPrevia = S.screen;
   app.classList.remove('fade-out');
   void app.offsetWidth;
   app.classList.add('fade-in');
@@ -6684,7 +6853,7 @@ function topbar(titulo){
 
   const logoWrap = el('div','logo-wrap');
   const badge = el('div','logo-badge');
-  badge.innerHTML = logoCamisetaCompacta(16);
+  badge.innerHTML = logoCamisetaCompacta(19);
   logoWrap.appendChild(badge);
   const logoText = el('div','logo-text');
   logoText.appendChild(el('div','top','FICHAJE'));
@@ -7612,6 +7781,18 @@ function pintarFilaSlot(slot, contenedor, opciones){
 SCREENS.ajustes = function(){
   topbar("Ajustes");
   const c = el('div','card');
+
+  const btnVolver = document.createElement('button');
+  btnVolver.className = 'btn-secondary';
+  btnVolver.textContent = '← Volver';
+  btnVolver.style.marginBottom = '16px';
+  btnVolver.onclick = ()=>{
+    S.screen = S.pantallaAnteriorAjustes || (S.jugador ? 'tabJugador' : 'menu');
+    S.pantallaAnteriorAjustes = null;
+    render();
+  };
+  c.appendChild(btnVolver);
+
   c.appendChild(crearEyebrow('Partidas guardadas'));
   for(let slot=1; slot<=NUM_SLOTS_GUARDADO; slot++){
     pintarFilaSlot(slot, c, {
@@ -7860,7 +8041,7 @@ SCREENS.tutorial = function(){
   hero.style.cssText = 'display:flex;justify-content:center;padding:26px 0 12px;';
   const lw = el('div','logo-wrap');
   const badge = el('div','logo-badge');
-  badge.innerHTML = logoCamisetaCompacta(16);
+  badge.innerHTML = logoCamisetaCompacta(19);
   lw.appendChild(badge);
   const lt = el('div','logo-text');
   lt.appendChild(el('div','top','FICHAJE'));
@@ -7919,7 +8100,7 @@ SCREENS.tutorial = function(){
 
 SCREENS.crear = function(){
   const state = SCREENS.crear._state || (SCREENS.crear._state = {
-    nombrePila:"Javi", apellido:"Navarro", localidad:"", pais:"España", estiloId:null
+    nombrePila:"", apellido:"", localidad:"", pais:"España", estiloId:null
   });
 
   topbar("Fichaje 10");
@@ -7927,29 +8108,38 @@ SCREENS.crear = function(){
   c.appendChild(crearEyebrow('Creación de personaje'));
   c.appendChild(el('h2',null,'Empieza tu carrera'));
 
+  const row1 = el('div','field-row');
   const f1 = el('div','field');
   f1.appendChild(el('label',null,'Nombre'));
   const inp = document.createElement('input'); inp.type='text'; inp.value=state.nombrePila; inp.placeholder='Nombre';
   inp.oninput = e=>{ state.nombrePila = e.target.value; };
   f1.appendChild(inp);
-  c.appendChild(f1);
+  row1.appendChild(f1);
 
   const f1b = el('div','field');
   f1b.appendChild(el('label',null,'Apellidos'));
   const inpApellido = document.createElement('input'); inpApellido.type='text'; inpApellido.value=state.apellido; inpApellido.placeholder='Apellidos';
   inpApellido.oninput = e=>{ state.apellido = e.target.value; };
   f1b.appendChild(inpApellido);
-  c.appendChild(f1b);
+  row1.appendChild(f1b);
+  c.appendChild(row1);
 
+  const row2 = el('div','field-row');
   const f2 = el('div','field');
   f2.appendChild(el('label',null,'Tu localidad'));
-  const inpLoc = document.createElement('input'); inpLoc.type='text'; inpLoc.value=state.localidad; inpLoc.placeholder='Ej: Getafe, Vigo, Elche...';
+  const inpLoc = document.createElement('input'); inpLoc.type='text'; inpLoc.value=state.localidad; inpLoc.placeholder='Ej: Getafe, Vigo...';
   inpLoc.oninput = e=>{ state.localidad = e.target.value; };
   f2.appendChild(inpLoc);
-  f2.appendChild(el('div','field-hint', 'De aquí sale toda la gente con la que creciste jugando al fútbol.'));
-  c.appendChild(f2);
+  row2.appendChild(f2);
 
-  c.appendChild(el('div','badge', '⚽ Posición: Delantero'));
+  const f3 = el('div','field');
+  f3.appendChild(el('label',null,'Posición'));
+  const inpPos = document.createElement('input'); inpPos.type='text'; inpPos.value='Delantero'; inpPos.disabled = true;
+  f3.appendChild(inpPos);
+  row2.appendChild(f3);
+  c.appendChild(row2);
+
+  c.appendChild(el('div','field-hint', 'De la localidad sale toda la gente con la que creciste jugando al fútbol.'));
 
   const ph = el('div','points-header');
   ph.appendChild(el('h3',null,'Elige tu estilo de juego'));
@@ -8409,11 +8599,15 @@ SCREENS.ofertas = function(){
   c.appendChild(el('h2',null,'Ofertas de otros clubes'));
 
   const ofertas = S.ofertasActuales || [];
+  // Primero los clubes de más prestigio; a igualdad, la oferta más jugosa (sueldo × años).
+  const prestigioDe = of => PRESTIGIO_CLUB[of.nombre] || 2;
+  const valorDe = of => (of.sueldo || 0) * (of.duracion || 1);
+  ofertas.sort((a,b) => prestigioDe(b) - prestigioDe(a) || valorDe(b) - valorDe(a));
   if(ofertas.length===0){
     c.appendChild(el('p',null,`<span style="color:var(--ink-soft)">Ningún club ha preguntado por ti esta pretemporada. Sigues en ${articuloClub(j.club.nombre)} ${j.club.nombre}.</span>`));
   } else {
     ofertas.forEach(of=>{
-      const card = el('div','oferta-card');
+      const card = el('div', 'oferta-card' + (prestigioDe(of) === 4 ? ' elite' : ''));
       const cabecera = document.createElement('div');
       cabecera.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;';
       const izda = document.createElement('span');
@@ -8428,6 +8622,9 @@ SCREENS.ofertas = function(){
       cabecera.appendChild(izda);
       cabecera.appendChild(dcha);
       card.appendChild(cabecera);
+      if(of.rivalDirecto){
+        card.appendChild(el('div','badge risk', `⚠️ Rival directo ${articuloClub(j.club.nombre)==='la'?'de la':'del'} ${j.club.nombre}. Fichar aquí hundiría tu cariño con la afición.`));
+      }
       const lista = document.createElement('ul');
       lista.className = 'oferta-lista';
       const filas = [
@@ -8445,7 +8642,7 @@ SCREENS.ofertas = function(){
       const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Negociar fichaje';
       btn.onclick = ()=>{
         const nuevoClub = of.extranjero
-          ? { nombre: of.nombre, categoria: "LaLiga", extranjero: true, pais: of.pais, liga: of.liga, colores: of.colores, ambicionNivel: ambicionInicial(of.nombre) }
+          ? { nombre: of.nombre, categoria: "LaLiga", extranjero: true, pais: of.pais, liga: of.liga, colores: of.colores, ambicionNivel: ambicionInicial(of.nombre), ...(of.grande ? { grande:true } : {}) }
           : { nombre: of.nombre, categoria: of.categoria, colores: of.colores, ambicionNivel: ambicionInicial(of.nombre) };
         S.negociacion = { club: nuevoClub, sueldo: of.sueldo, duracion: of.duracion };
         S.screen = 'negociacionFichaje';
@@ -9498,7 +9695,10 @@ SCREENS.tirando = function(){
   const sumaLbl = el('div','dice-suma', '');
   scene.appendChild(sumaLbl);
   const textoConToken = conToken==='inspiracion' ? ' (con Golpe de Inspiración)' : (conToken==='vestuario' ? ' (con Palabras del vestuario)' : '');
-  scene.appendChild(el('div','dice-caption', `1d20 + ${r.bono} de ${NICE_ATTR[op.tirada.atributo]}${textoConToken}${r.dadoDescartado!==null?' (con Segunda Oportunidad, 2 dados)':''}`));
+  const captionTirada = (r.natural20 || r.natural1)
+    ? `1d20 — un ${r.dado} natural decide solo`
+    : `1d20 + ${r.bono} de ${NICE_ATTR[op.tirada.atributo]}${textoConToken}${r.dadoDescartado!==null?' (con Segunda Oportunidad, 2 dados)':''}`;
+  scene.appendChild(el('div','dice-caption', captionTirada));
   const resultLbl = el('div','roll-result', r.exito ? 'ÉXITO' : 'FALLO');
   resultLbl.classList.add(r.exito ? 'exito' : 'fallo');
   scene.appendChild(resultLbl);
@@ -9520,7 +9720,9 @@ SCREENS.tirando = function(){
       if(r.natural1) die.classList.add('maldeojo');
       Sonido.tick();
       setTimeout(()=>{
-        sumaLbl.textContent = `${r.dado} ${r.bono>=0?'+':'-'} ${Math.abs(r.bono)} = ${r.total}`;
+        sumaLbl.textContent = r.natural20 ? '¡20 natural!'
+          : r.natural1 ? '1 natural…'
+          : `${r.dado} ${r.bono>=0?'+':'-'} ${Math.abs(r.bono)} = ${r.total}`;
         sumaLbl.classList.add('show');
       }, 450);
       setTimeout(()=>{
@@ -9686,6 +9888,7 @@ function fraseEfectos(cambios){
 
 SCREENS.resultado = function(){
   topbar("Consecuencia");
+  const j = S.jugador;
   const r = S.resultadoEvento;
   const cambios = r.cambios || [];
   const c = el('div','card');
@@ -9696,7 +9899,10 @@ SCREENS.resultado = function(){
     big.style.marginTop = '0';
     big.style.marginBottom = '10px';
     box.appendChild(big);
-    box.appendChild(el('div','outcome-roll', `🎲 1d20 (${r.roll.dado}) + ${r.roll.bono} bono contra Dificultad ${r.roll.dificultad}`));
+    const rollTxt = r.roll.natural20 ? '🎲 20 natural — éxito automático'
+      : r.roll.natural1 ? '🎲 1 natural — fallo automático'
+      : `🎲 1d20 (${r.roll.dado}) + ${r.roll.bono} bono contra Dificultad ${r.roll.dificultad}`;
+    box.appendChild(el('div','outcome-roll', rollTxt));
   }
   box.appendChild(el('div','outcome-text', r.rama.texto || fraseEfectos(cambios)));
   const eff = el('div','effects');
