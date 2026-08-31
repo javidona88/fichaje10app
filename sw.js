@@ -1,7 +1,8 @@
-/* Service worker de El Camino.
-   Sube el número de versión (CACHE) cada vez que publiques cambios en index.html
-   si quieres forzar la actualización inmediata en dispositivos ya instalados. */
-const CACHE = 'elcamino-v1';
+/* Service worker de Fichaje 10.
+   Mantén CACHE alineado con VERSION_JUEGO del index.html: al subir la versión del
+   juego (p. ej. v1.0 -> v1.1), cambia también aquí 'fichaje10-1.0' -> 'fichaje10-1.1'.
+   Eso fuerza la actualización inmediata en los dispositivos ya instalados. */
+const CACHE = 'fichaje10-1.0';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (e) => {

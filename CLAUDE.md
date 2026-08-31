@@ -1,9 +1,13 @@
-# El Camino — Contexto del proyecto
+# Fichaje 10 — Contexto del proyecto
 
 Juego de modo carrera de fútbol en HTML/JS de un solo archivo (`index.html`, ~10.970 líneas),
 inspirado en "El Ídolo" (potrerofutbol.ar). Interfaz en español (castellano de España). Todo
 —HTML, CSS y JS— vive en un único archivo autocontenido, sin dependencias externas ni build step.
-Pie de pantalla: "Fichaje 10 · v2.0" (`VERSION_JUEGO`).
+Pie de pantalla: "Fichaje 10 · v1.0" (`VERSION_JUEGO`). Al publicar cambios, subir
+`VERSION_JUEGO` en `index.html` y, en el mismo commit, `CACHE` en `sw.js` al mismo número
+(`fichaje10-1.0` → `fichaje10-1.1`) para forzar el refresco en dispositivos instalados.
+Desplegado en GitHub Pages: `https://javidona88.github.io/fichaje10app/` (repo `javidona88/fichaje10app`,
+workflow `.github/workflows/deploy.yml` en cada push a `main`).
 
 ## Historial de desarrollo
 
@@ -36,7 +40,7 @@ Pie de pantalla: "Fichaje 10 · v2.0" (`VERSION_JUEGO`).
 
 `nuevoJugador(nombre,pais,extra,clubInicial,localidad)` construye `j`. Estado global: `S`
 (pantalla actual, jugador, temporada, y decenas de flags temporales `S.xxx` / `S._xxx`).
-Guardado multi-slot en `localStorage` (`elCaminoGuardado_v1_slotN`, N=1..3);
+Guardado multi-slot en `localStorage` (`fichaje10Guardado_v1_slotN`, N=1..3; `claveSlot(n)`);
 `migrarJugadorGuardado(j)` rellena campos nuevos en partidas viejas — **añadir aquí toda clave
 nueva del modelo**.
 
@@ -377,13 +381,25 @@ desactivada a petición del usuario (el código sigue pero no se auto-arranca). 
 efectos en la topbar.
 
 ### Interfaz
-- Logo "EL CAMINO" con icono SVG propio en la topbar.
+- Logo "FICHAJE 10" (`.logo-wrap` > `.logo-badge` + `.logo-text` .top/.main) en la topbar y en
+  el tutorial. La camiseta usa `logoCamisetaCompacta(16)` (SVG de `logoCamiseta` con el viewBox
+  recortado a su dibujo y alto fijo) para que su altura case con las mayúsculas del texto. El
+  logo grande de la portada (`SCREENS.menu`) usa `logoCamiseta(74)` directamente.
 - `crearEyebrow(texto)` combina título/subtítulo de pantalla con el eyebrow de la tarjeta
   (usa `tituloPaginaPendiente` guardado por `topbar()`).
 - `PANTALLAS_TAB` (con barra de pestañas: tabJugador/tabClub/tabEstadisticas/tabEconomia/gastos/
   ajustes/casino/ruleta) vs `PANTALLAS_SIN_TABBAR` (reveals, rueda de prensa, legado, regreso...).
 - Nombre del jugador capitalizado (`capitalizarNombre`).
 - `render()` con transición fade de 260ms — cuidado con handlers "viejos" en doble clic.
+- **Tutorial de inicio** (`SCREENS.tutorial`): carrusel de 6 tarjetas (`TUTORIAL_PASOS`:
+  `{icono,titulo,texto}`) con logo arriba, una ilustración SVG propia por paso
+  (`ilustracionTutorial(id)`, switch por `icono`), caja de texto `.tuto-text` (sin el borde azul
+  de `.lore-box`), dots (`.tuto-dots`), Anterior/Siguiente/Empezar y "Saltar". Se
+  muestra la primera vez (gate en el arranque: `S.screen==='menu' && !S.jugador &&
+  !tutorialYaVisto()` → `S.screen='tutorial'`), marca `localStorage['fichaje10_tutorialVisto_v1']`
+  al terminar/saltar (`terminarTutorial()`), y hay acceso desde Ajustes ("Ver el tutorial otra
+  vez"). `terminarTutorial` vuelve al menú o a `S.pantallaBase` si hay partida en curso.
+  En `PANTALLAS_SIN_TABBAR`.
 
 ## Errores ya cazados — vigilar que no se repitan
 
