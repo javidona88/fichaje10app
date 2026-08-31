@@ -1,0 +1,16 @@
+{
+  "name": "El Camino — Fichaje 10",
+  "short_name": "El Camino",
+  "description": "Juego de modo carrera de fútbol: del fútbol de barrio a la élite.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14161F",
+  "theme_color": "#14161F",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

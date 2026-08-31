@@ -1,0 +1,10 @@
+# Contexto de trabajo local — NO publicar.
+# La carpeta historial/ contiene el export completo de conversaciones de claude.ai
+# (todas tus conversaciones) y copias de seguridad. No debe subirse a ningún repo.
+historial/
+
+# Sistema / temporales
+Thumbs.db
+.DS_Store
+*.log
+*.tmp
