@@ -3321,7 +3321,7 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.3.6';
+const VERSION_JUEGO = 'v1.3.7';
 
 const PARTIDOS_POR_CATEGORIA = {"Tercera RFEF":30,"Segunda RFEF":32,"Primera RFEF":34,"LaLiga2":36,"LaLiga":38};
 
@@ -4791,7 +4791,7 @@ function envolverEscudo(tamano, clipId, contenido, sigla, colorSigla, strokeSigl
   return `<svg width="${tamano}" height="${tamano}" viewBox="0 0 40 44" xmlns="http://www.w3.org/2000/svg">
     <defs><clipPath id="${clipId}">${formaEl}</clipPath></defs>
     <g clip-path="url(#${clipId})">${contenido}</g>
-    ${formaEl.replace('/>', ` fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>`)}
+    ${formaEl.replace('/>', ` fill="none" stroke="#1a1a1a" stroke-width="1.6"/>`)}
     <text x="20" y="26" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="${tamSigla || 10.5}" letter-spacing="0.3" fill="${colorSigla || '#fff'}" stroke="${strokeSigla || 'rgba(0,0,0,0.35)'}" stroke-width="0.5">${sigla}</text>
   </svg>`;
 }
@@ -4938,7 +4938,7 @@ function escudoSVG(nombre, tamano, colores){
   const cfg = PATRON_ESCUDO_LALIGA[nombre];
   if(!cfg){
     return `<svg width="${tamano}" height="${tamano}" viewBox="0 0 40 44" xmlns="http://www.w3.org/2000/svg">
-      <path d="${FORMA_ESCUDO_ESTANDAR}" fill="${primario}" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+      <path d="${FORMA_ESCUDO_ESTANDAR}" fill="${primario}" stroke="#1a1a1a" stroke-width="1.6"/>
       <text x="20" y="26" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="15" fill="${secundario}">${iniciales}</text>
     </svg>`;
   }
@@ -4968,7 +4968,7 @@ function escudoSVG(nombre, tamano, colores){
   return `<svg width="${tamano}" height="${tamano}" viewBox="0 0 40 44" xmlns="http://www.w3.org/2000/svg">
     <defs><clipPath id="${clipId}">${formaPath}</clipPath></defs>
     <g clip-path="url(#${clipId})">${relleno}</g>
-    ${formaPath.replace('/>', ` fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>`)}
+    ${formaPath.replace('/>', ` fill="none" stroke="#1a1a1a" stroke-width="1.6"/>`)}
     <text x="20" y="26" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="13" fill="${colorTexto}" stroke="rgba(0,0,0,0.25)" stroke-width="0.4">${iniciales}</text>
   </svg>`;
 }
