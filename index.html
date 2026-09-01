@@ -3321,7 +3321,7 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.3.3';
+const VERSION_JUEGO = 'v1.3.4';
 
 const PARTIDOS_POR_CATEGORIA = {"Tercera RFEF":30,"Segunda RFEF":32,"Primera RFEF":34,"LaLiga2":36,"LaLiga":38};
 
@@ -3675,7 +3675,13 @@ const ICONOS_SECTOR_MARCA = {
 };
 function logoMarca(nombre, tamano, colores){
   tamano = tamano || 30;
-  const primario = (colores && colores[0]) || colorDesdeTexto(nombre);
+  let primario = (colores && colores[0]) || colorDesdeTexto(nombre);
+  // Un color de marca casi negro (Nike, Adidas...) se pierde sobre el fondo oscuro del juego:
+  // por debajo de este umbral de luminancia se sustituye por un gris claro legible.
+  const c = primario.replace('#','');
+  const r = parseInt(c.substring(0,2),16), g = parseInt(c.substring(2,4),16), b = parseInt(c.substring(4,6),16);
+  const luminancia = (r*299 + g*587 + b*114) / 1000;
+  if(luminancia < 70) primario = '#EEEFF3';
   const sector = SECTOR_MARCA[nombre] || 'industrial';
   const trazos = ICONOS_SECTOR_MARCA[sector] || ICONOS_SECTOR_MARCA.industrial;
   return `<svg width="${tamano}" height="${tamano}" viewBox="0 0 24 24">
@@ -7778,7 +7784,7 @@ SCREENS.tabJugador = function(){
     cajaPatro.style.cssText = 'display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;';
     const dur = j.patrocinio ? (j.patrocinio.duracionTemporadas||1) : 0;
     cajaPatro.innerHTML = `
-      ${iconoInline('dinero',22)}
+      ${j.patrocinio ? logoMarca(j.patrocinio.marca, 22, j.patrocinio.colores) : iconoInline('dinero',22)}
       <div style="flex:1;min-width:0;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;">PATROCINIO</div>
         ${j.patrocinio
