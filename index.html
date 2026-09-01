@@ -1238,8 +1238,12 @@ const BANCO_EVENTOS = [
       return `Perdéis 3-0 y ${prensa} te espera a la salida del vestuario para preguntarte qué ha pasado.`;
     },
     variantes:[
-      "Otra derrota dolorosa. Los micrófonos te esperan nada más pisar el túnel de vestuarios.",
-      "El marcador ha sido durísimo. La prensa quiere una explicación antes de que subas al autobús."
+      j => tierPatrocinio(j.club.categoria) === 'local'
+        ? "Otra derrota dolorosa. Un par de aficionados te paran nada más pisar la calle para preguntarte qué ha pasado."
+        : "Otra derrota dolorosa. Los micrófonos te esperan nada más pisar el túnel de vestuarios.",
+      j => tierPatrocinio(j.club.categoria) === 'local'
+        ? "El marcador ha sido durísimo. En el grupo de WhatsApp del equipo ya hay quien pide explicaciones antes de que subas al autobús."
+        : "El marcador ha sido durísimo. La prensa quiere una explicación antes de que subas al autobús."
     ],
     opciones:[
       { texto:"Ser autocrítico y asumir errores propios", tirada:{atributo:"mental", dificultadBase:10},
@@ -2280,7 +2284,7 @@ const BANCO_EVENTOS = [
     trigger:{ probabilidad:0.16, condicion: j => j.rival.trayectoriaIniciada },
     texto: j => {
       const ubicacion = j.rival.club ? `${articuloClub(j.rival.club)==='la'?'en la':'en el'} ${j.rival.club}` : 'en su club actual';
-      return `Un periodista te pregunta en rueda de prensa por Adrián Ferraz, que últimamente está dando que hablar ${ubicacion}. "¿Seguís en contacto?", te suelta con intención, buscando titular.`;
+      return `Un periodista te pregunta en rueda de prensa por ${j.rival.nombre}, que últimamente está dando que hablar ${ubicacion}. "¿Seguís en contacto?", te suelta con intención, buscando titular.`;
     },
     opciones:[
       { texto:"Hablar bien de él, sin dobleces",
@@ -2290,14 +2294,14 @@ const BANCO_EVENTOS = [
         resultado:'Contestas con un "cada uno a lo suyo" que no dice gran cosa. El periodista insiste, pero cambias de tema.',
         efectos:{} },
       { texto:"Dejar caer una pulla, medio en broma",
-        resultado:"Sueltas una frase con doble sentido que hace reír a la sala de prensa. Cuando Adrián la lee al día siguiente, no le hace ninguna gracia.",
+        resultado: j => `Sueltas una frase con doble sentido que hace reír a la sala de prensa. Cuando ${j.rival.apodo} la lee al día siguiente, no le hace ninguna gracia.`,
         efectosFn: j => { j.rival.relacion = Math.max(-100, j.rival.relacion - 12); return {popularidad:5}; } }
     ]
   },
   {
     id:"cruce_adrian_padre", cooldown:6,
     trigger:{ probabilidad:0.1, condicion: j => j.rival.trayectoriaIniciada && j.edad >= 20 },
-    texto:"Coincidís en el aeropuerto, los dos con maleta y rueda de prensa a cuestas. Antes de que puedas decir nada, ves que Adrián está al teléfono, y por su cara, no es una llamada cualquiera. Cuelga y se acerca a saludarte.",
+    texto: j => `Coincidís en el aeropuerto, los dos con maleta y rueda de prensa a cuestas. Antes de que puedas decir nada, ves que ${j.rival.apodo} está al teléfono, y por su cara, no es una llamada cualquiera. Cuelga y se acerca a saludarte.`,
     opciones:[
       { texto:"Preguntarle si va todo bien", tirada:{atributo:"mental", dificultadBase:11},
         exito:{ texto:'Se le nota que no lo esperaba. Tras un silencio largo, te cuenta que era su padre, otra vez comparándolo con la temporada pasada. "Nunca es suficiente", dice, y por primera vez lo dice en voz alta delante de alguien.',
@@ -2311,7 +2315,7 @@ const BANCO_EVENTOS = [
   {
     id:"adrian_toxico", cooldown:5,
     trigger:{ probabilidad:0.14, condicion: j => j.rival.trayectoriaIniciada && j.rival.relacion <= -30 },
-    texto:"En unas declaraciones a un medio, Adrián se despacha a gusto sobre ti: insinúa que tu carrera está sobrevalorada, que hay jugadores mejores que nunca tienen la misma suerte que tú. No hace falta que diga tu nombre para que quede claro de quién habla.",
+    texto: j => `En unas declaraciones a un medio, ${j.rival.apodo} se despacha a gusto sobre ti: insinúa que tu carrera está sobrevalorada, que hay jugadores mejores que nunca tienen la misma suerte que tú. No hace falta que diga tu nombre para que quede claro de quién habla.`,
     opciones:[
       { texto:"Responder con la misma moneda en tus propias declaraciones",
         resultado:"Le devuelves el golpe, con intereses. La prensa deportiva tiene tema para una semana entera, y la distancia entre vosotros se hace todavía más grande.",
@@ -2361,7 +2365,7 @@ const BANCO_EVENTOS = [
           efectosFn: j => { despedirRivalDeTuClub(j); j.rival.relacion = Math.max(-100, j.rival.relacion - 20); return {confianza:8, reputacion:4, vestuario:3}; } },
         fallo:{ texto: j => `Lo intentas, pero los últimos meses no acompañan y el club duda hasta el final. Al final es ${j.rival.apodo} quien decide irse, harto de la incertidumbre, y tú te quedas con un año de desgaste encima.`,
           efectosFn: j => { despedirRivalDeTuClub(j); j.rival.relacion = Math.max(-100, j.rival.relacion - 6); return {confianza:-4, mental:-4}; } } },
-      { texto:"Hablar con Adrián de hombre a hombre antes de que lo decidan otros",
+      { texto:"Hablar con él de hombre a hombre antes de que lo decidan otros",
         resultado: j => `Os sentáis los dos, sin agentes ni directivos de por medio. Él admite que hace tiempo que no se siente valorado ahí, y que casi lo prefiere así. Se va sin dramas, y os dais la mano.`,
         efectosFn: j => { despedirRivalDeTuClub(j); j.rival.relacion = Math.min(100, j.rival.relacion + 6); return {mental:3, vestuario:2}; } }
     ]
@@ -2927,10 +2931,25 @@ const BANCO_EVENTOS = [
   {
     id:"polemica_arbitral", cooldown:4, soloSiSano:true,
     trigger:{ probabilidad:0.16 },
-    texto:"Una decisión arbitral muy discutida marca el resultado del partido, y todas las cámaras te buscan a ti para la reacción en caliente.",
+    texto: j => {
+      const tier = tierPatrocinio(j.club.categoria);
+      if(tier === 'nacional') return "Una decisión arbitral muy discutida marca el resultado del partido, y todas las cámaras te buscan a ti para la reacción en caliente.";
+      if(tier === 'regional') return "Una decisión arbitral muy discutida marca el resultado del partido, y la prensa regional te busca nada más acabar para la reacción en caliente.";
+      return "Una decisión arbitral muy discutida marca el resultado del partido, y varios aficionados que lo han grabado con el móvil ya te preguntan por ello según sales del vestuario.";
+    },
     variantes:[
-      "El colegiado toma una decisión que cambia el partido, y en la zona mixta todos quieren saber qué opinas.",
-      "Una jugada polémica se convierte en el tema del día, y los micrófonos te esperan nada más pisar el túnel de vestuarios."
+      j => {
+        const tier = tierPatrocinio(j.club.categoria);
+        if(tier === 'nacional') return "El colegiado toma una decisión que cambia el partido, y en la zona mixta todos quieren saber qué opinas.";
+        if(tier === 'regional') return "El colegiado toma una decisión que cambia el partido, y el periodista de la radio local te espera a la salida para que opines.";
+        return "El colegiado toma una decisión que cambia el partido, y el vídeo ya corre por el grupo de WhatsApp del equipo antes de que te duches.";
+      },
+      j => {
+        const tier = tierPatrocinio(j.club.categoria);
+        if(tier === 'nacional') return "Una jugada polémica se convierte en el tema del día, y los micrófonos te esperan nada más pisar el túnel de vestuarios.";
+        if(tier === 'regional') return "Una jugada polémica da que hablar, y algún medio local te llama esa misma tarde para que la comentes.";
+        return "Una jugada polémica da que hablar en las gradas, y hasta el bar de después del partido llegan comentarios sobre ella.";
+      }
     ],
     opciones:[
       { texto:"Responder con la cabeza fría, sin cargar tintas", tirada:{atributo:"mental", dificultadBase:12},
@@ -3302,7 +3321,7 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.3.2';
+const VERSION_JUEGO = 'v1.3.3';
 
 const PARTIDOS_POR_CATEGORIA = {"Tercera RFEF":30,"Segunda RFEF":32,"Primera RFEF":34,"LaLiga2":36,"LaLiga":38};
 
@@ -3599,24 +3618,44 @@ const MULTIPLICADOR_SUELDO_LIGA = {
   "J1 League":0.35, "K League 1":0.3, "Premier Liha":0.25, "Primera División de Chile":0.28, "Fortuna Liga":0.3
 };
 // Marcas de patrocinio inventadas (no reales, para no usar nombres comerciales protegidos), escaladas por nivel
+// Marcas reales, ajustadas al nivel real de patrocinio en el fútbol español: en 3ª/2ª RFEF
+// los patrocinadores de verdad son pequeños negocios locales sin marca reconocible (de ahí que
+// sigan siendo inventados), y a partir de 2ª RFEF/LaLiga2 empiezan a aparecer marcas reales.
+// Los "logos" (logoMarca) NUNCA reproducen el diseño real del logotipo (nada de swooshes,
+// tréboles ni símbolos protegidos) — solo un icono de sector genérico en el color de marca,
+// igual que los escudos de club nunca son el emblema oficial.
 const MARCAS_PATROCINIO = {
-  local: conColores(["Deportes Aurora","Calzados Vega","Suministros Ibérica","Neumáticos Castro","Panadería El Trigal","Autoescuela Rumbo"], 1),
-  regional: conColores(["Nutrisport Levante","Bebidas Solaris","Seguros Atlas","Vertex Wear","Cerámicas Duero"], 4),
-  nacional: conColores(["Athlon Sport","Kraft Nutrition","Solaris Energía","Meridian Bank","Zenith Motor","Halcón Seguros"], 7)
+  local: conColores(["Deportes Aurora","Calzados Vega","Suministros Ibérica","Neumáticos Castro","Panadería El Trigal","Autoescuela Rumbo","Ferretería Noroeste","Talleres Rincón"], 1),
+  regional: [
+    { nombre:"Cruzcampo", colores:["#D4A017","#1a1a1a"] },
+    { nombre:"Pascual", colores:["#0057A8","#FFFFFF"] },
+    { nombre:"Mapfre", colores:["#E4002B","#FFFFFF"] },
+    { nombre:"Unicaja Banco", colores:["#00A19A","#1a1a1a"] },
+    { nombre:"Air Europa", colores:["#00205B","#E4002B"] }
+  ],
+  nacional: [
+    { nombre:"Santander", colores:["#EC0000","#FFFFFF"] },
+    { nombre:"Iberdrola", colores:["#00A650","#1a1a1a"] },
+    { nombre:"Nike", colores:["#111111","#FFFFFF"] },
+    { nombre:"Adidas", colores:["#000000","#FFFFFF"] },
+    { nombre:"Movistar", colores:["#019DF4","#0A2C4E"] },
+    { nombre:"Mahou", colores:["#E30613","#1a1a1a"] },
+    { nombre:"CaixaBank", colores:["#00529B","#8DC63F"] }
+  ]
 };
 const SECTOR_MARCA = {
-  "Deportes Aurora":"deportes", "Athlon Sport":"deportes",
+  "Deportes Aurora":"deportes", "Nike":"deportes", "Adidas":"deportes",
   "Calzados Vega":"calzado",
-  "Suministros Ibérica":"industrial",
+  "Suministros Ibérica":"industrial", "Ferretería Noroeste":"industrial", "Talleres Rincón":"industrial",
   "Neumáticos Castro":"neumaticos",
-  "Panadería El Trigal":"alimentacion", "Nutrisport Levante":"alimentacion", "Kraft Nutrition":"alimentacion",
-  "Autoescuela Rumbo":"automocion", "Zenith Motor":"automocion",
-  "Bebidas Solaris":"bebidas",
-  "Seguros Atlas":"seguros", "Halcón Seguros":"seguros",
-  "Vertex Wear":"moda",
-  "Cerámicas Duero":"hogar",
-  "Solaris Energía":"energia",
-  "Meridian Bank":"banca"
+  "Panadería El Trigal":"alimentacion", "Pascual":"alimentacion",
+  "Autoescuela Rumbo":"automocion",
+  "Cruzcampo":"bebidas", "Mahou":"bebidas",
+  "Mapfre":"seguros",
+  "Santander":"banca", "Unicaja Banco":"banca", "CaixaBank":"banca",
+  "Iberdrola":"energia",
+  "Movistar":"telecom",
+  "Air Europa":"aviacion"
 };
 const ICONOS_SECTOR_MARCA = {
   deportes: '<circle cx="12" cy="12" r="8"/><path d="M12 4v4M12 16v4M4 12h4M16 12h4M6.3 6.3l2.1 2.1M15.6 15.6l2.1 2.1M17.7 6.3l-2.1 2.1M8.4 15.6l-2.1 2.1"/>',
@@ -3630,7 +3669,9 @@ const ICONOS_SECTOR_MARCA = {
   moda: '<path d="M9 4a3 3 0 0 1 6 0M4 9l5-3 3 2 3-2 5 3-2 3-3-1.5V20H9V10.5L6 12z"/>',
   hogar: '<path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/>',
   energia: '<path d="M13 2 5 14h6l-1 8 9-12h-6z"/>',
-  banca: '<path d="M4 10l8-6 8 6"/><rect x="4" y="10" width="16" height="8"/><path d="M8 14v2M12 14v2M16 14v2"/>'
+  banca: '<path d="M4 10l8-6 8 6"/><rect x="4" y="10" width="16" height="8"/><path d="M8 14v2M12 14v2M16 14v2"/>',
+  telecom: '<path d="M12 20v-6"/><path d="M8.5 17.5a5 5 0 0 1 7 0"/><path d="M5.5 14.5a9 9 0 0 1 13 0"/><circle cx="12" cy="20.5" r="1"/>',
+  aviacion: '<path d="M12 3v9M12 3l-4 4M12 3l4 4M3 15l9-3 9 3-9 2-9-2z"/><path d="M9 17l-1.5 3M15 17l1.5 3"/>'
 };
 function logoMarca(nombre, tamano, colores){
   tamano = tamano || 30;
@@ -11800,7 +11841,7 @@ SCREENS.balonDeOroReveal = function(){
   c.appendChild(el('h2',null,'Balón de Oro'));
   c.appendChild(el('div','event-text', 'La gala repasa a los mejores futbolistas del año. Poco a poco se van desvelando los tres primeros puestos.'));
   if(adrianEsCandidato){
-    c.appendChild(el('div','lore-box', `Entre los nominados está Adrián Ferraz. Verlo ahí, compitiendo por lo mismo que tú, te recuerda que aquella tarde de hace años sigue muy viva entre los dos.`));
+    c.appendChild(el('div','lore-box', `Entre los nominados está ${j.rival.nombre}. Verlo ahí, compitiendo por lo mismo que tú, te recuerda que aquella tarde de hace años sigue muy viva entre los dos.`));
   }
 
   const filasEl = [3,2,1].map(puesto=>{
