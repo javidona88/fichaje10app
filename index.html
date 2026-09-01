@@ -3302,7 +3302,7 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.3.1';
+const VERSION_JUEGO = 'v1.3.2';
 
 const PARTIDOS_POR_CATEGORIA = {"Tercera RFEF":30,"Segunda RFEF":32,"Primera RFEF":34,"LaLiga2":36,"LaLiga":38};
 
@@ -10271,6 +10271,7 @@ SCREENS.evento = function(){
     : resolverTexto(ev.texto, j);
   c.appendChild(el('div','event-text', textoMostrado));
 
+  let respondiendo = false; // evita que un doble toque resuelva el mismo suceso dos veces (260ms de transición)
   ev.opciones.forEach(op=>{
     const b = el('div','opt');
     b.appendChild(document.createTextNode(op.texto));
@@ -10289,6 +10290,8 @@ SCREENS.evento = function(){
       b.appendChild(tag);
     }
     b.onclick = ()=>{
+      if(respondiendo) return;
+      respondiendo = true;
       if(noPuedePagar){
         const cambios = aplicarEfectos(j, { dinero:-j.stats.dinero, reputacion:-4, mental:-3 });
         j.historial.push({ temporada:S.temporada, evento: ev.id||'relleno' });
@@ -10324,6 +10327,8 @@ SCREENS.evento = function(){
       tokenBtn.innerHTML = ICONOS_SVG.inspiracion;
       tokenBtn.onclick = (e)=>{
         e.stopPropagation();
+        if(respondiendo) return;
+        respondiendo = true;
         j.objetos.inspiracion--;
         const r = tirar(j, op.tirada, 4);
         S.pendingRoll = { j, ev, op, r, conToken:'inspiracion' };
@@ -10338,6 +10343,8 @@ SCREENS.evento = function(){
       tokenBtn2.innerHTML = ICONOS_SVG.vestuario;
       tokenBtn2.onclick = (e)=>{
         e.stopPropagation();
+        if(respondiendo) return;
+        respondiendo = true;
         j.objetos.vestuario--;
         const r = tirar(j, op.tirada, 2);
         S.pendingRoll = { j, ev, op, r, conToken:'vestuario' };
