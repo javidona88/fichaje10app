@@ -1048,7 +1048,7 @@ const TIENDA_SERVICIOS = [
     { nivel:2, costeAnual:5500, efectoTemporada:{fisico:1}, desc:'Plan específico de potencia, con seguimiento más cercano.', ...porCategoria(2) },
     { nivel:3, costeAnual:35000, efectoTemporada:{fisico:1.75}, desc:'Mensualidad alta o dedicación casi exclusiva. Métodos de última generación.', ...porCategoria(4) }
   ]},
-  { familia:'fisio', nombre:'Fisioterapeuta / Readaptador', icono:'fisio', categoria:'Rendimiento y Cuidado Físico', niveles:[
+  { familia:'fisio', nombre:'Fisioterapeuta', icono:'fisio', categoria:'Rendimiento y Cuidado Físico', niveles:[
     { nivel:1, costeAnual:1400, efectoTemporada:{salud:15}, desc:'Descargas musculares puntuales y seguimiento básico de molestias.', ...porCategoria(0) },
     { nivel:2, costeAnual:3800, efectoTemporada:{salud:25}, desc:'Recuperación acelerada tras partidos, con disponibilidad regular.', ...porCategoria(2) },
     { nivel:3, costeAnual:22000, efectoTemporada:{salud:40}, desc:'Iguala mensual con disponibilidad total, prácticamente a tu servicio.', ...porCategoria(4) }
@@ -1068,7 +1068,7 @@ const TIENDA_SERVICIOS = [
     { nivel:2, costeAnual:550, efectoTemporada:{salud:9}, desc:'Plantillas a medida y revisión periódica.', ...porCategoria(1) },
     { nivel:3, costeAnual:2200, efectoTemporada:{salud:15}, desc:'Ajustes continuos e hiperpersonalización, minimizando cualquier sobrecarga.', ...porCategoria(2) }
   ]},
-  { familia:'analista', nombre:'Analista de rendimiento / Scout', icono:'analista', categoria:'Desarrollo Técnico y Análisis', niveles:[
+  { familia:'analista', nombre:'Analista de rendimiento', icono:'analista', categoria:'Desarrollo Técnico y Análisis', niveles:[
     { nivel:1, costeAnual:1400, efectoTemporada:{reputacion:2}, desc:'Informes puntuales para corregir posicionamiento y toma de decisiones.', ...porCategoria(2) },
     { nivel:2, costeAnual:3800, efectoTemporada:{reputacion:4}, desc:'Análisis regular de tus intervenciones y del rival de cada semana.', ...porCategoria(3) },
     { nivel:3, costeAnual:22000, efectoTemporada:{reputacion:7}, desc:'Edición de vídeo semanal y scouting detallado de cada rival: se nota en cómo te perciben los ojeadores.', ...porCategoria(4) }
@@ -1078,7 +1078,7 @@ const TIENDA_SERVICIOS = [
     { nivel:2, costeAnual:4500, efectoTemporada:{tecnica:1.5}, desc:'Sesiones individuales más frecuentes, puliendo detalles finos.', ...porCategoria(3) },
     { nivel:3, costeAnual:27000, efectoTemporada:{tecnica:2.5}, desc:'Un especialista de prestigio trabaja contigo en exclusiva.', ...porCategoria(4) }
   ]},
-  { familia:'psicologo', nombre:'Psicólogo deportivo / Coach', icono:'psicologo', categoria:'Salud Mental y Bienestar', niveles:[
+  { familia:'psicologo', nombre:'Psicólogo deportivo', icono:'psicologo', categoria:'Salud Mental y Bienestar', niveles:[
     { nivel:1, costeAnual:1800, efectoTemporada:{mental:0.5}, desc:'Sesiones quincenales para gestionar la presión de cada semana.', ...porCategoria(1) },
     { nivel:2, costeAnual:4500, efectoTemporada:{mental:1}, desc:'Trabajo mental más profundo, con sesiones periódicas.', ...porCategoria(2) },
     { nivel:3, costeAnual:27000, efectoTemporada:{mental:1.75}, desc:'Acompañamiento continuo, incluida la gestión de crisis puntuales.', ...porCategoria(4) }
@@ -1098,7 +1098,7 @@ const TIENDA_SERVICIOS = [
     { nivel:2, costeAnual:1500, efectoTemporada:{confianza:6}, desc:'Planificación de inversiones y algo más de tranquilidad.', ...porCategoria(1) },
     { nivel:3, costeAnual:11000, efectoTemporada:{confianza:10}, desc:'Gestión patrimonial completa: sociedades, imagen, inversiones. Ni un solo dolor de cabeza económico.', ...porCategoria(3) }
   ]},
-  { familia:'comunicacion', nombre:'Community Manager / Prensa', icono:'agente', categoria:'Gestión y Entorno Profesional', niveles:[
+  { familia:'comunicacion', nombre:'Community Manager', icono:'agente', categoria:'Gestión y Entorno Profesional', niveles:[
     { nivel:1, costeAnual:1800, efectoTemporada:{popularidad:8}, desc:'Manejo básico de redes sociales.', ...porPopularidad(20) },
     { nivel:2, costeAnual:4500, efectoTemporada:{popularidad:14}, desc:'Gestión activa de la imagen pública y notas de prensa.', ...porPopularidad(40) },
     { nivel:3, costeAnual:27000, efectoTemporada:{popularidad:22, reputacion:3}, desc:'Agencia de comunicación integral a tu servicio.', ...porPopularidad(65) }
@@ -1576,7 +1576,7 @@ const BANCO_EVENTOS = [
       { texto:"Pedir asumir un rol protagonista y forzar la salida de la racha", tirada:{atributo:"tiro", dificultadBase:19},
         exito:{ texto:"Te echas el equipo a la espalda y sales de la racha por todo lo alto: hat-trick incluido.", efectos:{forma:20,mental:10,popularidad:12,reputacion:6} },
         fallo:{ texto:"Te viene grande el protagonismo que buscabas y la racha se hace todavía más larga.", efectos:{forma:-16,mental:-10,popularidad:-6} } },
-      { texto:"Pedir hablar con el psicólogo del club",
+      { texto:"Buscar ayuda de un psicólogo deportivo",
         resultado:"Decides que no pasa nada por pedir ayuda. Salir de una racha mala también es parte del oficio, aunque nadie te lo enseñara de joven.",
         efectos:{mental:6,forma:-2} }
     ]
@@ -1964,7 +1964,7 @@ const BANCO_EVENTOS = [
   },
   {
     id:"nacimiento_hijo", unico:true,
-    trigger:{ edadMin:26, probabilidad:0.14, condicion: j => j.tienePareja && !j.hijo && (j.stats.felicidadPareja||0) >= 55 },
+    trigger:{ edadMin:26, probabilidad:0.14, condicion: j => j.tienePareja && !!j.pareja && !j.hijo && (j.stats.felicidadPareja||0) >= 55 },
     texto: j => `Con tu pareja, ${j.pareja.apodo}, la noticia que cambia todo: vais a ser padres. Los meses pasan entre nervios y una ilusión que no habías sentido nunca.`,
     opciones:[
       { texto:"Estar presente en cada momento posible, aunque la temporada apriete",
@@ -2053,8 +2053,8 @@ const BANCO_EVENTOS = [
       if(!S._amigoNoFutbolCandidato) S._amigoNoFutbolCandidato = generarAmigoNoFutbol();
       const base = S._amigoNoFutbolCandidato;
       const etiqueta = base.genero==='f' ? 'amiga' : 'amigo';
-      const pronRelativo = base.genero==='f' ? 'la que' : 'el que';
-      return `${base.apodo}, tu ${etiqueta} de toda la vida de antes de que el fútbol lo ocupara todo, te escribe después de meses sin hablar: "¿te acuerdas de mí? ${pronRelativo} no juega al fútbol", bromea.`;
+      const pronRelativo = base.genero==='f' ? 'La que' : 'El que';
+      return `${base.apodo}, tu ${etiqueta} de toda la vida de antes de que el fútbol lo ocupara todo, te escribe después de meses sin hablar: "¿Te acuerdas de mí? ${pronRelativo} no juega al fútbol", bromea.`;
     },
     opciones:[
       { texto:"Quedar en cuanto tengas un hueco",
@@ -2200,6 +2200,7 @@ const BANCO_EVENTOS = [
       const etiqueta = base.genero==='f' ? 'madre' : 'padre';
       const pron = base.genero==='f' ? 'ella' : 'él';
       if(base.apoya) return `Tu ${etiqueta}, ${base.apodo}, nunca ha dudado de esto ni un solo segundo. "Vas a llegar donde te propongas", te repite cada vez que sales de casa hacia el entreno.`;
+      if(j.lesionSemanas > 0) return `Tu ${etiqueta}, ${base.apodo}, aunque te quiere con locura, nunca se ha fiado de esto del fútbol. Ahora que estás lesionado te lo dice sin rodeos: "¿Ves? Esto es justo lo que me preocupaba. ¿Y si no te recuperas bien? ¿Y si al final no sale?".`;
       return `Tu ${etiqueta}, ${base.apodo}, aunque te quiere con locura, no termina de fiarse de esto del fútbol. "¿Y si te lesionas? ¿Y si no sale?", te pregunta, más ${base.genero==='f'?'preocupada':'preocupado'} que ${base.genero==='f'?'orgullosa':'orgulloso'}.`;
     },
     opciones:[
@@ -2255,10 +2256,10 @@ const BANCO_EVENTOS = [
   {
     id:"salida_amigos_barrio", cooldown:4,
     trigger:{ edadMin:18, probabilidad:0.22 },
-    texto: j => `${j.companeros.map(c=>c.apodo).join(', ')} os escribís al grupo de siempre proponiendo salir esta noche, como en los viejos tiempos, antes de que nada de esto pasara.`,
+    texto: j => `${j.companeros.map(c=>c.apodo).join(', ')} y tú os escribís por el grupo de WhatsApp proponiendo salir esta noche, como en los viejos tiempos, antes de que nada de esto pasara.`,
     variantes:[
-      j => `${j.companeros.map(c=>c.apodo).join(', ')} organizan una quedada y no aceptan un no por respuesta: "ya casi ni te vemos", te dicen.`,
-      j => `Os escribís al grupo de siempre proponiendo salir esta noche. Hace demasiado que no coincidís ${j.companeros.map(c=>c.apodo).join(', ')} y tú.`
+      j => `${j.companeros.map(c=>c.apodo).join(', ')} organizan una quedada por el grupo de WhatsApp y no aceptan un no por respuesta: "ya casi ni te vemos", te dicen.`,
+      j => `Os escribís por el grupo de WhatsApp proponiendo salir esta noche. Hace demasiado que no coincidís ${j.companeros.map(c=>c.apodo).join(', ')} y tú.`
     ],
     opciones:[
       { texto:"Ir y disfrutar la noche con ellos", tirada:{atributo:"fisico", dificultadBase:10},
@@ -2815,7 +2816,7 @@ const BANCO_EVENTOS = [
     trigger:{ probabilidad:0.15, condicion: j => j.lesionSemanas >= 4 },
     texto:"Con la baja alargándose, empieza a rondarte una pregunta incómoda: ¿volverás a ser el mismo cuando pises otra vez el campo?",
     opciones:[
-      { texto:"Hablarlo abiertamente con el psicólogo del club", tirada:{atributo:"mental", dificultadBase:11},
+      { texto:"Hablarlo abiertamente con un psicólogo deportivo", tirada:{atributo:"mental", dificultadBase:11},
         exito:{ texto:"Poner en palabras el miedo ayuda más de lo que esperabas. Encaras la recta final de la recuperación con otra cabeza.", efectos:{mental:5,confianza:6} },
         fallo:{ texto:"La conversación remueve más dudas de las que resuelve. Cuesta quitárselo de la cabeza.", efectos:{mental:-4} } },
       { texto:"Guardarte la duda y centrarte solo en el proceso físico",
@@ -2965,7 +2966,7 @@ const BANCO_EVENTOS = [
       { texto:"Responder con humildad, sin darle mayor importancia", tirada:{atributo:"mental", dificultadBase:11},
         exito:{ texto: j => `Contestas con naturalidad: admiras a ${S._estrellaComparada||'ese nivel de jugadores'}, pero tú vas a tu ritmo. La afición valora la humildad más que la comparación en sí.`, efectos:{popularidad:8,reputacion:5} },
         fallo:{ texto: j => `Se te nota incómodo con la pregunta y la respuesta suena forzada. Algunos titulares se quedan con que "no ha sabido estar a la altura del piropo".`, efectos:{popularidad:-3,mental:-2} } },
-      { texto:"Aceptar el reto: '¿por qué no? ojalá llegar a ese nivel'",
+      { texto:"Aceptar el reto: '¿Por qué no? Ojalá llegar a ese nivel'",
         resultado: j => `Tu respuesta ambiciosa da mucho que hablar. Algunos lo ven como confianza sana, otros como una presión que tú mismo te has puesto encima.`,
         efectos:{popularidad:5,confianza:3} }
     ]
@@ -3070,7 +3071,7 @@ const BANCO_EVENTOS = [
     trigger:{ probabilidad:0.13, condicion: j => j.stats.confianza <= 30 },
     texto:"Llevas semanas sin encontrarte bien contigo mismo sobre el campo, y ya no es solo cuestión de resultados: dudas de tu propio nivel.",
     opciones:[
-      { texto:"Pedir hablar con el psicólogo del club sin más rodeos", tirada:{atributo:"mental", dificultadBase:11},
+      { texto:"Buscar un psicólogo deportivo sin más rodeos", tirada:{atributo:"mental", dificultadBase:11},
         exito:{ texto:"La conversación te ayuda a poner nombre a lo que sentías. Sales con la cabeza mucho más despejada.", efectos:{confianza:12,mental:4} },
         fallo:{ texto:"Cuesta encontrar las palabras adecuadas en la sesión. Sales igual de confundido que entraste.", efectos:{mental:-2} } },
       { texto:"Aguantar en silencio, ya se te pasará solo",
@@ -3301,7 +3302,7 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.2';
+const VERSION_JUEGO = 'v1.3';
 
 const PARTIDOS_POR_CATEGORIA = {"Tercera RFEF":30,"Segunda RFEF":32,"Primera RFEF":34,"LaLiga2":36,"LaLiga":38};
 
@@ -4206,7 +4207,7 @@ const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoI
 const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
-const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta']);
+const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras']);
 
 const NICE_ATTR = {fisico:"Físico",velocidad:"Velocidad",tiro:"Tiro",regate:"Regate",pase:"Pase",desmarque:"Desmarque",mental:"Carácter",tecnica:"Técnica"};
 
@@ -4925,6 +4926,8 @@ function migrarJugadorGuardado(j){
   if(j.temporadasEnClub === undefined) j.temporadasEnClub = 0;
   if(j.temporadasSinEquipo === undefined) j.temporadasSinEquipo = [];
   if(j.enParo === undefined) j.enParo = false;
+  if(j.contrato && j.contrato.duracionOriginal == null) j.contrato.duracionOriginal = j.contrato.duracionTemporadas;
+  if(j.tienePareja && !j.pareja) j.pareja = generarNombrePareja(); // reconcilia desincronía legacy pareja/tienePareja
   // Arreglo retroactivo: partidas viejas podían tener a la madre con el primer apellido del jugador.
   if(j.padreMadre && j.padreMadre.genero === 'f'){
     const apJugador = (j.nombre||'').trim().split(' ').slice(1).join(' ');
@@ -4974,7 +4977,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad){
     nombre, pais, posicion: POSICION_FIJA, edad:16,
     localidad: (localidad||'').trim() || 'tu ciudad',
     club:{ nombre: club.nombre, categoria:"Tercera RFEF", colores: club.colores },
-    contrato:{ sueldoAnual:900, duracionTemporadas:2 },
+    contrato:{ sueldoAnual:900, duracionTemporadas:2, duracionOriginal:2 },
     stats:{ forma:60, reputacion:5, salud:100, dinero:40, popularidad:2, valorMercado:5000, confianza:55, felicidadPareja:0, vestuario:45 },
     estadoMental:'normal',
     rachaResultados:0,
@@ -5000,6 +5003,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad){
       temporadaInicio:1, temporadaFin:1, partidos:0, goles:0, asistencias:0, carino:20, titulos:[]
     }],
     carrera:{ partidos:0, goles:0, asistencias:0, ascensos:0, titulos:0, dineroGanado:0, valorMercadoMaximo:0, partidosSeleccion:0, golesSeleccion:0, asistenciasSeleccion:0 },
+    titulosSeleccion:[], historialSeleccion:[],
     companeros: COMPANEROS_CANTERA_BASE.map(cmp => ({ ...cmp, temporadasJuntos:0, relacion:50, juntosActualmente:false })),
     protegido:null,
     pareja:null,
@@ -5076,8 +5080,7 @@ function puedePagarServicio(j, familia, nuevoNivel){
   if(!servicio) return true;
   const nivelActual = j.suscripciones[familia] || 0;
   if(nuevoNivel === nivelActual || nuevoNivel === 0) return true; // cancelar, o quedarte igual, siempre está permitido
-  if((j.stats.dinero||0) < 0) return false; // en números rojos, no puedes activar ni subir de nivel, sea cual sea el tipo de servicio
-  if(servicio.esPorcentaje) return true; // fuera de números rojos, la comisión no compite por presupuesto fijo
+  if(servicio.esPorcentaje) return (j.stats.dinero||0) >= 0; // la comisión no compite por presupuesto fijo, pero no en números rojos
   const infoActual = nivelActual ? servicio.niveles.find(n=>n.nivel===nivelActual) : null;
   const costeActualFamilia = infoActual ? infoActual.costeAnual : 0;
   const infoNuevo = servicio.niveles.find(n=>n.nivel===nuevoNivel);
@@ -5086,7 +5089,10 @@ function puedePagarServicio(j, familia, nuevoNivel){
   const ingresoTotal = (j.contrato.sueldoAnual||0) + (j.patrocinio ? j.patrocinio.cantidadAnual : 0);
   const gastoRepresentante = j.representante ? Math.round((j.contrato.sueldoAnual||0) * j.representante.comision) : 0;
   const balanceNetoConCambio = ingresoTotal - gastoServiciosConCambio - gastoRepresentante - costeVidaAnual(j);
-  return balanceNetoConCambio >= 0; // el balance neto de la temporada, con el cambio aplicado, tiene que seguir en positivo
+  if(balanceNetoConCambio >= 0) return true;
+  // Aunque el balance de la temporada quede en negativo, se permite mientras tus ahorros
+  // cubran el déficit del año: el dinero acumulado funciona como colchón.
+  return (j.stats.dinero||0) + balanceNetoConCambio >= 0;
 }
 function comprobarNumerosRojos(j){
   if(j.stats.dinero >= 0) return null;
@@ -5624,7 +5630,7 @@ function acumularProgresoAtributo(jugador, clave, valorCrudo, cambios){
       jugador.mentalidadProgreso -= 1; jugador.mentalidad += 1;
       cambios.push({ clave:'mental', tipo:'atributo', nuevoValor:jugador.mentalidad, subio:true });
       Sonido.subeNivel();
-      mostrarNotificacion(`${iconoInline('mental',15)}¡Mejora de ${NICE_ATTR.mental} completado! <span style="color:var(--gold);font-weight:700;">${NICE_ATTR.mental.toUpperCase()} +1</span>`, 'atributo');
+      mostrarNotificacion(`${iconoInline('mental',15)}<b style="color:var(--gold);">${NICE_ATTR.mental} +1</b>`, 'atributo');
     }
     if(jugador.mentalidad >= ATRIBUTO_MAX) jugador.mentalidadProgreso = Math.min(jugador.mentalidadProgreso, 0);
     while(jugador.mentalidadProgreso <= -1 && jugador.mentalidad > 1){
@@ -5641,7 +5647,7 @@ function acumularProgresoAtributo(jugador, clave, valorCrudo, cambios){
     jugador.atributosProgreso[clave] -= 1; jugador.atributos[clave] += 1;
     cambios.push({ clave, tipo:'atributo', nuevoValor:jugador.atributos[clave], subio:true });
     Sonido.subeNivel();
-    mostrarNotificacion(`${iconoInline(clave,15)}¡Mejora de ${NICE_ATTR[clave]||clave} completado! <span style="color:var(--gold);font-weight:700;">${(NICE_ATTR[clave]||clave).toUpperCase()} +1</span>`, 'atributo');
+    mostrarNotificacion(`${iconoInline(clave,15)}<b style="color:var(--gold);">${NICE_ATTR[clave]||clave} +1</b>`, 'atributo');
   }
   if(jugador.atributos[clave] >= ATRIBUTO_MAX) jugador.atributosProgreso[clave] = Math.min(jugador.atributosProgreso[clave], 0);
   while(jugador.atributosProgreso[clave] <= -1 && jugador.atributos[clave] > 1){
@@ -6183,7 +6189,10 @@ function iniciarFichaje(j, nuevoClub, nuevoContrato, pantallaSiguiente){
     mostrarNotificacion(`⚠️ Fichas por ${articuloClub(nuevoClub.nombre)} ${nuevoClub.nombre}, el rival directo ${articuloClub(clubAnteriorNombre)==='la'?'de la':'del'} ${clubAnteriorNombre}. La afición que dejas atrás no te lo va a perdonar.`, 'riesgo');
   }
   j.club = nuevoClub;
-  if(nuevoContrato) j.contrato = nuevoContrato;
+  if(nuevoContrato){
+    if(nuevoContrato.duracionOriginal == null) nuevoContrato.duracionOriginal = nuevoContrato.duracionTemporadas;
+    j.contrato = nuevoContrato;
+  }
   j.carinoAficion = carinoInicial;
   j.stats.vestuario = calcularVestuarioInicial(j, nuevoClub, nuevoContrato);
   const nivelExposicionNuevo = nivelExposicionClub(nuevoClub);
@@ -6795,6 +6804,35 @@ const Sonido = (function(){
       setTimeout(()=>sfx(311,.18,'sine',.05),140);
       setTimeout(()=>sfx(233,.34,'sine',.045),300);
     },
+    // ---- Tragaperras: sonido electrónico de máquina de bar, distinto del de la ruleta ----
+    tragaGira(){
+      const notas = [262,330,392,494,587,494,392,330];
+      const total = 26;
+      for(let i=0;i<total;i++){
+        setTimeout(()=> sfx(notas[i % notas.length] * (i > total*0.6 ? 1 : 2), 0.035, 'square', 0.022), i*48);
+      }
+    },
+    tragaPara(){
+      sfx(150,.05,'square',.05);
+      setTimeout(()=> sfx(90,.09,'square',.045), 20);
+    },
+    tragaGana(){
+      // arpegio ascendente + cascada de "monedas"
+      [523,659,784,1046,1319].forEach((f,i)=> setTimeout(()=> sfx(f,.11,'triangle',.06), i*90));
+      for(let i=0;i<16;i++){
+        setTimeout(()=> sfx(1400 + Math.random()*1100, 0.02, 'square', 0.018), 120 + i*38);
+      }
+      setTimeout(()=> sfx(1568,.3,'triangle',.07), 560);
+    },
+    tragaPierde(){
+      sfx(300,.10,'square',.05);
+      setTimeout(()=> sfx(200,.17,'square',.05), 120);
+    },
+    tragaRiesgo(){
+      for(let i=0;i<7;i++){
+        setTimeout(()=> sfx(i%2 ? 660 : 880, 0.04, 'square', 0.03), i*95);
+      }
+    },
     iniciarMusica, detenerMusica,
     desbloquear(){ try{ getCtx().resume(); }catch(e){} },
     toggleEfectos(){ efectosActivos = !efectosActivos; return efectosActivos; },
@@ -7288,7 +7326,11 @@ function seccionContrato(j){
   if(S.fichaAcordeon.contrato){
     const gridContrato = el('div','stat-grid-2');
     gridContrato.appendChild(statRow('Sueldo anual', formatearDinero(j.contrato.sueldoAnual)));
-    gridContrato.appendChild(statRow('Duración', j.contrato.duracionTemporadas + (j.contrato.duracionTemporadas===1?' año':' años')));
+    const dRest = j.contrato.duracionTemporadas;
+    const dTot = j.contrato.duracionOriginal || dRest;
+    gridContrato.appendChild(statRow('Duración', dRest === dTot
+      ? `${dTot} ${dTot===1?'año':'años'}`
+      : `${dRest} de ${dTot} ${dTot===1?'año':'años'}`));
     secContrato.appendChild(gridContrato);
 
     const tituloPromesas = document.createElement('div');
@@ -7368,13 +7410,6 @@ function seccionEconomia(j){
       <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--ink);">Balance neto /temp.</span>
       <span style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;color:${balance>=0?'var(--green)':'var(--red)'};">${balance>=0?'+':'-'}${formatearDinero(Math.abs(balance))}</span>`;
     secEconomia.appendChild(cajaBalance);
-
-    const textoPatrocinio = j.patrocinio
-      ? `${j.patrocinio.marca} — ${formatearDinero(j.patrocinio.cantidadAnual)}/temp. (${j.patrocinio.duracionTemporadas||1} ${(j.patrocinio.duracionTemporadas||1)===1?'año':'años'})`
-      : 'Sin patrocinio';
-    const filaPatrocinio = statRow('Patrocinio', textoPatrocinio);
-    filaPatrocinio.style.marginTop = '2px';
-    secEconomia.appendChild(filaPatrocinio);
   }
   return secEconomia;
 }
@@ -7697,6 +7732,21 @@ SCREENS.tabJugador = function(){
   c.appendChild(seccionEstado(j));
   c.appendChild(seccionAtributos(j));
   c.appendChild(graficaValorMercado(j));
+  {
+    const cajaPatro = document.createElement('div');
+    cajaPatro.style.cssText = 'display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;';
+    const dur = j.patrocinio ? (j.patrocinio.duracionTemporadas||1) : 0;
+    cajaPatro.innerHTML = `
+      ${iconoInline('dinero',22)}
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;">PATROCINIO</div>
+        ${j.patrocinio
+          ? `<div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-top:2px;">${j.patrocinio.marca}</div>
+             <div style="font-family:'Space Grotesk',sans-serif;font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.6;">${formatearDinero(j.patrocinio.cantidadAnual)}/temp. · ${dur} ${dur===1?'año':'años'} de contrato</div>`
+          : `<div style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);margin-top:3px;font-style:italic;">Sin patrocinio por ahora</div>`}
+      </div>`;
+    c.appendChild(cajaPatro);
+  }
   if(j.representante){
     const nivelServicio = TIENDA_SERVICIOS.find(s=>s.familia==='representante').niveles.find(n=>n.comisionPct===j.representante.comision);
     const beneficio = beneficioRepresentante(j);
@@ -7798,16 +7848,36 @@ function colorNumeroRuleta(n){
   if(n === 0) return 'verde';
   return ROJOS_RULETA.includes(n) ? 'rojo' : 'negro';
 }
-function gradienteRuleta(){
-  const anguloSeg = 360/37;
+// Orden real de una ruleta europea (un solo cero), tal cual va grabado en el plato físico.
+const ORDEN_RUEDA_EUROPEA = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+function puntoAnguloRuleta(cx, cy, r, angDeg){
+  const rad = angDeg * Math.PI/180;
+  return { x: cx + r*Math.sin(rad), y: cy - r*Math.cos(rad) };
+}
+// Plato numerado en SVG: casillas de color en el orden real de la rueda, con los números
+// impresos girados en radial (como en una ruleta física de verdad).
+function svgRuedaRuleta(){
+  const DIM = 218, cx = DIM/2, cy = DIM/2, R = 106, rIn = 38;
+  const seg = 360/37;
   const colorHex = { verde:'#1B7A3D', rojo:'#C8102E', negro:'#1a1c26' };
-  const paradas = [];
-  for(let n=0;n<=36;n++){
-    const inicio = n*anguloSeg, fin = (n+1)*anguloSeg;
-    const c = colorHex[colorNumeroRuleta(n)];
-    paradas.push(`${c} ${inicio.toFixed(2)}deg ${fin.toFixed(2)}deg`);
-  }
-  return `conic-gradient(${paradas.join(',')})`;
+  let paths = '', labels = '';
+  ORDEN_RUEDA_EUROPEA.forEach((num, i)=>{
+    const a0 = i*seg, a1 = (i+1)*seg;
+    const p1 = puntoAnguloRuleta(cx,cy,R,a0), p2 = puntoAnguloRuleta(cx,cy,R,a1);
+    const p3 = puntoAnguloRuleta(cx,cy,rIn,a1), p4 = puntoAnguloRuleta(cx,cy,rIn,a0);
+    const color = colorHex[colorNumeroRuleta(num)];
+    paths += `<path d="M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} A ${R} ${R} 0 0 1 ${p2.x.toFixed(2)} ${p2.y.toFixed(2)} L ${p3.x.toFixed(2)} ${p3.y.toFixed(2)} A ${rIn} ${rIn} 0 0 0 ${p4.x.toFixed(2)} ${p4.y.toFixed(2)} Z" fill="${color}" stroke="#05060a" stroke-width="1"/>`;
+    const am = a0 + seg/2;
+    const rt = rIn + (R-rIn)*0.62;
+    const pt = puntoAnguloRuleta(cx,cy,rt,am);
+    labels += `<text x="${pt.x.toFixed(2)}" y="${pt.y.toFixed(2)}" transform="rotate(${am.toFixed(2)} ${pt.x.toFixed(2)} ${pt.y.toFixed(2)})" text-anchor="middle" dominant-baseline="central" font-family="'Space Grotesk',Arial,sans-serif" font-weight="700" font-size="10.5" fill="#f4f4f6">${num}</text>`;
+  });
+  return `<svg viewBox="0 0 ${DIM} ${DIM}" width="100%" height="100%" style="display:block;">
+    ${paths}
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+    <circle cx="${cx}" cy="${cy}" r="${rIn-1}" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+    ${labels}
+  </svg>`;
 }
 SCREENS.casino = function(){
   const j = S.jugador;
@@ -7819,11 +7889,234 @@ SCREENS.casino = function(){
   const btnRuleta = document.createElement('button'); btnRuleta.className='btn-main'; btnRuleta.textContent='🎡 Ruleta';
   btnRuleta.onclick = ()=>{ S.screen = 'ruleta'; render(); };
   c.appendChild(btnRuleta);
+  const btnTraga = document.createElement('button'); btnTraga.className='btn-main'; btnTraga.style.marginTop='8px'; btnTraga.textContent='🎰 Tragaperras';
+  btnTraga.onclick = ()=>{ S.screen = 'tragaperras'; render(); };
+  c.appendChild(btnTraga);
   const btnSalir = document.createElement('button'); btnSalir.className='btn-main';
   btnSalir.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
   btnSalir.textContent = 'Salir del casino';
   btnSalir.onclick = ()=>{ S.screen = 'tabEconomia'; render(); };
   c.appendChild(btnSalir);
+  app.appendChild(c);
+};
+const TRAGA_SIMBOLOS = [
+  { s:'🍒', peso:8,  triple:5,  nombre:'cerezas' },
+  { s:'🍋', peso:6,  triple:10, nombre:'limones' },
+  { s:'🍊', peso:4,  triple:18, nombre:'naranjas' },
+  { s:'🔔', peso:2,  triple:35, nombre:'campanas' },
+  { s:'⭐', peso:1,  triple:80, nombre:'estrellas' }
+];
+function tiraSimboloTraga(){
+  const total = TRAGA_SIMBOLOS.reduce((s,x)=>s+x.peso,0);
+  let r = Math.random()*total;
+  for(const sim of TRAGA_SIMBOLOS){ if((r -= sim.peso) < 0) return sim; }
+  return TRAGA_SIMBOLOS[0];
+}
+function resultadoTraga(rodillos){
+  const [a,b,c2] = rodillos;
+  if(a.s === b.s && b.s === c2.s) return { mult:a.triple, texto:`¡Triple ${a.nombre}!`, combo:a.s };
+  const cerezas = rodillos.filter(x=>x.s === '🍒').length;
+  if(cerezas === 2) return { mult:1, texto:'Dos cerezas — recuperas la apuesta', combo:'2cerezas' };
+  return { mult:0, texto:'Sin premio', combo:null };
+}
+function objTraga(str){ return TRAGA_SIMBOLOS.find(x=>x.s===str) || TRAGA_SIMBOLOS[0]; }
+function generarGridTraga(){
+  return [0,1,2].map(()=> [0,1,2].map(()=> tiraSimboloTraga().s));
+}
+function cobrarBoteTraga(j){
+  if(S.tragaBote > 0){
+    aplicarEfectos(j, { dinero: S.tragaBote });
+    if(S.tragaBote >= (S.tragaApuesta||10)*35) aplicarEfectos(j, { mental:3, confianza:3 });
+  }
+  S.tragaMensaje = S.tragaBote > 0 ? `Cobras ${formatearDinero(S.tragaBote)}` : S.tragaMensaje;
+  S.tragaBote = 0;
+  S.tragaFase = null;
+  S.tragaComboGanador = null;
+}
+SCREENS.tragaperras = function(){
+  const j = S.jugador;
+  S.tragaApuesta = S.tragaApuesta || Math.max(10, Math.round(j.stats.dinero*0.02/10)*10);
+  S.tragaGrid = S.tragaGrid || generarGridTraga();
+  S.tragaMensaje = S.tragaMensaje || 'Haz tu apuesta y dale a JUGAR';
+  S.tragaBote = S.tragaBote || 0;
+  topbar("Tragaperras");
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Casino · Tragaperras'));
+
+  const enRiesgo = S.tragaFase === 'riesgo';
+
+  // ---- Marcador superior tipo máquina ----
+  const marcador = document.createElement('div');
+  marcador.style.cssText = 'display:flex;gap:6px;margin-bottom:12px;';
+  const celdaMarcador = (etq, valor, color, flex)=>{
+    const d = document.createElement('div');
+    d.style.cssText = `flex:${flex};min-width:0;background:#0c0e15;border:1px solid var(--line);border-radius:8px;padding:6px 9px;box-shadow:0 1px 4px rgba(0,0,0,0.4) inset;`;
+    d.innerHTML = `<div style="font-family:'Space Grotesk',sans-serif;font-size:8.5px;letter-spacing:.06em;color:var(--ink-soft);">${etq}</div><div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${valor}</div>`;
+    return d;
+  };
+  marcador.appendChild(celdaMarcador('MENSAJE', S.tragaMensaje, 'var(--ink)', 3));
+  marcador.appendChild(celdaMarcador('PREMIO', formatearDinero(enRiesgo ? S.tragaBote : 0), '#3FBE6A', 1.4));
+  marcador.appendChild(celdaMarcador('SALDO', formatearDinero(j.stats.dinero), 'var(--gold)', 1.6));
+  c.appendChild(marcador);
+
+  // ---- Cuerpo: tabla de premios + rodillos ----
+  const cuerpo = document.createElement('div');
+  cuerpo.style.cssText = 'display:flex;gap:8px;margin-bottom:12px;align-items:stretch;';
+
+  const tabla = document.createElement('div');
+  tabla.style.cssText = "width:112px;flex-shrink:0;font-family:'Space Grotesk',sans-serif;border:1px solid var(--line);border-radius:10px;padding:8px 8px;background:rgba(255,255,255,0.02);display:flex;flex-direction:column;justify-content:center;gap:6px;";
+  const filasPago = TRAGA_SIMBOLOS.slice().reverse().map(s=>({ txt:`${s.s}${s.s}${s.s}`, val:S.tragaApuesta*s.triple, combo:s.s }));
+  filasPago.push({ txt:'🍒🍒', val:S.tragaApuesta*1, combo:'2cerezas' });
+  filasPago.forEach(f=>{
+    const gan = S.tragaComboGanador === f.combo;
+    const row = document.createElement('div');
+    row.style.cssText = `display:flex;flex-direction:column;align-items:flex-start;gap:0;${gan?'background:rgba(212,175,55,0.2);border-radius:5px;padding:2px 4px;margin:-2px -4px;':''}`;
+    row.innerHTML = `<span style="font-size:12px;line-height:1.2;">${f.txt}</span><span style="color:var(--gold);font-weight:700;font-size:10px;">${formatearDinero(f.val)}</span>`;
+    tabla.appendChild(row);
+  });
+  cuerpo.appendChild(tabla);
+
+  const rodillosWrap = document.createElement('div');
+  rodillosWrap.style.cssText = 'flex:1;position:relative;display:flex;gap:5px;padding:10px 8px;border-radius:12px;background:linear-gradient(180deg,#2a1c30,#160d1c);box-shadow:0 4px 16px rgba(0,0,0,0.4),0 0 0 2px var(--gold) inset;';
+  // línea de premio (fila central)
+  const lineaPremio = document.createElement('div');
+  lineaPremio.style.cssText = 'position:absolute;left:2px;right:2px;top:50%;height:0;border-top:2px solid rgba(212,175,55,0.85);transform:translateY(-1px);z-index:3;pointer-events:none;';
+  rodillosWrap.appendChild(lineaPremio);
+  [0,1,2].forEach(col=>{
+    const colDiv = document.createElement('div');
+    colDiv.style.cssText = 'flex:1;display:flex;flex-direction:column;justify-content:center;gap:4px;';
+    [0,1,2].forEach(row=>{
+      const cd = document.createElement('div');
+      cd.id = `traga-c${col}-r${row}`;
+      const esLinea = row === 1;
+      cd.style.cssText = `height:46px;border-radius:8px;background:linear-gradient(180deg,#fdfdfd,#dcdce2);display:flex;align-items:center;justify-content:center;font-size:27px;box-shadow:0 2px 5px rgba(0,0,0,0.35) inset;${esLinea?'outline:2px solid var(--gold);outline-offset:-2px;':'opacity:0.75;'}`;
+      cd.textContent = (S.tragaGrid[col] && S.tragaGrid[col][row]) || '🍒';
+      colDiv.appendChild(cd);
+    });
+    rodillosWrap.appendChild(colDiv);
+  });
+  cuerpo.appendChild(rodillosWrap);
+  c.appendChild(cuerpo);
+
+  // ---- Selector de apuesta (fichas) ----
+  const fichaWrap = document.createElement('div');
+  fichaWrap.style.cssText = 'display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;';
+  const COLOR_FICHA = { 10:'#4a6', 50:'#48c', 100:'#c54', 500:'#a5a', 1000:'#c93' };
+  [10,50,100,500,1000].filter(v => v <= Math.max(10, j.stats.dinero)).forEach(v=>{
+    const b = document.createElement('button');
+    b.disabled = !!S.tragaGirando || enRiesgo;
+    const sel = S.tragaApuesta===v;
+    b.style.cssText = `width:46px;height:46px;border-radius:50%;font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;color:#fff;border:3px ${sel?'solid var(--gold)':'dashed rgba(255,255,255,0.5)'};background:radial-gradient(circle at 38% 32%, ${COLOR_FICHA[v]||'#777'}, #222 130%);box-shadow:0 2px 5px rgba(0,0,0,0.4);${sel?'transform:scale(1.08);':''}`;
+    b.textContent = formatearDinero(v);
+    b.onclick = ()=>{ S.tragaApuesta = v; pintar(); };
+    fichaWrap.appendChild(b);
+  });
+  c.appendChild(fichaWrap);
+
+  const noPuede = j.stats.dinero <= 0 || S.tragaApuesta > j.stats.dinero;
+  if(noPuede && !enRiesgo) c.appendChild(el('div','badge risk', j.stats.dinero <= 0 ? 'No puedes jugar con la cuenta en números rojos.' : 'No tienes suficiente dinero para esa apuesta.'));
+
+  if(enRiesgo){
+    // Juego de riesgo: doblar o nada
+    const info = el('div','badge token');
+    info.style.cssText = 'display:flex;justify-content:center;width:100%;text-align:center;font-size:13px;margin-bottom:8px;';
+    info.textContent = `Premio: ${formatearDinero(S.tragaBote)} · ¿lo arriesgas?`;
+    c.appendChild(info);
+    const fila = document.createElement('div');
+    fila.style.cssText = 'display:flex;gap:8px;';
+    const btnCobrar = document.createElement('button'); btnCobrar.className='btn-main';
+    btnCobrar.style.cssText = 'flex:1;';
+    btnCobrar.textContent = `Cobrar ${formatearDinero(S.tragaBote)}`;
+    btnCobrar.disabled = !!S.tragaGirando;
+    btnCobrar.onclick = ()=>{ cobrarBoteTraga(j); pintar(); };
+    const btnRiesgo = document.createElement('button'); btnRiesgo.className='btn-main';
+    btnRiesgo.style.cssText = 'flex:1;background:transparent;color:var(--gold);border:1px solid var(--gold);';
+    btnRiesgo.textContent = S.tragaGirando ? '···' : 'Arriesgar (50%)';
+    btnRiesgo.disabled = !!S.tragaGirando;
+    btnRiesgo.onclick = ()=>{
+      S.tragaGirando = true; S.tragaMensaje = 'Arriesgando…'; pintar();
+      Sonido.tragaRiesgo();
+      setTimeout(()=>{
+        S.tragaGirando = false;
+        if(Math.random() < 0.5){
+          S.tragaBote *= 2;
+          S.tragaRiesgos = (S.tragaRiesgos||0) + 1;
+          Sonido.tragaGana();
+          if(S.tragaRiesgos >= 4 || S.tragaBote > 200000){
+            S.tragaMensaje = `¡Doblas! Se cobra ${formatearDinero(S.tragaBote)}`;
+            cobrarBoteTraga(j);
+          } else {
+            S.tragaMensaje = `¡Doblas! Ahora ${formatearDinero(S.tragaBote)}. ¿Otra vez?`;
+          }
+        } else {
+          Sonido.tragaPierde();
+          S.tragaMensaje = 'Lo pierdes todo en el riesgo';
+          S.tragaBote = 0; S.tragaFase = null; S.tragaComboGanador = null;
+        }
+        pintar();
+      }, 850);
+    };
+    fila.appendChild(btnCobrar); fila.appendChild(btnRiesgo);
+    c.appendChild(fila);
+  } else {
+    const btnJugar = document.createElement('button'); btnJugar.className='btn-main';
+    btnJugar.textContent = S.tragaGirando ? 'Girando…' : 'JUGAR';
+    btnJugar.disabled = !!S.tragaGirando || noPuede;
+    btnJugar.onclick = ()=>{
+      const apuesta = S.tragaApuesta;
+      aplicarEfectos(j, { dinero: -apuesta });
+      S.tragaGirando = true; S.tragaMensaje = 'Girando…'; S.tragaComboGanador = null; pintar();
+      Sonido.tragaGira();
+      const cols = [0,1,2].map(()=> [0,1,2].map(()=> tiraSimboloTraga()));
+      const resolverTirada = ()=>{
+        const linea = [cols[0][1], cols[1][1], cols[2][1]];
+        const res = resultadoTraga(linea);
+        S.tragaGrid = cols.map(cc=>cc.map(o=>o.s));
+        S.tragaGirando = false;
+        if(res.mult > 0){
+          S.tragaBote = apuesta * res.mult;
+          S.tragaFase = 'riesgo';
+          S.tragaRiesgos = 0;
+          S.tragaComboGanador = res.combo;
+          S.tragaMensaje = `${res.texto} · ${formatearDinero(S.tragaBote)}`;
+          setTimeout(()=> Sonido.tragaGana(), 120);
+        } else {
+          S.tragaMensaje = 'Sin premio esta vez';
+          setTimeout(()=> Sonido.tragaPierde(), 120);
+        }
+        pintar();
+      };
+      // Cada columna gira más tiempo que la anterior y desacelera antes de parar.
+      [0,1,2].forEach(col=>{
+        const celdas = [0,1,2].map(r=>document.getElementById(`traga-c${col}-r${r}`));
+        const totalTicks = 10 + col*7 + col*col*2;   // col0:10 · col1:19 · col2:32
+        let n = 0;
+        const paso = ()=>{
+          n++;
+          celdas.forEach(cd=>{ if(cd) cd.textContent = TRAGA_SIMBOLOS[Math.floor(Math.random()*TRAGA_SIMBOLOS.length)].s; });
+          if(n >= totalTicks){
+            celdas.forEach((cd,r)=>{ if(cd) cd.textContent = cols[col][r].s; });
+            Sonido.tragaPara();
+            if(col === 2) resolverTirada();
+            return;
+          }
+          const restantes = totalTicks - n;
+          const delay = restantes <= 5 ? 55 + (6 - restantes) * 30 : 55;
+          setTimeout(paso, delay);
+        };
+        setTimeout(paso, 55);
+      });
+    };
+    c.appendChild(btnJugar);
+  }
+
+  const btnVolver = document.createElement('button'); btnVolver.className='btn-main';
+  btnVolver.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
+  btnVolver.textContent = 'Volver al casino';
+  btnVolver.disabled = !!S.tragaGirando || enRiesgo;
+  btnVolver.onclick = ()=>{ S.screen = 'casino'; render(); };
+  c.appendChild(btnVolver);
+
   app.appendChild(c);
 };
 SCREENS.ruleta = function(){
@@ -7834,7 +8127,9 @@ SCREENS.ruleta = function(){
   topbar("Ruleta");
   const c = el('div','card');
   c.appendChild(crearEyebrow('Casino · Ruleta'));
-  c.appendChild(el('div','lore-box', `Dinero disponible: <b style="color:var(--gold);">${formatearDinero(j.stats.dinero)}</b>`));
+  const cajaDinero = el('div',null, `Dinero disponible: <b style="color:var(--gold);">${formatearDinero(j.stats.dinero)}</b>`);
+  cajaDinero.style.cssText = "background:rgba(110,136,168,0.1);border-radius:8px;padding:14px 16px;margin-bottom:18px;font-family:'Space Grotesk',sans-serif;font-size:14.5px;line-height:1.55;color:var(--ink);";
+  c.appendChild(cajaDinero);
 
   // ---- Plato de la ruleta ----
   const wheelWrap = document.createElement('div');
@@ -7854,8 +8149,18 @@ SCREENS.ruleta = function(){
 
   const wheel = document.createElement('div');
   wheel.id = 'ruleta-wheel';
-  wheel.style.cssText = `position:absolute;inset:16px;border-radius:50%;background:${gradienteRuleta()};box-shadow:0 0 0 3px rgba(0,0,0,0.5) inset, 0 0 14px rgba(0,0,0,0.4);transition:transform 3.2s cubic-bezier(.15,.6,.05,1);transform:rotate(${S.ruletaAnguloActual||0}deg);`;
+  wheel.style.cssText = `position:absolute;inset:16px;border-radius:50%;overflow:hidden;background:#111;box-shadow:0 0 0 3px rgba(0,0,0,0.5) inset, 0 0 14px rgba(0,0,0,0.4);transition:transform 3.2s cubic-bezier(.15,.6,.05,1);transform:rotate(${S.ruletaAnguloActual||0}deg);`;
+  wheel.innerHTML = svgRuedaRuleta();
   plato.appendChild(wheel);
+
+  // Bola: gira en su propia capa, independiente de la rueda y en sentido contrario
+  const bolaTrack = document.createElement('div');
+  bolaTrack.id = 'ruleta-bola-track';
+  bolaTrack.style.cssText = `position:absolute;inset:16px;border-radius:50%;pointer-events:none;z-index:2;transition:transform 2.8s cubic-bezier(.1,.5,.15,1);transform:rotate(${S.ruletaAnguloBola||0}deg);`;
+  const bola = document.createElement('div');
+  bola.style.cssText = 'position:absolute;top:6px;left:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:radial-gradient(circle at 32% 28%, #fff, #cfd2da 55%, #8a8d97 100%);box-shadow:0 1px 3px rgba(0,0,0,0.6);';
+  bolaTrack.appendChild(bola);
+  plato.appendChild(bolaTrack);
 
   // Brillo de cristal fijo (no gira)
   const sheen = document.createElement('div');
@@ -7881,8 +8186,9 @@ SCREENS.ruleta = function(){
     const r = S.ruletaUltimoResultado;
     const puntoColor = r.colorTexto === 'rojo' ? '#C8102E' : (r.colorTexto === 'negro' ? '#1a1c26' : '#1B7A3D');
     const resBox = document.createElement('div');
-    resBox.className = r.gano ? 'badge' : 'badge risk';
-    resBox.style.cssText = 'text-align:center;margin-bottom:14px;font-size:13px;';
+    resBox.className = 'badge';
+    resBox.style.cssText = 'display:flex;justify-content:center;align-items:center;width:100%;text-align:center;margin:0 0 14px;font-size:15.5px;padding:8px 12px;'
+      + (r.gano ? 'background:rgba(76,175,109,0.16);color:var(--green);' : 'background:rgba(217,73,92,0.16);color:var(--red);');
     resBox.innerHTML = `<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${puntoColor};border:1px solid rgba(255,255,255,0.5);vertical-align:-1px;margin-right:6px;"></span>`
       + (r.gano
         ? `Sale el <b>${r.numero}</b> (${r.colorTexto}). Ganas <b>${formatearDinero(r.ganancia)}</b>`
@@ -7892,31 +8198,61 @@ SCREENS.ruleta = function(){
 
   // ---- Tipos de apuesta ----
   const SWATCH = { rojo:'#C8102E', negro:'#1a1c26', verde:'#1B7A3D' };
-  const tipos = [
-    {id:'rojo',  label:'Rojo',     pago:'x2',  prob:'18/37', sw:'rojo'},
-    {id:'negro', label:'Negro',    pago:'x2',  prob:'18/37', sw:'negro'},
-    {id:'verde', label:'Verde (0)',pago:'x36', prob:'1/37',  sw:'verde'},
-    {id:'par',   label:'Par',      pago:'x2',  prob:'18/37'},
-    {id:'impar', label:'Impar',    pago:'x2',  prob:'18/37'},
-    {id:'numero',label:'Nº exacto',pago:'x36', prob:'1/37'}
-  ];
-  const tiposWrap = document.createElement('div');
-  tiposWrap.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;';
-  tipos.forEach(t=>{
-    const sel = S.ruletaApuestaTipo === t.id;
-    const btn = document.createElement('button');
-    btn.disabled = !!S.ruletaGirando;
-    btn.style.cssText = `display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px;border-radius:11px;font-family:'Space Grotesk',sans-serif;border:1.5px solid ${sel?'var(--gold)':'var(--line)'};background:${sel?'rgba(212,175,55,0.14)':'transparent'};color:var(--ink);`;
-    const top = t.sw
-      ? `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${SWATCH[t.sw]};border:1px solid rgba(255,255,255,0.45);vertical-align:-1px;margin-right:5px;"></span>${t.label}`
-      : t.label;
-    btn.innerHTML = `<span style="font-size:11.5px;font-weight:600;">${top}</span><span style="font-size:10px;color:var(--ink-soft);">${t.pago} · ${t.prob}</span>`;
-    btn.onclick = ()=>{ S.ruletaApuestaTipo = t.id; pintar(); };
-    tiposWrap.appendChild(btn);
-  });
-  c.appendChild(tiposWrap);
+  const GRUPOS_COLAPSABLES = {
+    basicas: { titulo:'APUESTAS BÁSICAS', lista:[
+      {id:'rojo',  label:'Rojo',     pago:'x2',  prob:'18/37', sw:'rojo'},
+      {id:'negro', label:'Negro',    pago:'x2',  prob:'18/37', sw:'negro'},
+      {id:'verde', label:'Verde (0)',pago:'x36', prob:'1/37',  sw:'verde'},
+      {id:'par',   label:'Par',      pago:'x2',  prob:'18/37'},
+      {id:'impar', label:'Impar',    pago:'x2',  prob:'18/37'},
+      {id:'numero',label:'Nº exacto',pago:'x36', prob:'1/37'} ] },
+    mitad:   { titulo:'MITAD DE LA MESA', lista:[
+      {id:'baja', label:'1 a 18',  pago:'x2', prob:'18/37'},
+      {id:'alta', label:'19 a 36', pago:'x2', prob:'18/37'} ] },
+    docenas: { titulo:'DOCENAS', lista:[
+      {id:'docena1', label:'1ª (1-12)',  pago:'x3', prob:'12/37'},
+      {id:'docena2', label:'2ª (13-24)', pago:'x3', prob:'12/37'},
+      {id:'docena3', label:'3ª (25-36)', pago:'x3', prob:'12/37'} ] },
+    columnas:{ titulo:'COLUMNAS', lista:[
+      {id:'columna1', label:'Columna 1', pago:'x3', prob:'12/37'},
+      {id:'columna2', label:'Columna 2', pago:'x3', prob:'12/37'},
+      {id:'columna3', label:'Columna 3', pago:'x3', prob:'12/37'} ] }
+  };
+  const grupoDeApuesta = tipo => Object.keys(GRUPOS_COLAPSABLES).find(k => GRUPOS_COLAPSABLES[k].lista.some(t=>t.id===tipo)) || 'basicas';
+  if(S.ruletaGrupoAbierto === undefined) S.ruletaGrupoAbierto = grupoDeApuesta(S.ruletaApuestaTipo);
 
-  if(S.ruletaApuestaTipo === 'numero'){
+  function pintarRejillaApuestas(lista, idGrupo){
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:6px;';
+    lista.forEach(t=>{
+      const sel = S.ruletaApuestaTipo === t.id;
+      const btn = document.createElement('button');
+      btn.disabled = !!S.ruletaGirando;
+      btn.style.cssText = `display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px;border-radius:11px;font-family:'Space Grotesk',sans-serif;border:1.5px solid ${sel?'var(--gold)':'var(--line)'};background:${sel?'rgba(212,175,55,0.14)':'transparent'};color:var(--ink);`;
+      const top = t.sw
+        ? `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${SWATCH[t.sw]};border:1px solid rgba(255,255,255,0.45);vertical-align:-1px;margin-right:5px;"></span>${t.label}`
+        : t.label;
+      btn.innerHTML = `<span style="font-size:11.5px;font-weight:600;">${top}</span><span style="font-size:10px;color:var(--ink-soft);">${t.pago} · ${t.prob}</span>`;
+      btn.onclick = ()=>{ S.ruletaApuestaTipo = t.id; if(idGrupo) S.ruletaGrupoAbierto = idGrupo; pintar(); };
+      wrap.appendChild(btn);
+    });
+    c.appendChild(wrap);
+  }
+  // Todas las apuestas en secciones plegables (básicas abierta por defecto)
+  Object.entries(GRUPOS_COLAPSABLES).forEach(([id, g])=>{
+    const abierto = S.ruletaGrupoAbierto === id;
+    const activa = g.lista.find(t=>t.id === S.ruletaApuestaTipo);
+    const hd = document.createElement('button');
+    hd.disabled = !!S.ruletaGirando;
+    hd.style.cssText = `display:flex;justify-content:space-between;align-items:center;width:100%;padding:8px 11px;margin:${abierto?'6px 0 6px':'6px 0 0'};border-radius:9px;border:1px solid ${activa?'var(--gold)':'var(--line)'};background:${activa?'rgba(212,175,55,0.1)':'transparent'};color:var(--ink);font-family:'Space Grotesk',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.04em;`;
+    hd.innerHTML = `<span>${g.titulo}${activa?` · <span style="color:var(--gold);font-weight:600;">${activa.label}</span>`:''}</span><span style="color:var(--ink-soft);font-size:12px;">${abierto?'▾':'▸'}</span>`;
+    hd.onclick = ()=>{ S.ruletaGrupoAbierto = abierto ? null : id; pintar(); };
+    c.appendChild(hd);
+    if(abierto) pintarRejillaApuestas(g.lista, id);
+  });
+  c.appendChild(el('div')).style.height = '16px'; // aire bajo el acordeón
+
+  if(S.ruletaApuestaTipo === 'numero' && S.ruletaGrupoAbierto === 'basicas'){
     const numWrap = document.createElement('div');
     numWrap.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;';
     const btnMenos = document.createElement('button'); btnMenos.textContent='−'; btnMenos.disabled = !!S.ruletaGirando;
@@ -7933,11 +8269,11 @@ SCREENS.ruleta = function(){
   }
 
   const cantidadWrap = document.createElement('div');
-  cantidadWrap.style.cssText = 'margin-bottom:14px;';
+  cantidadWrap.style.cssText = 'margin-bottom:14px;text-align:center;';
   cantidadWrap.appendChild(el('div','lbl', `Apuesta: ${formatearDinero(S.ruletaApuestaCantidad)}`));
   const botonesCantidad = document.createElement('div');
-  botonesCantidad.style.cssText = 'display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;';
-  const opcionesCantidad = [10, 50, 100, 500, 1000].filter(v => v <= Math.max(10, j.stats.dinero));
+  botonesCantidad.style.cssText = 'display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:center;';
+  const opcionesCantidad = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000].filter(v => v <= Math.max(10, j.stats.dinero));
   if(!opcionesCantidad.length) opcionesCantidad.push(10);
   opcionesCantidad.forEach(v=>{
     const btn = document.createElement('button');
@@ -7964,15 +8300,24 @@ SCREENS.ruleta = function(){
     pintar();
     Sonido.ruletaGira();
     const numeroGanador = Math.floor(Math.random()*37);
+    const idxGanador = ORDEN_RUEDA_EUROPEA.indexOf(numeroGanador);
     const anguloSeg = 360/37;
     const vueltasExtra = 5 + Math.floor(Math.random()*3);
     const anguloBase = S.ruletaAnguloActual || 0;
-    const anguloDestinoBruto = vueltasExtra*360 - (numeroGanador*anguloSeg + anguloSeg/2);
+    const anguloDestinoBruto = vueltasExtra*360 - (idxGanador*anguloSeg + anguloSeg/2);
     const anguloFinal = anguloBase - (anguloBase % 360) + anguloDestinoBruto;
     S.ruletaAnguloActual = anguloFinal;
+    // La bola gira en sentido contrario y siempre completa vueltas enteras, así que
+    // vuelve exactamente a la posición de arriba (bajo el puntero) al terminar.
+    const vueltasBola = 6 + Math.floor(Math.random()*3);
+    const anguloBaseBola = S.ruletaAnguloBola || 0;
+    const anguloFinalBola = anguloBaseBola - (anguloBaseBola % 360) - vueltasBola*360;
+    S.ruletaAnguloBola = anguloFinalBola;
     setTimeout(()=>{
       const rueda = document.getElementById('ruleta-wheel');
       if(rueda) rueda.style.transform = `rotate(${anguloFinal}deg)`;
+      const bolaT = document.getElementById('ruleta-bola-track');
+      if(bolaT) bolaT.style.transform = `rotate(${anguloFinalBola}deg)`;
     }, 30);
     setTimeout(()=>{
       const colorGanador = colorNumeroRuleta(numeroGanador);
@@ -7984,6 +8329,14 @@ SCREENS.ruleta = function(){
       else if(S.ruletaApuestaTipo === 'par' && numeroGanador !== 0 && numeroGanador%2===0){ gano = true; multiplicador = 2; }
       else if(S.ruletaApuestaTipo === 'impar' && numeroGanador%2===1){ gano = true; multiplicador = 2; }
       else if(S.ruletaApuestaTipo === 'numero' && numeroGanador === S.ruletaApuestaNumero){ gano = true; multiplicador = 36; }
+      else if(S.ruletaApuestaTipo === 'baja' && numeroGanador >= 1 && numeroGanador <= 18){ gano = true; multiplicador = 2; }
+      else if(S.ruletaApuestaTipo === 'alta' && numeroGanador >= 19 && numeroGanador <= 36){ gano = true; multiplicador = 2; }
+      else if(S.ruletaApuestaTipo === 'docena1' && numeroGanador >= 1 && numeroGanador <= 12){ gano = true; multiplicador = 3; }
+      else if(S.ruletaApuestaTipo === 'docena2' && numeroGanador >= 13 && numeroGanador <= 24){ gano = true; multiplicador = 3; }
+      else if(S.ruletaApuestaTipo === 'docena3' && numeroGanador >= 25 && numeroGanador <= 36){ gano = true; multiplicador = 3; }
+      else if(S.ruletaApuestaTipo === 'columna1' && numeroGanador !== 0 && (numeroGanador-1)%3 === 0){ gano = true; multiplicador = 3; }
+      else if(S.ruletaApuestaTipo === 'columna2' && numeroGanador !== 0 && (numeroGanador-1)%3 === 1){ gano = true; multiplicador = 3; }
+      else if(S.ruletaApuestaTipo === 'columna3' && numeroGanador !== 0 && (numeroGanador-1)%3 === 2){ gano = true; multiplicador = 3; }
       const apuesta = S.ruletaApuestaCantidad;
       const ganancia = gano ? apuesta*multiplicador : 0;
       aplicarEfectos(j, { dinero: gano ? (ganancia-apuesta) : -apuesta });
@@ -8693,7 +9046,7 @@ SCREENS.origenRival = function(){
     { texto:'Decirle que podía haber sido cualquiera de los dos', relacion:15,
       resultado:`${apodoRival} asiente, pero se nota que le cuesta. "Ya", dice, sin más, y cambia de tema enseguida. No hay rencor todavía — solo un chaval de dieciséis años que no sabe qué hacer con esto.` },
     { texto:'No darle más vueltas de las necesarias', relacion:0,
-      resultado:`Se lo tomas con normalidad, como una cosa más que pasa. ${apodoRival} se queda más callado de lo habitual el resto de la tarde, pero no dice nada.` },
+      resultado:`Te lo tomas con normalidad, como una cosa más que pasa. ${apodoRival} se queda más callado de lo habitual el resto de la tarde, pero no dice nada.` },
     { texto:'Decirle que seguro que a él le sale en otro sitio', relacion:-10,
       resultado:`Lo dices con buena intención, pero suena a consuelo de quien ya ha ganado. ${apodoRival} esboza una sonrisa que no le llega a los ojos. "Seguro", contesta, y algo se queda flotando entre los dos que no estaba antes.` }
   ];
@@ -9089,7 +9442,7 @@ function cerrarTratoNegociacion(){
   const neg = S.negociacion;
   const j = S.jugador;
   if(neg.esRenovacion){
-    j.contrato = { sueldoAnual: neg.sueldo, duracionTemporadas: neg.duracion };
+    j.contrato = { sueldoAnual: neg.sueldo, duracionTemporadas: neg.duracion, duracionOriginal: neg.duracion };
     aplicarPromesasNegociacion(j, neg);
     S.negociacion = null;
     S.ofertasActuales = [];
@@ -9243,7 +9596,7 @@ SCREENS.negociacionFichaje = function(){
       btnVolver.textContent = neg.esRenovacion ? 'Buscar otro club →' : (esNarrativa ? 'Seguir en tu club →' : 'Volver al mercado →');
       btnVolver.onclick = ()=>{
         if(neg.esRenovacion){
-          j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1 };
+          j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1 };
           S.ofertasActuales = generarOfertas(j);
           if(S.ofertasActuales.length === 0){
             const clubReserva = clubAleatorio(j.club.categoria, j.club.nombre);
@@ -9732,7 +10085,10 @@ function renderizarServiciosProfesionales(j, contenedor){
     const nivelActual = j.suscripciones[servicio.familia] || 0;
     const fila = el('div','servicio-fila');
     const cab = el('div','servicio-cab');
-    cab.innerHTML = `${iconoInsignia(servicio.icono,26)}<span class="servicio-nombre">${servicio.nombre}</span>${nivelActual>0?'<span class="servicio-activo-tag">ACTIVO</span>':''}`;
+    const efectoBase = (servicio.niveles[0] || {}).efectoTemporada || {};
+    const mejoraTxt = Object.keys(efectoBase).map(k => NICE_ATTR[k] || NICE_STAT[k] || k).join(' · ');
+    const mejoraSpan = mejoraTxt ? ` <span class="servicio-mejora" style="font-weight:400;font-size:11px;color:var(--gold);white-space:nowrap;">↑ ${mejoraTxt}</span>` : '';
+    cab.innerHTML = `${iconoInsignia(servicio.icono,26)}<span class="servicio-nombre">${servicio.nombre}</span>${mejoraSpan}${nivelActual>0?'<span class="servicio-activo-tag">ACTIVO</span>':''}`;
     fila.appendChild(cab);
     const niveles = el('div','servicio-niveles');
     servicio.niveles.forEach(info=>{
@@ -9741,14 +10097,13 @@ function renderizarServiciosProfesionales(j, contenedor){
       const asequible = !desbloqueado || activo || puedePagarServicio(j, servicio.familia, info.nivel);
       const btn = el('div','servicio-nivel-btn'+(activo?' activo':'')+(!desbloqueado||!asequible?' inasequible':''));
       const etiquetaCoste = servicio.esPorcentaje ? `${Math.round(info.comisionPct*100)}% del sueldo` : `${formatearDinero(info.costeAnual)}/año`;
-      const etiquetaVentaja = info.efectoTemporada ? Object.entries(info.efectoTemporada).map(([k,v])=>`${'↑'.repeat(info.nivel)} ${(NICE_ATTR[k]||NICE_STAT[k]||k)}`).join(' · ') : '';
-      btn.innerHTML = `<div class="n">Nivel ${info.nivel}</div>${etiquetaVentaja?`<div class="v" style="font-size:10px;color:var(--gold);margin:2px 0;">${etiquetaVentaja}</div>`:''}<div class="c">${etiquetaCoste}</div>`;
+      btn.innerHTML = `<div class="n">Nivel ${info.nivel}</div><div class="c">${etiquetaCoste}</div>`;
       if(!desbloqueado){
         btn.title = info.etiquetaBloqueo || 'Todavía no disponible';
       } else if(!asequible){
         btn.title = (j.stats.dinero||0) < 0
-          ? 'No puedes activar ni subir de nivel ningún servicio mientras tu cuenta esté en números rojos'
-          : 'Con este compromiso, tu balance neto de la temporada quedaría en negativo';
+          ? 'No puedes activar ni subir de nivel servicios mientras tu cuenta esté en números rojos'
+          : 'Ni con tus ahorros puedes cubrir el déficit que dejaría este compromiso durante la temporada';
       }
       if(desbloqueado && asequible){
         btn.onclick = ()=>{
@@ -10008,9 +10363,7 @@ SCREENS.tirando = function(){
   const sumaLbl = el('div','dice-suma', '');
   scene.appendChild(sumaLbl);
   const textoConToken = conToken==='inspiracion' ? ' (con Golpe de Inspiración)' : (conToken==='vestuario' ? ' (con Palabras del vestuario)' : '');
-  const captionTirada = (r.natural20 || r.natural1)
-    ? `1d20 — un ${r.dado} natural decide solo`
-    : `1d20 + ${r.bono} de ${NICE_ATTR[op.tirada.atributo]}${textoConToken}${r.dadoDescartado!==null?' (con Segunda Oportunidad, 2 dados)':''}`;
+  const captionTirada = `1d20 + ${r.bono} de ${NICE_ATTR[op.tirada.atributo]}${textoConToken}${r.dadoDescartado!==null?' (con Segunda Oportunidad, 2 dados)':''}`;
   scene.appendChild(el('div','dice-caption', captionTirada));
   const resultLbl = el('div','roll-result', r.exito ? 'ÉXITO' : 'FALLO');
   resultLbl.classList.add(r.exito ? 'exito' : 'fallo');
@@ -10033,9 +10386,7 @@ SCREENS.tirando = function(){
       if(r.natural1) die.classList.add('maldeojo');
       Sonido.tick();
       setTimeout(()=>{
-        sumaLbl.textContent = r.natural20 ? '¡20 natural!'
-          : r.natural1 ? '1 natural…'
-          : `${r.dado} ${r.bono>=0?'+':'-'} ${Math.abs(r.bono)} = ${r.total}`;
+        sumaLbl.textContent = `${r.dado} ${r.bono>=0?'+':'-'} ${Math.abs(r.bono)} = ${r.total}`;
         sumaLbl.classList.add('show');
       }, 450);
       setTimeout(()=>{
@@ -10573,7 +10924,7 @@ function iniciarTorneoEliminatorio(cfg){
   const esSeleccion = cfg.tipo === 'seleccion' || cfg.tipo === 'seleccion_sub21';
   let rivalSemi, rivalFinal, nombreCompeticion;
   if(esSeleccion){
-    const nombreTorneo = torneoDeVerano(S.temporada);
+    const nombreTorneo = torneoDeVerano(S.temporada) || 'Torneo internacional';
     const poolRivales = nombreTorneo === 'Eurocopa' ? RIVALES_EUROCOPA : RIVALES_MUNDIAL;
     const paisesBarajados = [...poolRivales].sort(()=>Math.random()-0.5);
     rivalSemi = { nombre: paisesBarajados[0] };
@@ -11638,7 +11989,7 @@ SCREENS.renovacion = function(){
     const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Buscar un nuevo equipo →';
     btn.onclick = ()=>{
       S.clubDeclinaRenovar = undefined;
-      j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1 };
+      j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1 };
       S.ofertasActuales = generarOfertas(j);
       if(S.ofertasActuales.length === 0){
         const clubReserva = clubAleatorio(j.club.categoria, j.club.nombre);
@@ -11689,7 +12040,7 @@ SCREENS.renovacion = function(){
   rechazar.textContent = 'No renovar, buscar otro club directamente';
   rechazar.onclick = ()=>{
     S.clubDeclinaRenovar = undefined;
-    j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1 };
+    j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1 };
     S.ofertasActuales = generarOfertas(j);
     if(S.ofertasActuales.length === 0){
       const clubReserva = clubAleatorio(j.club.categoria, j.club.nombre);

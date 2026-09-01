@@ -3,9 +3,9 @@
 Juego de modo carrera de fútbol en HTML/JS de un solo archivo (`index.html`, ~10.970 líneas),
 inspirado en "El Ídolo" (potrerofutbol.ar). Interfaz en español (castellano de España). Todo
 —HTML, CSS y JS— vive en un único archivo autocontenido, sin dependencias externas ni build step.
-Pie de pantalla: "Fichaje 10 · v1.2" (`VERSION_JUEGO`). Al publicar cambios, subir
+Pie de pantalla: "Fichaje 10 · v1.3" (`VERSION_JUEGO`). Al publicar cambios, subir
 `VERSION_JUEGO` en `index.html` y, en el mismo commit, `CACHE` en `sw.js` al mismo número
-(`fichaje10-1.1` → `fichaje10-1.2`) para forzar el refresco en dispositivos instalados.
+(`fichaje10-1.2` → `fichaje10-1.3`) para forzar el refresco en dispositivos instalados.
 Desplegado en GitHub Pages: `https://javidona88.github.io/fichaje10app/` (repo `javidona88/fichaje10app`,
 workflow `.github/workflows/deploy.yml` en cada push a `main`).
 
@@ -49,7 +49,7 @@ j = {
   nombre, pais, posicion:"Delantero" (POSICION_FIJA), edad (empieza a 16), localidad,
   club:{ nombre, categoria, colores:[hex1,hex2], extranjero?, pais?, liga?, grande?,
          nivelEuropeo?('champions'|'europa'|'conference'), ambicionNivel(1-4), objetivoActual? },
-  contrato:{ sueldoAnual, duracionTemporadas },
+  contrato:{ sueldoAnual, duracionTemporadas, duracionOriginal },  // duracionOriginal = años al firmar; el tab Club muestra "X de Y años"
   stats:{ forma, confianza, reputacion, salud, dinero, popularidad, valorMercado,
           felicidadPareja, vestuario },
   atributos:{ fisico, velocidad, tiro, regate, pase, desmarque },   // 1-20, visibles (6 ahora)
@@ -84,7 +84,8 @@ j = {
   periodista:{ nombre, apodo } | null,
   hermano:{ nombre, apodo, genero } | null,
   padreMadre:{ nombre, apodo, genero } | null,
-  pareja:{ nombre, apodo } | null,   tienePareja (bool, legacy),
+  pareja:{ nombre, apodo } | null,   tienePareja (bool; siempre en sincronía con `pareja` —
+    `migrarJugadorGuardado` reconcilia `tienePareja && !pareja` generando pareja),
   hijo:{ nombre, genero } | null,
   amigoNoFutbol:{ nombre, apodo, profesion, genero } | null,
   fichajeVeranoGarantizado?, clubesEnfriados?
@@ -100,10 +101,12 @@ elegir). **Las dos tienen que aplicar exactamente los mismos modificadores** —
 desincronizado varias veces (racha gafada, crisis) y el jugador veía un % más optimista del real.
 - **1 natural = FALLO automático, 20 natural = ÉXITO automático**, pase lo que pase con bono y
   dificultad (`exito = dado===1 ? false : (dado===20 ? true : total>=dificultad)`). Aplicado
-  también en `probabilidadExito`, en la pantalla de lesión y en `SCREENS.resultado`. En 1/20
-  natural la UI NO muestra la suma `dado + bono = total`: `SCREENS.tirando` pone "20 natural ·
-  éxito automático" / "1 natural · fallo automático" (y el caption "un N natural decide solo"),
-  y `SCREENS.resultado` lo mismo en `.outcome-roll`.
+  también en `probabilidadExito`, en la pantalla de lesión y en `SCREENS.resultado`.
+  **Durante la tirada (`SCREENS.tirando`) NO se adelanta el 1/20 automático** — el caption es
+  siempre "1d20 + N de <atributo>" y la suma siempre "dado + bono = total" (p. ej. "20 + 4 =
+  24"); el resultado auto solo se revela al final con ÉXITO/FALLO. `SCREENS.resultado` (pantalla
+  de consecuencia, ya con el resultado a la vista) sí explicita "20 natural — éxito automático"
+  en `.outcome-roll`.
 - `ventaja:true` → tira 2 dados y se queda con el mejor (objeto "Segunda Oportunidad").
 - El % de `probabilidadExito` siempre es múltiplo de 5 (probabilidad exacta de un d20). Verificado
   con Monte Carlo que coincide con `tirar()` en todos los estados (crisis / racha gafada / salud
@@ -382,8 +385,11 @@ En `PANTALLAS_SIN_TABBAR`.
 - Valor de mercado por temporada: `(goles*15000 + asistencias*6000) * (1 + idxCategoria*2)`.
   Bonos de eventos y servicios "porcentaje" escalan sobre el valor actual (nunca cifra fija).
 - **Números rojos**: `comprobarNumerosRojos(j)` cancela automáticamente TODAS las suscripciones
-  si `dinero < 0`; se muestra en `SCREENS.numerosRojosReveal`. En rojos no puedes activar ni
-  subir servicios (`puedePagarServicio`).
+  si `dinero < 0`; se muestra en `SCREENS.numerosRojosReveal`.
+- **`puedePagarServicio(j, familia, nivel)`**: permite el cambio si el balance neto de la
+  temporada con el cambio queda ≥ 0 **o** si `j.stats.dinero` (ahorros) cubre ese déficit anual
+  — el dinero acumulado funciona como colchón. En números rojos (`dinero < 0`) los servicios
+  `esPorcentaje` sí se bloquean.
 
 ### Tienda / servicios / gastos personales
 `TIENDA_SERVICIOS`: 12 familias en 4 categorías (Rendimiento y Cuidado Físico, Desarrollo
@@ -391,6 +397,13 @@ Técnico y Análisis, Salud Mental y Bienestar, Gestión y Entorno Profesional).
 `niveles:[{nivel, costeAnual|comisionPct, efectoTemporada:{...}, desc, ...porReputacion(N)}]`.
 `j.suscripciones[familia] = nivel`. Efectos pro-rateados por paso de temporada
 (`aplicarEfectosServiciosPasivo`, multiplica por `DIVISOR_PROGRESO` si es atributo).
+- Los nombres van sin rol redundante ("Fisioterapeuta", "Analista de rendimiento", "Psicólogo
+  deportivo", "Community Manager"). En la cabecera de cada servicio, junto al nombre, va un
+  `↑ <atributos>` fino y dorado (de `niveles[0].efectoTemporada`); los botones de nivel solo
+  muestran "Nivel N" + coste, sin el atributo.
+- `patrocinio`: la ficha del patrocinio (marca, cantidad/temp., años) vive en `SCREENS.tabJugador`
+  (caja `PATROCINIO`), no en Economía; en Economía solo queda la línea "· Patrocinio" del desglose
+  de ingresos.
 - `representante` es `esPorcentaje:true` (comisión 3/6/10% del sueldo, no coste fijo). Crea
   `j.representante` vía `crearRepresentante` con `.agente` (nombre + genero + relacion).
   `AGENCIAS_REPRESENTACION` para el nombre de la agencia.
@@ -398,13 +411,43 @@ Técnico y Análisis, Salud Mental y Bienestar, Gestión y Entorno Profesional).
 - Servicios repetibles pero no más de uno por temporada (`S.comprasEstaTemporada`, reset en
   `iniciarTemporadaJuego`). `SCREENS.gastos` se salta si no hay nada pagable.
 
-### Casino — `SCREENS.casino` / `SCREENS.ruleta`
-Minijuego de ruleta con dinero real de `j.stats.dinero`. `S.ruletaApuestaTipo/Numero/Cantidad`,
-`S.ruletaGirando`, `S.ruletaUltimoResultado`. Perder una apuesta grande resta algo de mental.
-En `PANTALLAS_TAB`. Apuestas: rojo/negro/par/impar (x2), **verde = el 0 (x36)**, nº exacto
-(x36). `colorNumeroRuleta` / `gradienteRuleta` (37 segmentos, 0 verde). Sonidos propios
-(`Sonido.ruletaGira` / `ruletaGana` / `ruletaPierde`), distintos de los de los dados. Plato con
-aro de madera + brillo de cristal fijo (no gira) + cubo central que toma el color del resultado.
+### Casino — `SCREENS.casino` / `SCREENS.ruleta` / `SCREENS.tragaperras`
+Dos minijuegos con dinero real de `j.stats.dinero`, ambos en `PANTALLAS_TAB`.
+- **Ruleta**: `S.ruletaApuestaTipo/Numero/Cantidad`, `S.ruletaGirando`, `S.ruletaUltimoResultado`.
+  Apuestas: TODO en secciones **plegables** tipo acordeón (`GRUPOS_COLAPSABLES`: basicas
+  rojo/negro/verde/par/impar/nº exacto, mitad 1-18/19-36 x2, docenas x3, columnas x3 con
+  `(numeroGanador-1)%3`). `S.ruletaGrupoAbierto` = grupo abierto (o null); por defecto se abre
+  `basicas`, o el grupo de la apuesta activa la 1ª vez. La cabecera plegada muestra la opción
+  elegida si hay una. `pintarRejillaApuestas(lista, idGrupo)`. Cantidades: 10 · 25 · 50 · 100 ·
+  250 · 500 · 1K · 2,5K · 5K · 10K (filtradas por saldo). El cartel de resultado lleva fondo
+  **verde** si ganas y **rojo** si pierdes. `colorNumeroRuleta`
+  decide el color por número (fijo, como en una ruleta real); `ORDEN_RUEDA_EUROPEA` es el orden
+  físico real de una ruleta europea (0,32,15,19,4,...) — el ángulo de parada usa la POSICIÓN del
+  número ganador en ese array, no el número en sí. `svgRuedaRuleta()` dibuja el plato como SVG:
+  37 sectores con línea divisoria + números impresos girados en radial (como en una rueda física).
+  **Bola** (`#ruleta-bola-track`): capa independiente que gira en sentido contrario a la rueda;
+  siempre completa vueltas enteras, así que vuelve exactamente a la posición del puntero (arriba)
+  cuando termina su transición — coincide visualmente con el número ganador porque la rueda
+  también gira hasta dejarlo bajo el puntero. Plato con aro de madera + brillo de cristal fijo +
+  cubo central que toma el color del resultado.
+- **Tragaperras**: estilo máquina clásica española. `TRAGA_SIMBOLOS` (🍒🍋🍊🔔⭐ con peso y
+  pago de triple), `tiraSimboloTraga()` ponderado, `resultadoTraga([obj,obj,obj])` (triple = xN;
+  dos 🍒 = x1). **Grid 3×3** (`S.tragaGrid` = 3 columnas de 3 símbolos), solo paga la **fila
+  central** (línea de premio). Marcador tipo LED arriba (MENSAJE / PREMIO / SALDO), tabla de
+  premios a la izquierda (€ = apuesta × multiplicador, resalta el combo ganador vía
+  `S.tragaComboGanador`), fichas de apuesta redondas. Retorno de la línea ≈0,94 (casa ~6%).
+  **Juego de riesgo** (`S.tragaFase='riesgo'`, `S.tragaBote`): tras premio, Cobrar o Arriesgar
+  (50% doblar / 50% perderlo todo); tope a 4 dobles o 200.000 €. `cobrarBoteTraga(j)` acredita
+  el bote. Celdas `#traga-c{col}-r{row}` (colDiv con `justify-content:center` para que la línea
+  de premio en `top:50%` caiga justo en el centro de la fila central). Animación por columna con
+  `setTimeout` recursivo: cada columna gira más ticks que la anterior (`10 + col*7 + col*col*2`)
+  y desacelera en los últimos 5 ticks — para escalonada y progresivamente más lenta.
+- Sonidos: la ruleta usa `Sonido.ruletaGira` / `ruletaGana` / `ruletaPierde` (bolita en el
+  plato). La tragaperras tiene los suyos, con timbre electrónico de máquina de bar y claramente
+  distintos: `Sonido.tragaGira` (arpegio square rápido), `tragaPara` (clunk por rodillo),
+  `tragaGana` (arpegio ascendente + cascada de monedas), `tragaPierde` (dos notas cortas hacia
+  abajo), `tragaRiesgo` (tic-toc de suspense). Ninguno se parece a los de los dados. Perder una
+  apuesta grande resta algo de mental.
 
 ### Clubes — bases de datos reales
 - `CLUBES_POR_CATEGORIA`: clubes reales de España (temporada 2026-27), LaLiga / LaLiga2 /
