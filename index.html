@@ -3302,7 +3302,7 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.3';
+const VERSION_JUEGO = 'v1.4';
 
 const PARTIDOS_POR_CATEGORIA = {"Tercera RFEF":30,"Segunda RFEF":32,"Primera RFEF":34,"LaLiga2":36,"LaLiga":38};
 
@@ -11449,7 +11449,7 @@ SCREENS.playoffFinal = function(){
     c.appendChild(el('h2',null,`Ves la final del ascenso contra ${rival.nombre} desde la grada`));
     c.appendChild(el('div','event-text', 'Tu lesión te deja fuera justo del partido más importante del año. Lo vives con el corazón en un puño, sin poder hacer nada por ayudar.'));
     const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Ver cómo termina →';
-    btn.onclick = ()=>{ S.torneoFinalResultado = resultadoFinalSinJugador(); S.screen = 'playoffFinalReveal'; render(); };
+    btn.onclick = ()=>{ S.playoffFinalResultado = { ...resultadoFinalSinJugador(), rival }; S.screen = 'playoffFinalReveal'; render(); };
     c.appendChild(btn);
     app.appendChild(c);
     return;
