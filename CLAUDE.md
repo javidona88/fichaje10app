@@ -3,9 +3,9 @@
 Juego de modo carrera de fútbol en HTML/JS de un solo archivo (`index.html`, ~10.970 líneas),
 inspirado en "El Ídolo" (potrerofutbol.ar). Interfaz en español (castellano de España). Todo
 —HTML, CSS y JS— vive en un único archivo autocontenido, sin dependencias externas ni build step.
-Pie de pantalla: "Fichaje 10 · v1.0" (`VERSION_JUEGO`). Al publicar cambios, subir
+Pie de pantalla: "Fichaje 10 · v1.2" (`VERSION_JUEGO`). Al publicar cambios, subir
 `VERSION_JUEGO` en `index.html` y, en el mismo commit, `CACHE` en `sw.js` al mismo número
-(`fichaje10-1.0` → `fichaje10-1.1`) para forzar el refresco en dispositivos instalados.
+(`fichaje10-1.1` → `fichaje10-1.2`) para forzar el refresco en dispositivos instalados.
 Desplegado en GitHub Pages: `https://javidona88.github.io/fichaje10app/` (repo `javidona88/fichaje10app`,
 workflow `.github/workflows/deploy.yml` en cada push a `main`).
 
@@ -258,6 +258,29 @@ rechazar renovar) → contrato de emergencia de 1 año al 70% del sueldo de merc
 en pantalla**. `aplicarPromesasNegociacion(j, neg)` añade promesas del club.
 - **Suelo mínimo en renovaciones**: la oferta nunca cae por debajo del sueldo actual, SALVO
   rendimiento reciente flojo (nota media < 5,5), donde se permite hasta -15%.
+- **Última propuesta**: al agotar `neg.maxTurnos` (6) NO se fuerza el fracaso — se pone
+  `neg.sinMasPropuestas` y el club deja su última oferta sobre la mesa; solo quedan
+  Aceptar / Levantarte. El club sí rompe si `neg.medidor <= 12`. Aplica a fichaje/renovación
+  y a `SCREENS.negociacionPatrocinio`.
+
+### Agente libre — temporada sin club (`SCREENS.temporadaSinClub`)
+Desde `SCREENS.renovacion` (el club no renueva, o eliges no renovar) hay un botón para
+**quedarte sin equipo**. `entrarEnParo(j)` cierra la etapa actual de `j.trayectoria`
+(`temporadaFin = S.temporada-1`, `cerrada:true` — `abrirNuevaEtapa` respeta ese flag y no la
+pisa), pone `j.club` a un centinela `{nombre:'Sin equipo', sinEquipo:true, categoria:'Sin
+equipo', ...}`, `j.contrato = {0,0}`, `j.enParo = true`, `S.paroFase='intro'`.
+`SCREENS.temporadaSinClub` tiene 2 fases (`S.paroFase` 'intro' → 'resultado'):
+`pasarTemporadaSinEquipo(j)` aplica el año en blanco (forma→~42, confianza -8, reputación
+-6..14, popularidad -3..9, **valorMercado ×0.6**, sin sueldo pero `costeVidaAnual` corre,
+`comprobarNumerosRojos`), añade la temporada a `j.temporadasSinEquipo[]`, avanza edad/temporada,
+y genera `generarOfertasSinClub(j)` (reutiliza `generarOfertas` con contexto de categoría según
+reputación —suelo 2ª RFEF—, degrada sueldos ×0.8, quita prestigio 4, extranjero y filiales,
+máx 3; si vacío, oferta de reserva). Luego → `SCREENS.ofertas`, donde el botón "Seguir en X"
+pasa a **"Seguir otro año sin equipo"** si `j.club.sinEquipo`. Firmar (`iniciarFichaje`, que
+pone `j.enParo=false`) cierra el arco. En `SCREENS.retiro`, "seguir" con `sinEquipo` vuelve a
+`temporadaSinClub` (no a `renovacion`). El resumen de fin de carrera (`SCREENS.final` y
+`generarImagenResumenCarrera`) muestra una línea "Temporadas sin equipo: …" sin contar como
+club. `migrarJugadorGuardado` rellena `j.temporadasSinEquipo=[]` y `j.enParo=false`.
 
 ### Patrocinios — `SCREENS.negociacionPatrocinio` + sistema de promesas
 Minijuego propio de negociación con la marca. `aplicarPromesasPatrocinio(j, neg)` crea promesas
@@ -303,6 +326,14 @@ verdad rechazaste ofertas). `ABREVIATURA_OBJETIVO` da la versión corta.
   (`j.tuvoPrimeraConvocatoriaAbsoluta` / `...Sub21`).
 - Pantallas: `torneoSemifinal` → `torneoFinalIntro` → `torneoFinal` → `torneoFinalReveal`
   (y `torneoEliminado` / `playoffEliminado` si caes).
+- **Estadísticas de selección**: `acumularEstadisticasSeleccion(j, cfg, nombreCompeticion)` se
+  llama en `iniciarTorneoEliminatorio` para cada torneo de selección (absoluta o Sub-21). Asume
+  el recorrido completo del torneo (5-7 PJ) y estima goles/asistencias por atributos. Acumula en
+  `j.carrera.partidosSeleccion/golesSeleccion/asistenciasSeleccion` y añade una fila a
+  `j.historialSeleccion:[{temporada,torneo,sub21,partidos,goles,asistencias}]`. Se muestran en
+  la sección SELECCIÓN de `SCREENS.tabEstadisticas` (filas por torneo + "Total selección", igual
+  que CLUBES), en la fila de selección de `SCREENS.final` y en `generarImagenResumenCarrera`.
+  `migrarJugadorGuardado` rellena los campos nuevos.
 - **Semifinales a doble vuelta**: los textos NO deben decir "campo neutral" / "todo un partido"
   (`TEXTOS_SEMIFINAL_CLUB`, `TEXTOS_SEMIFINAL_SELECCION`), y hay protección para no repetir la
   misma variante dos veces seguidas (cuidado con el fallo de `0` "falsy" en JS al hacerlo).
@@ -370,7 +401,10 @@ Técnico y Análisis, Salud Mental y Bienestar, Gestión y Entorno Profesional).
 ### Casino — `SCREENS.casino` / `SCREENS.ruleta`
 Minijuego de ruleta con dinero real de `j.stats.dinero`. `S.ruletaApuestaTipo/Numero/Cantidad`,
 `S.ruletaGirando`, `S.ruletaUltimoResultado`. Perder una apuesta grande resta algo de mental.
-En `PANTALLAS_TAB`.
+En `PANTALLAS_TAB`. Apuestas: rojo/negro/par/impar (x2), **verde = el 0 (x36)**, nº exacto
+(x36). `colorNumeroRuleta` / `gradienteRuleta` (37 segmentos, 0 verde). Sonidos propios
+(`Sonido.ruletaGira` / `ruletaGana` / `ruletaPierde`), distintos de los de los dados. Plato con
+aro de madera + brillo de cristal fijo (no gira) + cubo central que toma el color del resultado.
 
 ### Clubes — bases de datos reales
 - `CLUBES_POR_CATEGORIA`: clubes reales de España (temporada 2026-27), LaLiga / LaLiga2 /

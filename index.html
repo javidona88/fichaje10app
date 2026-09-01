@@ -576,11 +576,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:10px; background:var(--bg2);
 }
 .oferta-card.elite{
-  border-color:var(--gold);
-  box-shadow:0 0 0 1px rgba(212,175,55,0.35), 0 4px 16px rgba(212,175,55,0.12);
-  background:linear-gradient(180deg, rgba(212,175,55,0.07), var(--bg2) 55%);
+  border-color:rgba(212,175,55,0.55);
 }
-.oferta-card.elite .oferta-club span{ color:var(--gold); }
 .oferta-club{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; }
 .oferta-meta{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); margin:4px 0 10px; }
 .oferta-lista{ list-style:none; margin:6px 0 12px; padding:0; }
@@ -1196,11 +1193,11 @@ const BANCO_EVENTOS = [
       { texto:"Jugar con cautela, cuidándote la pierna", tirada:{atributo:"fisico", dificultadBase:12},
         exito:{ texto:"Aguantas los noventa minutos y marcas en el descuento. La grada se vuelve loca.", efectos:{forma:15,popularidad:10,salud:-10} },
         fallo:{ texto:"A los sesenta minutos la pierna dice basta. Sales cojeando entre pitos.",
-          efectosFn: j => { const r = generarLesion(j); r.origen = 'el derbi'; if(r.ventanas>=2) S.pendienteLesionReveal = r; else if(r.semanas>0) mostrarNotificacion(`${iconoInline('fisico',15)}Lesión ${r.gravedad}`, 'atributo'); return {forma:-10,popularidad:-5, ...(r.semanas>0?{}:{salud:-10})}; } } },
+          efectosFn: j => { const r = generarLesion(j); r.origen = 'el derbi'; if(r.ventanas === 0){ r.ventanas = 1; r.gravedad = 'leve'; r.semanas = SEMANAS_POR_PASO; j.lesionSemanas = (j.lesionSemanas||0) + r.semanas; S.temporadaSemanasLesion = (S.temporadaSemanasLesion||0) + r.semanas; } if(r.ventanas>=2) S.pendienteLesionReveal = r; else if(r.semanas>0) mostrarNotificacion(`${iconoInline('fisico',15)}Lesión ${r.gravedad}`, 'atributo'); return {forma:-10,popularidad:-5}; } } },
       { texto:"Jugarlo a muerte, sin ahorrarte nada", tirada:{atributo:"fisico", dificultadBase:18},
         exito:{ texto:"Juegas al límite y sale perfecto: doblete y una actuación que se recordará en el club durante años.", efectos:{forma:22,popularidad:18,reputacion:8,salud:-20} },
         fallo:{ texto:"Fuerzas de más y la pierna se resiente en serio. Sales entre gestos de dolor.",
-          efectosFn: j => { const r = generarLesion(j); r.origen = 'el derbi'; if(r.ventanas>=2) S.pendienteLesionReveal = r; else if(r.semanas>0) mostrarNotificacion(`${iconoInline('fisico',15)}Lesión ${r.gravedad}`, 'atributo'); return {forma:-16,popularidad:-6, ...(r.semanas>0?{}:{salud:-20})}; } } },
+          efectosFn: j => { const r = generarLesion(j); r.origen = 'el derbi'; if(r.ventanas < 2){ r.ventanas = 2; r.gravedad = 'moderada'; const s = 2*SEMANAS_POR_PASO - r.semanas; r.semanas = 2*SEMANAS_POR_PASO; if(s>0){ j.lesionSemanas = (j.lesionSemanas||0) + s; S.temporadaSemanasLesion = (S.temporadaSemanasLesion||0) + s; } } if(r.ventanas>=2) S.pendienteLesionReveal = r; else if(r.semanas>0) mostrarNotificacion(`${iconoInline('fisico',15)}Lesión ${r.gravedad}`, 'atributo'); return {forma:-16,popularidad:-6}; } } },
       { texto:"Avisar al entrenador y quedarte fuera",
         resultado:"Te sientas en la grada viendo el derbi de paisano. Duele no estar, pero el cuerpo técnico valora que antepongas la cabeza al orgullo.",
         efectos:{forma:-5,salud:5,reputacion:-3} }
@@ -1769,10 +1766,10 @@ const BANCO_EVENTOS = [
   {
     id:"documental_carrera", cooldown:6,
     trigger:{ edadMin:24, probabilidad:0.12, condicion: j => j.stats.reputacion >= 25 || CATEGORIAS.indexOf(j.club.categoria) >= 2 },
-    texto:"Una productora te propone protagonizar un documental sobre tu trayectoria: desde el descampado del barrio hasta donde estás ahora.",
+    texto:"Netflix te propone protagonizar un documental sobre tu trayectoria: desde el descampado del barrio hasta donde estás ahora.",
     variantes:[
-      "Una plataforma audiovisual quiere producir un documental sobre tu vida, desde el barrio hasta donde estás ahora.",
-      "Te llega la propuesta de contar tu historia en formato documental: de dónde vienes, y hasta dónde has llegado."
+      "Una productora que trabaja para Netflix quiere producir un documental sobre tu vida, desde el barrio hasta donde estás ahora.",
+      "Te llega la propuesta de contar tu historia en un documental de Netflix: de dónde vienes, y hasta dónde has llegado."
     ],
     opciones:[
       { texto:"Aceptar y abrirte de verdad, sin filtros", tirada:{atributo:"mental", dificultadBase:13},
@@ -1941,15 +1938,15 @@ const BANCO_EVENTOS = [
   },
   {
     id:"boda_propia", unico:true,
-    trigger:{ edadMin:24, probabilidad:0.18, condicion: j => j.tienePareja },
+    trigger:{ edadMin:24, probabilidad:0.18, condicion: j => j.tienePareja && (j.stats.felicidadPareja||0) >= 45 },
     texto:"Después de tanto tiempo juntos, decides dar el paso más importante de tu vida fuera del campo.",
     opciones:[
       { texto:"Celebrar una boda por todo lo alto, con todos los que os queréis",
         resultado: j => `El día pasa volando entre nervios, lágrimas y baile. Ni el mejor gol de tu carrera te ha hecho sonreír así. Al día siguiente vuelves a los entrenos ${articuloClub(j.club.nombre)==='la'?'de la':'del'} ${j.club.nombre} como un hombre distinto, con ${j.pareja ? j.pareja.apodo : 'tu pareja'} como testigo de todo lo que viene.`,
-        efectosFn: j => ({dinero:-Math.round(j.contrato.sueldoAnual*0.15), mental:8, popularidad:6, felicidadPareja:20}) },
+        efectosFn: j => { j.stats.felicidadPareja = Math.max(90, j.stats.felicidadPareja||0); return {dinero:-Math.round(j.contrato.sueldoAnual*0.15), mental:8, popularidad:6}; } },
       { texto:"Una boda íntima, solo los vuestros",
         resultado: j => `Sin photocall ni titulares, solo la gente que de verdad importa. Es, con diferencia, el mejor día de tu vida junto a ${j.pareja ? j.pareja.apodo : 'tu pareja'}.`,
-        efectosFn: j => ({dinero:-Math.round(j.contrato.sueldoAnual*0.03), mental:8, felicidadPareja:20}) }
+        efectosFn: j => { j.stats.felicidadPareja = Math.max(90, j.stats.felicidadPareja||0); return {dinero:-Math.round(j.contrato.sueldoAnual*0.03), mental:8}; } }
     ]
   },
   {
@@ -2218,7 +2215,7 @@ const BANCO_EVENTOS = [
   {
     id:"padre_madre_estadio_grande", unico:true,
     trigger:{ probabilidad:0.3, condicion: j => !!j.padreMadre && CATEGORIAS.indexOf(j.club.categoria) >= 3 },
-    texto: j => `Tu ${j.padreMadre.genero==="f"?"madre":"padre"}, ${j.padreMadre.nombre}, viaja para verte jugar en un estadio como nunca antes había pisado. Le ves en la grada antes de saltar al campo, con una cara que no le habías visto nunca.`,
+    texto: j => `Tu ${j.padreMadre.genero==="f"?"madre":"padre"}, ${j.padreMadre.apodo}, viaja para verte jugar en un estadio como nunca antes había pisado. Le ves en la grada antes de saltar al campo, con una cara que no le habías visto nunca.`,
     opciones:[
       { texto:"Dedicarle un gesto especial si marcas",
         resultado: j => { j.padreMadre.relacion = Math.min(100, j.padreMadre.relacion+15); return `El gol llega, y corres directo hacia donde está. El abrazo que os dais, aunque sea a través de la valla, se queda grabado para siempre.`; },
@@ -2669,7 +2666,7 @@ const BANCO_EVENTOS = [
     ]
   },
   {
-    id:"objeto_perdido_sentimental", cooldown:6,
+    id:"objeto_perdido_sentimental", cooldown:6, soloSiSano:true,
     trigger:{ probabilidad:0.1 },
     texto:"Descubres que has perdido el objeto que siempre llevas contigo antes de cada partido, ese pequeño amuleto sin valor para nadie más que para ti. No aparece por ningún lado, y en un rato sales al campo.",
     opciones:[
@@ -3272,7 +3269,7 @@ const BANCO_EVENTOS = [
     trigger:{ edadMin:18, probabilidad:0.18, condicion: j => !j.representante && CATEGORIAS.indexOf(j.club.categoria) >= 1 && (j.stats.dinero||0) >= 0 },
     texto:"Un agente con buena reputación en el gremio se pone en contacto contigo: quiere representarte y asegura que puede conseguirte mejores condiciones en tus próximos contratos.",
     opciones:[
-      { texto:"Firmar con él a cambio de una comisión del 8% de tu sueldo",
+      { texto:"Firmar con él a cambio de una comisión del 6% de tu sueldo",
         resultado:"Firmas el contrato de representación. A partir de ahora alguien negocia por ti a cambio de su parte, y ya empiezas a notar que las ofertas que te llegan son mejores.",
         efectos:{mental:1},
         contratarRepresentante:true },
@@ -3304,7 +3301,7 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.1';
+const VERSION_JUEGO = 'v1.2';
 
 const PARTIDOS_POR_CATEGORIA = {"Tercera RFEF":30,"Segunda RFEF":32,"Primera RFEF":34,"LaLiga2":36,"LaLiga":38};
 
@@ -4206,7 +4203,7 @@ const BANDERAS_SVG = {
   "República Checa": '<rect width="40" height="20" y="0" fill="#FFFFFF"/><rect width="40" height="20" y="20" fill="#D7141A"/><polygon points="0,0 0,40 20,20" fill="#11457E"/>'
 };
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub']);
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
 const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta']);
@@ -4856,6 +4853,7 @@ function esColorClaro(hex){
 function usarConfianzaCiegaSiHay(j, efectosNormales, efectosProtegidos){
   if(j.objetos.confianzaCiega > 0){
     j.objetos.confianzaCiega--;
+    mostrarNotificacion(`${iconoInline('confianzaCiega',15)}Confianza ciega: te has ido a tu bola sin que el vestuario lo pague`, 'objeto');
     return efectosProtegidos;
   }
   return efectosNormales;
@@ -4916,10 +4914,25 @@ function migrarJugadorGuardado(j){
   if(j.enFilial === undefined) j.enFilial = false;
   if(j.tienePareja === undefined) j.tienePareja = false;
   if(j.titulosSeleccion === undefined) j.titulosSeleccion = [];
+  if(j.historialSeleccion === undefined) j.historialSeleccion = [];
+  j.carrera = j.carrera || {};
+  if(j.carrera.partidosSeleccion === undefined) j.carrera.partidosSeleccion = 0;
+  if(j.carrera.golesSeleccion === undefined) j.carrera.golesSeleccion = 0;
+  if(j.carrera.asistenciasSeleccion === undefined) j.carrera.asistenciasSeleccion = 0;
   if(j.historialCompras === undefined) j.historialCompras = [];
   if(j.clubesEnfriados === undefined) j.clubesEnfriados = {};
   if(j.representante === undefined) j.representante = null;
   if(j.temporadasEnClub === undefined) j.temporadasEnClub = 0;
+  if(j.temporadasSinEquipo === undefined) j.temporadasSinEquipo = [];
+  if(j.enParo === undefined) j.enParo = false;
+  // Arreglo retroactivo: partidas viejas podían tener a la madre con el primer apellido del jugador.
+  if(j.padreMadre && j.padreMadre.genero === 'f'){
+    const apJugador = (j.nombre||'').trim().split(' ').slice(1).join(' ');
+    if(apJugador && typeof j.padreMadre.nombre === 'string' && j.padreMadre.nombre.endsWith(' ' + apJugador)){
+      const nuevoAp = APELLIDOS_PROTEGIDO[Math.floor(Math.random()*APELLIDOS_PROTEGIDO.length)];
+      j.padreMadre.nombre = `${j.padreMadre.apodo} ${nuevoAp}`;
+    }
+  }
   if(j.historialTemporadas){
     j.historialTemporadas.forEach(h=>{ if(h.carino === undefined) h.carino = j.carinoAficion; });
   }
@@ -4986,7 +4999,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad){
       club: club.nombre, categoria:"Tercera RFEF", pais:"España", extranjero:false, colores: club.colores,
       temporadaInicio:1, temporadaFin:1, partidos:0, goles:0, asistencias:0, carino:20, titulos:[]
     }],
-    carrera:{ partidos:0, goles:0, asistencias:0, ascensos:0, titulos:0, dineroGanado:0, valorMercadoMaximo:0 },
+    carrera:{ partidos:0, goles:0, asistencias:0, ascensos:0, titulos:0, dineroGanado:0, valorMercadoMaximo:0, partidosSeleccion:0, golesSeleccion:0, asistenciasSeleccion:0 },
     companeros: COMPANEROS_CANTERA_BASE.map(cmp => ({ ...cmp, temporadasJuntos:0, relacion:50, juntosActualmente:false })),
     protegido:null,
     pareja:null,
@@ -5287,8 +5300,9 @@ function calcularResumenTemporada(j, ascensoPlayoff){
       nivelEuropeo = 'conference';
     }
   }
-  // Ganar una competición continental garantiza jugarla de nuevo la temporada siguiente, sea cual sea tu posición en liga
-  const TITULOS_A_NIVEL_CONTINENTAL = { 'Champions League':'champions', 'Europa League':'europa', 'Conference League':'conference', 'Copa Libertadores':'libertadores', 'Concacaf Champions Cup':'concacaf', 'AFC Champions League Elite':'afc' };
+  // Ganar una competición continental da plaza para la temporada siguiente, sea cual sea tu posición en liga.
+  // Como en la realidad: ganar la Europa League da billete de Champions, y ganar la Conference da billete de Europa League.
+  const TITULOS_A_NIVEL_CONTINENTAL = { 'Champions League':'champions', 'Europa League':'champions', 'Conference League':'europa', 'Copa Libertadores':'libertadores', 'Concacaf Champions Cup':'concacaf', 'AFC Champions League Elite':'afc' };
   const RANGO_NIVEL_CONTINENTAL = { conference:1, europa:2, champions:3, libertadores:3, concacaf:3, afc:3 };
   (S.titulosTemporadaActual||[]).forEach(nombreTitulo=>{
     const nivelGanado = TITULOS_A_NIVEL_CONTINENTAL[nombreTitulo];
@@ -5301,13 +5315,16 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   // Fase alcanzada en cada competición esta temporada: usa el resultado real si se jugó la semifinal/final,
   // y si no, simula una fase de eliminación temprana (para que siempre haya información, aunque no llegues lejos)
   const fasesCompeticiones = [];
-  if(clasificacionEuropea){
-    const nombreCompEuropea = nivelEuropeo === 'libertadores' ? 'Copa Libertadores' : NOMBRE_COMPETICION_CONTINENTAL[nivelEuropeo];
+  // La competición continental que se ha DISPUTADO esta temporada es la que tenías al empezar (j.club.nivelEuropeo,
+  // aún sin sobrescribir), no la que te acabas de ganar para la que viene. Así no aparecen dos europeas a la vez.
+  const nivelEuropeoJugado = j.club.nivelEuropeo || null;
+  if(nivelEuropeoJugado){
+    const nombreCompEuropea = nivelEuropeoJugado === 'libertadores' ? 'Copa Libertadores' : NOMBRE_COMPETICION_CONTINENTAL[nivelEuropeoJugado];
     const faseReal = (S.faseCompeticiones||{})[nombreCompEuropea];
     fasesCompeticiones.push({ nombre: nombreCompEuropea, fase: faseReal || simularFaseCompeticion(j) });
   }
-  if(CATEGORIAS.indexOf(j.club.categoria) >= 2 && !j.club.extranjero){
-    const nombreCopa = "Copa del Rey";
+  if(CATEGORIAS.indexOf(j.club.categoria) >= 2){
+    const nombreCopa = j.club.extranjero ? nombreCopaNacional(j.club.pais) : "Copa del Rey";
     const faseReal = (S.faseCompeticiones||{})[nombreCopa];
     fasesCompeticiones.push({ nombre: nombreCopa, fase: faseReal || simularFaseCompeticion(j, true) });
   }
@@ -5380,7 +5397,7 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   j.ultimaNotaTemporada = nota;
 
   // Trofeo individual: mejor jugador de la liga (MVP). Como delantero, no basta con ganar títulos: hacen falta goles de verdad, y el equipo tiene que estar arriba
-  const probMvp = (nota >= 8.5 && goles >= 20 && posicionFinal <= 6) ? Math.min(0.75, (nota-8) * 0.5) : 0;
+  const probMvp = (nota >= 8.5 && goles >= 20 && partidos >= 25 && posicionFinal <= 6) ? Math.min(0.75, (nota-8) * 0.5) : 0;
   const mvp = Math.random() < probMvp;
   if(mvp){
     j.stats.reputacion = Math.min(99, j.stats.reputacion + 10);
@@ -5391,7 +5408,7 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   // Balón de Oro: se decide aquí porque necesita la nota y el MVP, ya calculados; si lo ganas, sustituye al titular normal
   let balonDeOroPuesto = null;
   const clubEsEliteParaBalonOro = !j.club.extranjero || LIGAS_ELITE_EXTRANJERO.includes(j.club.pais);
-  if(nota >= 9.0 && (pichichi || mvp || campeon) && esMaximaCategoria && clubEsEliteParaBalonOro){
+  if(nota >= 9.0 && partidos >= 28 && (pichichi || mvp || campeon) && esMaximaCategoria && clubEsEliteParaBalonOro){
     const probTop3 = Math.min(0.6, (nota - 8.7) * 0.7 + (campeon?0.15:0) + (pichichi?0.1:0));
     if(Math.random() < probTop3){
       balonDeOroPuesto = (Math.random() < 0.35) ? 1 : (Math.random() < 0.5 ? 2 : 3);
@@ -5934,7 +5951,7 @@ function continuarTrasPasoTorneo(j){
 function abrirNuevaEtapa(j, nuevoClub, carinoInicial){
   j.trayectoria = j.trayectoria || [];
   const anterior = j.trayectoria[j.trayectoria.length-1];
-  if(anterior) anterior.temporadaFin = S.temporada;
+  if(anterior && !anterior.cerrada) anterior.temporadaFin = S.temporada;
   j.trayectoria.push({
     club: nuevoClub.nombre, categoria: nuevoClub.categoria, liga: nuevoClub.liga || null,
     pais: nuevoClub.extranjero ? nuevoClub.pais : "España", extranjero: !!nuevoClub.extranjero,
@@ -5942,6 +5959,76 @@ function abrirNuevaEtapa(j, nuevoClub, carinoInicial){
     temporadaInicio: S.temporada, temporadaFin: S.temporada,
     partidos:0, goles:0, asistencias:0, carino: carinoInicial!=null ? carinoInicial : 40, titulos:[]
   });
+}
+// ---- Agente libre: temporada sin club ----
+function entrarEnParo(j){
+  const ult = (j.trayectoria||[])[j.trayectoria.length-1];
+  if(ult && !ult.cerrada){ ult.temporadaFin = S.temporada - 1; ult.cerrada = true; }
+  j.club = { nombre:'Sin equipo', categoria:'Sin equipo', colores:['#3b4150','#2a2f3a'], sinEquipo:true, ambicionNivel:1, objetivoActual:null, clasificacionEuropea:false, nivelEuropeo:null };
+  j.enParo = true;
+  j.temporadasEnClub = 0;
+  S.clubDeclinaRenovar = undefined;
+  S.paroFase = 'intro';
+  guardarPartida();
+}
+function generarOfertasSinClub(j){
+  // Estima el escalón realista según reputación, tirando a la baja por el año parado.
+  const rep = j.stats.reputacion || 0;
+  let idx;
+  if(rep >= 55) idx = CATEGORIAS.indexOf('LaLiga2');
+  else if(rep >= 35) idx = CATEGORIAS.indexOf('Primera RFEF');
+  else idx = CATEGORIAS.indexOf('Segunda RFEF');
+  idx = Math.max(1, idx); // un ex-profesional no baja de 2ª RFEF por estar parado
+  const clubReal = j.club;
+  const catCtx = CATEGORIAS[idx];
+  j.club = { nombre:'—', categoria: catCtx, colores:['#3b4150','#2a2f3a'], ambicionNivel:1 };
+  let ofertas = [];
+  try { ofertas = generarOfertas(j) || []; } catch(e){ ofertas = []; }
+  ofertas = ofertas
+    .filter(of => (PRESTIGIO_CLUB[of.nombre]||2) < 4 && !of.extranjero && !primerEquipoDeFilial(of.nombre))
+    .map(of => ({ ...of, sueldo: Math.max(1500, Math.round(of.sueldo * 0.8 / 50) * 50), ascenso:false }))
+    .slice(0, 3);
+  if(!ofertas.length){
+    const cat = CATEGORIAS[Math.max(1, idx-1)] || CATEGORIAS[1];
+    let cr = clubAleatorio(cat, undefined);
+    let intentos = 0;
+    while(primerEquipoDeFilial(cr.nombre) && intentos++ < 8) cr = clubAleatorio(cat, undefined);
+    ofertas = [{
+      nombre: cr.nombre, categoria: cat, colores: cr.colores, ascenso:false, duracion: 1,
+      sueldo: Math.max(1000, Math.round(calcularSueldoOferta(j, cat, cr.nombre) * 0.7 / 50) * 50),
+      objetivo: (elegirObjetivo({ club:{ nombre:cr.nombre, categoria:cat, ambicionNivel:1 } })||{}).texto || OBJETIVOS_POR_CATEGORIA[cat][1],
+      minutos: expectativaMinutos(j, false)
+    }];
+  }
+  j.club = clubReal;
+  return ofertas;
+}
+function pasarTemporadaSinEquipo(j){
+  // Un año entero sin competir sale caro en todos los frentes.
+  const repAntes = j.stats.reputacion, valorAntes = j.stats.valorMercado, formaAntes = j.stats.forma;
+  j.stats.forma = Math.round(Math.min(j.stats.forma, j.stats.forma*0.55 + 42*0.45));
+  j.stats.confianza = Math.max(0, j.stats.confianza - 8);
+  j.stats.salud = Math.min(100, j.stats.salud + 8);
+  j.stats.reputacion = Math.max(0, Math.round(j.stats.reputacion - (6 + Math.random()*8)));
+  j.stats.popularidad = Math.max(0, Math.round(j.stats.popularidad - (3 + Math.random()*6)));
+  j.stats.valorMercado = Math.round(j.stats.valorMercado * 0.6);
+  const coste = Math.round(costeVidaAnual(j));
+  j.stats.dinero -= coste;
+  const cancelados = comprobarNumerosRojos(j);
+  j.temporadasSinEquipo = j.temporadasSinEquipo || [];
+  j.temporadasSinEquipo.push(S.temporada);
+  S.paroResumen = {
+    temporada: S.temporada, coste, serviciosCancelados: !!cancelados,
+    repDelta: j.stats.reputacion - repAntes,
+    valorDelta: j.stats.valorMercado - valorAntes,
+    formaDelta: j.stats.forma - formaAntes
+  };
+  j.edad += 1;
+  S.temporada += 1;
+  j.contrato = { sueldoAnual:0, duracionTemporadas:0 };
+  S.ofertasActuales = generarOfertasSinClub(j);
+  S.paroFase = 'resultado';
+  guardarPartida();
 }
 function ratingJugador(j){
   return (j.atributos.fisico + j.atributos.velocidad + j.atributos.tiro + j.atributos.regate + j.atributos.pase + j.atributos.desmarque) / 6;
@@ -6078,6 +6165,7 @@ function nivelExposicionClub(club){
   return CATEGORIAS.indexOf(club.categoria);
 }
 function iniciarFichaje(j, nuevoClub, nuevoContrato, pantallaSiguiente){
+  j.enParo = false;
   const clubAnteriorNombre = j.club.nombre;
   const nivelExposicionAnterior = nivelExposicionClub(j.club);
   const etapasPrevias = (j.trayectoria||[]).filter(e => e.club === nuevoClub.nombre);
@@ -6103,6 +6191,11 @@ function iniciarFichaje(j, nuevoClub, nuevoContrato, pantallaSiguiente){
     const saltos = Math.min(3, nivelExposicionNuevo - nivelExposicionAnterior);
     j.stats.popularidad = Math.min(100, j.stats.popularidad + saltos*3); // el simple foco mediático de un escenario mayor te hace algo más conocido, al margen de tu rendimiento
   }
+  // Fichar por un club de primer nivel te mete en el foco aunque vinieras de abajo: suelo de popularidad.
+  const prestigioClubNuevo = PRESTIGIO_CLUB[nuevoClub.nombre] || 2;
+  if(esClubGrande(nuevoClub.nombre)) j.stats.popularidad = Math.max(j.stats.popularidad, 30);
+  else if(prestigioClubNuevo >= 4) j.stats.popularidad = Math.max(j.stats.popularidad, 24);
+  else if(prestigioClubNuevo === 3) j.stats.popularidad = Math.max(j.stats.popularidad, 15);
   S.esRegresoClub = esRegreso;
   if(esRegreso){
     const totalPartidos = etapasPrevias.reduce((s,e)=>s+(e.partidos||0),0);
@@ -6195,87 +6288,203 @@ function rangoTemporadas(inicio, fin){
 }
 
 function generarImagenResumenCarrera(j){
+  const W = 900;
+  const trayectoria = j.trayectoria || [];
+  const historial = j.historialTemporadas || [];
+  const notasValidas = historial.filter(h=>h.nota!=null).map(h=>h.nota);
+  const notaMedia = notasValidas.length ? (notasValidas.reduce((s,n)=>s+n,0)/notasValidas.length) : null;
+  const mejorTemporada = historial.filter(h=>h.nota!=null).slice().sort((a,b)=>b.nota-a.nota)[0];
+  const titulosSel = (j.titulosSeleccion||[]).length;
+  const partidosSel = (j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21 || titulosSel) ? true : false;
+  const valorMax = Math.max(j.carrera.valorMercadoMaximo||0, j.stats.valorMercado||0);
+  const dineroGanado = Math.max(j.carrera.dineroGanado||0, j.stats.dinero||0);
+  const balonesOro = j.carrera.balonesDeOro||0;
+  const trofeosInd = j.carrera.trofeosIndividuales||0;
+
+  // Altura dinámica según nº de etapas
+  let alturaEtapas = 0;
+  trayectoria.forEach(e=>{ alturaEtapas += 60 + ((e.titulos && e.titulos.length) ? 20 : 0); });
+  const H = 470 + (partidosSel ? 44 : 0) + (mejorTemporada ? 40 : 0) + ((j.temporadasSinEquipo||[]).length ? 26 : 0) + 46 + alturaEtapas + 150;
+
   const canvas = document.createElement('canvas');
-  canvas.width = 800;
-  canvas.height = 1100;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  const grad = ctx.createLinearGradient(0,0,0,1100);
-  grad.addColorStop(0,'#1B1E2A');
-  grad.addColorStop(1,'#14161F');
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'#1F2331');
+  grad.addColorStop(0.5,'#181B26');
+  grad.addColorStop(1,'#111219');
   ctx.fillStyle = grad;
-  ctx.fillRect(0,0,800,1100);
+  ctx.fillRect(0,0,W,H);
+
+  // Brillo diagonal sutil
+  const sheen = ctx.createLinearGradient(0,0,W,H*0.5);
+  sheen.addColorStop(0,'rgba(255,255,255,0.05)');
+  sheen.addColorStop(0.4,'rgba(255,255,255,0)');
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0,0,W,H);
+
+  // Barra dorada superior
+  ctx.fillStyle = '#D4AF37';
+  ctx.fillRect(0,0,W,6);
+
+  function rrect(x,yy,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,yy);
+    ctx.arcTo(x+w,yy,x+w,yy+h,r);
+    ctx.arcTo(x+w,yy+h,x,yy+h,r);
+    ctx.arcTo(x,yy+h,x,yy,r);
+    ctx.arcTo(x,yy,x+w,yy,r);
+    ctx.closePath();
+  }
 
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#A9862B';
-  ctx.font = '700 16px Arial';
-  ctx.fillText('F I C H A J E   1 0', 400, 55);
+  ctx.fillStyle = '#C9A227';
+  ctx.font = '700 15px Arial';
+  ctx.fillText('F I C H A J E   1 0', W/2, 46);
 
-  ctx.fillStyle = '#EEEFF3';
-  ctx.font = '700 46px Arial';
-  ctx.fillText(j.nombre, 400, 120);
+  ctx.fillStyle = '#EEF0F5';
+  ctx.font = '700 52px Arial';
+  ctx.fillText(capitalizarNombre ? capitalizarNombre(j.nombre) : j.nombre, W/2, 104);
 
   ctx.fillStyle = '#8D93A6';
-  ctx.font = '400 18px Arial';
-  ctx.fillText(`Cuelga las botas tras ${S.temporada} temporadas · se retira con ${j.edad} años`, 400, 155);
+  ctx.font = '400 17px Arial';
+  ctx.fillText(`Cuelga las botas con ${j.edad} años · ${S.temporada} temporadas de carrera · hasta ${categoriaCorta(j.club)}`, W/2, 134);
 
-  const stats = [['Partidos', j.carrera.partidos], ['Goles', j.carrera.goles], ['Asistencias', j.carrera.asistencias], ['Títulos', j.carrera.titulos]];
-  const statW = 800/4;
-  stats.forEach(([lbl,num], i)=>{
-    const x = statW*i + statW/2;
-    ctx.fillStyle = '#D4AF37';
-    ctx.font = '700 40px Arial';
-    ctx.fillText(String(num), x, 240);
-    ctx.fillStyle = '#8D93A6';
-    ctx.font = '400 13px Arial';
-    ctx.fillText(lbl.toUpperCase(), x, 265);
+  // ---- Tiles hero (4) ----
+  const heroDatos = [['GOLES', j.carrera.goles], ['PARTIDOS', j.carrera.partidos], ['ASISTENCIAS', j.carrera.asistencias], ['TÍTULOS', (j.carrera.titulos||0) + titulosSel]];
+  const margen = 40, gap = 16;
+  const tileW = (W - margen*2 - gap*3) / 4;
+  let ty = 164;
+  heroDatos.forEach(([lbl,num],i)=>{
+    const x = margen + i*(tileW+gap);
+    ctx.fillStyle = 'rgba(212,175,55,0.12)';
+    rrect(x,ty,tileW,92,12); ctx.fill();
+    ctx.strokeStyle = 'rgba(212,175,55,0.35)'; ctx.lineWidth = 1;
+    rrect(x,ty,tileW,92,12); ctx.stroke();
+    ctx.fillStyle = '#E8C349';
+    ctx.font = '700 38px Arial';
+    ctx.fillText(String(num), x+tileW/2, ty+50);
+    ctx.fillStyle = '#9AA0B0';
+    ctx.font = '600 12px Arial';
+    ctx.fillText(lbl, x+tileW/2, ty+74);
   });
 
-  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-  ctx.beginPath();
-  ctx.moveTo(60,305); ctx.lineTo(740,305); ctx.stroke();
+  // ---- Tiles secundarios (hasta 6) ----
+  const sec = [];
+  if(j.carrera.ascensos) sec.push(['Ascensos', j.carrera.ascensos]);
+  if(balonesOro) sec.push(['Balones de Oro', balonesOro]);
+  if(trofeosInd) sec.push(['Trofeos individuales', trofeosInd]);
+  if(notaMedia != null) sec.push(['Nota media', (formatearNumero ? formatearNumero(notaMedia) : notaMedia.toFixed(2))]);
+  sec.push(['Valor máx.', formatearDinero(valorMax)]);
+  sec.push(['Ganado en la carrera', formatearDinero(dineroGanado)]);
+  const secShown = sec.slice(0,6);
+  const cols = Math.min(3, secShown.length);
+  const s2W = (W - margen*2 - gap*(cols-1)) / cols;
+  let sy = ty + 108;
+  secShown.forEach((d,i)=>{
+    const col = i % cols, row = Math.floor(i/cols);
+    const x = margen + col*(s2W+gap);
+    const yy = sy + row*54;
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    rrect(x,yy,s2W,44,10); ctx.fill();
+    ctx.fillStyle = '#D7DAE3';
+    ctx.font = '700 17px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(String(d[1]), x+14, yy+21);
+    ctx.fillStyle = '#8D93A6';
+    ctx.font = '400 11px Arial';
+    ctx.fillText(String(d[0]).toUpperCase(), x+14, yy+37);
+    ctx.textAlign = 'center';
+  });
+  let y = sy + Math.ceil(secShown.length/cols)*54 + 14;
+
+  if(mejorTemporada){
+    ctx.fillStyle = '#8D93A6';
+    ctx.font = 'italic 400 14px Arial';
+    ctx.fillText(`Mejor temporada: ${temporadaAAno ? temporadaAAno(mejorTemporada.temporada) : mejorTemporada.temporada} con ${mejorTemporada.club} — ${mejorTemporada.goles}G / ${mejorTemporada.asistencias}A · nota ${formatearNumero ? formatearNumero(mejorTemporada.nota) : mejorTemporada.nota}`, W/2, y);
+    y += 30;
+  }
+
+  // Divisoria
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(margen,y); ctx.lineTo(W-margen,y); ctx.stroke();
+  y += 34;
 
   ctx.textAlign = 'left';
-  ctx.fillStyle = '#A9862B';
+  ctx.fillStyle = '#C9A227';
   ctx.font = '700 14px Arial';
-  ctx.fillText('TRAYECTORIA', 60, 345);
+  ctx.fillText('TRAYECTORIA', margen, y);
+  y += 30;
 
-  let y = 385;
-  (j.trayectoria||[]).forEach(etapa=>{
-    const colorPrimario = (etapa.colores && etapa.colores[0]) || '#8B2E3A';
-    ctx.fillStyle = colorPrimario;
-    ctx.beginPath(); ctx.arc(75, y-6, 14, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#EEEFF3';
+  trayectoria.forEach(etapa=>{
+    const c1 = (etapa.colores && etapa.colores[0]) || '#8B2E3A';
+    const c2 = (etapa.colores && etapa.colores[1]) || c1;
+    ctx.fillStyle = c1;
+    rrect(margen, y-16, 8, 34, 3); ctx.fill();
+    ctx.fillStyle = c2;
+    rrect(margen+9, y-16, 8, 34, 3); ctx.fill();
+    ctx.fillStyle = '#EEF0F5';
     ctx.font = '600 19px Arial';
-    ctx.fillText(etapa.club, 105, y);
+    ctx.fillText(etapa.club, margen+32, y);
     ctx.fillStyle = '#8D93A6';
     ctx.font = '400 13px Arial';
-    ctx.fillText(`${rangoTemporadas(etapa.temporadaInicio, etapa.temporadaFin)} · ${etapa.partidos} PJ · ${etapa.goles} goles · ${etapa.asistencias} asist.`, 105, y+20);
+    ctx.fillText(`${rangoTemporadas(etapa.temporadaInicio, etapa.temporadaFin)}  ·  ${etapa.partidos} PJ  ·  ${etapa.goles} goles  ·  ${etapa.asistencias} asist.`, margen+32, y+19);
     if(etapa.titulos && etapa.titulos.length){
       ctx.fillStyle = '#D4AF37';
       ctx.font = '600 12px Arial';
-      const nombresTitulos = [...new Set(etapa.titulos.map(t=>t.nombre))].join(' · ');
-      ctx.fillText(nombresTitulos, 105, y+38);
+      ctx.fillText('🏆 ' + [...new Set(etapa.titulos.map(t=>t.nombre))].join('  ·  '), margen+32, y+37);
       y += 20;
     }
-    y += 52;
+    y += 60;
   });
 
+  if((j.temporadasSinEquipo||[]).length){
+    const anios = [...new Set(j.temporadasSinEquipo.map(t=>temporadaAAno(t)))].join(', ');
+    ctx.fillStyle = '#6E7486';
+    ctx.font = 'italic 400 13px Arial';
+    ctx.fillText(`— ${j.temporadasSinEquipo.length === 1 ? 'Temporada' : 'Temporadas'} sin equipo: ${anios} —`, margen+32, y-6);
+    y += 26;
+  }
+
+  if(partidosSel){
+    ctx.fillStyle = '#C9A227';
+    ctx.font = '700 14px Arial';
+    ctx.fillText('SELECCIÓN', margen, y);
+    ctx.fillStyle = '#8D93A6';
+    ctx.font = '400 13px Arial';
+    const pjSel = j.carrera.partidosSeleccion||0;
+    let txtSel;
+    if(pjSel > 0){
+      txtSel = `${pjSel} PJ  ·  ${j.carrera.golesSeleccion||0} goles  ·  ${j.carrera.asistenciasSeleccion||0} asist.`;
+      if(titulosSel) txtSel += `  ·  ${[...new Set((j.titulosSeleccion||[]).map(t=>t.nombre))].join('  ·  ')}`;
+    } else {
+      txtSel = titulosSel
+        ? `Internacional absoluto · ${[...new Set((j.titulosSeleccion||[]).map(t=>t.nombre))].join('  ·  ')}`
+        : `Llegó a vestir la camiseta de la selección`;
+    }
+    ctx.fillText(txtSel, margen+120, y);
+    y += 34;
+  }
+
+  // Legado
   ctx.textAlign = 'center';
   const mejorEtapaCarino = clubConMasCarino(j);
+  y += 8;
   if(mejorEtapaCarino.carino >= 80){
-    ctx.fillStyle = '#D4AF37';
-    ctx.font = '700 17px Arial';
-    ctx.fillText(`★ LEYENDA DEL ${mejorEtapaCarino.club.toUpperCase()}`, 400, y+30);
+    ctx.fillStyle = '#E8C349';
+    ctx.font = '700 18px Arial';
+    ctx.fillText(`★  LEYENDA DEL ${String(mejorEtapaCarino.club).toUpperCase()}  ★`, W/2, y);
   } else if(mejorEtapaCarino.carino >= 60){
-    ctx.fillStyle = '#8D93A6';
+    ctx.fillStyle = '#9AA0B0';
     ctx.font = '600 15px Arial';
-    ctx.fillText(`Jugador querido en ${mejorEtapaCarino.club}`, 400, y+30);
+    ctx.fillText(`Jugador querido en ${mejorEtapaCarino.club}`, W/2, y);
   }
 
   ctx.fillStyle = '#5A5F70';
   ctx.font = '400 12px Arial';
-  ctx.fillText('Generado con Fichaje 10', 400, 1070);
+  ctx.fillText(`Generado con Fichaje 10 · ${VERSION_JUEGO}`, W/2, H-24);
 
   return canvas;
 }
@@ -6565,6 +6774,26 @@ const Sonido = (function(){
       }
       setTimeout(()=> sfx(180,.4,'sawtooth',.035), 300);
       setTimeout(()=> sfx(140,.5,'sawtooth',.035), 620);
+    },
+    // Ruleta: bolita traqueteando sobre el plato, cada vez más lenta
+    ruletaGira(){
+      const golpes = 22;
+      for(let i=0;i<golpes;i++){
+        const t = i/golpes;
+        const retraso = Math.pow(t, 1.9) * 3000;
+        setTimeout(()=> sfx(2600 - t*900 + Math.random()*260, 0.02, 'square', 0.02), retraso);
+      }
+    },
+    ruletaGana(){
+      sfx(784,.10,'triangle',.06);
+      setTimeout(()=>sfx(988,.10,'triangle',.06),100);
+      setTimeout(()=>sfx(1319,.10,'triangle',.06),200);
+      setTimeout(()=>sfx(1568,.28,'triangle',.07),300);
+    },
+    ruletaPierde(){
+      sfx(392,.16,'sine',.05);
+      setTimeout(()=>sfx(311,.18,'sine',.05),140);
+      setTimeout(()=>sfx(233,.34,'sine',.045),300);
     },
     iniciarMusica, detenerMusica,
     desbloquear(){ try{ getCtx().resume(); }catch(e){} },
@@ -7250,24 +7479,51 @@ function seccionEstadisticas(j){
       const bandera = banderaPais('España');
       const tablaSel = el('div','historial-temporadas');
       tablaSel.appendChild(el('div','historial-club-header', `Selección española ${bandera}`));
-      if(j.tuvoPrimeraConvocatoriaAbsoluta){
-        const filaAbs = el('div','historial-fila');
-        filaAbs.appendChild(el('span','temp', 'Internacional absoluto'));
-        filaAbs.appendChild(el('div','historial-fila-stats', `<span class="dato oro">${iconoInline('estrella',12)}Convocado</span>`));
-        tablaSel.appendChild(filaAbs);
-      } else if(j.tuvoPrimeraConvocatoriaSub21){
-        const filaSub = el('div','historial-fila');
-        filaSub.appendChild(el('span','temp', 'Internacional Sub-21'));
-        filaSub.appendChild(el('div','historial-fila-stats', `<span class="dato oro">${iconoInline('estrella',12)}Convocado</span>`));
-        tablaSel.appendChild(filaSub);
-      }
-      if(j.titulosSeleccion && j.titulosSeleccion.length){
-        j.titulosSeleccion.forEach(t=>{
-          const filaTitulo = el('div','historial-fila');
-          filaTitulo.appendChild(el('span','temp', `${temporadaAAno(t.temporada)} - ${t.nombre}`));
-          filaTitulo.appendChild(el('div','historial-fila-stats', `<span class="dato oro">${iconoInline('trofeo',12)}Campeón</span>`));
-          tablaSel.appendChild(filaTitulo);
+      const histSel = j.historialSeleccion || [];
+      const selCampeon = new Set((j.titulosSeleccion||[]).map(t=>`${t.temporada}|${t.nombre}`));
+      if(histSel.length){
+        histSel.forEach(h=>{
+          const fila = el('div','historial-fila');
+          fila.appendChild(el('span','temp', `${temporadaAAno(h.temporada)} - ${h.torneo}`));
+          const stats = el('div','historial-fila-stats');
+          stats.appendChild(el('span','dato', `${h.partidos} PJ`));
+          stats.appendChild(el('span','dato', `${h.goles} G`));
+          stats.appendChild(el('span','dato', `${h.asistencias} A`));
+          const fueCampeon = selCampeon.has(`${h.temporada}|${h.torneo}`);
+          stats.appendChild(el('span','dato'+(fueCampeon?' oro':''), fueCampeon ? `${iconoInline('trofeo',12)}Campeón` : `${iconoInline('trofeo',12)}—`));
+          fila.appendChild(stats);
+          tablaSel.appendChild(fila);
         });
+        const filaT = el('div','historial-fila total');
+        filaT.appendChild(el('span','temp', 'Total selección'));
+        const st = el('div','historial-fila-stats');
+        st.appendChild(el('span','dato', `${j.carrera.partidosSeleccion||0} PJ`));
+        st.appendChild(el('span','dato', `${j.carrera.golesSeleccion||0} G`));
+        st.appendChild(el('span','dato', `${j.carrera.asistenciasSeleccion||0} A`));
+        const titSel = (j.titulosSeleccion||[]).length;
+        st.appendChild(el('span','dato'+(titSel>0?' oro':''), titSel>0 ? `${iconoInline('trofeo',12)}${titSel}` : `${iconoInline('trofeo',12)}—`));
+        filaT.appendChild(st);
+        tablaSel.appendChild(filaT);
+      } else {
+        if(j.tuvoPrimeraConvocatoriaAbsoluta){
+          const filaAbs = el('div','historial-fila');
+          filaAbs.appendChild(el('span','temp', 'Internacional absoluto'));
+          filaAbs.appendChild(el('div','historial-fila-stats', `<span class="dato oro">${iconoInline('estrella',12)}Convocado</span>`));
+          tablaSel.appendChild(filaAbs);
+        } else if(j.tuvoPrimeraConvocatoriaSub21){
+          const filaSub = el('div','historial-fila');
+          filaSub.appendChild(el('span','temp', 'Internacional Sub-21'));
+          filaSub.appendChild(el('div','historial-fila-stats', `<span class="dato oro">${iconoInline('estrella',12)}Convocado</span>`));
+          tablaSel.appendChild(filaSub);
+        }
+        if(j.titulosSeleccion && j.titulosSeleccion.length){
+          j.titulosSeleccion.forEach(t=>{
+            const filaTitulo = el('div','historial-fila');
+            filaTitulo.appendChild(el('span','temp', `${temporadaAAno(t.temporada)} - ${t.nombre}`));
+            filaTitulo.appendChild(el('div','historial-fila-stats', `<span class="dato oro">${iconoInline('trofeo',12)}Campeón</span>`));
+            tablaSel.appendChild(filaTitulo);
+          });
+        }
       }
       secStats.appendChild(tablaSel);
     }
@@ -7320,7 +7576,7 @@ function seccionEstadisticas(j){
 function seccionObjetos(j){
   const hayObjetos = j.objetos && (j.objetos.inspiracion>0 || j.objetos.segundaOportunidad>0 || j.objetos.avalNegociacion>0 || j.objetos.vestuario>0 || j.objetos.confianzaCiega>0 || j.rachaGafada);
   if(!hayObjetos) return null;
-  const secObjetos = seccionPlegable('OBJETOS','objetos');
+  const secObjetos = seccionPlegable('VENTAJAS Y DESVENTAJAS','objetos');
   if(S.fichaAcordeon.objetos){
     const fila = el('div','objetos-fila');
     const listaObjetos = [
@@ -7580,47 +7836,81 @@ SCREENS.ruleta = function(){
   c.appendChild(crearEyebrow('Casino · Ruleta'));
   c.appendChild(el('div','lore-box', `Dinero disponible: <b style="color:var(--gold);">${formatearDinero(j.stats.dinero)}</b>`));
 
+  // ---- Plato de la ruleta ----
   const wheelWrap = document.createElement('div');
-  wheelWrap.style.cssText = 'display:flex;justify-content:center;margin:18px 0;position:relative;';
+  wheelWrap.style.cssText = 'display:flex;justify-content:center;margin:20px 0 22px;position:relative;';
+  const plato = document.createElement('div');
+  plato.style.cssText = 'position:relative;width:250px;height:250px;';
+  wheelWrap.appendChild(plato);
+
   const puntero = document.createElement('div');
-  puntero.style.cssText = 'position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-top:16px solid var(--gold);z-index:2;';
-  wheelWrap.appendChild(puntero);
+  puntero.style.cssText = 'position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:20px solid var(--gold);z-index:4;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.5));';
+  plato.appendChild(puntero);
+
+  // Aro exterior de madera/dorado
+  const aro = document.createElement('div');
+  aro.style.cssText = 'position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 35%, #4a3722, #2a1e12 70%);box-shadow:0 8px 24px rgba(0,0,0,0.45), 0 0 0 2px var(--gold) inset;';
+  plato.appendChild(aro);
+
   const wheel = document.createElement('div');
   wheel.id = 'ruleta-wheel';
-  wheel.style.cssText = `width:220px;height:220px;border-radius:50%;background:${gradienteRuleta()};border:4px solid var(--gold);box-shadow:0 0 0 2px rgba(0,0,0,0.4) inset;transition:transform 3.2s cubic-bezier(.15,.65,.05,1);transform:rotate(${S.ruletaAnguloActual||0}deg);`;
-  wheelWrap.appendChild(wheel);
+  wheel.style.cssText = `position:absolute;inset:16px;border-radius:50%;background:${gradienteRuleta()};box-shadow:0 0 0 3px rgba(0,0,0,0.5) inset, 0 0 14px rgba(0,0,0,0.4);transition:transform 3.2s cubic-bezier(.15,.6,.05,1);transform:rotate(${S.ruletaAnguloActual||0}deg);`;
+  plato.appendChild(wheel);
+
+  // Brillo de cristal fijo (no gira)
+  const sheen = document.createElement('div');
+  sheen.style.cssText = 'position:absolute;inset:16px;border-radius:50%;pointer-events:none;background:radial-gradient(circle at 32% 26%, rgba(255,255,255,0.22), rgba(255,255,255,0) 42%);z-index:2;';
+  plato.appendChild(sheen);
+
+  // Cubo central
   const centro = document.createElement('div');
-  centro.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:var(--panel);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:\'Space Grotesk\',sans-serif;font-weight:700;font-size:20px;color:var(--gold);';
   centro.id = 'ruleta-numero-centro';
-  centro.textContent = S.ruletaUltimoResultado ? S.ruletaUltimoResultado.numero : '?';
-  wheelWrap.appendChild(centro);
+  centro.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 50% 35%, var(--panel), #10121a);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:\'Space Grotesk\',sans-serif;font-weight:700;font-size:24px;z-index:3;box-shadow:0 2px 8px rgba(0,0,0,0.5);';
+  if(S.ruletaUltimoResultado && !S.ruletaGirando){
+    const cg = S.ruletaUltimoResultado.colorTexto;
+    centro.style.color = cg === 'rojo' ? '#E8563F' : (cg === 'negro' ? '#c9cdda' : '#3FBE6A');
+    centro.textContent = S.ruletaUltimoResultado.numero;
+  } else {
+    centro.style.color = 'var(--gold)';
+    centro.textContent = S.ruletaGirando ? '·' : '?';
+  }
+  plato.appendChild(centro);
   c.appendChild(wheelWrap);
 
   if(S.ruletaUltimoResultado && !S.ruletaGirando){
     const r = S.ruletaUltimoResultado;
+    const puntoColor = r.colorTexto === 'rojo' ? '#C8102E' : (r.colorTexto === 'negro' ? '#1a1c26' : '#1B7A3D');
     const resBox = document.createElement('div');
     resBox.className = r.gano ? 'badge' : 'badge risk';
-    resBox.style.cssText = 'text-align:center;margin-bottom:12px;';
-    resBox.innerHTML = r.gano
-      ? `¡Sale el ${r.numero} (${r.colorTexto})! Ganas ${formatearDinero(r.ganancia)}`
-      : `Sale el ${r.numero} (${r.colorTexto}). Pierdes ${formatearDinero(r.apuesta)}`;
+    resBox.style.cssText = 'text-align:center;margin-bottom:14px;font-size:13px;';
+    resBox.innerHTML = `<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${puntoColor};border:1px solid rgba(255,255,255,0.5);vertical-align:-1px;margin-right:6px;"></span>`
+      + (r.gano
+        ? `Sale el <b>${r.numero}</b> (${r.colorTexto}). Ganas <b>${formatearDinero(r.ganancia)}</b>`
+        : `Sale el <b>${r.numero}</b> (${r.colorTexto}). Pierdes <b>${formatearDinero(r.apuesta)}</b>`);
     c.appendChild(resBox);
   }
 
+  // ---- Tipos de apuesta ----
+  const SWATCH = { rojo:'#C8102E', negro:'#1a1c26', verde:'#1B7A3D' };
   const tipos = [
-    {id:'rojo', label:'🔴 Rojo', pago:'x2'},
-    {id:'negro', label:'⚫ Negro', pago:'x2'},
-    {id:'par', label:'Par', pago:'x2'},
-    {id:'impar', label:'Impar', pago:'x2'},
-    {id:'numero', label:'Nº exacto', pago:'x36'}
+    {id:'rojo',  label:'Rojo',     pago:'x2',  prob:'18/37', sw:'rojo'},
+    {id:'negro', label:'Negro',    pago:'x2',  prob:'18/37', sw:'negro'},
+    {id:'verde', label:'Verde (0)',pago:'x36', prob:'1/37',  sw:'verde'},
+    {id:'par',   label:'Par',      pago:'x2',  prob:'18/37'},
+    {id:'impar', label:'Impar',    pago:'x2',  prob:'18/37'},
+    {id:'numero',label:'Nº exacto',pago:'x36', prob:'1/37'}
   ];
   const tiposWrap = document.createElement('div');
-  tiposWrap.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;';
+  tiposWrap.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;';
   tipos.forEach(t=>{
+    const sel = S.ruletaApuestaTipo === t.id;
     const btn = document.createElement('button');
-    btn.textContent = `${t.label} (${t.pago})`;
     btn.disabled = !!S.ruletaGirando;
-    btn.style.cssText = `padding:8px 4px;border-radius:10px;font-size:11px;font-family:'Space Grotesk',sans-serif;border:1.5px solid ${S.ruletaApuestaTipo===t.id?'var(--gold)':'var(--line)'};background:${S.ruletaApuestaTipo===t.id?'rgba(212,175,55,0.12)':'transparent'};color:var(--ink);`;
+    btn.style.cssText = `display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px;border-radius:11px;font-family:'Space Grotesk',sans-serif;border:1.5px solid ${sel?'var(--gold)':'var(--line)'};background:${sel?'rgba(212,175,55,0.14)':'transparent'};color:var(--ink);`;
+    const top = t.sw
+      ? `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${SWATCH[t.sw]};border:1px solid rgba(255,255,255,0.45);vertical-align:-1px;margin-right:5px;"></span>${t.label}`
+      : t.label;
+    btn.innerHTML = `<span style="font-size:11.5px;font-weight:600;">${top}</span><span style="font-size:10px;color:var(--ink-soft);">${t.pago} · ${t.prob}</span>`;
     btn.onclick = ()=>{ S.ruletaApuestaTipo = t.id; pintar(); };
     tiposWrap.appendChild(btn);
   });
@@ -7672,6 +7962,7 @@ SCREENS.ruleta = function(){
     S.ruletaGirando = true;
     S.ruletaUltimoResultado = null;
     pintar();
+    Sonido.ruletaGira();
     const numeroGanador = Math.floor(Math.random()*37);
     const anguloSeg = 360/37;
     const vueltasExtra = 5 + Math.floor(Math.random()*3);
@@ -7689,6 +7980,7 @@ SCREENS.ruleta = function(){
       let gano = false, multiplicador = 0;
       if(S.ruletaApuestaTipo === 'rojo' && colorGanador === 'rojo'){ gano = true; multiplicador = 2; }
       else if(S.ruletaApuestaTipo === 'negro' && colorGanador === 'negro'){ gano = true; multiplicador = 2; }
+      else if(S.ruletaApuestaTipo === 'verde' && numeroGanador === 0){ gano = true; multiplicador = 36; }
       else if(S.ruletaApuestaTipo === 'par' && numeroGanador !== 0 && numeroGanador%2===0){ gano = true; multiplicador = 2; }
       else if(S.ruletaApuestaTipo === 'impar' && numeroGanador%2===1){ gano = true; multiplicador = 2; }
       else if(S.ruletaApuestaTipo === 'numero' && numeroGanador === S.ruletaApuestaNumero){ gano = true; multiplicador = 36; }
@@ -7697,6 +7989,7 @@ SCREENS.ruleta = function(){
       aplicarEfectos(j, { dinero: gano ? (ganancia-apuesta) : -apuesta });
       if(gano && multiplicador >= 36) aplicarEfectos(j, { mental:3, confianza:3 });
       if(!gano && apuesta >= j.stats.dinero + apuesta) aplicarEfectos(j, { mental:-2 });
+      if(gano) Sonido.ruletaGana(); else Sonido.ruletaPierde();
       S.ruletaUltimoResultado = { numero:numeroGanador, colorTexto, gano, ganancia: gano?ganancia-apuesta:0, apuesta };
       S.ruletaGirando = false;
       pintar();
@@ -8604,7 +8897,9 @@ SCREENS.ofertas = function(){
   const valorDe = of => (of.sueldo || 0) * (of.duracion || 1);
   ofertas.sort((a,b) => prestigioDe(b) - prestigioDe(a) || valorDe(b) - valorDe(a));
   if(ofertas.length===0){
-    c.appendChild(el('p',null,`<span style="color:var(--ink-soft)">Ningún club ha preguntado por ti esta pretemporada. Sigues en ${articuloClub(j.club.nombre)} ${j.club.nombre}.</span>`));
+    c.appendChild(el('p',null, j.club && j.club.sinEquipo
+      ? `<span style="color:var(--ink-soft)">Ningún club ha preguntado por ti. Puedes seguir entrenando por tu cuenta otra temporada más.</span>`
+      : `<span style="color:var(--ink-soft)">Ningún club ha preguntado por ti esta pretemporada. Sigues en ${articuloClub(j.club.nombre)} ${j.club.nombre}.</span>`));
   } else {
     ofertas.forEach(of=>{
       const card = el('div', 'oferta-card' + (prestigioDe(of) === 4 ? ' elite' : ''));
@@ -8654,15 +8949,20 @@ SCREENS.ofertas = function(){
   }
 
   const seguir = document.createElement('button'); seguir.className='btn-secondary';
-  seguir.textContent = `Seguir en ${articuloClub(j.club.nombre)} ${j.club.nombre}`;
-  seguir.onclick = ()=>{
-    if((S.ofertasActuales||[]).length > 0){
-      const ganancia = gananciaEscalada(j.carinoAficion||0, 5, 100);
-      j.carinoAficion = Math.min(100, (j.carinoAficion||0) + ganancia);
-    }
-    iniciarTemporadaJuego(j);
-    render();
-  };
+  if(j.club && j.club.sinEquipo){
+    seguir.textContent = 'Seguir otro año sin equipo';
+    seguir.onclick = ()=>{ entrarEnParo(j); S.screen = 'temporadaSinClub'; render(); };
+  } else {
+    seguir.textContent = `Seguir en ${articuloClub(j.club.nombre)} ${j.club.nombre}`;
+    seguir.onclick = ()=>{
+      if((S.ofertasActuales||[]).length > 0){
+        const ganancia = gananciaEscalada(j.carinoAficion||0, 5, 100);
+        j.carinoAficion = Math.min(100, (j.carinoAficion||0) + ganancia);
+      }
+      iniciarTemporadaJuego(j);
+      render();
+    };
+  }
   c.appendChild(seguir);
   app.appendChild(c);
 };
@@ -8780,7 +9080,9 @@ function enviarPropuestaNegociacion(){
   if(neg.medidor <= 12){
     neg.terminado = 'roto';
   } else if(neg.turno >= neg.maxTurnos){
-    neg.terminado = neg.medidor >= 45 ? 'acuerdo' : 'sinAcuerdo';
+    // Se agotan las propuestas, pero no se fuerza el fracaso: el club deja su última
+    // oferta sobre la mesa y tú decides si la aceptas o te levantas.
+    neg.sinMasPropuestas = true;
   }
 }
 function cerrarTratoNegociacion(){
@@ -8847,6 +9149,7 @@ SCREENS.negociacionFichaje = function(){
     neg.medidor = 55 + beneficioRepresentante(j).medidorBonus; neg.turno = 0; neg.maxTurnos = 6; neg.objetivosConseguidos = []; neg.objetivosMonto = {};
     neg.log = `${neg.club.nombre} pone su primera oferta sobre la mesa: ${formatearDinero(neg.sueldo)}/temp., ${neg.duracion} ${neg.duracion===1?'año':'años'}.`;
     neg.terminado = null;
+    neg.sinMasPropuestas = false;
     neg.propuesta = { sueldoDelta:0, duracionDelta:0, objetivo:null };
   }
 
@@ -9104,13 +9407,17 @@ SCREENS.negociacionFichaje = function(){
   }
   c.appendChild(bloqueObjetivo);
 
-  const btnProponer = document.createElement('button'); btnProponer.className='btn-main';
-  btnProponer.style.marginTop = '10px';
-  btnProponer.textContent = `Presentar propuesta (${neg.turno+1}/${neg.maxTurnos}) →`;
-  const sinCambios = neg.propuesta.sueldoDelta===0 && neg.propuesta.duracionDelta===0 && !neg.propuesta.objetivo;
-  btnProponer.disabled = sinCambios;
-  btnProponer.onclick = ()=>{ enviarPropuestaNegociacion(); pintar(); };
-  c.appendChild(btnProponer);
+  if(neg.sinMasPropuestas){
+    c.appendChild(el('div','event-text', `${neg.club.nombre} da por cerrada la ronda de propuestas: esta es su última oferta. Ahora solo puedes aceptarla o levantarte de la mesa.`));
+  } else {
+    const btnProponer = document.createElement('button'); btnProponer.className='btn-main';
+    btnProponer.style.marginTop = '10px';
+    btnProponer.textContent = `Presentar propuesta (${neg.turno+1}/${neg.maxTurnos}) →`;
+    const sinCambios = neg.propuesta.sueldoDelta===0 && neg.propuesta.duracionDelta===0 && !neg.propuesta.objetivo;
+    btnProponer.disabled = sinCambios;
+    btnProponer.onclick = ()=>{ enviarPropuestaNegociacion(); pintar(); };
+    c.appendChild(btnProponer);
+  }
 
   const filaFinal = document.createElement('div');
   filaFinal.style.cssText = 'display:flex;gap:8px;margin-top:10px;';
@@ -9194,7 +9501,8 @@ function enviarPropuestaPatrocinio(){
   if(neg.medidor <= 12){
     neg.terminado = 'roto';
   } else if(neg.turno >= neg.maxTurnos){
-    neg.terminado = neg.medidor >= 45 ? 'acuerdo' : 'sinAcuerdo';
+    // Se agotan las propuestas: el club deja su última oferta y tú decides.
+    neg.sinMasPropuestas = true;
   }
 }
 function aplicarPromesasPatrocinio(j, neg){
@@ -9228,6 +9536,7 @@ SCREENS.negociacionPatrocinio = function(){
     neg.medidor = 55; neg.turno = 0; neg.maxTurnos = 6; neg.objetivosConseguidos = []; neg.objetivosMonto = {};
     neg.log = `${neg.marca} pone su primera oferta sobre la mesa: ${formatearDinero(neg.dinero)}/temp., ${neg.duracion} ${neg.duracion===1?'año':'años'}.`;
     neg.terminado = null;
+    neg.sinMasPropuestas = false;
     neg.propuesta = { sueldoDelta:0, duracionDelta:0, objetivo:null };
   }
 
@@ -9371,13 +9680,17 @@ SCREENS.negociacionPatrocinio = function(){
   }
   c.appendChild(bloqueObjetivo);
 
-  const btnProponer = document.createElement('button'); btnProponer.className='btn-main';
-  btnProponer.style.marginTop = '10px';
-  btnProponer.textContent = `Presentar propuesta (${neg.turno+1}/${neg.maxTurnos}) →`;
-  const sinCambios = neg.propuesta.sueldoDelta===0 && neg.propuesta.duracionDelta===0 && !neg.propuesta.objetivo;
-  btnProponer.disabled = sinCambios;
-  btnProponer.onclick = ()=>{ enviarPropuestaPatrocinio(); pintar(); };
-  c.appendChild(btnProponer);
+  if(neg.sinMasPropuestas){
+    c.appendChild(el('div','event-text', `La marca da por cerrada la ronda de propuestas: esta es su última oferta. Ahora solo puedes aceptarla o levantarte de la mesa.`));
+  } else {
+    const btnProponer = document.createElement('button'); btnProponer.className='btn-main';
+    btnProponer.style.marginTop = '10px';
+    btnProponer.textContent = `Presentar propuesta (${neg.turno+1}/${neg.maxTurnos}) →`;
+    const sinCambios = neg.propuesta.sueldoDelta===0 && neg.propuesta.duracionDelta===0 && !neg.propuesta.objetivo;
+    btnProponer.disabled = sinCambios;
+    btnProponer.onclick = ()=>{ enviarPropuestaPatrocinio(); pintar(); };
+    c.appendChild(btnProponer);
+  }
 
   const filaFinal = document.createElement('div');
   filaFinal.style.cssText = 'display:flex;gap:8px;margin-top:10px;';
@@ -9634,7 +9947,7 @@ SCREENS.evento = function(){
         const efectosReales = op.efectosFn ? op.efectosFn(j) : op.efectos;
         const cambios = aplicarEfectos(j, efectosReales);
         if(op.patrocinioFn) j.patrocinio = op.patrocinioFn(j);
-        if(op.contratarRepresentante) j.representante = crearRepresentante(0.08);
+        if(op.contratarRepresentante) j.representante = crearRepresentante(0.06);
         if(op.filialInicio) j.enFilial = true;
         if(op.filialFin) j.enFilial = false;
         if(op.parejaInicio){ j.tienePareja = true; j.stats.felicidadPareja = 60; j.pareja = generarNombrePareja(); }
@@ -9822,7 +10135,7 @@ SCREENS.tirando = function(){
             mostrarNotificacion(`${iconoInline(tipo,15)}¡Consigues ${(OBJETO_INFO[tipo] && OBJETO_INFO[tipo].nombre) || 'un objeto'}!`, 'objeto');
             S.objetosNuevosSinVer = (S.objetosNuevosSinVer||0) + 1;
           }
-          if(rama.contratarRepresentante) j.representante = crearRepresentante(0.08);
+          if(rama.contratarRepresentante) j.representante = crearRepresentante(0.06);
           if(rama.filialInicio) j.enFilial = true;
           if(rama.filialFin) j.enFilial = false;
           if(rama.parejaInicio){ j.tienePareja = true; j.stats.felicidadPareja = 60; j.pareja = generarNombrePareja(); }
@@ -10241,6 +10554,20 @@ function rivalClubTorneo(cfg){
   return candidatos[Math.floor(Math.random()*candidatos.length)];
 }
 
+function acumularEstadisticasSeleccion(j, cfg, nombreCompeticion){
+  // El juego solo "ve" a la selección en los torneos de verano; se asume el recorrido completo
+  // del torneo (fase de grupos + eliminatorias) y se acumulan partidos/goles/asistencias.
+  const sub21 = cfg.tipo === 'seleccion_sub21';
+  const partidos = 5 + Math.floor(Math.random()*3);
+  const tasaGol = Math.min(0.6, 0.12 + (j.atributos.tiro/ATRIBUTO_MAX)*0.34 + (j.atributos.desmarque/ATRIBUTO_MAX)*0.12);
+  const goles = Math.max(0, Math.round(partidos * tasaGol * (0.65 + Math.random()*0.7)));
+  const asistencias = Math.max(0, Math.round(partidos * (0.06 + (j.atributos.pase/ATRIBUTO_MAX)*0.16) * (0.6 + Math.random()*0.8)));
+  j.carrera.partidosSeleccion = (j.carrera.partidosSeleccion||0) + partidos;
+  j.carrera.golesSeleccion = (j.carrera.golesSeleccion||0) + goles;
+  j.carrera.asistenciasSeleccion = (j.carrera.asistenciasSeleccion||0) + asistencias;
+  j.historialSeleccion = j.historialSeleccion || [];
+  j.historialSeleccion.push({ temporada: S.temporada, torneo: nombreCompeticion, sub21, partidos, goles, asistencias });
+}
 function iniciarTorneoEliminatorio(cfg){
   const j = S.jugador;
   const esSeleccion = cfg.tipo === 'seleccion' || cfg.tipo === 'seleccion_sub21';
@@ -10270,12 +10597,13 @@ function iniciarTorneoEliminatorio(cfg){
   }
   j._ultimoTextoSemifinalIdx = idxTexto;
   S.torneoActual = {
-    id: cfg.id, tipo: cfg.tipo, nombreCompeticion, rival: cfg.sinSemifinal ? rivalFinal : rivalSemi, rivalFinalPendiente: rivalFinal,
+    id: cfg.id, tipo: cfg.tipo, nombreCompeticion, sinSemifinal: !!cfg.sinSemifinal, rival: cfg.sinSemifinal ? rivalFinal : rivalSemi, rivalFinalPendiente: rivalFinal,
     efectosVictoria: cfg.efectosVictoria,
     textoSemifinal: pool[idxTexto](datosTexto),
     opcionesSemifinal: poolOpciones[Math.floor(Math.random()*poolOpciones.length)]
   };
   j.historial.push({ temporada:S.temporada, evento:'torneo_'+cfg.id });
+  if(esSeleccion) acumularEstadisticasSeleccion(j, cfg, nombreCompeticion);
   const claveConvocatoria = esSeleccion ? (cfg.tipo === 'seleccion_sub21' ? 'tuvoPrimeraConvocatoriaSub21' : 'tuvoPrimeraConvocatoriaAbsoluta') : null;
   if(esSeleccion && !j[claveConvocatoria]){
     j[claveConvocatoria] = true;
@@ -10314,7 +10642,7 @@ SCREENS.legadoCarrera = function(){
   topbar("Fichaje 10");
   const c = el('div','card');
   c.appendChild(crearEyebrow('Un momento para mirar atrás'));
-  c.appendChild(el('h2',null, `${S.temporada} temporadas como profesional`));
+  c.appendChild(el('h2',null, `${S.temporada} temporadas de carrera`));
   const TEXTOS_LEGADO_HITO = {
     5: j => `Ya no eres aquel chaval que se presentó a la prueba en ${j.localidad}. Cinco temporadas dan para conocerte de verdad a ti mismo sobre un campo.`,
     10: j => `Una década completa desde que todo empezó en ${j.localidad}. El camino ha dado para mucho más de lo que imaginabas entonces.`,
@@ -11216,6 +11544,76 @@ SCREENS.mejoraContratoAscenso = function(){
   c.appendChild(btnRechazar);
   app.appendChild(c);
 };
+SCREENS.temporadaSinClub = function(){
+  const j = S.jugador;
+  topbar("Agente libre");
+  const c = el('div','card');
+
+  if(S.paroFase !== 'resultado'){
+    c.appendChild(crearEyebrow('Sin equipo'));
+    c.appendChild(el('h2',null,'Una temporada sin club'));
+    const cuantas = (j.temporadasSinEquipo||[]).length;
+    c.appendChild(el('div','event-text',
+      cuantas === 0
+        ? `No has firmado con nadie. Vas a pasar la temporada como agente libre: entrenando por tu cuenta, sin partidos oficiales, sin sueldo y esperando una llamada. Cuanto más tiempo pases parado, más difícil será que un club apueste por ti.`
+        : `Otra temporada más sin equipo. Sigues entrenando solo y manteniéndote a punto como puedes, pero el teléfono no suena tanto como antes. El fútbol tiene memoria corta.`));
+    const caja = document.createElement('div');
+    caja.style.cssText = 'background:rgba(217,73,92,0.08);border:1px solid rgba(217,73,92,0.3);border-radius:12px;padding:12px 14px;margin:12px 0;font-family:\'Space Grotesk\',sans-serif;font-size:12.5px;color:var(--ink);line-height:1.8;';
+    caja.innerHTML = `Un año en blanco te va a costar:<br>· Reputación y popularidad a la baja<br>· Valor de mercado desplomado (≈ -40%)<br>· Sin ingresos, pero el coste de vida sigue corriendo<br>· Pérdida de forma y ritmo de competición`;
+    c.appendChild(caja);
+
+    const btn = document.createElement('button'); btn.className='btn-main';
+    btn.textContent = 'Pasar la temporada como agente libre →';
+    btn.onclick = ()=>{ pasarTemporadaSinEquipo(j); render(); };
+    c.appendChild(btn);
+
+    if(j.edad >= 34){
+      const btnRet = document.createElement('button'); btnRet.className='btn-main';
+      btnRet.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
+      btnRet.textContent = 'Colgar las botas ahora';
+      btnRet.onclick = ()=>{ S.screen = 'retiro'; render(); };
+      c.appendChild(btnRet);
+    }
+    app.appendChild(c);
+    return;
+  }
+
+  // Fase resultado: ha pasado el año
+  const r = S.paroResumen || {};
+  c.appendChild(crearEyebrow('Ha pasado un año'));
+  c.appendChild(el('h2',null,'Temporada en blanco'));
+  c.appendChild(el('div','event-text', `Se cierra ${r.temporada ? temporadaAAno(r.temporada) : 'la temporada'} sin haber jugado un solo partido oficial. Toca ver quién se acuerda de ti.`));
+
+  const filas = [
+    ['Reputación', formatearDelta('reputacion', Math.round(r.repDelta||0))],
+    ['Valor de mercado', formatearDinero(j.stats.valorMercado)],
+    ['Forma', formatearDelta('forma', Math.round(r.formaDelta||0))],
+    ['Coste de vida del año', '-' + formatearDinero(r.coste||0)]
+  ];
+  const box = document.createElement('div');
+  box.style.cssText = "margin:12px 0 6px;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-family:'Space Grotesk',sans-serif;";
+  filas.forEach(([k,v],i)=>{
+    const row = document.createElement('div');
+    row.style.cssText = `display:flex;justify-content:space-between;gap:12px;padding:10px 14px;font-size:12.5px;${i?'border-top:1px solid var(--line);':''}`;
+    row.innerHTML = `<span style="color:var(--ink-soft);">${k}</span><span style="color:var(--ink);font-weight:600;">${v}</span>`;
+    box.appendChild(row);
+  });
+  c.appendChild(box);
+  if(r.serviciosCancelados){
+    c.appendChild(el('div','badge risk', 'Tu cuenta se ha quedado en números rojos y se han cancelado tus servicios contratados.'));
+  }
+
+  const btn = document.createElement('button'); btn.className='btn-main';
+  btn.textContent = 'Ver qué clubes preguntan por ti →';
+  btn.onclick = ()=>{
+    S.paroFase = null;
+    S.paroResumen = null;
+    S.screen = 'ofertas';
+    render();
+  };
+  c.appendChild(btn);
+  app.appendChild(c);
+};
 SCREENS.renovacion = function(){
   const j = S.jugador;
   if(j.edad >= 42){ S.screen = 'retiro'; return SCREENS.retiro(); }
@@ -11256,6 +11654,13 @@ SCREENS.renovacion = function(){
       render();
     };
     c.appendChild(btn);
+
+    const btnParo = document.createElement('button'); btnParo.className='btn-secondary';
+    btnParo.style.marginTop = '8px';
+    btnParo.textContent = 'Quedarte sin equipo esta temporada';
+    btnParo.onclick = ()=>{ entrarEnParo(j); S.screen = 'temporadaSinClub'; render(); };
+    c.appendChild(btnParo);
+
     app.appendChild(c);
     return;
   }
@@ -11300,6 +11705,13 @@ SCREENS.renovacion = function(){
     render();
   };
   c.appendChild(rechazar);
+
+  const btnParo = document.createElement('button'); btnParo.className='btn-secondary';
+  btnParo.style.marginTop = '8px';
+  btnParo.textContent = 'No renovar y quedarte sin equipo esta temporada';
+  btnParo.onclick = ()=>{ entrarEnParo(j); S.screen = 'temporadaSinClub'; render(); };
+  c.appendChild(btnParo);
+
   app.appendChild(c);
 };
 
@@ -11316,7 +11728,8 @@ SCREENS.retiro = function(){
   if(!retiradaForzosa){
     const seguir = el('div','opt','Seguir una temporada más');
     seguir.onclick = ()=>{
-      if(j.contrato.duracionTemporadas <= 0){ S.screen='renovacion'; }
+      if(j.club && j.club.sinEquipo){ S.paroFase = 'intro'; S.screen = 'temporadaSinClub'; }
+      else if(j.contrato.duracionTemporadas <= 0){ S.screen='renovacion'; }
       else { S.ofertasActuales = generarOfertas(j); S.screen='ofertas'; }
       render();
     };
@@ -11593,24 +12006,49 @@ SCREENS.final = function(){
       }
       hc.appendChild(row);
     });
-    if(j.titulosSeleccion && j.titulosSeleccion.length){
-      totalTitulos += j.titulosSeleccion.length;
+    if((j.temporadasSinEquipo||[]).length){
+      const anios = [...new Set(j.temporadasSinEquipo.map(t=>temporadaAAno(t)))].join(', ');
+      const rowParo = el('div','club-row');
+      const infoParo = el('div','club-info');
+      infoParo.appendChild(el('div','club-nombre', 'Sin equipo'));
+      infoParo.appendChild(el('div','club-meta', `${j.temporadasSinEquipo.length === 1 ? 'Temporada' : 'Temporadas'} como agente libre · ${anios}`));
+      rowParo.appendChild(infoParo);
+      hc.appendChild(rowParo);
+    }
+    if((j.historialSeleccion||[]).length || (j.titulosSeleccion||[]).length){
+      totalTitulos += (j.titulosSeleccion||[]).length;
       const rowSel = el('div','club-row');
+      const topSel = el('div','club-top');
       const infoSel = el('div','club-info');
       infoSel.appendChild(el('div','club-nombre', `Selección española ${banderaPais('España')}`));
-      rowSel.appendChild(infoSel);
-      const gruposSel = {};
-      j.titulosSeleccion.forEach(t=>{
-        gruposSel[t.nombre] = gruposSel[t.nombre] || [];
-        gruposSel[t.nombre].push(temporadaAAnoUnico(t.temporada));
-      });
-      const tituloBoxSel = el('div','club-titulos-box');
-      Object.entries(gruposSel).forEach(([nombre,anios])=>{
-        const chip = el('span','titulo-chip');
-        chip.innerHTML = `${logoCompeticion(nombre,16)} ${nombre} (${anios.join(', ')})`;
-        tituloBoxSel.appendChild(chip);
-      });
-      rowSel.appendChild(tituloBoxSel);
+      const nInt = (j.historialSeleccion||[]).length;
+      if(nInt) infoSel.appendChild(el('div','club-meta', `${nInt} ${nInt===1?'gran torneo':'grandes torneos'} disputado${nInt===1?'':'s'}`));
+      topSel.appendChild(infoSel);
+      if((j.carrera.partidosSeleccion||0) > 0){
+        const statsSel = el('div','club-stats');
+        [[j.carrera.partidosSeleccion||0,'PJ'],[j.carrera.golesSeleccion||0,'Goles'],[j.carrera.asistenciasSeleccion||0,'Asist.'],[(j.titulosSeleccion||[]).length,'Títulos']].forEach(([num,lbl])=>{
+          const st = el('div','stat');
+          st.appendChild(el('b',null,num));
+          st.appendChild(el('span',null,lbl));
+          statsSel.appendChild(st);
+        });
+        topSel.appendChild(statsSel);
+      }
+      rowSel.appendChild(topSel);
+      if((j.titulosSeleccion||[]).length){
+        const gruposSel = {};
+        j.titulosSeleccion.forEach(t=>{
+          gruposSel[t.nombre] = gruposSel[t.nombre] || [];
+          gruposSel[t.nombre].push(temporadaAAnoUnico(t.temporada));
+        });
+        const tituloBoxSel = el('div','club-titulos-box');
+        Object.entries(gruposSel).forEach(([nombre,anios])=>{
+          const chip = el('span','titulo-chip');
+          chip.innerHTML = `${logoCompeticion(nombre,16)} ${nombre} (${anios.join(', ')})`;
+          tituloBoxSel.appendChild(chip);
+        });
+        rowSel.appendChild(tituloBoxSel);
+      }
       hc.appendChild(rowSel);
     }
     const totalPartidos = j.trayectoria.reduce((s,e)=>s+e.partidos,0);
