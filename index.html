@@ -4417,6 +4417,17 @@ const OPCIONES_SEMIFINAL_SELECCION = [
     {texto:'Mantener la calma y esperar tu ocasión', atributo:'mental', dificultadBase:14} ]
 ];
 
+// Probabilidad de llegar a semis de una competición continental, YA clasificado para ella
+// (eso ya filtra mucho: solo entran los puestos altos de tu liga). Ni siquiera los grandes
+// llegan a semis todos los años — el prestigio del club mueve una base que refleja lo exigente
+// que es cada competición en la vida real: la Champions está llena de gigantes (base más baja),
+// la Conference es la más asequible de las tres (base más alta).
+function probabilidadSemisContinental(j, baseCompeticion){
+  const prestigio = PRESTIGIO_CLUB[j.club.nombre] || 2; // 1-4
+  const factorPrestigio = prestigio / 2.5; // 1→0.4 · 2,5 (neutro)→1.0 · 4→1.6
+  return Math.max(0.02, baseCompeticion * factorPrestigio);
+}
+
 const TORNEOS_CONFIG = [
   { id:'copa_rey', nombreCompeticion:'Copa del Rey', tipo:'copa_domestica',
     condicion: j => CATEGORIAS.indexOf(j.club.categoria) >= 2 && !j.club.extranjero && !primerEquipoDeFilial(j.club.nombre) && S.pasoIndex === 3,
@@ -4443,13 +4454,16 @@ const TORNEOS_CONFIG = [
     },
     efectosVictoria:{forma:16,popularidad:22,reputacion:14,valorMercado:60000} },
   { id:'copa_europa', nombreCompeticion:'Champions League', tipo:'club', tierMin:3, tierMax:4,
-    condicion: j => j.club.nivelEuropeo === 'champions' && S.pasoIndex === 4, probabilidad:0.85,
+    condicion: j => j.club.nivelEuropeo === 'champions' && S.pasoIndex === 4,
+    probabilidad: j => probabilidadSemisContinental(j, 0.10),
     efectosVictoria:{forma:15,popularidad:12,reputacion:10,valorMercado:54000} },
   { id:'europa_league', nombreCompeticion:'Europa League', tipo:'club', tierMin:2, tierMax:3,
-    condicion: j => j.club.nivelEuropeo === 'europa' && S.pasoIndex === 4, probabilidad:0.85,
+    condicion: j => j.club.nivelEuropeo === 'europa' && S.pasoIndex === 4,
+    probabilidad: j => probabilidadSemisContinental(j, 0.16),
     efectosVictoria:{forma:13,popularidad:9,reputacion:7,valorMercado:36000} },
   { id:'conference_league', nombreCompeticion:'Conference League', tipo:'club', tierMin:1, tierMax:2,
-    condicion: j => j.club.nivelEuropeo === 'conference' && S.pasoIndex === 4, probabilidad:0.85,
+    condicion: j => j.club.nivelEuropeo === 'conference' && S.pasoIndex === 4,
+    probabilidad: j => probabilidadSemisContinental(j, 0.24),
     efectosVictoria:{forma:11,popularidad:6,reputacion:5,valorMercado:24000} },
   { id:'copa_libertadores', nombreCompeticion:'Copa Libertadores', tipo:'club_sudamerica',
     condicion: j => j.club.nivelEuropeo === 'libertadores' && S.pasoIndex === 4, probabilidad:0.85,
