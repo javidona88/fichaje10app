@@ -4778,12 +4778,14 @@ const PATRON_ESCUDO_LALIGA = {
    resto del juego (FORMA_ESCUDO_ESTANDAR, la misma que escudoSVG dibuja para LaLiga y el
    resto de clubes) para que no desentonen visualmente con los demás. */
 const FORMA_ESCUDO_ESTANDAR = 'M20 2 L37 8 V22 C37 33 30 40 20 43 C10 40 3 33 3 22 V8 Z';
-// Silueta general del escudo: 'escudo' (apuntado, el mismo de siempre), 'circulo' u 'ovalo' —
-// solo la categoría geométrica gruesa de cada club real (redondo/ovalado/apuntado), nunca su
-// contorno exacto ni ningún detalle del emblema oficial.
+const FORMA_ESCUDO_RECTO = 'M4 2 L36 2 L36 21 C36 32 29 40 20 43 C11 40 4 32 4 21 Z';
+// Silueta general del escudo: 'escudo' (apuntado), 'escudo_recto' (borde superior recto,
+// como la mayoría de escudos de fútbol reales), 'circulo' u 'ovalo' — solo la categoría
+// geométrica gruesa de cada club real, nunca su contorno exacto ni ningún detalle del emblema.
 function formaEscudoElemento(forma){
   if(forma === 'circulo') return '<circle cx="20" cy="21" r="19"/>';
   if(forma === 'ovalo') return '<ellipse cx="20" cy="22" rx="17.5" ry="21"/>';
+  if(forma === 'escudo_recto') return `<path d="${FORMA_ESCUDO_RECTO}"/>`;
   return `<path d="${FORMA_ESCUDO_ESTANDAR}"/>`;
 }
 function envolverEscudo(tamano, clipId, contenido, sigla, colorSigla, strokeSigla, tamSigla, forma, extra){
@@ -4808,7 +4810,7 @@ function escudoBarcelona(tamano){
     + `<rect x="20" y="${bandaH}" width="10" height="${44-bandaH}" fill="${AZUL}"/>`
     + `<rect x="30" y="${bandaH}" width="10" height="${44-bandaH}" fill="${GRANA}"/>`
     + `<rect x="0" y="${bandaH-0.9}" width="40" height="1.8" fill="${LINEA}"/>`;
-  return envolverEscudo(tamano, 'clip_FCBarcelona', cuerpo, 'FCB');
+  return envolverEscudo(tamano, 'clip_FCBarcelona', cuerpo, 'FCB', undefined, undefined, undefined, 'escudo_recto');
 }
 function escudoRealMadrid(tamano){
   tamano = tamano || 30;
@@ -4831,7 +4833,7 @@ function escudoAtletico(tamano){
   const cuerpo = franjas
     + `<rect x="0" y="0" width="40" height="${bandaH}" fill="${AZUL}"/>`
     + `<rect x="0" y="${bandaH-0.9}" width="40" height="1.8" fill="${LINEA}"/>`;
-  return envolverEscudo(tamano, 'clip_Atletico', cuerpo, 'ATM', '#fff', 'rgba(0,0,0,0.45)', 9.5);
+  return envolverEscudo(tamano, 'clip_Atletico', cuerpo, 'ATM', '#fff', 'rgba(0,0,0,0.45)', 9.5, 'escudo_recto');
 }
 function escudoBayern(tamano){
   tamano = tamano || 30;
@@ -4869,35 +4871,35 @@ function escudoManUnited(tamano){
   const ROJO = '#DA291C', NEGRO = '#000000';
   const cuerpo = `<rect x="0" y="0" width="40" height="44" fill="${ROJO}"/>`
     + `<rect x="0" y="35" width="40" height="9" fill="${NEGRO}"/>`;
-  return envolverEscudo(tamano, 'clip_ManUnited', cuerpo, 'MU', '#fff', 'rgba(0,0,0,0.4)', 12);
+  return envolverEscudo(tamano, 'clip_ManUnited', cuerpo, 'MU', '#fff', 'rgba(0,0,0,0.4)', 12, 'escudo_recto');
 }
 function escudoLiverpool(tamano){
   tamano = tamano || 30;
   const ROJO = '#C8102E', ORO = '#F6C94C';
   const cuerpo = `<rect x="0" y="0" width="40" height="44" fill="${ROJO}"/>`
     + `<rect x="0" y="0" width="40" height="6" fill="${ORO}"/>`;
-  return envolverEscudo(tamano, 'clip_Liverpool', cuerpo, 'LIV', '#fff', 'rgba(0,0,0,0.4)', 9.5);
+  return envolverEscudo(tamano, 'clip_Liverpool', cuerpo, 'LIV', '#fff', 'rgba(0,0,0,0.4)', 9.5, 'escudo_recto');
 }
 function escudoChelsea(tamano){
   tamano = tamano || 30;
   const AZUL = '#034694', BLANCO = '#FFFFFF';
   const cuerpo = `<rect x="0" y="0" width="40" height="44" fill="${AZUL}"/>`
-    + `<rect x="0" y="35" width="40" height="9" fill="${BLANCO}"/>`;
-  return envolverEscudo(tamano, 'clip_Chelsea', cuerpo, 'CFC', '#fff', 'rgba(0,0,0,0.35)', 9.5);
+    + `<rect x="0" y="29" width="40" height="12" fill="${BLANCO}"/>`;
+  return envolverEscudo(tamano, 'clip_Chelsea', cuerpo, 'CFC', '#fff', 'rgba(0,0,0,0.35)', 9.5, 'circulo');
 }
 function escudoArsenal(tamano){
   tamano = tamano || 30;
   const ROJO = '#EF0107', BLANCO = '#FFFFFF';
   const cuerpo = `<rect x="0" y="0" width="40" height="44" fill="${BLANCO}"/>`
     + `<rect x="9" y="0" width="22" height="44" fill="${ROJO}"/>`;
-  return envolverEscudo(tamano, 'clip_Arsenal', cuerpo, 'ARS', '#fff', 'rgba(0,0,0,0.35)', 9.5);
+  return envolverEscudo(tamano, 'clip_Arsenal', cuerpo, 'ARS', '#fff', 'rgba(0,0,0,0.35)', 9.5, 'escudo_recto');
 }
 function escudoJuventus(tamano){
   tamano = tamano || 30;
   const NEGRO = '#000000', BLANCO = '#FFFFFF', n = 5, sw = 40/n;
   let franjas = '';
   for(let i=0;i<n;i++) franjas += `<rect x="${(i*sw).toFixed(2)}" y="0" width="${(sw+0.4).toFixed(2)}" height="44" fill="${i%2===0?NEGRO:BLANCO}"/>`;
-  return envolverEscudo(tamano, 'clip_Juventus', franjas, 'JUV', '#fff', 'rgba(0,0,0,0.4)', 9.5);
+  return envolverEscudo(tamano, 'clip_Juventus', franjas, 'JUV', '#fff', 'rgba(0,0,0,0.4)', 9.5, 'ovalo');
 }
 function escudoACMilan(tamano){
   tamano = tamano || 30;
