@@ -4420,14 +4420,14 @@ const OPCIONES_SEMIFINAL_SELECCION = [
 const TORNEOS_CONFIG = [
   { id:'copa_rey', nombreCompeticion:'Copa del Rey', tipo:'copa_domestica',
     condicion: j => CATEGORIAS.indexOf(j.club.categoria) >= 2 && !j.club.extranjero && !primerEquipoDeFilial(j.club.nombre) && S.pasoIndex === 3,
-    // La reputación sigue pesando dentro de cada categoría, pero además, entre las categorías
-    // que ya dan acceso a la Copa, cuanto más arriba juegues más fácil es llegar a semis:
-    // LaLiga > LaLiga2 > Primera RFEF (tanto el suelo como el techo suben con la categoría).
+    // La categoría manda: en LaLiga es habitual dar la campanada en la Copa, en Primera RFEF
+    // (la más baja de las que ya dan acceso) es una rareza. La reputación matiza dentro de
+    // cada categoría (±reputación 40 = referencia neutra), pero no cambia el orden entre ellas.
     probabilidad: j => {
       const idxCat = CATEGORIAS.indexOf(j.club.categoria);
-      const tope = idxCat >= 4 ? 0.65 : (idxCat === 3 ? 0.55 : 0.45);
-      const base = idxCat >= 4 ? 0.25 : (idxCat === 3 ? 0.20 : 0.15);
-      return Math.min(tope, base + (j.stats.reputacion||0)/180);
+      const base = idxCat >= 4 ? 0.70 : (idxCat === 3 ? 0.25 : 0.05); // LaLiga / LaLiga2 / Primera RFEF
+      const ajusteRep = ((j.stats.reputacion||0) - 40) / 400;
+      return Math.min(0.92, Math.max(0.02, base + ajusteRep));
     },
     efectosVictoria:{forma:16,popularidad:22,reputacion:14,valorMercado:60000} },
   { id:'copa_europa', nombreCompeticion:'Champions League', tipo:'club', tierMin:3, tierMax:4,
