@@ -9697,7 +9697,7 @@ SCREENS.negociacionFichaje = function(){
     c.appendChild(el('div','event-text', desc));
 
     if(neg.terminado === 'acuerdo'){
-      const añosRestantes = (!neg.esRenovacion && j.contrato) ? j.contrato.duracionTemporadas : 0;
+      const añosRestantes = (!neg.esRenovacion && j.contrato && !j.contrato.emergencia) ? j.contrato.duracionTemporadas : 0;
       if(añosRestantes > 0){
         const sueldoPendiente = j.contrato.sueldoAnual * añosRestantes;
         const pctPenalizacion = beneficioRepresentante(j).penalizacionClausula;
@@ -9759,7 +9759,7 @@ SCREENS.negociacionFichaje = function(){
       btnVolver.textContent = neg.esRenovacion ? 'Buscar otro club →' : (esNarrativa ? 'Seguir en tu club →' : 'Volver al mercado →');
       btnVolver.onclick = ()=>{
         if(neg.esRenovacion){
-          j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1 };
+          j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1, emergencia: true };
           S.ofertasActuales = generarOfertas(j);
           if(S.ofertasActuales.length === 0){
             const clubReserva = clubAleatorio(j.club.categoria, j.club.nombre);
@@ -12159,7 +12159,7 @@ SCREENS.renovacion = function(){
     const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Buscar un nuevo equipo →';
     btn.onclick = ()=>{
       S.clubDeclinaRenovar = undefined;
-      j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1 };
+      j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1, emergencia: true };
       S.ofertasActuales = generarOfertas(j);
       if(S.ofertasActuales.length === 0){
         const clubReserva = clubAleatorio(j.club.categoria, j.club.nombre);
@@ -12210,7 +12210,7 @@ SCREENS.renovacion = function(){
   rechazar.textContent = 'No renovar, buscar otro club directamente';
   rechazar.onclick = ()=>{
     S.clubDeclinaRenovar = undefined;
-    j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1 };
+    j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1, emergencia: true };
     S.ofertasActuales = generarOfertas(j);
     if(S.ofertasActuales.length === 0){
       const clubReserva = clubAleatorio(j.club.categoria, j.club.nombre);
