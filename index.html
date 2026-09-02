@@ -4752,8 +4752,8 @@ const PATRON_ESCUDO_LALIGA = {
   "FC Barcelona": { forma:'escudo', patron:'rayas_verticales' },
   "Real Madrid CF": { forma:'escudo', patron:'solido' },
   "Atlético de Madrid": { forma:'escudo', patron:'mitades_vertical' },
-  "Villarreal CF": { forma:'circulo', patron:'solido' },
-  "Real Betis Balompié": { forma:'escudo', patron:'rayas_horizontales' },
+  "Villarreal CF": { forma:'rombo', patron:'solido' },
+  "Real Betis Balompié": { forma:'triangulo', patron:'rayas_horizontales' },
   "Real Sociedad": { forma:'circulo', patron:'rayas_verticales' },
   "RC Celta de Vigo": { forma:'circulo', patron:'solido' },
   "Getafe CF": { forma:'escudo', patron:'solido' },
@@ -4779,13 +4779,13 @@ const PATRON_ESCUDO_LALIGA = {
   "SSC Nápoles": { forma:'circulo', patron:'solido' },
   "Atalanta BC": { forma:'escudo', patron:'rayas_verticales' },
   "SS Lazio": { forma:'escudo', patron:'solido' },
-  "ACF Fiorentina": { forma:'escudo', patron:'solido' },
+  "ACF Fiorentina": { forma:'rombo', patron:'solido' },
   "RB Leipzig": { forma:'escudo', patron:'mitades_horizontal' },
   "Bayer Leverkusen": { forma:'escudo', patron:'solido' },
   "VfB Stuttgart": { forma:'escudo', patron:'mitades_horizontal' },
   "Eintracht Frankfurt": { forma:'circulo', patron:'solido' },
   "Olympique de Marsella": { forma:'circulo', patron:'solido' },
-  "Olympique de Lyon": { forma:'escudo', patron:'mitades_horizontal' },
+  "Olympique de Lyon": { forma:'cuadrado_pico', patron:'mitades_horizontal' },
   "AS Mónaco": { forma:'escudo', patron:'diagonal' },
   "LOSC Lille": { forma:'escudo_recto', patron:'mitades_vertical' }
 };
@@ -4798,13 +4798,21 @@ const PATRON_ESCUDO_LALIGA = {
    resto de clubes) para que no desentonen visualmente con los demás. */
 const FORMA_ESCUDO_ESTANDAR = 'M20 2 L37 8 V22 C37 33 30 40 20 43 C10 40 3 33 3 22 V8 Z';
 const FORMA_ESCUDO_RECTO = 'M4 2 L36 2 L36 21 C36 32 29 40 20 43 C11 40 4 32 4 21 Z';
+const FORMA_TRIANGULO = 'M4 3 L36 3 L20 43 Z';
+const FORMA_ROMBO = 'M20 2 L37 22 L20 43 L3 22 Z';
+const FORMA_CUADRADO_PICO = 'M4 2 L36 2 L36 30 L20 43 L4 30 Z';
 // Silueta general del escudo: 'escudo' (apuntado), 'escudo_recto' (borde superior recto,
-// como la mayoría de escudos de fútbol reales), 'circulo' u 'ovalo' — solo la categoría
-// geométrica gruesa de cada club real, nunca su contorno exacto ni ningún detalle del emblema.
+// como la mayoría de escudos de fútbol reales), 'circulo', 'ovalo', 'triangulo' (punta
+// abajo), 'rombo' o 'cuadrado_pico' (cuerpo recto que remata en punta abajo) — solo la
+// categoría geométrica gruesa de cada club real, nunca su contorno exacto ni ningún
+// detalle del emblema.
 function formaEscudoElemento(forma){
   if(forma === 'circulo') return '<circle cx="20" cy="21" r="19"/>';
   if(forma === 'ovalo') return '<ellipse cx="20" cy="22" rx="17.5" ry="21"/>';
   if(forma === 'escudo_recto') return `<path d="${FORMA_ESCUDO_RECTO}"/>`;
+  if(forma === 'triangulo') return `<path d="${FORMA_TRIANGULO}"/>`;
+  if(forma === 'rombo') return `<path d="${FORMA_ROMBO}"/>`;
+  if(forma === 'cuadrado_pico') return `<path d="${FORMA_CUADRADO_PICO}"/>`;
   return `<path d="${FORMA_ESCUDO_ESTANDAR}"/>`;
 }
 function envolverEscudo(tamano, clipId, contenido, sigla, colorSigla, strokeSigla, tamSigla, forma, extra){
@@ -4988,11 +4996,14 @@ function escudoSVG(nombre, tamano, colores){
     relleno = `<rect x="0" y="0" width="40" height="44" fill="${secundario}"/><polygon points="0,44 40,0 40,14 0,44" fill="${primario}"/><polygon points="0,30 0,44 14,44" fill="${primario}"/>`;
   }
   const colorTexto = cfg.patron === 'solido' && esColorClaro(primario) ? '#1a1a1a' : (cfg.patron === 'solido' ? '#fff' : secundario);
+  // El triángulo se estrecha mucho hacia abajo: las iniciales suben para no salirse del contorno.
+  const textoY = cfg.forma === 'triangulo' ? 15 : 26;
+  const textoSize = cfg.forma === 'triangulo' ? 11 : 13;
   return `<svg width="${tamano}" height="${tamano}" viewBox="0 0 40 44" xmlns="http://www.w3.org/2000/svg">
     <defs><clipPath id="${clipId}">${formaPath}</clipPath></defs>
     <g clip-path="url(#${clipId})">${relleno}</g>
     ${formaPath.replace('/>', ` fill="none" stroke="#1a1a1a" stroke-width="1.6"/>`)}
-    <text x="20" y="26" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="13" fill="${colorTexto}" stroke="rgba(0,0,0,0.25)" stroke-width="0.4">${iniciales}</text>
+    <text x="20" y="${textoY}" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="${textoSize}" fill="${colorTexto}" stroke="rgba(0,0,0,0.25)" stroke-width="0.4">${iniciales}</text>
   </svg>`;
 }
 function esColorClaro(hex){
