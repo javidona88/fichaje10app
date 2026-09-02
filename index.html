@@ -4745,7 +4745,7 @@ function iconoInline(clave, tamano){
   return `<span class="icono-inline" style="display:inline-flex;vertical-align:middle;width:${tamano}px;height:${tamano}px;margin-right:5px;">${svg}</span>`;
 }
 function inicialesClub(nombre){
-  const palabras = nombre.replace(/^(CD|UD|CF|SD|Real|Atlético|Racing|Sporting|Deportivo)\s+/,'').split(' ');
+  const palabras = nombre.replace(/^(CD|UD|CF|SD|Real|Atlético|Racing|Sporting|Deportivo|Olympique de)\s+/,'').split(' ');
   return (palabras[0][0] + (palabras[1] ? palabras[1][0] : palabras[0][1]||'')).toUpperCase();
 }
 const PATRON_ESCUDO_LALIGA = {
@@ -4768,7 +4768,26 @@ const PATRON_ESCUDO_LALIGA = {
   "Elche CF": { forma:'circulo', patron:'rayas_verticales' },
   "Real Racing Club": { forma:'escudo', patron:'rayas_verticales' },
   "RC Deportivo": { forma:'circulo', patron:'rayas_verticales' },
-  "Málaga CF": { forma:'escudo', patron:'rayas_verticales' }
+  "Málaga CF": { forma:'escudo', patron:'rayas_verticales' },
+  // Prestigio 3 de las 5 grandes ligas europeas que no son LaLiga — mismo criterio: forma
+  // general del escudo real (círculo/óvalo/recto arriba/apuntado) + colores oficiales, sin
+  // símbolos ni contornos concretos de ningún emblema real.
+  "Aston Villa": { forma:'escudo_recto', patron:'mitades_vertical' },
+  "Newcastle United": { forma:'escudo_recto', patron:'rayas_verticales' },
+  "Tottenham Hotspur": { forma:'escudo_recto', patron:'mitades_horizontal' },
+  "AS Roma": { forma:'escudo', patron:'mitades_horizontal' },
+  "SSC Nápoles": { forma:'circulo', patron:'solido' },
+  "Atalanta BC": { forma:'escudo', patron:'rayas_verticales' },
+  "SS Lazio": { forma:'escudo', patron:'solido' },
+  "ACF Fiorentina": { forma:'escudo', patron:'solido' },
+  "RB Leipzig": { forma:'escudo', patron:'mitades_horizontal' },
+  "Bayer Leverkusen": { forma:'escudo', patron:'solido' },
+  "VfB Stuttgart": { forma:'escudo', patron:'mitades_horizontal' },
+  "Eintracht Frankfurt": { forma:'circulo', patron:'solido' },
+  "Olympique de Marsella": { forma:'circulo', patron:'solido' },
+  "Olympique de Lyon": { forma:'escudo', patron:'mitades_horizontal' },
+  "AS Mónaco": { forma:'escudo', patron:'diagonal' },
+  "LOSC Lille": { forma:'escudo_recto', patron:'mitades_vertical' }
 };
 /* Escudos "a medida" de los clubes top del juego (CLUBES_GRANDES) y de los de prestigio 4
    que no son "grandes". Son interpretaciones propias construidas con primitivas heráldicas
@@ -4810,7 +4829,7 @@ function escudoBarcelona(tamano){
     + `<rect x="20" y="${bandaH}" width="10" height="${44-bandaH}" fill="${AZUL}"/>`
     + `<rect x="30" y="${bandaH}" width="10" height="${44-bandaH}" fill="${GRANA}"/>`
     + `<rect x="0" y="${bandaH-0.9}" width="40" height="1.8" fill="${LINEA}"/>`;
-  return envolverEscudo(tamano, 'clip_FCBarcelona', cuerpo, 'FCB', undefined, undefined, undefined, 'escudo_recto');
+  return envolverEscudo(tamano, 'clip_FCBarcelona', cuerpo, 'FCB');
 }
 function escudoRealMadrid(tamano){
   tamano = tamano || 30;
@@ -4949,9 +4968,7 @@ function escudoSVG(nombre, tamano, colores){
     </svg>`;
   }
   const clipId = `clip_${nombre.replace(/[^a-zA-Z0-9]/g,'')}`;
-  const formaPath = cfg.forma === 'circulo'
-    ? `<circle cx="20" cy="20" r="18" />`
-    : `<path d="${FORMA_ESCUDO_ESTANDAR}" />`;
+  const formaPath = formaEscudoElemento(cfg.forma);
   let relleno;
   if(cfg.patron === 'solido'){
     relleno = `<rect x="0" y="0" width="40" height="44" fill="${primario}"/>`;
