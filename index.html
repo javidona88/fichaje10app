@@ -4420,21 +4420,26 @@ const OPCIONES_SEMIFINAL_SELECCION = [
 const TORNEOS_CONFIG = [
   { id:'copa_rey', nombreCompeticion:'Copa del Rey', tipo:'copa_domestica',
     condicion: j => CATEGORIAS.indexOf(j.club.categoria) >= 2 && !j.club.extranjero && !primerEquipoDeFilial(j.club.nombre) && S.pasoIndex === 3,
-    // No es "cuánto vales tú": la categoría es la PUERTA de entrada (reparto real de
-    // semifinalistas de Copa del Rey en los últimos 50 años: Primera División 188/200 = 94%,
-    // Segunda División 10/200 = 5%, Segunda B/Primera RFEF 2/200 = 1%). Dentro de esa puerta,
-    // el prestigio del club y tu posición de liga deciden si TU equipo, en concreto, es de
-    // los que la cruzan esta temporada — un colista de LaLiga sigue teniendo mucha más opción
-    // que el líder de LaLiga2, pero bastante menos que un grande en buena posición.
+    // OJO con confundir dos cosas: el 94/5/1% (últimos 50 años) es de qué categoría suele SER
+    // el semifinalista, no la probabilidad de que lo sea TU club — ese reparto se divide entre
+    // los ~20 equipos de LaLiga, los ~22 de LaLiga2, etc. cada temporada, así que la media por
+    // equipo es mucho más baja (a 4 semifinalistas/año: LaLiga ≈3,76 plazas repartidas entre
+    // 20 equipos ≈19%; LaLiga2 ≈0,2 entre 22 ≈1%; Primera RFEF ≈0,04 entre 40 ≈0,1%). Ni
+    // siquiera el Real Madrid llega a semis todos los años. El prestigio del club y tu
+    // posición de liga mueven esa media hacia arriba o hacia abajo, no hacia un techo cercano
+    // al 94%.
     probabilidad: j => {
       const idxCat = CATEGORIAS.indexOf(j.club.categoria);
-      const techo = idxCat >= 4 ? 0.94 : (idxCat === 3 ? 0.05 : 0.01); // LaLiga / LaLiga2 / Primera RFEF
+      const datos = idxCat >= 4 ? { plazasPorAno:3.76, equipos:CLUBES_POR_CATEGORIA['LaLiga'].length }
+        : idxCat === 3 ? { plazasPorAno:0.20, equipos:CLUBES_POR_CATEGORIA['LaLiga2'].length }
+        : { plazasPorAno:0.04, equipos:CLUBES_POR_CATEGORIA['Primera RFEF'].length };
+      const mediaPorEquipo = datos.plazasPorAno / datos.equipos;
       const prestigio = PRESTIGIO_CLUB[j.club.nombre] || 2; // 1-4
-      const factorPrestigio = 0.4 + (prestigio-1)/3 * 0.6; // prestigio 1→0.4 · 4→1.0
+      const factorPrestigio = prestigio / 2.5; // 1→0.4 · 2,5 (neutro)→1.0 · 4→1.6
       const posicion = S.posicionLiga || Math.ceil(EQUIPOS_EN_LIGA/2);
-      const factorPosicion = 1 - (posicion-1)/(EQUIPOS_EN_LIGA-1) * 0.7; // 1º→1.0 · último→0.3
+      const factorPosicion = 1.8 - (posicion-1)/(EQUIPOS_EN_LIGA-1) * 1.5; // 1º→1.8 · último→0.3
       const factorForma = (factorPrestigio + factorPosicion) / 2;
-      return techo * factorForma;
+      return Math.max(0.0002, mediaPorEquipo * factorForma);
     },
     efectosVictoria:{forma:16,popularidad:22,reputacion:14,valorMercado:60000} },
   { id:'copa_europa', nombreCompeticion:'Champions League', tipo:'club', tierMin:3, tierMax:4,
