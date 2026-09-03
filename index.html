@@ -4561,21 +4561,23 @@ const TORNEOS_CONFIG = [
       const fueDecisivo = ultimaTemp && ultimaTemp.trofeosIndividuales > 0; // Pichichi o MVP la temporada anterior
       return fueDecisivo || j.stats.reputacion >= 55;
     }, probabilidad: j => {
-      // La selección no tiene "categoría" propia como un club — España es siempre España —
-      // así que aquí el peso lo lleva tu situación personal (edad, si fuiste decisivo, tu
-      // reputación) tal cual estaba, y se le añade tu nota media real de la última temporada
-      // como matiz adicional: a igualdad de reputación, quien venga de jugar de verdad bien
-      // (no solo "sonar" para la lista) tiene algo más de opciones de ir hasta el final.
+      // OJO, mismo fallo que tuvo la Copa al principio: esto NO puede depender casi solo de
+      // ti. España compite contra otras 23-31 selecciones por 4 puestos de semifinalista —
+      // tu situación personal (edad/decisivo/reputación/nota) decide como mucho si formas
+      // parte de la selección que hace ese recorrido, no si España lo hace. Base fija de
+      // selección "contendiente habitual, no favorita segura" (~1 de cada 4 grandes torneos),
+      // matizada por un factor personal centrado en 1 (ni sube ni baja el caso normal).
+      const BASE_SELECCION_ABSOLUTA = 0.25;
       const ultimaTemp = (j.historialTemporadas||[])[j.historialTemporadas.length-1];
       const fueDecisivo = ultimaTemp && ultimaTemp.trofeosIndividuales > 0;
       const factorNota = multiplicadorPorNota(j.ultimaNotaTemporada != null ? j.ultimaNotaTemporada : 6.5);
-      let base;
-      if(fueDecisivo) base = 0.85; // ser decisivo pesa mucho, pero la competencia por la camiseta sigue siendo dura
-      else if(j.edad >= 34) base = 0.1;
-      else if(j.edad >= 32) base = 0.25;
-      else if(j.edad >= 30) base = 0.45;
-      else base = Math.min(0.65, 0.25 + (j.stats.reputacion-55)/120);
-      return Math.max(0.05, Math.min(0.92, base * factorNota));
+      let factorPersonal;
+      if(fueDecisivo) factorPersonal = 1.8; // ser decisivo pesa mucho, pero no lo es todo
+      else if(j.edad >= 34) factorPersonal = 0.5;
+      else if(j.edad >= 32) factorPersonal = 0.7;
+      else if(j.edad >= 30) factorPersonal = 0.9;
+      else factorPersonal = 0.75 + Math.min(0.5, (j.stats.reputacion-55)/70);
+      return Math.max(0.04, Math.min(0.65, BASE_SELECCION_ABSOLUTA * factorPersonal * factorNota));
     },
     efectosVictoria:{forma:15,popularidad:25,reputacion:15,valorMercado:80000} },
   { id:'seleccion_sub21', nombreCompeticion:null, tipo:'seleccion_sub21', edadMax:21,
@@ -4588,11 +4590,14 @@ const TORNEOS_CONFIG = [
       if(j.stats.reputacion >= 40) return false; // con ese perfil ya suena para la absoluta
       return true;
     }, probabilidad: j => {
-      // Antes era un 60% fijo igual para todos los que llegaban al filtro. La Sub-21 española
-      // es un proyecto fuerte de por sí (referencia 0,45), y tu nota media real de la
-      // temporada pasada matiza esa base igual que en la absoluta.
+      // Misma corrección que en la absoluta: la Sub-21 española compite contra otras
+      // muchas selecciones por 4 puestos de semifinalista, no depende casi solo de ti. Base
+      // algo más alta que la absoluta (~0,30) porque España Sub-21 viene de una racha muy
+      // buena en los últimos torneos, matizada por reputación y tu nota real.
+      const BASE_SELECCION_SUB21 = 0.30;
+      const factorReputacion = 0.8 + Math.min(0.4, (j.stats.reputacion-25)/40);
       const factorNota = multiplicadorPorNota(j.ultimaNotaTemporada != null ? j.ultimaNotaTemporada : 6.5);
-      return Math.max(0.15, Math.min(0.85, 0.45 * factorNota));
+      return Math.max(0.05, Math.min(0.55, BASE_SELECCION_SUB21 * factorReputacion * factorNota));
     },
     efectosVictoria:{forma:10,popularidad:14,reputacion:9,valorMercado:35000} }
 ];
