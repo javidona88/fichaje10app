@@ -3476,11 +3476,15 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.4';
+const VERSION_JUEGO = 'v1.4.1';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.4.1', titulo:'Sucesos con nombres reales', cambios:[
+    'Varios sucesos mencionan ahora marcas, medios y personajes reales para dar más realismo: Telecinco, El Chiringuito de Jugones, Jijantes, Ibai Llanos, DjMaRiiO, Kings League, Cruz Roja, Fundación LaLiga, UNICEF, RFEF, Ryanair, Vueling, easyJet, entre otros — con varias opciones distintas para que no se repita siempre la misma.',
+    'El injerto capilar que sale bien ya no menciona siempre la misma revista: puede acabar en ¡Hola!, comentado en directo por Javi Hoyos, o con un hilo de choteo en Forocoches.'
+  ]},
   { version:'v1.4', titulo:'Torneos con probabilidades realistas', cambios:[
     'Llegar a semifinales (Copa del Rey, Champions, Europa League, Conference, Libertadores, Concacaf, AFC, Eurocopa y Mundial) ahora depende de tu categoría, el prestigio de tu club, tu posición en liga y tu propia nota media — nada de techos absurdos ni un 85% fijo para cualquiera.',
     'El rival de esas semifinales y finales también pesa por prestigio y por país: ya no te puede tocar cualquier equipo al azar sea cual sea su nivel real.',
