@@ -15,6 +15,11 @@
 <meta name="apple-mobile-web-app-title" content="Fichaje 10">
 <meta name="mobile-web-app-capable" content="yes">
 
+<!-- Analítica (Umami Cloud, capa gratuita): solo cuenta visitas y los eventos que
+     dispara trackEvento() más abajo en el JS, sin cookies ni datos personales.
+     Sustituye TU-WEBSITE-ID por el ID real que te da cloud.umami.is al dar de alta el sitio. -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="TU-WEBSITE-ID"></script>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=PT+Serif:wght@700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
@@ -7639,6 +7644,11 @@ function render(){
   setTimeout(pintar, 260);
 }
 function el(tag, cls, html){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; }
+// Envía un evento a Umami si el script de analítica ha cargado (puede no hacerlo: bloqueadores
+// de anuncios, sin conexión...). Nunca debe romper el juego si falla o no está disponible.
+function trackEvento(nombre, datos){
+  try{ if(typeof umami !== 'undefined') umami.track(nombre, datos); }catch(e){}
+}
 
 function logoCamiseta(tamano){
   tamano = tamano || 22;
@@ -9804,6 +9814,7 @@ SCREENS.crear = function(){
     ATRIBUTOS_JUGADOR.forEach(a=>{ extra[a] = estilo.atributos[a] - ATRIBUTOS_BASE[a]; });
     const nombreCompleto = `${state.nombrePila.trim()} ${state.apellido.trim()}`;
     S.jugador = nuevoJugador(nombreCompleto, state.pais, extra, null, state.localidad.trim());
+    trackEvento('nueva_partida', { estilo: estilo.id });
     S.screen = 'personalizarGrupo';
     render();
   };
@@ -13122,7 +13133,10 @@ SCREENS.retiro = function(){
   }
 
   const retirar = el('div','opt', retiradaForzosa ? 'Colgar las botas' : 'Colgar las botas ahora');
-  retirar.onclick = ()=>{ S.screen='final'; render(); };
+  retirar.onclick = ()=>{
+    trackEvento('retiro', { temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, titulos: j.carrera.titulos, categoriaFinal: j.club.categoria });
+    S.screen='final'; render();
+  };
   c.appendChild(retirar);
 
   app.appendChild(c);

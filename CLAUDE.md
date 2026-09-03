@@ -537,6 +537,22 @@ efectos en la topbar.
   vez"). `terminarTutorial` vuelve al menú o a `S.pantallaBase` si hay partida en curso.
   En `PANTALLAS_SIN_TABBAR`.
 
+## Analítica (Umami Cloud)
+
+Única dependencia externa deliberada del proyecto aparte de Google Fonts: un `<script>` de
+[Umami Cloud](https://cloud.umami.is) (capa gratuita, sin cookies, sin datos personales) en el
+`<head>` de `index.html`, con `data-website-id="TU-WEBSITE-ID"` — sustituir por el ID real que da
+Umami al dar de alta el sitio (crear cuenta gratis en cloud.umami.is → añadir sitio con la URL de
+GitHub Pages → copiar el Website ID). Cuenta visitas automáticamente sin código extra.
+Eventos personalizados vía `trackEvento(nombre, datos)` (definida junto a `el()`, ~línea 7646;
+no rompe nada si el script no ha cargado — bloqueadores de anuncios, sin red — porque comprueba
+`typeof umami !== 'undefined'` dentro de un `try/catch`). Disparados actualmente:
+- `nueva_partida` (`{estilo}`) al pulsar "Empezar carrera" en `SCREENS.crear`.
+- `retiro` (`{temporada, partidos, goles, titulos, categoriaFinal}`) al pulsar "Colgar las
+  botas" en `SCREENS.retiro` (forzosa a los 42 o voluntaria, mismo punto).
+Al añadir un evento nuevo: nombre en minúsculas con guion bajo, payload pequeño (unas pocas
+claves), y pensar en el volumen si se dispara muy seguido (capa gratuita: 100.000 eventos/mes).
+
 ## Errores ya cazados — vigilar que no se repitan
 
 - **Cambios que no persisten**: en FICHAJE 10, varios arreglos "guardados" no llegaban al
