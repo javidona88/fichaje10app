@@ -9802,8 +9802,8 @@ SCREENS.crear = function(){
   row1.appendChild(f1);
 
   const f1b = el('div','field');
-  f1b.appendChild(el('label',null,'Apellidos'));
-  const inpApellido = document.createElement('input'); inpApellido.type='text'; inpApellido.value=state.apellido; inpApellido.placeholder='Apellidos';
+  f1b.appendChild(el('label',null,'Apellido'));
+  const inpApellido = document.createElement('input'); inpApellido.type='text'; inpApellido.value=state.apellido; inpApellido.placeholder='Apellido';
   inpApellido.oninput = e=>{ state.apellido = e.target.value; };
   f1b.appendChild(inpApellido);
   row1.appendChild(f1b);
@@ -9917,7 +9917,7 @@ SCREENS.personalizarGrupo = function(){
     const inpN = document.createElement('input'); inpN.type='text'; inpN.value = state[p.id].nombre; inpN.placeholder='Nombre';
     inpN.style.cssText = 'flex:1;min-width:0;padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);font-family:\'Space Grotesk\',sans-serif;font-size:14px;color:var(--ink);';
     inpN.oninput = e=>{ state[p.id].nombre = e.target.value; };
-    const inpA = document.createElement('input'); inpA.type='text'; inpA.value = state[p.id].apellido; inpA.placeholder='Apellidos';
+    const inpA = document.createElement('input'); inpA.type='text'; inpA.value = state[p.id].apellido; inpA.placeholder='Apellido (opcional)';
     inpA.style.cssText = inpN.style.cssText;
     inpA.oninput = e=>{ state[p.id].apellido = e.target.value; };
     row.appendChild(inpN); row.appendChild(inpA);
