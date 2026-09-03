@@ -1343,7 +1343,11 @@ const BANCO_EVENTOS = [
     opciones:[
       { texto:"Reservar clínica en Turquía para un injerto capilar", tirada:{atributo:"fisico", dificultadBase:17},
         costeEstimado: j => 4500,
-        exito:{ texto:"Sale redondo. Un par de semanas con gorra, algo de costra al principio, y en unos meses recuperas la línea del pelo de los veinte. Vuelves al campo estrenando look y hasta la prensa rosa te dedica un reportaje.",
+        exito:{ texto: j => {
+            const revistas = ['¡Hola!','Semana','Diez Minutos'];
+            const revista = revistas[Math.floor(Math.random()*revistas.length)];
+            return `Sale redondo. Un par de semanas con gorra, algo de costra al principio, y en unos meses recuperas la línea del pelo de los veinte. Vuelves al campo estrenando look y hasta ${revista} te dedica un reportaje.`;
+          },
           efectos:{ dinero:-4500, popularidad:6, confianza:5, mental:2 } },
         fallo:{ texto:"La zona injertada se infecta a los pocos días. Fiebre alta, antibióticos por vía y una revisión de los servicios médicos del club que acaba en parte oficial: media temporada apartado hasta que aquello cicatrice del todo. En el vestuario ya nadie hace bromas.",
           efectosFn: j => {
@@ -1880,7 +1884,7 @@ const BANCO_EVENTOS = [
     trigger:{ edadMin:24, probabilidad:0.12, condicion: j => j.stats.reputacion >= 25 || CATEGORIAS.indexOf(j.club.categoria) >= 2 },
     texto:"Netflix te propone protagonizar un documental sobre tu trayectoria: desde el descampado del barrio hasta donde estás ahora.",
     variantes:[
-      "Una productora que trabaja para Netflix quiere producir un documental sobre tu vida, desde el barrio hasta donde estás ahora.",
+      "The Mediapro Studio, la productora que trabaja para Netflix en España, quiere producir un documental sobre tu vida, desde el barrio hasta donde estás ahora.",
       "Te llega la propuesta de contar tu historia en un documental de Netflix: de dónde vienes, y hasta dónde has llegado."
     ],
     opciones:[
@@ -1895,7 +1899,11 @@ const BANCO_EVENTOS = [
   {
     id:"gesto_solidario_publico", cooldown:5,
     trigger:{ edadMin:19, probabilidad:0.14 },
-    texto: j => `Una asociación benéfica de ${j.localidad}, tu ciudad de origen, te pide colaborar en una campaña para chavales sin recursos que sueñan con jugar al fútbol, igual que tú soñabas sin tener ni las botas adecuadas.`,
+    texto: j => {
+      const entidades = ['Cruz Roja','Fundación LaLiga','UNICEF'];
+      const entidad = entidades[Math.floor(Math.random()*entidades.length)];
+      return `${entidad} te pide colaborar con una campaña en ${j.localidad}, tu ciudad de origen, para chavales sin recursos que sueñan con jugar al fútbol, igual que tú soñabas sin tener ni las botas adecuadas.`;
+    },
     opciones:[
       { texto:"Implicarte a fondo, poniendo tiempo y dinero de tu parte",
         resultado: j => `Donas parte de tu sueldo ${articuloClub(j.club.nombre)==='la'?'de la':'del'} ${j.club.nombre} y te presentas en persona a repartir material deportivo. Ver las caras de esos chavales te devuelve, por un momento, a quien eras tú antes de todo esto.`,
@@ -2838,9 +2846,10 @@ const BANCO_EVENTOS = [
     trigger:{ probabilidad:0.12 },
     texto: j => {
       const vuela = CATEGORIAS.indexOf(j.club.categoria) >= 3 || j.club.extranjero;
-      return vuela
-        ? "Una cancelación de última hora en el vuelo del equipo amenaza con dejaros tirados a horas de un partido importante. El caos en el aeropuerto es total."
-        : "Una avería de última hora en el autobús del equipo amenaza con dejaros tirados a horas de un partido importante. El caos en la estación es total.";
+      if(!vuela) return "Una avería de última hora en el autobús del equipo amenaza con dejaros tirados a horas de un partido importante. El caos en la estación es total.";
+      const aerolineas = ['Ryanair','Vueling','easyJet'];
+      const aerolinea = aerolineas[Math.floor(Math.random()*aerolineas.length)];
+      return `Una cancelación de última hora del vuelo de ${aerolinea} amenaza con dejaros tirados a horas de un partido importante. El caos en el aeropuerto es total.`;
     },
     opciones:[
       { texto:"Mantener la calma y ayudar a organizar un plan B", tirada:{atributo:"mental", dificultadBase:11},
@@ -3013,10 +3022,15 @@ const BANCO_EVENTOS = [
   {
     id:"oferta_publicidad_nacional", cooldown:6,
     trigger:{ edadMin:20, probabilidad:0.14, condicion: j => j.stats.reputacion >= 20 && CATEGORIAS.indexOf(j.club.categoria) >= 3 },
-    texto:"Una marca de alcance nacional te propone protagonizar su próxima campaña publicitaria.",
+    texto: j => {
+      const marcas = ['Coca-Cola','El Corte Inglés','San Miguel'];
+      const marca = marcas[Math.floor(Math.random()*marcas.length)];
+      S._marcaPublicidadNacional = marca;
+      return `${marca} te propone protagonizar su próxima campaña publicitaria.`;
+    },
     opciones:[
       { texto:"Aceptar la campaña",
-        resultado: j => `Grabas el anuncio en apenas un día, pero se emite en televisión durante semanas. Media España te ve en el descanso de cada partido.`,
+        resultado: j => `Grabas el anuncio de ${S._marcaPublicidadNacional||'la marca'} en apenas un día, pero se emite en televisión durante semanas. Media España te ve en el descanso de cada partido.`,
         efectosFn: j => ({ popularidad:12, reputacion:4, dinero: Math.max(1000, Math.round(j.stats.valorMercado*0.015)) }) },
       { texto:"Rechazarla, prefieres mantener un perfil discreto",
         resultado:"Declinas la propuesta. Prefieres que hablen de ti solo por lo que haces en el campo.",
@@ -3026,7 +3040,11 @@ const BANCO_EVENTOS = [
   {
     id:"entrevista_television_nacional", cooldown:6,
     trigger:{ edadMin:21, probabilidad:0.14, condicion: j => j.stats.popularidad >= 25 && CATEGORIAS.indexOf(j.club.categoria) >= 3 },
-    texto:"Un programa deportivo de máxima audiencia te invita a una entrevista en directo, sin guion ni preguntas pactadas.",
+    texto: j => {
+      const programas = ['Vamos, de Movistar Plus+','Deportes Cuatro','El Partidazo de COPE'];
+      const programa = programas[Math.floor(Math.random()*programas.length)];
+      return `${programa} te invita a una entrevista en directo, sin guion ni preguntas pactadas.`;
+    },
     opciones:[
       { texto:"Ir y mostrarte tal y como eres", tirada:{atributo:"mental", dificultadBase:13},
         exito:{ texto:"Sales natural, cercano y con las ideas claras. La entrevista se comenta en redes toda la semana, para bien.", efectos:{popularidad:11,reputacion:5} },
@@ -3071,7 +3089,14 @@ const BANCO_EVENTOS = [
   {
     id:"premio_juego_limpio", unico:true,
     trigger:{ edadMin:22, probabilidad:0.12, condicion: j => j.stats.reputacion >= 35 },
-    texto:"La federación te concede un reconocimiento al juego limpio por tu comportamiento dentro y fuera del campo esta temporada.",
+    texto: j => {
+      const textos = [
+        'La RFEF te concede un reconocimiento al juego limpio por tu comportamiento dentro y fuera del campo esta temporada.',
+        'La RFEF te incluye en su lista anual de jugadores modélicos por el juego limpio, por tu comportamiento dentro y fuera del campo esta temporada.',
+        'LaLiga destaca tu comportamiento dentro y fuera del campo esta temporada con un reconocimiento al juego limpio.'
+      ];
+      return textos[Math.floor(Math.random()*textos.length)];
+    },
     opciones:[
       { texto:"Recoger el premio con orgullo",
         resultado:"No es una Bota de Oro, pero para tu familia, que sabe todo lo que ha costado llegar hasta aquí sin perder la forma de ser, vale como el trofeo más importante de la vitrina.",
@@ -3087,7 +3112,13 @@ const BANCO_EVENTOS = [
     texto: j => {
       const estrella = CANDIDATOS_BALON_ORO[Math.floor(Math.random()*CANDIDATOS_BALON_ORO.length)];
       S._estrellaComparada = estrella;
-      return `Un periodista de sobremesa lanza la comparación en directo: "por estilo de juego, a mí me recuerda a ${estrella}". El clip se hace viral en cuestión de horas.`;
+      const fuentes = [
+        `Un tertuliano de El Chiringuito de Jugones lanza la comparación en directo: "por estilo de juego, a mí me recuerda a ${estrella}"`,
+        `Jijantes sube un vídeo con la comparación: "por estilo de juego, esto me recuerda a ${estrella}"`,
+        `Ibai Llanos comenta en directo, sin venir mucho a cuento: "por estilo de juego, esto me recuerda a ${estrella}"`
+      ];
+      const fuente = fuentes[Math.floor(Math.random()*fuentes.length)];
+      return `${fuente}. El clip se hace viral en cuestión de horas.`;
     },
     opciones:[
       { texto:"Responder con humildad, sin darle mayor importancia", tirada:{atributo:"mental", dificultadBase:11},
@@ -3170,7 +3201,14 @@ const BANCO_EVENTOS = [
   {
     id:"reto_benefico_famosos", cooldown:6, soloSiSano:true,
     trigger:{ edadMin:21, probabilidad:0.12, condicion: j => j.stats.popularidad >= 30 },
-    texto:"Te invitan a un partido benéfico con caras conocidas de otros ámbitos: música, cine, otros deportes. Las cámaras de televisión estarán allí.",
+    texto: j => {
+      const eventos = [
+        'Te invitan a un partido benéfico organizado por DjMaRiiO, con caras conocidas de otros ámbitos: música, cine, otros deportes. Las cámaras estarán allí.',
+        'Te invitan a una exhibición de Kings League junto a caras conocidas de otros ámbitos: música, cine, otros deportes. Las cámaras estarán allí.',
+        'Te invitan al Corazón Classic Match, un partido benéfico con caras conocidas de otros ámbitos: música, cine, otros deportes. Las cámaras estarán allí.'
+      ];
+      return eventos[Math.floor(Math.random()*eventos.length)];
+    },
     opciones:[
       { texto:"Ir a por todas y lucirte con algún regate vistoso", tirada:{atributo:"regate", dificultadBase:11},
         exito:{ texto:"Dejas un par de jugadas que se hacen virales al instante. La causa benéfica recauda más de lo esperado gracias al revuelo.", efectos:{popularidad:9,reputacion:2} },
