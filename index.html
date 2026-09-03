@@ -8339,7 +8339,7 @@ SCREENS.tabEconomia = function(){
   const btnCasino = document.createElement('button'); btnCasino.className='btn-main';
   btnCasino.style.cssText = 'background:transparent;color:var(--ink-soft);border:1px solid var(--line);box-shadow:none;';
   btnCasino.textContent = 'Entrar al casino →';
-  btnCasino.onclick = ()=>{ S.screen = 'casino'; render(); };
+  btnCasino.onclick = ()=>{ S.casinoManosJugadas = 0; S.screen = 'casino'; render(); };
   cCasino.appendChild(btnCasino);
   app.appendChild(cCasino);
 
