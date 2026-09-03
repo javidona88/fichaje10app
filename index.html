@@ -4424,12 +4424,14 @@ const OPCIONES_SEMIFINAL_SELECCION = [
 // la Conference es la más asequible de las tres (base más alta). La posición en liga (el único
 // baremo que tenemos de cómo va tu equipo ESA temporada) matiza esa base igual que el prestigio.
 function probabilidadSemisContinental(j, baseCompeticion){
-  const prestigio = PRESTIGIO_CLUB[j.club.nombre] || 2; // 1-4
+  const prestigio = PRESTIGIO_CLUB[j.club.nombre] || 2; // 1-4, relativo a SU PROPIO país
   const factorPrestigio = prestigio / 2.5; // 1→0.4 · 2,5 (neutro)→1.0 · 4→1.6
   const posicion = S.posicionLiga || Math.ceil(EQUIPOS_EN_LIGA/2);
   const factorPosicion = 1.8 - (posicion-1)/(EQUIPOS_EN_LIGA-1) * 1.5; // 1º→1.8 · último→0.3
   const factorForma = (factorPrestigio + factorPosicion) / 2;
-  return Math.max(0.02, baseCompeticion * factorForma);
+  const pais = j.club.extranjero ? j.club.pais : 'España';
+  const factorLiga = FACTOR_LIGA_CONTINENTAL[pais] ?? 0.25; // el prestigio no vale lo mismo en cualquier liga
+  return Math.max(0.005, baseCompeticion * factorForma * factorLiga);
 }
 
 const TORNEOS_CONFIG = [
@@ -4520,6 +4522,14 @@ const TORNEOS_CONFIG = [
 ];
 
 const PAISES_UEFA = ["Alemania","Bélgica","España","Francia","Inglaterra","Italia","Países Bajos","Portugal","Turquía","Escocia","Croacia","Suiza","Grecia","Polonia","Austria","Dinamarca","Ucrania","República Checa"];
+// PRESTIGIO_CLUB es una escala RELATIVA dentro de cada país (un 3 en Croacia no es lo mismo
+// que un 3 en España): un club de las 5 grandes ligas llega mucho más lejos en Europa que el
+// mejor de una liga modesta con el mismo prestigio interno. Este factor corrige eso al usar
+// PRESTIGIO_CLUB fuera de su propio país, en las competiciones continentales.
+const FACTOR_LIGA_CONTINENTAL = {
+  "España":1, "Inglaterra":1, "Italia":1, "Alemania":1, "Francia":1,
+  "Portugal":0.6, "Países Bajos":0.6
+}; // el resto de PAISES_UEFA (Bélgica, Turquía, Escocia, Croacia, Suiza, Grecia...) cae al 0.25 por defecto
 
 const CANDIDATOS_BALON_ORO = ["Kylian Mbappé","Erling Haaland","Vinícius Júnior","Jude Bellingham","Lamine Yamal","Rodri"];
 
@@ -11102,15 +11112,18 @@ function rivalClubTorneo(cfg){
   // Champions / Europa League / Conference: un único reparto ponderado por prestigio que
   // mete a España en la misma bolsa que el resto de la UEFA (antes España tenía su propio
   // 22% de posibilidades sin mirar el prestigio, así que podía tocarte de rival cualquier
-  // equipo de LaLiga, hasta el colista, en una semifinal de Champions). Dentro de la franja
-  // tierMin-tierMax de la competición, un club de prestigio 4 pesa el doble que uno de 2.
+  // equipo de LaLiga, hasta el colista, en una semifinal de Champions). La franja tierMin-
+  // tierMax (a qué clubes deja entrar la competición) usa el prestigio tal cual, relativo a
+  // su propio país; pero el PESO para elegir entre ellos aplica además FACTOR_LIGA_CONTINENTAL,
+  // porque un 3 en Croacia o Turquía no pesa lo mismo en Europa que un 3 en España o Inglaterra.
   const clubesEspanoles = CLUBES_POR_CATEGORIA["LaLiga"].map(c => ({ ...c, pais:'España' }));
   const clubesUefa = CLUBES_EXTRANJERO.filter(c => PAISES_UEFA.includes(c.pais));
   const pool = [...clubesEspanoles, ...clubesUefa].filter(c => c.nombre !== j.club.nombre);
+  const pesoClub = c => (PRESTIGIO_CLUB[c.nombre]||2) * (FACTOR_LIGA_CONTINENTAL[c.pais] ?? 0.25);
   let candidatosConPeso = pool
-    .map(c => ({ club:c, peso: PRESTIGIO_CLUB[c.nombre]||2 }))
-    .filter(c => c.peso >= cfg.tierMin && c.peso <= cfg.tierMax);
-  if(!candidatosConPeso.length) candidatosConPeso = pool.map(c => ({ club:c, peso: PRESTIGIO_CLUB[c.nombre]||2 }));
+    .filter(c => (PRESTIGIO_CLUB[c.nombre]||2) >= cfg.tierMin && (PRESTIGIO_CLUB[c.nombre]||2) <= cfg.tierMax)
+    .map(c => ({ club:c, peso: pesoClub(c) }));
+  if(!candidatosConPeso.length) candidatosConPeso = pool.map(c => ({ club:c, peso: pesoClub(c) }));
   const pesoTotal = candidatosConPeso.reduce((s,c)=>s+c.peso, 0);
   let dado = Math.random() * pesoTotal;
   let elegido = candidatosConPeso[candidatosConPeso.length-1].club;
