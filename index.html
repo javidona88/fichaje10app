@@ -3592,11 +3592,15 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.4.1';
+const VERSION_JUEGO = 'v1.4.2';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.4.2', titulo:'Tu provincia real en la creación', cambios:[
+    'Nuevo campo Provincia al crear personaje: tu primer club de Tercera RFEF sale ahora del grupo real de tu región (los 18 grupos territoriales de toda España, no solo uno).',
+    'El campo de apellido pasa a ser uno solo ("Apellido"), y el de tus amigos queda claro que es opcional.'
+  ]},
   { version:'v1.4.1', titulo:'Sucesos con nombres reales', cambios:[
     'Varios sucesos mencionan ahora marcas, medios y personajes reales para dar más realismo: Telecinco, El Chiringuito de Jugones, Jijantes, Ibai Llanos, DjMaRiiO, Kings League, Cruz Roja, Fundación LaLiga, UNICEF, RFEF, Ryanair, Vueling, easyJet, entre otros — con varias opciones distintas para que no se repita siempre la misma.',
     'El injerto capilar que sale bien ya no menciona siempre la misma revista: puede acabar en ¡Hola!, comentado en directo por Javi Hoyos, o con un hilo de choteo en Forocoches.'
