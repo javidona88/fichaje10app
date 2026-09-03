@@ -4417,12 +4417,47 @@ const OPCIONES_SEMIFINAL_SELECCION = [
     {texto:'Mantener la calma y esperar tu ocasión', atributo:'mental', dificultadBase:14} ]
 ];
 
+// Cuánto multiplica tu nota media de la temporada pasada (j.ultimaNotaTemporada) la
+// probabilidad de tu equipo. Más franjas que un simple lineal, y calibrado para que el 8-10
+// habitual de quien juega competición europea siga teniendo recorrido dentro de la escala.
+function multiplicadorPorNota(nota){
+  if(nota < 5.5) return 0.70;  // floja
+  if(nota < 6.5) return 0.85;  // normalita
+  if(nota < 7.5) return 1.00;  // correcta (referencia neutra)
+  if(nota < 8.5) return 1.20;  // buena
+  if(nota < 9.3) return 1.50;  // notable / de los mejores de la liga
+  return 1.90;                 // descomunal / candidato a Balón de Oro
+}
+// Un crack de verdad arrastra mucho más a un equipo modesto (donde el resto de la plantilla es
+// floja y tu aportación pesa proporcionalmente más) que a un equipo ya lleno de buenos
+// jugadores. nivelEquipo va de 0 (equipo humilde) a 1 (equipo top).
+function factorJugadorEstrella(j, nivelEquipo){
+  const nota = j.ultimaNotaTemporada != null ? j.ultimaNotaTemporada : 6.5;
+  const desviacion = multiplicadorPorNota(nota) - 1; // -0.30 .. +0.90
+  const intensidad = 1.8 - nivelEquipo * 1.3; // equipo humilde → x1.8 · equipo top → x0.5
+  return 1 + desviacion * intensidad;
+}
+// "Tamaño" del club para la Copa del Rey: categoría + prestigio dentro de esa categoría.
+function nivelEquipoDomestico(j){
+  const idxCat = CATEGORIAS.indexOf(j.club.categoria);
+  const prestigio = PRESTIGIO_CLUB[j.club.nombre] || 2;
+  return idxCat >= 4 ? (0.55 + (prestigio-1)/3*0.45)   // LaLiga
+    : idxCat === 3 ? (0.25 + (prestigio-1)/3*0.25)      // LaLiga2
+    : ((prestigio-1)/3*0.2);                            // Primera RFEF
+}
+// "Tamaño" del club para competiciones internacionales: prestigio + qué tan fuerte es su liga.
+function nivelEquipoInternacional(j){
+  const prestigio = PRESTIGIO_CLUB[j.club.nombre] || 2;
+  const pais = j.club.extranjero ? j.club.pais : 'España';
+  const factorLiga = FACTOR_LIGA_PAIS[pais] ?? 0.25;
+  return Math.max(0, Math.min(1, ((prestigio-1)/3 * 0.5) + ((factorLiga-0.25)/0.75) * 0.5));
+}
 // Probabilidad de llegar a semis de una competición continental, YA clasificado para ella
 // (eso ya filtra mucho: solo entran los puestos altos de tu liga). Ni siquiera los grandes
 // llegan a semis todos los años — el prestigio del club mueve una base que refleja lo exigente
-// que es cada competición en la vida real: la Champions está llena de gigantes (base más baja),
-// la Conference es la más asequible de las tres (base más alta). La posición en liga (el único
-// baremo que tenemos de cómo va tu equipo ESA temporada) matiza esa base igual que el prestigio.
+// que es cada competición en la vida real. La posición en liga (el único baremo que tenemos de
+// cómo va tu equipo ESA temporada), la liga de tu país, y tu propia nota media de crack (o de
+// jugador flojo) terminan de matizar esa base.
 function probabilidadSemisContinental(j, baseCompeticion){
   const prestigio = PRESTIGIO_CLUB[j.club.nombre] || 2; // 1-4, relativo a SU PROPIO país
   const factorPrestigio = prestigio / 2.5; // 1→0.4 · 2,5 (neutro)→1.0 · 4→1.6
@@ -4430,8 +4465,9 @@ function probabilidadSemisContinental(j, baseCompeticion){
   const factorPosicion = 1.8 - (posicion-1)/(EQUIPOS_EN_LIGA-1) * 1.5; // 1º→1.8 · último→0.3
   const factorForma = (factorPrestigio + factorPosicion) / 2;
   const pais = j.club.extranjero ? j.club.pais : 'España';
-  const factorLiga = FACTOR_LIGA_CONTINENTAL[pais] ?? 0.25; // el prestigio no vale lo mismo en cualquier liga
-  return Math.max(0.005, baseCompeticion * factorForma * factorLiga);
+  const factorLiga = FACTOR_LIGA_PAIS[pais] ?? 0.25; // el prestigio no vale lo mismo en cualquier liga
+  const factorEstrella = factorJugadorEstrella(j, nivelEquipoInternacional(j));
+  return Math.max(0.003, baseCompeticion * factorForma * factorLiga * factorEstrella);
 }
 
 const TORNEOS_CONFIG = [
@@ -4456,7 +4492,8 @@ const TORNEOS_CONFIG = [
       const posicion = S.posicionLiga || Math.ceil(EQUIPOS_EN_LIGA/2);
       const factorPosicion = 1.8 - (posicion-1)/(EQUIPOS_EN_LIGA-1) * 1.5; // 1º→1.8 · último→0.3
       const factorForma = (factorPrestigio + factorPosicion) / 2;
-      return Math.max(0.0002, mediaPorEquipo * factorForma);
+      const factorEstrella = factorJugadorEstrella(j, nivelEquipoDomestico(j));
+      return Math.max(0.0002, mediaPorEquipo * factorForma * factorEstrella);
     },
     efectosVictoria:{forma:16,popularidad:22,reputacion:14,valorMercado:60000} },
   { id:'copa_europa', nombreCompeticion:'Champions League', tipo:'club', tierMin:3, tierMax:4,
@@ -4472,13 +4509,16 @@ const TORNEOS_CONFIG = [
     probabilidad: j => probabilidadSemisContinental(j, 0.24),
     efectosVictoria:{forma:11,popularidad:6,reputacion:5,valorMercado:24000} },
   { id:'copa_libertadores', nombreCompeticion:'Copa Libertadores', tipo:'club_sudamerica',
-    condicion: j => j.club.nivelEuropeo === 'libertadores' && S.pasoIndex === 4, probabilidad:0.85,
+    condicion: j => j.club.nivelEuropeo === 'libertadores' && S.pasoIndex === 4,
+    probabilidad: j => probabilidadSemisContinental(j, 0.12),
     efectosVictoria:{forma:15,popularidad:12,reputacion:10,valorMercado:54000} },
   { id:'concacaf_champions_cup', nombreCompeticion:'Concacaf Champions Cup', tipo:'club_concacaf',
-    condicion: j => j.club.nivelEuropeo === 'concacaf' && S.pasoIndex === 4, probabilidad:0.85,
+    condicion: j => j.club.nivelEuropeo === 'concacaf' && S.pasoIndex === 4,
+    probabilidad: j => probabilidadSemisContinental(j, 0.20),
     efectosVictoria:{forma:14,popularidad:11,reputacion:9,valorMercado:48000} },
   { id:'afc_champions_league', nombreCompeticion:'AFC Champions League Elite', tipo:'club_asia',
-    condicion: j => j.club.nivelEuropeo === 'afc' && S.pasoIndex === 4, probabilidad:0.85,
+    condicion: j => j.club.nivelEuropeo === 'afc' && S.pasoIndex === 4,
+    probabilidad: j => probabilidadSemisContinental(j, 0.16),
     efectosVictoria:{forma:14,popularidad:11,reputacion:9,valorMercado:48000} },
   { id:'supercopa_europa', nombreCompeticion:'Supercopa de Europa', tipo:'club', tierMin:3, tierMax:4, sinSemifinal:true,
     condicion: j => {
@@ -4523,13 +4563,21 @@ const TORNEOS_CONFIG = [
 
 const PAISES_UEFA = ["Alemania","Bélgica","España","Francia","Inglaterra","Italia","Países Bajos","Portugal","Turquía","Escocia","Croacia","Suiza","Grecia","Polonia","Austria","Dinamarca","Ucrania","República Checa"];
 // PRESTIGIO_CLUB es una escala RELATIVA dentro de cada país (un 3 en Croacia no es lo mismo
-// que un 3 en España): un club de las 5 grandes ligas llega mucho más lejos en Europa que el
-// mejor de una liga modesta con el mismo prestigio interno. Este factor corrige eso al usar
-// PRESTIGIO_CLUB fuera de su propio país, en las competiciones continentales.
-const FACTOR_LIGA_CONTINENTAL = {
+// que un 3 en España, y un 3 en Uruguay no es lo mismo que un 3 en Brasil): un club de una
+// liga dominante llega mucho más lejos en su competición continental que el mejor de una liga
+// modesta con el mismo prestigio interno. Un único mapa por país, válido para las cuatro
+// competiciones continentales del juego (UEFA, Libertadores, Concacaf, AFC).
+const FACTOR_LIGA_PAIS = {
+  // UEFA — las 5 grandes ligas
   "España":1, "Inglaterra":1, "Italia":1, "Alemania":1, "Francia":1,
-  "Portugal":0.6, "Países Bajos":0.6
-}; // el resto de PAISES_UEFA (Bélgica, Turquía, Escocia, Croacia, Suiza, Grecia...) cae al 0.25 por defecto
+  "Portugal":0.6, "Países Bajos":0.6,
+  // Sudamérica — Brasil y Argentina dominan la Libertadores con mucha diferencia
+  "Brasil":1, "Argentina":1, "Uruguay":0.45, "Chile":0.4,
+  // Concacaf — México manda claramente sobre la MLS
+  "México":1, "Estados Unidos":0.35,
+  // AFC — Arabia Saudí, Japón y Corea compiten bastante parejos por el título
+  "Arabia Saudí":1, "Japón":0.95, "Corea del Sur":0.95
+}; // cualquier otro país (ligas menores de UEFA no listadas arriba) cae al 0.25 por defecto
 
 const CANDIDATOS_BALON_ORO = ["Kylian Mbappé","Erling Haaland","Vinícius Júnior","Jude Bellingham","Lamine Yamal","Rodri"];
 
@@ -11102,24 +11150,35 @@ function rivalClubTorneo(cfg){
     return { nombre: elegido.nombre, colores: elegido.colores, pais:'España' };
   }
   if(['club_sudamerica','club_concacaf','club_asia'].includes(cfg.tipo)){
+    // Mismo criterio que las competiciones UEFA: ponderado por prestigio × liga del país
+    // (Brasil/Argentina sobre Uruguay/Chile, México sobre la MLS...), no uniforme al azar.
     let candidatos;
     if(cfg.tipo === 'club_sudamerica') candidatos = CLUBES_EXTRANJERO.filter(c => PAISES_SUDAMERICANOS.includes(c.pais) && c.nombre !== j.club.nombre);
     else if(cfg.tipo === 'club_concacaf') candidatos = CLUBES_EXTRANJERO.filter(c => PAISES_CONCACAF.includes(c.pais) && c.nombre !== j.club.nombre);
     else candidatos = CLUBES_EXTRANJERO.filter(c => PAISES_ASIA.includes(c.pais) && c.nombre !== j.club.nombre);
     if(!candidatos.length) candidatos = CLUBES_EXTRANJERO.filter(c => c.nombre !== j.club.nombre);
-    return candidatos[Math.floor(Math.random()*candidatos.length)];
+    const pesoRegional = c => (PRESTIGIO_CLUB[c.nombre]||2) * (FACTOR_LIGA_PAIS[c.pais] ?? 0.25);
+    const candidatosConPesoRegional = candidatos.map(c => ({ club:c, peso: pesoRegional(c) }));
+    const pesoTotalRegional = candidatosConPesoRegional.reduce((s,c)=>s+c.peso, 0);
+    let dadoRegional = Math.random() * pesoTotalRegional;
+    let elegidoRegional = candidatosConPesoRegional[candidatosConPesoRegional.length-1].club;
+    for(const c of candidatosConPesoRegional){
+      dadoRegional -= c.peso;
+      if(dadoRegional <= 0){ elegidoRegional = c.club; break; }
+    }
+    return elegidoRegional;
   }
   // Champions / Europa League / Conference: un único reparto ponderado por prestigio que
   // mete a España en la misma bolsa que el resto de la UEFA (antes España tenía su propio
   // 22% de posibilidades sin mirar el prestigio, así que podía tocarte de rival cualquier
   // equipo de LaLiga, hasta el colista, en una semifinal de Champions). La franja tierMin-
   // tierMax (a qué clubes deja entrar la competición) usa el prestigio tal cual, relativo a
-  // su propio país; pero el PESO para elegir entre ellos aplica además FACTOR_LIGA_CONTINENTAL,
+  // su propio país; pero el PESO para elegir entre ellos aplica además FACTOR_LIGA_PAIS,
   // porque un 3 en Croacia o Turquía no pesa lo mismo en Europa que un 3 en España o Inglaterra.
   const clubesEspanoles = CLUBES_POR_CATEGORIA["LaLiga"].map(c => ({ ...c, pais:'España' }));
   const clubesUefa = CLUBES_EXTRANJERO.filter(c => PAISES_UEFA.includes(c.pais));
   const pool = [...clubesEspanoles, ...clubesUefa].filter(c => c.nombre !== j.club.nombre);
-  const pesoClub = c => (PRESTIGIO_CLUB[c.nombre]||2) * (FACTOR_LIGA_CONTINENTAL[c.pais] ?? 0.25);
+  const pesoClub = c => (PRESTIGIO_CLUB[c.nombre]||2) * (FACTOR_LIGA_PAIS[c.pais] ?? 0.25);
   let candidatosConPeso = pool
     .filter(c => (PRESTIGIO_CLUB[c.nombre]||2) >= cfg.tierMin && (PRESTIGIO_CLUB[c.nombre]||2) <= cfg.tierMax)
     .map(c => ({ club:c, peso: pesoClub(c) }));
