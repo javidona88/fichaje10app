@@ -16,7 +16,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=PT+Serif:wght@700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root{
   --bg: #14161F;
@@ -411,6 +411,66 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 }
 .eff-chip.pos{ color:var(--green); }
 .eff-chip.neg{ color:var(--red); }
+
+/* ---- blackjack (casino) ---- */
+.bj-dinero{ background:rgba(110,136,168,0.1); border-radius:8px; padding:12px 14px; margin-bottom:16px; font-size:13.5px; line-height:1.5; }
+.bj-mesa{
+  background:radial-gradient(ellipse 130% 90% at 50% -20%, #1e4a34, #0c2318 75%);
+  border-radius:16px; border:1px solid rgba(212,175,55,0.22);
+  padding:16px 14px 18px; margin-bottom:16px;
+  box-shadow:inset 0 0 34px rgba(0,0,0,0.5), 0 6px 18px rgba(0,0,0,0.35);
+}
+.bj-fila{ margin-bottom:14px; }
+.bj-fila:last-child{ margin-bottom:0; }
+.bj-etq-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.bj-etq{ font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; color:rgba(238,239,243,0.68); }
+.bj-total{ font-size:12.5px; font-weight:700; color:var(--gold); background:rgba(0,0,0,0.32); padding:2px 10px; border-radius:20px; font-variant-numeric:tabular-nums; }
+.bj-cartas-row{ display:flex; gap:7px; min-height:74px; flex-wrap:wrap; align-items:flex-start; }
+.bj-carta{
+  width:52px; height:73px; border-radius:7px; background:#F4EFDE;
+  box-shadow:0 3px 9px rgba(0,0,0,0.4); position:relative; flex-shrink:0;
+  font-family:'PT Serif',Georgia,serif; animation:bjCartaEntra .5s ease;
+}
+@keyframes bjCartaEntra{ from{ opacity:0; transform:translateY(-9px) scale(.93); } to{ opacity:1; transform:translateY(0) scale(1); } }
+@media (prefers-reduced-motion: reduce){ .bj-carta{ animation:none; } }
+.bj-carta .esq{ position:absolute; font-weight:700; font-size:12px; line-height:1; display:flex; flex-direction:column; align-items:center; gap:1px; }
+.bj-carta .esq.tl{ top:4px; left:5px; }
+.bj-carta .esq.br{ bottom:4px; right:5px; transform:rotate(180deg); }
+.bj-carta .centro{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:22px; }
+.bj-carta.roja{ color:#C8102E; }
+.bj-carta.negra{ color:#1A1C26; }
+.bj-carta.dorso{
+  background:#1B2138; border:1px solid rgba(212,175,55,0.4);
+  background-image:repeating-linear-gradient(45deg, rgba(212,175,55,0.10) 0 6px, transparent 6px 12px);
+  display:flex; align-items:center; justify-content:center;
+}
+.bj-carta.dorso .mono{
+  width:26px; height:26px; border-radius:50%; border:1.5px solid var(--gold);
+  display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif;
+  font-weight:700; font-size:10.5px; color:var(--gold); background:rgba(212,175,55,0.08);
+}
+.bj-resultado{ display:flex; justify-content:center; align-items:center; text-align:center; width:100%; padding:10px 14px; border-radius:10px; font-size:13.5px; font-weight:600; margin-bottom:14px; }
+.bj-resultado.gana{ background:rgba(76,175,109,0.16); color:var(--green); }
+.bj-resultado.pierde{ background:rgba(217,73,92,0.16); color:var(--red); }
+.bj-resultado.empate{ background:rgba(141,147,166,0.15); color:var(--ink-soft); }
+.bj-mensaje{ font-size:13px; color:var(--ink-soft); text-align:center; margin-bottom:14px; line-height:1.5; }
+.bj-apuesta-label{ text-align:center; font-size:12.5px; color:var(--ink-soft); margin-bottom:8px; }
+.bj-apuesta-label b{ color:var(--ink); }
+.bj-chips-row{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:16px; }
+.bj-chip-btn{ padding:6px 10px; border-radius:8px; font-size:11px; font-family:'Space Grotesk',sans-serif; border:1px solid var(--line); background:transparent; color:var(--ink); cursor:pointer; }
+.bj-chip-btn.sel{ border-color:var(--gold); background:rgba(212,175,55,0.12); color:var(--gold); }
+.bj-chip-btn:disabled{ opacity:.3; cursor:not-allowed; }
+.bj-acciones-row{ display:flex; gap:7px; margin-top:2px; }
+.bj-accion-btn{ flex:1; padding:12px 4px; border-radius:10px; border:1.5px solid var(--line); background:transparent; color:var(--ink); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; cursor:pointer; }
+.bj-accion-btn.primaria{ background:var(--gold); color:#191507; border-color:var(--gold); }
+.bj-accion-btn.primaria:hover:not(:disabled){ background:#E0BE49; }
+.bj-accion-btn:hover:not(:disabled):not(.primaria){ border-color:var(--gold); }
+.bj-accion-btn:disabled{ opacity:.32; cursor:not-allowed; }
+.bj-regla-hint{ text-align:center; font-size:11px; color:var(--ink-soft); margin-top:12px; line-height:1.5; font-style:italic; }
+.bj-interrupcion{ display:flex; gap:12px; align-items:flex-start; background:rgba(212,175,55,0.07); border:1px solid rgba(212,175,55,0.28); border-radius:12px; padding:14px; margin-bottom:14px; }
+.bj-interrupcion-icono{ font-size:23px; line-height:1; flex-shrink:0; }
+.bj-interrupcion-texto{ font-family:'Space Grotesk',sans-serif; font-size:14px; line-height:1.55; color:var(--ink); }
+.bj-interrupcion-etq{ font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--gold-dim); margin-bottom:3px; }
 
 /* ---- fin de temporada / informe de partido ---- */
 .press{
@@ -3376,6 +3436,7 @@ const CHANGELOG_JUEGO = [
   { version:'v1.4', titulo:'Torneos con probabilidades realistas', cambios:[
     'Llegar a semifinales (Copa del Rey, Champions, Europa League, Conference, Libertadores, Concacaf, AFC, Eurocopa y Mundial) ahora depende de tu categoría, el prestigio de tu club, tu posición en liga y tu propia nota media — nada de techos absurdos ni un 85% fijo para cualquiera.',
     'El rival de esas semifinales y finales también pesa por prestigio y por país: ya no te puede tocar cualquier equipo al azar sea cual sea su nivel real.',
+    'Nuevo juego en el casino: Blackjack, con crupier, doblar apuesta y algún que otro aviso de tu entorno si te quedas demasiado tiempo en la mesa.',
     'Corregido: al no renovar contrato, el "contrato de emergencia" que te hacía el club ya no obliga a pagar una cláusula de rescisión para fichar por el equipo que el propio juego te ofrece a continuación.'
   ]},
   { version:'v1.3.4', titulo:'Nuevos sucesos y apodos sin ambigüedad', cambios:[
@@ -4346,7 +4407,7 @@ const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoI
 const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
-const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras']);
+const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras','blackjack']);
 
 const NICE_ATTR = {fisico:"Físico",velocidad:"Velocidad",tiro:"Tiro",regate:"Regate",pase:"Pase",desmarque:"Desmarque",mental:"Carácter",tecnica:"Técnica"};
 
@@ -7038,6 +7099,31 @@ const Sonido = (function(){
     if(!efectosActivos) return;
     tonoRaw(freq, dur, tipo, vol);
   }
+  // Ruido filtrado con caída rápida: el "fwip" de papel de una carta deslizándose sobre el
+  // tapete — igual de procedural que sfx()/tonoRaw() (buffer generado al vuelo, sin muestras).
+  function ruido(dur, freqFiltro, q, vol){
+    if(!efectosActivos) return;
+    try{
+      const c = getCtx();
+      const n = Math.max(1, Math.floor(c.sampleRate * dur));
+      const buffer = c.createBuffer(1, n, c.sampleRate);
+      const data = buffer.getChannelData(0);
+      for(let i=0;i<n;i++){
+        const caida = Math.pow(1 - i/n, 1.7);
+        data[i] = (Math.random()*2 - 1) * caida;
+      }
+      const src = c.createBufferSource();
+      src.buffer = buffer;
+      const filtro = c.createBiquadFilter();
+      filtro.type = 'bandpass';
+      filtro.frequency.value = freqFiltro;
+      filtro.Q.value = q;
+      const g = c.createGain();
+      g.gain.value = vol;
+      src.connect(filtro); filtro.connect(g); g.connect(c.destination);
+      src.start();
+    }catch(e){}
+  }
 
   // Nota suave con ataque y caída lentos, más filtro paso-bajo para quitar aspereza (pad ambiental)
   function notaPad(freq, duracion, vol){
@@ -7226,6 +7312,32 @@ const Sonido = (function(){
         setTimeout(()=> sfx(i%2 ? 660 : 880, 0.04, 'square', 0.03), i*95);
       }
     },
+    // ---- Blackjack: mismo criterio que ruleta/tragaperras, timbre propio ----
+    bjCarta(){ ruido(0.075, 3200, 1.1, 0.05); setTimeout(()=> sfx(1450,.012,'square',.018), 45); },
+    bjVoltear(){ sfx(500,.03,'triangle',.025); setTimeout(()=> sfx(1100,.03,'triangle',.03), 25); },
+    bjDoblar(){ sfx(200,.05,'square',.05); setTimeout(()=> sfx(160,.08,'square',.045), 60); },
+    bjBlackjack(){
+      [523,659,784,1046].forEach((f,i)=> setTimeout(()=> sfx(f,.1,'triangle',.06), i*90));
+      setTimeout(()=> sfx(1318,.35,'triangle',.08), 360);
+    },
+    bjGana(){
+      sfx(784,.10,'triangle',.06);
+      setTimeout(()=> sfx(988,.10,'triangle',.06), 100);
+      setTimeout(()=> sfx(1319,.10,'triangle',.06), 200);
+      setTimeout(()=> sfx(1568,.28,'triangle',.07), 300);
+    },
+    bjPierde(){
+      sfx(392,.16,'sine',.05);
+      setTimeout(()=> sfx(311,.18,'sine',.05), 140);
+      setTimeout(()=> sfx(233,.34,'sine',.045), 300);
+    },
+    bjEmpate(){
+      sfx(440,.09,'sine',.04);
+      setTimeout(()=> sfx(440,.09,'sine',.04), 130);
+    },
+    // Avisos de "llevas mucho tiempo en el casino" — pensados para cualquier juego, no solo blackjack
+    casinoLlamada(){ sfx(700,.05,'square',.03); setTimeout(()=> sfx(700,.05,'square',.03), 130); },
+    casinoNotificacion(){ sfx(1200,.05,'triangle',.035); setTimeout(()=> sfx(1600,.07,'triangle',.04), 90); },
     iniciarMusica, detenerMusica,
     desbloquear(){ try{ getCtx().resume(); }catch(e){} },
     toggleEfectos(){ efectosActivos = !efectosActivos; return efectosActivos; },
@@ -8285,6 +8397,9 @@ SCREENS.casino = function(){
   const btnTraga = document.createElement('button'); btnTraga.className='btn-main'; btnTraga.style.marginTop='8px'; btnTraga.textContent='🎰 Tragaperras';
   btnTraga.onclick = ()=>{ S.screen = 'tragaperras'; render(); };
   c.appendChild(btnTraga);
+  const btnBlackjack = document.createElement('button'); btnBlackjack.className='btn-main'; btnBlackjack.style.marginTop='8px'; btnBlackjack.textContent='🃏 Blackjack';
+  btnBlackjack.onclick = ()=>{ S.screen = 'blackjack'; render(); };
+  c.appendChild(btnBlackjack);
   const btnSalir = document.createElement('button'); btnSalir.className='btn-main';
   btnSalir.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
   btnSalir.textContent = 'Salir del casino';
@@ -8749,6 +8864,365 @@ SCREENS.ruleta = function(){
   btnSalir.disabled = !!S.ruletaGirando;
   btnSalir.onclick = ()=>{ S.screen = 'casino'; render(); };
   c.appendChild(btnSalir);
+
+  app.appendChild(c);
+};
+
+/* ============ BLACKJACK (casino) ============ */
+const PALOS_BJ = [{s:'♠',color:'negra'},{s:'♣',color:'negra'},{s:'♥',color:'roja'},{s:'♦',color:'roja'}];
+const RANGOS_BJ = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+function crearBarajaBj(){
+  const d = [];
+  PALOS_BJ.forEach(p => RANGOS_BJ.forEach(r => d.push({ r, s:p.s, color:p.color })));
+  for(let i=d.length-1;i>0;i--){ const k = Math.floor(Math.random()*(i+1)); [d[i],d[k]] = [d[k],d[i]]; }
+  return d;
+}
+function valorCartaBj(r){ if(r==='A') return 11; if(r==='J'||r==='Q'||r==='K') return 10; return parseInt(r,10); }
+function totalManoBj(mano){
+  let total = 0, ases = 0;
+  mano.forEach(c => { total += valorCartaBj(c.r); if(c.r==='A') ases++; });
+  while(total > 21 && ases > 0){ total -= 10; ases--; }
+  return { total, blando: ases > 0 };
+}
+function cartaElBj(carta, oculta){
+  const d = document.createElement('div');
+  if(oculta){
+    d.className = 'bj-carta dorso';
+    d.innerHTML = '<div class="mono">F10</div>';
+    return d;
+  }
+  d.className = 'bj-carta ' + carta.color;
+  d.innerHTML = `<div class="esq tl"><span>${carta.r}</span><span>${carta.s}</span></div>
+    <div class="centro">${carta.s}</div>
+    <div class="esq br"><span>${carta.r}</span><span>${carta.s}</span></div>`;
+  return d;
+}
+
+// Aviso cómico por llevar demasiado tiempo en la mesa: representante/prensa siempre pueden
+// saltar, pareja/amigo solo si ese personaje existe en la partida (igual que el resto de
+// subtramas del juego, nunca se asume que existen).
+const UMBRAL_INTERRUPCION_CASINO = 20;
+const ICONOS_INTERRUPCION_CASINO = { representante:'📱', prensa:'📰', pareja:'💬', amigo:'🍻' };
+const INTERRUPCIONES_CASINO = [
+  { id:'rep1', tipo:'representante', requiere:j=>!!j.representante, texto:j=>`Te vibra el móvil. Es tu agente, ${j.representante.agente.apodo}: «¿Se puede saber dónde estás? Llevas toda la tarde sin contestar y la rueda de prensa era a las seis.»` },
+  { id:'rep2', tipo:'representante', requiere:j=>!!j.representante, texto:j=>`Tu agente, ${j.representante.agente.apodo}, al teléfono, sin rodeos: «Como el director deportivo se entere de que sigues ahí metido, no respondo de lo que pase.»` },
+  { id:'rep3', tipo:'representante', requiere:j=>!!j.representante, texto:j=>`Tres llamadas perdidas. A la cuarta contestas. «¿Qué?» — «Que llevas ahí toda la tarde, eso pasa.» Tu agente, ${j.representante.agente.apodo}, no suena nada contento.` },
+  { id:'rep4', tipo:'representante', requiere:j=>!!j.representante, texto:j=>`Un mensaje de tu agente, ${j.representante.agente.apodo}: «Como no me digas ya que vas de camino a casa, mañana desayunamos los dos con el club.»` },
+  { id:'rep5', tipo:'representante', requiere:j=>!!j.representante, texto:j=>`Tu agente, ${j.representante.agente.apodo}, te escribe otra vez: «En serio, ¿todavía ahí? Empiezo a pensar que te gusta más la ruleta que el fútbol.»` },
+  { id:'pren1', tipo:'prensa', requiere:()=>true, texto:()=>`Corre un titular por redes: «Captado en un casino de la ciudad — ¿demasiadas horas de más?» Nada grave, pero ya circula.` },
+  { id:'pren2', tipo:'prensa', requiere:()=>true, texto:()=>`Una foto borrosa tuya en la mesa de juego aparece en un grupo de aficionados. Nadie dice nada... por ahora.` },
+  { id:'pren3', tipo:'prensa', requiere:j=>!!j.periodista, texto:j=>`Tu periodista de cabecera, ${j.periodista.apodo}, te avisa por privado: «Te han visto salir del casino dos veces esta semana. Como sigas así, alguien lo va a publicar.»` },
+  { id:'pren4', tipo:'prensa', requiere:()=>true, texto:()=>`Un tuit con una foto tuya de espaldas en la mesa de juego se hace viral entre la afición: «¿Ese no es...?»` },
+  { id:'pren5', tipo:'prensa', requiere:()=>true, texto:()=>`La prensa deportiva local menciona de pasada tus «noches largas» en el casino. Nada explícito, pero el rumor ya está sembrado.` },
+  { id:'pareja1', tipo:'pareja', requiere:j=>!!j.pareja, texto:j=>`Tu pareja, ${j.pareja.apodo}, te escribe: «Llevas toda la tarde sin dar señales de vida. ¿Sigues vivo o te ha comido la ruleta?»` },
+  { id:'pareja2', tipo:'pareja', requiere:j=>!!j.pareja, texto:j=>`Un mensaje de tu pareja, ${j.pareja.apodo}: «La cena se enfría. Y tú, sin aparecer.»` },
+  { id:'pareja3', tipo:'pareja', requiere:j=>!!j.pareja, texto:j=>`Tu pareja, ${j.pareja.apodo}, te llama: «Como sigas ahí una hora más, cenamos por videollamada.»` },
+  { id:'pareja4', tipo:'pareja', requiere:j=>!!j.pareja, texto:j=>`Tu pareja, ${j.pareja.apodo}, te manda un audio de doce segundos que empieza con un suspiro. No hace falta escucharlo entero para saber de qué va.` },
+  { id:'pareja5', tipo:'pareja', requiere:j=>!!j.pareja, texto:j=>`Tu pareja, ${j.pareja.apodo}, te escribe: «Dime que por lo menos vas ganando, porque llevas ahí una eternidad.»` },
+  { id:'amigo1', tipo:'amigo', requiere:j=>!!j.amigoNoFutbol, texto:j=>`${j.amigoNoFutbol.genero==='f'?'Tu amiga':'Tu amigo'} ${j.amigoNoFutbol.apodo} te escribe: «¿Sigues en el casino? Te dije que la suerte no es lo tuyo, ¿eh?»` },
+  { id:'amigo2', tipo:'amigo', requiere:j=>!!j.amigoNoFutbol, texto:j=>`${j.amigoNoFutbol.genero==='f'?'Tu amiga':'Tu amigo'} ${j.amigoNoFutbol.apodo} te manda un meme sobre gente que se arruina jugando, sin comentario. El mensaje lo dice todo.` },
+  { id:'amigo3', tipo:'amigo', requiere:j=>!!j.amigoNoFutbol, texto:j=>`${j.amigoNoFutbol.genero==='f'?'Tu amiga':'Tu amigo'} ${j.amigoNoFutbol.apodo} te llama: «Llevo media hora esperándote en la puerta. ¿Sigues ahí o qué?»` },
+  { id:'amigo4', tipo:'amigo', requiere:j=>!!j.amigoNoFutbol, texto:j=>`${j.amigoNoFutbol.genero==='f'?'Tu amiga':'Tu amigo'} ${j.amigoNoFutbol.apodo} te escribe: «Como pierdas el sueldo del mes en la ruleta, no pienso prestarte para el cine.»` },
+  { id:'amigo5', tipo:'amigo', requiere:j=>!!j.amigoNoFutbol, texto:j=>{ const etq = j.amigoNoFutbol.genero==='f'?'tu amiga':'tu amigo'; return `Un wasap de ${etq} ${j.amigoNoFutbol.apodo}: «Te veo raro últimamente. ¿Todo bien con eso del casino?»`; } }
+];
+function candidatosInterrupcionCasino(j){
+  return INTERRUPCIONES_CASINO.filter(v => v.requiere(j));
+}
+function etiquetaInterrupcionCasino(entry, j){
+  if(entry.tipo==='representante') return 'Tu agente';
+  if(entry.tipo==='prensa') return 'Prensa';
+  if(entry.tipo==='pareja') return 'Tu pareja';
+  return (j.amigoNoFutbol && j.amigoNoFutbol.genero==='f') ? 'Tu amiga' : 'Tu amigo';
+}
+
+function bjSacarCarta(){ return S.bjBaraja.pop(); }
+function bjRepartir(j){
+  if(S.bjApuesta <= 0 || S.bjApuesta > j.stats.dinero) return;
+  S.bjBaraja = crearBarajaBj();
+  S.bjManoJugador = [];
+  S.bjManoCrupier = [];
+  S.bjCrupierOculto = true;
+  S.bjFase = 'repartiendo';
+  S.bjResultadoTipo = null;
+  S.bjCambios = [];
+  S.bjMensaje = 'Reparte el crupier...';
+  pintar();
+  const turnos = [S.bjManoJugador, S.bjManoCrupier, S.bjManoJugador, S.bjManoCrupier];
+  turnos.forEach((mano, i)=>{
+    setTimeout(()=>{
+      mano.push(bjSacarCarta());
+      Sonido.bjCarta();
+      pintar();
+      if(i === turnos.length-1) bjDespuesDeRepartir(j);
+    }, i*420);
+  });
+}
+function bjDespuesDeRepartir(j){
+  const pj = totalManoBj(S.bjManoJugador).total;
+  const pc = totalManoBj(S.bjManoCrupier).total;
+  if(pj === 21){
+    S.bjCrupierOculto = false;
+    Sonido.bjVoltear();
+    if(pc === 21) bjResolver(j, 'empate', 'Empate a 21 — los dos con blackjack. Recuperas la apuesta.');
+    else bjResolver(j, 'blackjack', `¡Blackjack! Cobras ${formatearDinero(Math.round(S.bjApuesta*1.5))}.`);
+    return;
+  }
+  S.bjFase = 'jugando';
+  S.bjMensaje = 'Pide carta o plántate.';
+  pintar();
+}
+function bjPedirCarta(j){
+  S.bjManoJugador.push(bjSacarCarta());
+  Sonido.bjCarta();
+  const { total } = totalManoBj(S.bjManoJugador);
+  if(total > 21){ S.bjCrupierOculto = false; bjResolver(j, 'pierde', `Te pasas de 21 con ${total}. Pierdes ${formatearDinero(S.bjApuesta)}.`); return; }
+  pintar();
+}
+function bjDoblar(j){
+  if(S.bjManoJugador.length !== 2 || S.bjApuesta*2 > j.stats.dinero) return;
+  Sonido.bjDoblar();
+  S.bjApuesta *= 2;
+  S.bjManoJugador.push(bjSacarCarta());
+  Sonido.bjCarta();
+  const { total } = totalManoBj(S.bjManoJugador);
+  if(total > 21){ S.bjCrupierOculto = false; bjResolver(j, 'pierde', `Doblas y te pasas de 21 con ${total}. Pierdes ${formatearDinero(S.bjApuesta)}.`); return; }
+  bjJugarCrupier(j);
+}
+function bjPlantarse(j){ bjJugarCrupier(j); }
+function bjJugarCrupier(j){
+  S.bjFase = 'crupier';
+  S.bjCrupierOculto = false;
+  Sonido.bjVoltear();
+  S.bjMensaje = 'El crupier destapa su carta...';
+  pintar();
+  const paso = ()=>{
+    const { total } = totalManoBj(S.bjManoCrupier);
+    if(total < 17){
+      setTimeout(()=>{ S.bjManoCrupier.push(bjSacarCarta()); Sonido.bjCarta(); pintar(); paso(); }, 1100);
+    } else {
+      setTimeout(()=> bjResolverFinal(j), 850);
+    }
+  };
+  setTimeout(paso, 900);
+}
+function bjResolverFinal(j){
+  const pj = totalManoBj(S.bjManoJugador).total;
+  const pc = totalManoBj(S.bjManoCrupier).total;
+  if(pc > 21) bjResolver(j, 'gana', `El crupier se pasa con ${pc}. Ganas ${formatearDinero(S.bjApuesta)}.`);
+  else if(pj > pc) bjResolver(j, 'gana', `Tú ${pj}, crupier ${pc}. Ganas ${formatearDinero(S.bjApuesta)}.`);
+  else if(pj < pc) bjResolver(j, 'pierde', `Tú ${pj}, crupier ${pc}. Pierdes ${formatearDinero(S.bjApuesta)}.`);
+  else bjResolver(j, 'empate', `Empate a ${pj}. Recuperas la apuesta.`);
+}
+function bjResolver(j, tipo, msg){
+  S.bjFase = 'resultado';
+  S.bjResultadoTipo = tipo;
+  S.bjMensaje = msg;
+  S.bjManosJugadas = (S.bjManosJugadas||0) + 1;
+  const dineroAntes = j.stats.dinero;
+  let cambios = [];
+  // Mismas reglas que la ruleta: un premio grande sube algo la confianza y el carácter;
+  // jugarte todo lo que tenías y perderlo baja el carácter.
+  if(tipo === 'gana') cambios = aplicarEfectos(j, { dinero: S.bjApuesta });
+  else if(tipo === 'blackjack') cambios = aplicarEfectos(j, { dinero: Math.round(S.bjApuesta*1.5), mental:3, confianza:3 });
+  else if(tipo === 'pierde'){
+    cambios = aplicarEfectos(j, { dinero: -S.bjApuesta });
+    if(S.bjApuesta >= dineroAntes) cambios = cambios.concat(aplicarEfectos(j, { mental:-2 }));
+  }
+  S.bjCambios = cambios;
+  pintar();
+  // Pequeño respiro antes del sonido de resultado: si acabas de pasarte de 21, el golpe de
+  // la última carta y el tono de derrota sonaban a la vez y se tapaban.
+  setTimeout(()=>{
+    if(tipo === 'blackjack') Sonido.bjBlackjack();
+    else if(tipo === 'gana') Sonido.bjGana();
+    else if(tipo === 'pierde') Sonido.bjPierde();
+    else Sonido.bjEmpate();
+  }, 220);
+}
+function bjNuevaMano(j){
+  S.bjManoJugador = []; S.bjManoCrupier = [];
+  S.bjResultadoTipo = null;
+  S.bjCambios = [];
+  if(S.bjManosJugadas > 0 && S.bjManosJugadas % UMBRAL_INTERRUPCION_CASINO === 0){
+    bjDispararInterrupcion(j);
+    return;
+  }
+  S.bjFase = 'apostando';
+  S.bjMensaje = 'Elige tu apuesta y reparte.';
+  pintar();
+}
+function bjDispararInterrupcion(j){
+  let candidatas = candidatosInterrupcionCasino(j).filter(v => v.id !== S.bjUltimaInterrupcionId);
+  if(!candidatas.length) candidatas = candidatosInterrupcionCasino(j);
+  const elegida = candidatas[Math.floor(Math.random()*candidatas.length)];
+  S.bjUltimaInterrupcionId = elegida.id;
+  S.bjInterrupcionId = elegida.id;
+  S.bjFase = 'interrupcion';
+  S.bjCambios = [];
+  if(elegida.tipo === 'representante') Sonido.casinoLlamada(); else Sonido.casinoNotificacion();
+  pintar();
+}
+function bjSeguirTrasInterrupcion(j){
+  const entry = INTERRUPCIONES_CASINO.find(v => v.id === S.bjInterrupcionId);
+  const efectos = { carinoAficion:-6 };
+  if(entry && entry.tipo === 'pareja') efectos.felicidadPareja = -8;
+  S.bjCambios = aplicarEfectos(j, efectos);
+  S.bjInterrupcionId = null;
+  S.bjFase = 'apostando';
+  S.bjMensaje = 'Vuelves a la mesa como si nada.';
+  pintar();
+}
+function bjSalirTrasInterrupcion(){
+  S.bjInterrupcionId = null;
+  S.bjCambios = [];
+  S.bjFase = 'apostando';
+  S.bjMensaje = 'Elige tu apuesta y reparte.';
+  S.screen = 'casino';
+  render();
+}
+SCREENS.blackjack = function(){
+  const j = S.jugador;
+  S.bjApuesta = S.bjApuesta || Math.max(50, Math.round(j.stats.dinero*0.02/50)*50);
+  S.bjManoJugador = S.bjManoJugador || [];
+  S.bjManoCrupier = S.bjManoCrupier || [];
+  S.bjFase = S.bjFase || 'apostando';
+  S.bjMensaje = S.bjMensaje || 'Elige tu apuesta y reparte.';
+  S.bjCrupierOculto = S.bjCrupierOculto === undefined ? true : S.bjCrupierOculto;
+  S.bjManosJugadas = S.bjManosJugadas || 0;
+  S.bjCambios = S.bjCambios || [];
+  topbar("Blackjack");
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Casino · Blackjack'));
+  c.appendChild(el('div','bj-dinero', `Dinero disponible: <b style="color:var(--gold);">${formatearDinero(j.stats.dinero)}</b>`));
+
+  // ---- Mesa de fieltro ----
+  const mesa = el('div','bj-mesa');
+  const filaCrupier = el('div','bj-fila');
+  const filaCrupierEtq = el('div','bj-etq-row');
+  filaCrupierEtq.appendChild(el('span','bj-etq','CRUPIER'));
+  const totalCrupier = el('span','bj-total', S.bjManoCrupier.length ? (S.bjCrupierOculto ? String(valorCartaBj(S.bjManoCrupier[0].r)) + ' + ?' : String(totalManoBj(S.bjManoCrupier).total)) : '—');
+  filaCrupierEtq.appendChild(totalCrupier);
+  filaCrupier.appendChild(filaCrupierEtq);
+  const cartasCrupier = el('div','bj-cartas-row');
+  S.bjManoCrupier.forEach((carta,i)=> cartasCrupier.appendChild(cartaElBj(carta, S.bjCrupierOculto && i===1)));
+  filaCrupier.appendChild(cartasCrupier);
+  mesa.appendChild(filaCrupier);
+
+  const filaJugador = el('div','bj-fila');
+  const filaJugadorEtq = el('div','bj-etq-row');
+  filaJugadorEtq.appendChild(el('span','bj-etq','TÚ'));
+  filaJugadorEtq.appendChild(el('span','bj-total', S.bjManoJugador.length ? String(totalManoBj(S.bjManoJugador).total) : '—'));
+  filaJugador.appendChild(filaJugadorEtq);
+  const cartasJugador = el('div','bj-cartas-row');
+  S.bjManoJugador.forEach(carta=> cartasJugador.appendChild(cartaElBj(carta, false)));
+  filaJugador.appendChild(cartasJugador);
+  mesa.appendChild(filaJugador);
+  c.appendChild(mesa);
+
+  // Chips de efectos: réplica exacta del patrón usado en SCREENS.resultado.
+  const pintarCambiosBj = (contenedor)=>{
+    if(!S.bjCambios.length) return;
+    const eff = el('div','effects');
+    eff.style.cssText = 'justify-content:center;margin:-6px 0 14px;';
+    S.bjCambios.forEach(c2=>{
+      if(c2.tipo==='stat'){
+        const nombre = NICE_TODO[c2.clave] || cap(c2.clave);
+        const texto = `${nombre} ${textoCambioStat(c2.clave, c2.delta)}`;
+        eff.appendChild(el('span','eff-chip '+(c2.delta>=0?'pos':'neg'), texto));
+      } else {
+        const nombre = NICE_ATTR[c2.clave] || cap(c2.clave);
+        const texto = c2.clave === 'mental' ? `${nombre} ${c2.subio?'↑':'↓'}` : `${nombre} → ${c2.nuevoValor}${c2.subio?' ⬆':' ⬇'}`;
+        eff.appendChild(el('span','eff-chip '+(c2.subio?'pos':'neg'), texto));
+      }
+    });
+    contenedor.appendChild(eff);
+  };
+
+  // ---- Zona de mensaje ----
+  if(S.bjFase === 'resultado'){
+    const clase = (S.bjResultadoTipo === 'gana' || S.bjResultadoTipo === 'blackjack') ? 'gana' : (S.bjResultadoTipo === 'pierde' ? 'pierde' : 'empate');
+    c.appendChild(el('div', 'bj-resultado '+clase, S.bjMensaje));
+    pintarCambiosBj(c);
+  } else if(S.bjFase === 'interrupcion' && S.bjInterrupcionId){
+    const entry = INTERRUPCIONES_CASINO.find(v=>v.id===S.bjInterrupcionId);
+    if(entry){
+      const box = el('div','bj-interrupcion');
+      box.innerHTML = `<span class="bj-interrupcion-icono">${ICONOS_INTERRUPCION_CASINO[entry.tipo]}</span>
+        <span><div class="bj-interrupcion-etq">${etiquetaInterrupcionCasino(entry, j)}</div><div class="bj-interrupcion-texto">${entry.texto(j)}</div></span>`;
+      c.appendChild(box);
+    }
+  } else {
+    c.appendChild(el('div','bj-mensaje', S.bjMensaje));
+    pintarCambiosBj(c);
+  }
+
+  // ---- Zona de apuesta ----
+  if(S.bjFase === 'apostando'){
+    c.appendChild(el('div','bj-apuesta-label', `Apuesta: <b>${formatearDinero(S.bjApuesta)}</b>`));
+    const row = el('div','bj-chips-row');
+    [50,100,200,500,1000,2000,5000].filter(v => v <= Math.max(50, j.stats.dinero)).forEach(v=>{
+      const b = document.createElement('button');
+      b.className = 'bj-chip-btn' + (S.bjApuesta===v ? ' sel' : '');
+      b.textContent = formatearDinero(v);
+      b.onclick = ()=>{ S.bjApuesta = v; pintar(); };
+      row.appendChild(b);
+    });
+    c.appendChild(row);
+  }
+
+  const noPuede = j.stats.dinero <= 0 || S.bjApuesta > j.stats.dinero;
+  if(S.bjFase === 'apostando' && noPuede){
+    c.appendChild(el('div','badge risk', j.stats.dinero <= 0 ? 'No puedes jugar con la cuenta en números rojos.' : 'No tienes suficiente dinero para esa apuesta.'));
+  }
+
+  // ---- Zona de acciones ----
+  if(S.bjFase === 'apostando'){
+    const btn = document.createElement('button'); btn.className='btn-main';
+    btn.textContent = 'Repartir →';
+    btn.disabled = noPuede;
+    btn.onclick = ()=> bjRepartir(j);
+    c.appendChild(btn);
+  } else if(S.bjFase === 'jugando'){
+    const row = el('div','bj-acciones-row');
+    const bPedir = document.createElement('button'); bPedir.className='bj-accion-btn primaria';
+    bPedir.textContent = 'Pedir carta'; bPedir.onclick = ()=> bjPedirCarta(j);
+    const bPlantarse = document.createElement('button'); bPlantarse.className='bj-accion-btn';
+    bPlantarse.textContent = 'Plantarse'; bPlantarse.onclick = ()=> bjPlantarse(j);
+    const bDoblar = document.createElement('button'); bDoblar.className='bj-accion-btn';
+    bDoblar.textContent = 'Doblar';
+    bDoblar.disabled = S.bjManoJugador.length !== 2 || S.bjApuesta*2 > j.stats.dinero;
+    bDoblar.onclick = ()=> bjDoblar(j);
+    row.appendChild(bPedir); row.appendChild(bPlantarse); row.appendChild(bDoblar);
+    c.appendChild(row);
+  } else if(S.bjFase === 'repartiendo' || S.bjFase === 'crupier'){
+    const btn = document.createElement('button'); btn.className='btn-main';
+    btn.textContent = S.bjFase === 'repartiendo' ? 'Repartiendo…' : 'El crupier juega…';
+    btn.disabled = true;
+    c.appendChild(btn);
+  } else if(S.bjFase === 'resultado'){
+    const btn = document.createElement('button'); btn.className='btn-main';
+    btn.textContent = j.stats.dinero > 0 ? 'Nueva mano →' : 'Sin fondos para seguir';
+    btn.disabled = j.stats.dinero <= 0;
+    btn.onclick = ()=> bjNuevaMano(j);
+    c.appendChild(btn);
+  } else if(S.bjFase === 'interrupcion'){
+    const optSeguir = el('div','opt','Seguir jugando');
+    optSeguir.onclick = ()=> bjSeguirTrasInterrupcion(j);
+    const optSalir = el('div','opt','Salir del casino');
+    optSalir.onclick = ()=> bjSalirTrasInterrupcion();
+    c.appendChild(optSeguir); c.appendChild(optSalir);
+  }
+
+  c.appendChild(el('div','bj-regla-hint','El crupier se planta en 17. Blackjack paga 3 a 2. Doblar: una carta más al doble de apuesta.<br>Un blackjack sube algo la confianza y el carácter; jugártelo todo y perderlo baja el carácter.'));
+
+  const enJuego = ['repartiendo','jugando','crupier','interrupcion'].includes(S.bjFase);
+  if(!enJuego){
+    const btnSalir = document.createElement('button'); btnSalir.className='btn-main';
+    btnSalir.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
+    btnSalir.textContent = 'Volver al casino';
+    btnSalir.onclick = ()=>{ S.screen = 'casino'; render(); };
+    c.appendChild(btnSalir);
+  }
 
   app.appendChild(c);
 };
