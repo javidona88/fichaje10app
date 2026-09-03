@@ -3,7 +3,7 @@
    juego (p. ej. v1.0 -> v1.1), cambia también aquí 'fichaje10-1.0' -> 'fichaje10-1.1'.
    Eso fuerza la actualización inmediata en los dispositivos ya instalados. */
 const CACHE = 'fichaje10-1.4.1';
-const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
+const ASSETS = ['./', './index.html', './stats.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -28,15 +28,17 @@ self.addEventListener('fetch', (e) => {
 
   if (isHTML) {
     // La página siempre intenta la red primero: así, al recargar con conexión,
-    // ves la última versión publicada. Sin conexión, cae al index cacheado.
+    // ves la última versión publicada. Sin conexión, cae a esa misma página cacheada
+    // (cada página HTML del sitio se cachea bajo su propia URL, no todas bajo la
+    // misma clave — con index.html y stats.html conviviendo, mezclarlas sería un bug).
     e.respondWith(
       fetch(request)
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put('./index.html', copy));
+          caches.open(CACHE).then((c) => c.put(request, copy));
           return res;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match(request).then((hit) => hit || caches.match('./index.html')))
     );
     return;
   }

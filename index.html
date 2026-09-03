@@ -7650,8 +7650,47 @@ function render(){
 function el(tag, cls, html){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; }
 // Envía un evento a Umami si el script de analítica ha cargado (puede no hacerlo: bloqueadores
 // de anuncios, sin conexión...). Nunca debe romper el juego si falla o no está disponible.
+// ---- Dashboard propio (Supabase): tabla "eventos", ver CLAUDE.md para el esquema. ----
+const SUPABASE_URL = 'TU-PROYECTO.supabase.co';
+const SUPABASE_ANON_KEY = 'TU-ANON-KEY';
+function idSesionAnonima(){
+  try{
+    let id = localStorage.getItem('fichaje10_sesion_id');
+    if(!id){ id = crypto.randomUUID(); localStorage.setItem('fichaje10_sesion_id', id); }
+    return id;
+  }catch(e){ return 'sin-id'; }
+}
+function detectarDispositivo(){
+  const ua = navigator.userAgent || '';
+  if(/ipad|tablet/i.test(ua)) return 'tablet';
+  if(/mobi|android|iphone/i.test(ua)) return 'movil';
+  return 'escritorio';
+}
+function enviarEventoSupabase(nombre, datos){
+  try{
+    if(!SUPABASE_URL || SUPABASE_URL.startsWith('TU-')) return; // sin configurar todavia
+    fetch(`https://${SUPABASE_URL}/rest/v1/eventos`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({
+        nombre,
+        sesion_id: idSesionAnonima(),
+        version_juego: VERSION_JUEGO,
+        timezone: (Intl.DateTimeFormat().resolvedOptions().timeZone) || null,
+        idioma: navigator.language || null,
+        dispositivo: detectarDispositivo(),
+        datos: datos || {}
+      })
+    }).catch(()=>{});
+  }catch(e){}
+}
 function trackEvento(nombre, datos){
   try{ if(typeof umami !== 'undefined') umami.track(nombre, datos); }catch(e){}
+  enviarEventoSupabase(nombre, datos);
 }
 
 function logoCamiseta(tamano){
@@ -13138,7 +13177,7 @@ SCREENS.retiro = function(){
 
   const retirar = el('div','opt', retiradaForzosa ? 'Colgar las botas' : 'Colgar las botas ahora');
   retirar.onclick = ()=>{
-    trackEvento('retiro', { temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, titulos: j.carrera.titulos, categoriaFinal: j.club.categoria });
+    trackEvento('retiro', { temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal: j.club.categoria, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais });
     S.screen='final'; render();
   };
   c.appendChild(retirar);

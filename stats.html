@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Fichaje 10 — Estadísticas</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+:root{
+  --bg: #14161F;
+  --bg2: #1B1E2A;
+  --panel: #1F2330;
+  --panel2: #262B3C;
+  --ink: #EEEFF3;
+  --ink-soft: #8D93A6;
+  --gold: #D4AF37;
+  --gold-dim: #A9862B;
+  --steel: #6E88A8;
+  --red: #D9495C;
+  --green: #4CAF6D;
+  --line: rgba(255,255,255,0.11);
+  --shadow: 0 14px 34px rgba(0,0,0,0.5);
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  background: linear-gradient(175deg, var(--bg2), var(--bg) 55%);
+  color: var(--ink);
+  font-family:'Space Grotesk',sans-serif;
+  min-height:100vh;
+  padding: 28px 16px 60px;
+}
+.wrap{ max-width: 780px; margin:0 auto; }
+.top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; gap:10px; flex-wrap:wrap; }
+.top h1{ font-size:20px; font-weight:700; margin:0; letter-spacing:.01em; }
+.top .sub{ font-size:12px; color:var(--ink-soft); }
+.top a{ color:var(--gold); text-decoration:none; font-size:13px; font-weight:600; }
+.top a:hover{ text-decoration:underline; }
+
+.card{
+  background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  box-shadow:var(--shadow); padding:20px; margin-bottom:18px;
+}
+.card h2{ font-size:15px; margin:0 0 14px; color:var(--gold); font-weight:700; letter-spacing:.02em; }
+.card .nota{ font-size:12px; color:var(--ink-soft); margin-top:8px; line-height:1.5; }
+
+.tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px; }
+.tile{
+  background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  box-shadow:var(--shadow); padding:18px 16px; text-align:center;
+}
+.tile .num{ font-size:30px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; line-height:1.1; }
+.tile .lbl{ font-size:11.5px; color:var(--ink-soft); margin-top:6px; letter-spacing:.02em; }
+
+.barra-fila{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.barra-fila:last-child{ margin-bottom:0; }
+.barra-lbl{ width:120px; flex-shrink:0; font-size:12.5px; color:var(--ink); text-transform:capitalize; overflow-wrap:anywhere; line-height:1.3; }
+.barra-track{ flex:1; height:14px; background:rgba(255,255,255,0.05); border-radius:7px; overflow:hidden; }
+.barra-fill{ height:100%; background:linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius:7px; min-width:2px; }
+.barra-val{ width:40px; text-align:right; flex-shrink:0; font-size:12.5px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; }
+
+table{ width:100%; border-collapse:collapse; font-size:13px; }
+thead th{
+  text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--ink-soft); font-weight:700; padding:0 8px 8px; border-bottom:1px solid var(--line);
+}
+thead th.num, tbody td.num{ text-align:right; }
+tbody td{ padding:9px 8px; border-bottom:1px solid var(--line); color:var(--ink); }
+tbody tr:last-child td{ border-bottom:none; }
+tbody td.num{ font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; }
+tbody td.rank{ color:var(--ink-soft); width:22px; }
+.tablas-grid{ display:grid; grid-template-columns:1fr; gap:18px; }
+@media (min-width:680px){ .tablas-grid{ grid-template-columns:1fr 1fr; } }
+
+.estado{ text-align:center; padding:60px 16px; color:var(--ink-soft); font-size:14px; line-height:1.6; }
+.estado b{ color:var(--ink); }
+.spinner{
+  width:26px; height:26px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--gold);
+  animation:girar .8s linear infinite; margin:0 auto 14px;
+}
+@keyframes girar{ to{ transform:rotate(360deg); } }
+[hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Fichaje 10 · Estadísticas</h1>
+      <div class="sub">Datos anónimos de las partidas jugadas</div>
+    </div>
+    <a href="./">← Volver al juego</a>
+  </div>
+
+  <div id="estado-carga" class="estado">
+    <div class="spinner"></div>
+    Cargando datos…
+  </div>
+
+  <div id="contenido" hidden>
+    <div class="tiles">
+      <div class="tile"><div class="num" id="t-partidas">—</div><div class="lbl">Partidas iniciadas</div></div>
+      <div class="tile"><div class="num" id="t-retiros">—</div><div class="lbl">Carreras completadas</div></div>
+      <div class="tile"><div class="num" id="t-jugadores">—</div><div class="lbl">Jugadores distintos</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Dispositivo</h2>
+      <div id="barras-dispositivo"></div>
+    </div>
+
+    <div class="card">
+      <h2>Zona horaria</h2>
+      <div id="barras-timezone"></div>
+      <div class="nota">Aproximación de región a partir del huso horario del navegador — no es geolocalización real.</div>
+    </div>
+
+    <div class="tablas-grid">
+      <div class="card">
+        <h2>🥅 Máximos goleadores</h2>
+        <table>
+          <thead><tr><th></th><th>Jugador</th><th class="num">Goles</th></tr></thead>
+          <tbody id="tabla-goles"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>🎯 Máximos asistentes</h2>
+        <table>
+          <thead><tr><th></th><th>Jugador</th><th class="num">Asist.</th></tr></thead>
+          <tbody id="tabla-asistencias"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>💰 Mayor dinero generado</h2>
+        <table>
+          <thead><tr><th></th><th>Jugador</th><th class="num">Total</th></tr></thead>
+          <tbody id="tabla-dinero"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>⏱️ Carreras más largas</h2>
+        <table>
+          <thead><tr><th></th><th>Jugador</th><th class="num">Temp.</th></tr></thead>
+          <tbody id="tabla-temporadas"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="estado-error" class="estado" hidden></div>
+  <div id="estado-sin-configurar" class="estado" hidden>
+    Este panel todavía no está conectado a la base de datos.<br><br>
+    Sustituye <b>SUPABASE_URL</b> y <b>SUPABASE_ANON_KEY</b> al principio del <code>&lt;script&gt;</code> de este
+    archivo por los datos reales de tu proyecto de Supabase.
+  </div>
+</div>
+
+<script>
+// Sustituir por los datos reales del proyecto de Supabase (mismos valores que en index.html).
+const SUPABASE_URL = 'TU-PROYECTO.supabase.co';
+const SUPABASE_ANON_KEY = 'TU-ANON-KEY';
+
+function formatearDinero(v){
+  if(v == null) return '—';
+  const abs = Math.abs(v);
+  let t;
+  if(abs >= 1000000) t = (abs/1000000).toFixed(1).replace('.0','').replace('.',',') + 'M';
+  else if(abs >= 1000) t = (abs/1000).toFixed(1).replace('.0','').replace('.',',') + 'K';
+  else t = abs.toLocaleString('es-ES');
+  return t + ' €';
+}
+
+async function consultarSupabase(pathQuery){
+  const res = await fetch(`https://${SUPABASE_URL}/rest/v1/${pathQuery}`, {
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+    }
+  });
+  if(!res.ok) throw new Error('Supabase respondió ' + res.status);
+  return { datos: await res.json() };
+}
+
+// Cuenta filas trayendo solo el id: más lento que una cabecera Content-Range, pero no depende
+// de que el servidor la exponga en CORS (no siempre es fiable en peticiones cross-origin), y a
+// esta escala (unos amigos jugando) el coste es insignificante.
+async function contarEventos(nombre){
+  const { datos } = await consultarSupabase(`eventos?nombre=eq.${nombre}&select=id&limit=10000`);
+  return datos.length;
+}
+
+function pintarBarras(contenedor, conteos, totalMax){
+  contenedor.innerHTML = '';
+  const entradas = Object.entries(conteos).sort((a,b)=> b[1]-a[1]);
+  if(!entradas.length){ contenedor.innerHTML = '<div class="nota">Todavía no hay datos suficientes.</div>'; return; }
+  const max = totalMax || Math.max(...entradas.map(e=>e[1]));
+  entradas.forEach(([nombre, valor])=>{
+    const fila = document.createElement('div'); fila.className = 'barra-fila';
+    fila.innerHTML = `<div class="barra-lbl">${nombre}</div>
+      <div class="barra-track"><div class="barra-fill" style="width:${Math.max(2, Math.round(valor/max*100))}%"></div></div>
+      <div class="barra-val">${valor}</div>`;
+    contenedor.appendChild(fila);
+  });
+}
+
+function pintarTablaRanking(contenedor, filas, claveValor, formatear){
+  contenedor.innerHTML = '';
+  if(!filas.length){ contenedor.innerHTML = '<tr><td colspan="3" class="nota">Sin datos todavía.</td></tr>'; return; }
+  filas.slice(0, 10).forEach((f, i)=>{
+    const tr = document.createElement('tr');
+    const valor = f.datos ? f.datos[claveValor] : undefined;
+    tr.innerHTML = `<td class="rank">${i+1}</td><td>${(f.datos && f.datos.nombreJugador) || 'Jugador anónimo'}</td>
+      <td class="num">${formatear ? formatear(valor) : (valor ?? '—')}</td>`;
+    contenedor.appendChild(tr);
+  });
+}
+
+async function cargarEstadisticas(){
+  const [partidas, retiros] = await Promise.all([contarEventos('nueva_partida'), contarEventos('retiro')]);
+  document.getElementById('t-partidas').textContent = partidas.toLocaleString('es-ES');
+  document.getElementById('t-retiros').textContent = retiros.toLocaleString('es-ES');
+
+  const { datos: filasSesion } = await consultarSupabase('eventos?select=sesion_id&limit=10000');
+  const sesionesUnicas = new Set(filasSesion.map(f=>f.sesion_id)).size;
+  document.getElementById('t-jugadores').textContent = sesionesUnicas.toLocaleString('es-ES');
+
+  const { datos: filasDispositivo } = await consultarSupabase('eventos?select=dispositivo&limit=10000');
+  const conteoDispositivo = {};
+  filasDispositivo.forEach(f=>{ const d = f.dispositivo || 'desconocido'; conteoDispositivo[d] = (conteoDispositivo[d]||0)+1; });
+  pintarBarras(document.getElementById('barras-dispositivo'), conteoDispositivo);
+
+  const { datos: filasTimezone } = await consultarSupabase('eventos?select=timezone&limit=10000');
+  const conteoTimezone = {};
+  filasTimezone.forEach(f=>{ const z = (f.timezone || 'desconocida').replace(/_/g,' '); conteoTimezone[z] = (conteoTimezone[z]||0)+1; });
+  const topTimezones = Object.fromEntries(Object.entries(conteoTimezone).sort((a,b)=>b[1]-a[1]).slice(0,8));
+  pintarBarras(document.getElementById('barras-timezone'), topTimezones);
+
+  const { datos: filasRetiro } = await consultarSupabase('eventos?nombre=eq.retiro&select=datos,created_at&limit=2000');
+  const porGoles = [...filasRetiro].sort((a,b)=> (b.datos?.goles||0) - (a.datos?.goles||0));
+  const porAsistencias = [...filasRetiro].sort((a,b)=> (b.datos?.asistencias||0) - (a.datos?.asistencias||0));
+  const porDinero = [...filasRetiro].sort((a,b)=> (b.datos?.dineroGanado||0) - (a.datos?.dineroGanado||0));
+  const porTemporadas = [...filasRetiro].sort((a,b)=> (b.datos?.temporada||0) - (a.datos?.temporada||0));
+
+  pintarTablaRanking(document.getElementById('tabla-goles'), porGoles, 'goles');
+  pintarTablaRanking(document.getElementById('tabla-asistencias'), porAsistencias, 'asistencias');
+  pintarTablaRanking(document.getElementById('tabla-dinero'), porDinero, 'dineroGanado', formatearDinero);
+  pintarTablaRanking(document.getElementById('tabla-temporadas'), porTemporadas, 'temporada');
+}
+
+(async function(){
+  if(!SUPABASE_URL || SUPABASE_URL.startsWith('TU-')){
+    document.getElementById('estado-carga').hidden = true;
+    document.getElementById('estado-sin-configurar').hidden = false;
+    return;
+  }
+  try{
+    await cargarEstadisticas();
+    document.getElementById('estado-carga').hidden = true;
+    document.getElementById('contenido').hidden = false;
+  }catch(e){
+    document.getElementById('estado-carga').hidden = true;
+    const el = document.getElementById('estado-error');
+    el.hidden = false;
+    el.innerHTML = 'No se han podido cargar los datos.<br><span style="font-size:12px;">' + (e.message||e) + '</span>';
+  }
+})();
+</script>
+</body>
+</html>

@@ -546,12 +546,57 @@ con el dominio pelado `javidona88.github.io`, SIN el `/fichaje10app/` de la ruta
 — eso ya dio error una vez al añadir el sitio). Cuenta visitas automáticamente sin código extra.
 Eventos personalizados vía `trackEvento(nombre, datos)` (definida junto a `el()`, ~línea 7646;
 no rompe nada si el script no ha cargado — bloqueadores de anuncios, sin red — porque comprueba
-`typeof umami !== 'undefined'` dentro de un `try/catch`). Disparados actualmente:
+`typeof umami !== 'undefined'` dentro de un `try/catch`). `trackEvento` manda el mismo evento
+también a Supabase (ver abajo) — es el único punto de entrada para analítica, nunca llamar a
+`umami.track` directamente. Disparados actualmente:
 - `nueva_partida` (`{estilo}`) al pulsar "Empezar carrera" en `SCREENS.crear`.
-- `retiro` (`{temporada, partidos, goles, titulos, categoriaFinal}`) al pulsar "Colgar las
-  botas" en `SCREENS.retiro` (forzosa a los 42 o voluntaria, mismo punto).
+- `retiro` (`{temporada, partidos, goles, asistencias, dineroGanado, titulos, categoriaFinal,
+  nombreJugador, pais}`) al pulsar "Colgar las botas" en `SCREENS.retiro` (forzosa a los 42 o
+  voluntaria, mismo punto).
 Al añadir un evento nuevo: nombre en minúsculas con guion bajo, payload pequeño (unas pocas
 claves), y pensar en el volumen si se dispara muy seguido (capa gratuita: 100.000 eventos/mes).
+
+## Dashboard propio (Supabase) — `stats.html`
+
+Segunda pieza de analítica, para tener control total y poder guardar lo que haga falta en el
+futuro sin depender de lo que ofrezca Umami. **Importante**: NO es un Artifact de Claude — los
+Artifacts tienen bloqueado hacer `fetch()`/XHR a servicios externos (solo pueden hablar con la
+base de datos propia de Claude, que no es accesible desde una web ajena como GitHub Pages), así
+que el dashboard es una página HTML normal más del propio repo, sin backend, que consulta
+Supabase directamente desde el navegador del que la abre.
+
+- **Base de datos**: proyecto de [Supabase](https://supabase.com) (capa gratuita), tabla única
+  `eventos` (esquema y políticas RLS documentados en el propio SQL, ver historial de commits o
+  pedir que se regenere): `id, created_at, nombre, sesion_id, version_juego, timezone, idioma,
+  dispositivo, datos jsonb`. `datos` es una columna JSON libre — cualquier evento nuevo puede
+  meter ahí lo que necesite sin tocar el esquema. RLS permite INSERT y SELECT a la clave pública
+  `anon`, pero NO UPDATE ni DELETE — nadie puede alterar ni borrar filas ya guardadas usando esa
+  clave (que por diseño es visible en el código del cliente, como el `data-website-id` de Umami).
+- **`SUPABASE_URL` / `SUPABASE_ANON_KEY`**: constantes duplicadas en `index.html` (junto a
+  `trackEvento`) y en `stats.html` (con los mismos valores del proyecto real) — sustituir el
+  placeholder `TU-PROYECTO.supabase.co` / `TU-ANON-KEY` en los DOS sitios al dar de alta el
+  proyecto. Mientras no estén configurados, ambos archivos detectan el placeholder y no hacen
+  ninguna petición de red (`enviarEventoSupabase` no envía nada; `stats.html` muestra un aviso
+  de "no configurado" en vez de intentar cargar).
+- **`enviarEventoSupabase(nombre, datos)`** (junto a `trackEvento` en `index.html`): añade
+  automáticamente `sesion_id` (UUID anónimo generado una vez y guardado en
+  `localStorage['fichaje10_sesion_id']`, sirve para contar jugadores distintos sin nada
+  personal), `timezone` (`Intl.DateTimeFormat().resolvedOptions().timeZone` — aproximación de
+  región SIN pedir permiso de geolocalización real, a propósito) y `dispositivo`
+  (`movil`/`tablet`/`escritorio`, por `navigator.userAgent`).
+- **`stats.html`**: mismo tema oscuro y paleta que el juego (variables CSS duplicadas de
+  `index.html`, no hay forma de compartir CSS entre archivos sin build step). Contadores de
+  partidas iniciadas / carreras completadas / jugadores distintos, desglose por dispositivo y
+  por zona horaria (barras), y 4 rankings (goles, asistencias, dinero generado, temporadas
+  jugadas) leyendo los eventos `retiro`. Cuenta filas trayendo `select=id` y usando
+  `.length` en vez de la cabecera `Content-Range` de PostgREST — esa cabecera no es fiable en
+  peticiones cross-origin salvo que el servidor la exponga explícitamente vía CORS, y a esta
+  escala (unos amigos jugando) traer las filas es insignificante en coste. Accesible desde
+  "← Volver al juego" / enlazando a `./` desde el juego si se añade un botón (aún no añadido).
+- **`sw.js`**: al cachear páginas HTML, cada una se guarda bajo su propia URL (`request` como
+  clave), no todas bajo `./index.html` — con dos páginas HTML en el sitio (`index.html` y
+  `stats.html`), cachear todo bajo una sola clave las mezclaría (bug ya corregido: antes SIEMPRE
+  se cacheaba como `./index.html` sin mirar qué página era).
 
 ## Errores ya cazados — vigilar que no se repitan
 
