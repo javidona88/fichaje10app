@@ -3321,7 +3321,47 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.3.3';
+const VERSION_JUEGO = 'v1.4';
+// Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
+// y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
+// Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
+const CHANGELOG_JUEGO = [
+  { version:'v1.4', titulo:'Torneos con probabilidades realistas', cambios:[
+    'Llegar a semifinales (Copa del Rey, Champions, Europa League, Conference, Libertadores, Concacaf, AFC, Eurocopa y Mundial) ahora depende de tu categoría, el prestigio de tu club, tu posición en liga y tu propia nota media — nada de techos absurdos ni un 85% fijo para cualquiera.',
+    'El rival de esas semifinales y finales también pesa por prestigio y por país: ya no te puede tocar cualquier equipo al azar sea cual sea su nivel real.',
+    'Corregido: al no renovar contrato, el "contrato de emergencia" que te hacía el club ya no obliga a pagar una cláusula de rescisión para fichar por el equipo que el propio juego te ofrece a continuación.'
+  ]},
+  { version:'v1.3.3', titulo:'Escudos, patrocinadores y sucesos más realistas', cambios:[
+    'El nombre de tu rival personalizado aparece de verdad en todos los sucesos donde antes salía un nombre de plantilla.',
+    'Los sucesos de prensa (cámaras, zona mixta...) se adaptan a tu categoría: nada de eso en Segunda o Tercera RFEF.',
+    'Patrocinadores con nombres de marcas reales a partir de Segunda RFEF, con sus colores; sus logos se ven bien en fondo oscuro y aparecen también en tu ficha de jugador.',
+    'Escudos: contorno unificado para los clubes "grandes", diseño propio para los 8 de prestigio 4, siluetas (círculo/óvalo/recto) fieles a cada escudo real, ampliado a los clubes de prestigio 3 de las 5 grandes ligas europeas.',
+    'Arreglada la pantalla en blanco en la final del playoff estando lesionado, y el doble toque rápido que resolvía un mismo suceso dos veces.'
+  ]},
+  { version:'v1.3', titulo:'Casino rediseñado y lote de arreglos', cambios:[
+    'Ruleta y tragaperras rediseñadas de arriba abajo.',
+    'La tirada de dados ya no adelanta el 1/20 natural mientras se resuelve.',
+    'Balón de Oro y MVP con requisitos mínimos de partidos jugados.',
+    'Ganar la Europa League da plaza de Champions la siguiente temporada.',
+    'Varios ajustes de tono y coherencia en sucesos existentes.'
+  ]},
+  { version:'v1.2', titulo:'Agente libre y estadísticas de selección', cambios:[
+    'Nueva opción de quedarte sin equipo una temporada si no te convence ninguna oferta.',
+    'Estadísticas de la selección (partidos, goles, asistencias) contabilizadas aparte de las de club.',
+    'La negociación ya no falla en seco al agotar los turnos: el club deja su última oferta sobre la mesa.',
+    'Pinchazo antes del derbi: fallar la tirada garantiza lesión real.'
+  ]},
+  { version:'v1.1', titulo:'Escudos a medida y rivalidades', cambios:[
+    'Escudos propios (interpretaciones no oficiales) para los 6 clubes top: Barça, Real Madrid, Atlético, Bayern, Manchester City y PSG.',
+    'Ampliado el grupo de clubes de prestigio alto con Liverpool, Manchester United, Chelsea, Arsenal, Juventus, Inter, Milan y Dortmund.',
+    'Rivalidades directas: tu rival casi nunca ficha por tu club — y si lo hace, la afición no te lo perdona.'
+  ]},
+  { version:'v1.0', titulo:'Lanzamiento de Fichaje 10', cambios:[
+    'Primera versión pública del juego, con el nombre "Fichaje 10" definitivo.',
+    'Tutorial de inicio en 6 pantallas.',
+    'Guardado en 3 huecos independientes.'
+  ]}
+];
 
 const PARTIDOS_POR_CATEGORIA = {"Tercera RFEF":30,"Segunda RFEF":32,"Primera RFEF":34,"LaLiga2":36,"LaLiga":38};
 
@@ -4251,7 +4291,7 @@ const BANDERAS_SVG = {
   "República Checa": '<rect width="40" height="20" y="0" fill="#FFFFFF"/><rect width="40" height="20" y="20" fill="#D7141A"/><polygon points="0,0 0,40 20,20" fill="#11457E"/>'
 };
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub']);
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
 const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras']);
@@ -8789,9 +8829,55 @@ SCREENS.ajustes = function(){
   filaTutorial.onclick = ()=>{ S.tutorialPaso = 0; S.pantallaAnteriorAjustes = null; S.screen = 'tutorial'; render(); };
   c.appendChild(filaTutorial);
 
+  c.appendChild(crearEyebrow('Novedades'));
+  const filaChangelog = el('div','opt');
+  filaChangelog.textContent = 'Ver el historial de cambios';
+  filaChangelog.onclick = ()=>{ S.screen = 'changelog'; render(); };
+  c.appendChild(filaChangelog);
+
   const version = el('div', null, `Fichaje 10 · ${VERSION_JUEGO}`);
   version.style.cssText = 'text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-soft);opacity:.6;margin-top:20px;';
   c.appendChild(version);
+
+  app.appendChild(c);
+};
+
+SCREENS.changelog = function(){
+  topbar("Historial de cambios");
+  const c = el('div','card');
+
+  const btnVolver = document.createElement('button');
+  btnVolver.className = 'btn-secondary';
+  btnVolver.textContent = '← Volver';
+  btnVolver.style.marginBottom = '16px';
+  btnVolver.onclick = ()=>{ S.screen = 'ajustes'; render(); };
+  c.appendChild(btnVolver);
+
+  c.appendChild(crearEyebrow('Novedades'));
+  c.appendChild(el('h2',null,'Qué ha cambiado en cada versión'));
+
+  CHANGELOG_JUEGO.forEach((entrada, idx)=>{
+    const bloque = document.createElement('div');
+    bloque.style.cssText = `padding:${idx===0?'0':'16px'} 0 16px;${idx>0?'border-top:1px solid var(--line);':''}`;
+    const cab = document.createElement('div');
+    cab.style.cssText = 'display:flex;align-items:baseline;gap:9px;margin-bottom:8px;';
+    const badge = el('span',null, entrada.version);
+    badge.style.cssText = "font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;color:var(--gold);";
+    const titulo = el('span',null, entrada.titulo);
+    titulo.style.cssText = "font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;color:var(--ink);";
+    cab.appendChild(badge); cab.appendChild(titulo);
+    bloque.appendChild(cab);
+    const lista = document.createElement('ul');
+    lista.style.cssText = 'margin:0;padding-left:20px;display:flex;flex-direction:column;gap:5px;';
+    entrada.cambios.forEach(txt=>{
+      const li = document.createElement('li');
+      li.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:13px;line-height:1.5;color:var(--ink-soft);";
+      li.textContent = txt;
+      lista.appendChild(li);
+    });
+    bloque.appendChild(lista);
+    c.appendChild(bloque);
+  });
 
   app.appendChild(c);
 };
