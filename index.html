@@ -799,13 +799,129 @@ const PALETA_COLORES_CLUB = [
   ['#7A1F3D','#F2C230'], ['#0E7C86','#FFFFFF'], ['#1B1B1B','#FFFFFF'], ['#E86A20','#1B1B1B'],
   ['#6E2C91','#FFFFFF'], ['#1B3A6B','#C8102E']
 ];
-// Clubes reales de la temporada 2026-27 (Tercera RFEF: Grupo VI · Segunda RFEF: Grupo 5; Primera RFEF: Grupos 1 y 2)
+// Clubes reales de Tercera RFEF por grupo territorial (temporada 2025-26, la más reciente confirmada al
+// investigarlo). 18 grupos oficiales de la RFEF (numeración romana I-XVIII); casi todos cubren una única
+// comunidad autónoma (excepción: Andalucía se reparte en el IX -oriental- y el X -occidental-). Cada grupo
+// lista las provincias reales que cubre — de ahí sale PROVINCIAS_ESPANA y el club inicial que se le ofrece
+// al jugador en SCREENS.elegirClub según la provincia que elija en la creación (grupoTerceraRFEFPorProvincia /
+// clubesTerceraRFEFPorProvincia). El resto del juego (rival, compañeros que se van fuera, ascensos...) sigue
+// usando el pool completo de los 18 grupos vía CLUBES_POR_CATEGORIA["Tercera RFEF"].
+const TERCERA_RFEF_GRUPOS = [
+  { grupo:'I', provincias:['A Coruña','Lugo','Ourense','Pontevedra'], clubes:[
+    "Alondras CF","Arosa SC","Atlético Arteixo","Atlético Coruña Montañeros CF","CD Barco","UD Barbadás","CD Boiro",
+    "Céltiga FC","SD Compostela","CD Estradense","Gran Peña FC","C. Juventud Cambados","CF Noia","Polvorín FC",
+    "Racing Villalbés","Silva SD","UD Somozas","Viveiro CF"
+  ]},
+  { grupo:'II', provincias:['Asturias'], clubes:[
+    "Avilés Stadium CF","Caudal Deportivo","UC Ceares","CD Colunga","CD Covadonga","UD Gijón Industrial",
+    "L'Entregu CF","SD Lenense","UD Llanera","CD Llanes","CD Mosconia","Navarro CF","CD Praviano","Club Siero",
+    "Sporting Atlético","Real Titánico","EI San Martín del Rey Aurelio","CD Tuilla"
+  ]},
+  { grupo:'III', provincias:['Cantabria'], clubes:[
+    "SD Atlético Albericia","CD Barquereño","CD Bezana","UC Cartes","Castro FC","CD Cayón","CD Colindres",
+    "Cultural D. Guarnizo","UM Escobedo","Gimnástica de Torrelavega","CD Laredo","CD Montañas del Pas","SD Noja",
+    "CD Revilla","Selaya FC","SD Torina","CD Tropezón","CF Vimenor"
+  ]},
+  { grupo:'IV', provincias:['Álava','Vizcaya','Guipúzcoa'], clubes:[
+    "Deportivo Alavés C","Añorga KKE","UD Aretxabaleta","CD Aurrera de Vitoria","CD Derio","SD Deusto",
+    "SCD Durango","SD Eibar C","CD Lagun Onak","SD Leioa","Pasaia KE","Club Portugalete","Real Sociedad C",
+    "CD San Ignacio","CD Santurtzi","Touring KE","SD Zamudio"
+  ]},
+  { grupo:'V', provincias:['Barcelona','Girona','Lleida','Tarragona'], clubes:[
+    "CF Badalona","CF Can Vidalet","Cerdanyola del Vallès FC","UE Cornellà","CE Europa B","FE Grama",
+    "FC L'Escala","CE L'Hospitalet","Lleida CF","CE Manresa","CF J. Mollerussa","CF Montañesa","CF Peralada",
+    "CP San Cristóbal","UE Tona","UE Vic","CF Vilanova i la Geltrú","UE Vilassar de Mar"
+  ]},
+  { grupo:'VI', provincias:['Valencia','Alicante','Castellón'], clubes:[
+    "UD Alzira","FC Jove Español San Vicente","Ontinyent 1931 CF","CF La Nucía","UD Castellonense","CD Utiel",
+    "Villarreal CF C","Atzeneta UE","UD Vall de Uxó","CD Soneja","Atlético Saguntino","CD Roda",
+    "Atlético Levante UD","Crevillente Deportivo","Athletic Club Torrellano","Hércules CF B","CD Buñol",
+    "CD Recambios Colón Catarroja"
+  ]},
+  { grupo:'VII', provincias:['Madrid'], clubes:[
+    "AD Alcorcón B","Atlético de Madrid C","RCD Carabanchel","CD Galapagar","Las Rozas CF","CD Leganés B",
+    "México FC","CD Móstoles URJC","AD Parla","CF Pozuelo de Alarcón","SAD Racing Ciudad de Madrid",
+    "UD Sanse B","CDB Siello FC","AD Torrejón CF","CDF Tres Cantos","CF Trival Valderas","AD Unión Adarve",
+    "SAD Villaverde San Andrés"
+  ]},
+  { grupo:'VIII', provincias:['Ávila','Burgos','León','Palencia','Salamanca','Segovia','Soria','Valladolid','Zamora'], clubes:[
+    "SD Almazán","Arandina CF","CD Becerril","Atlético Bembibre","CD Diócesis de Ávila","CD Guijuelo",
+    "Júpiter Leonés","CD La Virgen del Camino","CD Atlético Mansillés","CD Mirandés B","CD Mojados",
+    "CD Numancia de Soria B","Palencia CF","CD Palencia Cristo Atlético","UD Santa Marta de Tormes",
+    "SD Atlético Tordesillas","Unionistas de Salamanca CF B","CD Villaralbo"
+  ]},
+  { grupo:'IX', provincias:['Granada','Málaga','Jaén','Almería','Melilla'], clubes:[
+    "CD Alhaurino","Arenas de Armilla CyD","Atlético Mancha Real","Atlético Porcuna CF","Churriana de la Vega CF",
+    "El Palo FC","CD Huétor Tájar","CD Huétor Vega","FC Marbellí","Martos CD","UD Melilla B",
+    "CP Mijas Las Lagunas","CF Motril","Recreativo Granada","UD San Pedro","UD Torre del Mar",
+    "UD Ciudad de Torredonjimeno","CD Torreperogil"
+  ]},
+  { grupo:'X', provincias:['Sevilla','Cádiz','Huelva','Córdoba','Ceuta'], clubes:[
+    "Atlético Central","Atlético Onubense","Bollullos CF","Cádiz CF Mirandilla","Castilleja CF","Chiclana CF",
+    "AD Ceuta FC B","CD Ciudad de Lucena","Conil CF","Córdoba CF B","Coria CF","Dos Hermanas CF 1971",
+    "RB Linense","CD Pozoblanco","CD San Roque de Lepe","Sevilla FC C","UD Tomares","CD Utrera"
+  ]},
+  { grupo:'XI', provincias:['Baleares'], clubes:[
+    "UD Alcudia","CD Binisalem","CD Cardassar","UD Collerense","CD Constancia","CD Felanitx","SD Formentera",
+    "Inter Ibiza CD","CD Llosetense","RCD Mallorca B","CD Manacor","CD Mercadal","SCR Peña Deportiva",
+    "CF Playas de Calviá","SD Portmany","UD Rotlet Molinar","CD Santañí","CD Son Cladera"
+  ]},
+  { grupo:'XII', provincias:['Las Palmas','Santa Cruz de Tenerife'], clubes:[
+    "CD Arcángel San Miguel","Arucas CF","CD Atlético Paso","CD Herbania","UD Lanzarote","UD Las Palmas C",
+    "CD Marino","CD Mensajero","CF Panadería Pulido San Mateo","San Bartolomé CF","UD San Fernando",
+    "Real Unión de Tenerife","UD Tamaraceite","UD Telde","CD Tenerife C","SD Tenisca",
+    "CD Unión Sur Yaiza","UD Villa de Santa Brígida"
+  ]},
+  { grupo:'XIII', provincias:['Murcia'], clubes:[
+    "Águilas FC B","Atlético Pulpileño","Atlético Santa Cruz","CD Bala Azul","UD Caravaca","FC Cartagena B",
+    "CD Cieza","El Palmar CF","Deportivo Marítimo","Mazarrón FC","SFC Minerva","Muleño CF",
+    "Real Murcia Imperial CF","Olímpico de Totana","CF Santomera","UCAM Murcia CF B","Unión Molinense CF",
+    "Yeclano Deportivo B"
+  ]},
+  { grupo:'XIV', provincias:['Badajoz','Cáceres'], clubes:[
+    "Atlético Pueblonuevo","CD Azuaga","CD Badajoz","CD Cabeza del Buey","CD Calamonte","CD Diocesano",
+    "CF Jaraíz","Jerez CF","AD Llerenense","CP Montehermoso","UD Montijo","Moralo CP",
+    "EF Puebla de la Calzada","CD Santa Amalia","SP Villafranca","CF Villanovense"
+  ]},
+  { grupo:'XV', provincias:['Navarra'], clubes:[
+    "CD Aoiz","CD Ardoi","Atlético Artajonés","Atlético Cirbonero","CD Avance Ezcabarte","Beti Kozkor KE",
+    "CD Beti Onak","FC Bidezarra","CD Cortes","CDF Itaroa Huarte","CD Izarra","CD Oberena","Peña Sport FC",
+    "CD Pamplona","AD San Juan","CD Subiza","UDC Txantrea","CD Valle de Egüés"
+  ]},
+  { grupo:'XVI', provincias:['La Rioja'], clubes:[
+    "CD Agoncillo","CD Anguiano","CD Arnedo","C. Atlético Vianés","CD Autol","CD Berceo","CD Calahorra",
+    "Comillas CF","C. Haro Deportivo","CDFC La Calzada","UD Logroñés B","SD Oyonesa","Peña Balsamaiso CF",
+    "CD Pradejón","CD San Marcial","CD Varea","CD Villegas","Yagüe CF"
+  ]},
+  { grupo:'XVII', provincias:['Zaragoza','Huesca','Teruel'], clubes:[
+    "AD Almudévar","Andorra CF","CF Atlético de Monzón","CD Belchite 97","CD Binéfar","CF Calamocha",
+    "CD Cariñena","UD Casetas","CD Caspe","CD Cuarte","ADCF Épila","SD Huesca B","CF Illueca","CD La Almunia",
+    "CD Robres","CDJ Tamarite","CD Utrillas","CD Zuera"
+  ]},
+  { grupo:'XVIII', provincias:['Albacete','Ciudad Real','Cuenca','Guadalajara','Toledo'], clubes:[
+    "Atlético Albacete","CD Azuqueca","Calvo Sotelo de Puertollano CF","CD Cazalegas","CD Guadalajara B",
+    "CD Huracán de Balazote","CD Illescas","CF La Solana","CD Manchego Ciudad Real","CD Marchamalo",
+    "CD Pedroñeras","AD San Clemente","CD Sonseca","CD Tarancón","CD Toledo","CD Villacañas",
+    "CP Villarrobledo","Villarrubia CF"
+  ]}
+];
+// Todas las provincias españolas + Ceuta y Melilla que aparecen en algún grupo de arriba (52 en total).
+const PROVINCIAS_ESPANA = [...new Set(TERCERA_RFEF_GRUPOS.flatMap(g=>g.provincias))].sort((a,b)=>a.localeCompare(b,'es'));
+function grupoTerceraRFEFPorProvincia(provincia){
+  return TERCERA_RFEF_GRUPOS.find(g => g.provincias.includes(provincia)) || null;
+}
+// Clubes de Tercera RFEF del grupo real de esa provincia (con colores ya asignados, mismo objeto que
+// CLUBES_POR_CATEGORIA["Tercera RFEF"] filtrado). Si la provincia no se reconoce (o no se eligió, partidas
+// viejas), cae al pool completo de los 18 grupos.
+function clubesTerceraRFEFPorProvincia(provincia){
+  const grupo = grupoTerceraRFEFPorProvincia(provincia);
+  if(!grupo) return CLUBES_POR_CATEGORIA["Tercera RFEF"];
+  const nombres = new Set(grupo.clubes);
+  return CLUBES_POR_CATEGORIA["Tercera RFEF"].filter(c => nombres.has(c.nombre));
+}
+// Clubes reales de la temporada 2026-27 (Segunda RFEF: Grupo 5; Primera RFEF: Grupos 1 y 2).
 const CLUBES_POR_CATEGORIA = {
-  "Tercera RFEF": conColores([
-    "Torrent CF","CD Castellón B","Atlético Saguntino","Levante UD B","Villarreal CF C","CD Buñol",
-    "UD Vall de Uxó","Ontinyent 1931 CF","Athletic Club Torrellano","CD Soneja","Hércules CF B","CD Roda",
-    "Crevillente Deportivo","FC Jove Español San Vicente","Atzeneta UE","CD Acero","CD Eldense B","SC Torrevieja CF"
-  ]),
+  "Tercera RFEF": conColores(TERCERA_RFEF_GRUPOS.flatMap(g=>g.clubes)),
   "Segunda RFEF": conColores([
     // Grupo 1: Galicia, Asturias, Cantabria, Castilla y León
     "Atlético Astorga","Burgos CF Promesas","CD Numancia","Gimnástica Segoviana","Real Ávila","Valladolid Promesas","Salamanca UDS",
@@ -5432,6 +5548,7 @@ function migrarJugadorGuardado(j){
   if(j.temporadasEnClub === undefined) j.temporadasEnClub = 0;
   if(j.temporadasSinEquipo === undefined) j.temporadasSinEquipo = [];
   if(j.enParo === undefined) j.enParo = false;
+  if(j.provincia === undefined) j.provincia = '';
   if(j.contrato && j.contrato.duracionOriginal == null) j.contrato.duracionOriginal = j.contrato.duracionTemporadas;
   if(j.tienePareja && !j.pareja) j.pareja = generarNombrePareja(); // reconcilia desincronía legacy pareja/tienePareja
   // Arreglo retroactivo: partidas viejas podían tener a la madre con el primer apellido del jugador.
@@ -5474,7 +5591,7 @@ function borrarPartidaGuardada(slot){
   try{ localStorage.removeItem(claveSlot(slot)); }catch(e){}
 }
 
-function nuevoJugador(nombre,pais,extra,clubInicial,localidad){
+function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia){
   const atributos = {};
   const atributosProgreso = {};
   ATRIBUTOS_JUGADOR.forEach(a=>{ atributos[a] = ATRIBUTOS_BASE[a] + (extra[a]||0); atributosProgreso[a] = 0; });
@@ -5483,6 +5600,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad){
   return {
     nombre, pais, posicion: POSICION_FIJA, edad:16,
     localidad: (localidad||'').trim() || 'tu ciudad',
+    provincia: provincia || '',
     club:{ nombre: club.nombre, categoria:"Tercera RFEF", colores: club.colores },
     contrato:{ sueldoAnual:900, duracionTemporadas:2, duracionOriginal:2 },
     stats:{ forma:60, reputacion:5, salud:100, dinero:40, popularidad:2, valorMercado:5000, confianza:55, felicidadPareja:0, vestuario:45 },
@@ -9785,7 +9903,7 @@ SCREENS.tutorial = function(){
 
 SCREENS.crear = function(){
   const state = SCREENS.crear._state || (SCREENS.crear._state = {
-    nombrePila:"", apellido:"", localidad:"", pais:"España", estiloId:null
+    nombrePila:"", apellido:"", localidad:"", provincia:"", pais:"España", estiloId:null
   });
 
   topbar("Fichaje 10");
@@ -9817,14 +9935,29 @@ SCREENS.crear = function(){
   f2.appendChild(inpLoc);
   row2.appendChild(f2);
 
+  const f2b = el('div','field');
+  f2b.appendChild(el('label',null,'Provincia'));
+  const selProv = document.createElement('select');
+  const optVacia = document.createElement('option'); optVacia.value=''; optVacia.textContent='Selecciona...'; optVacia.disabled=true; optVacia.selected = !state.provincia;
+  selProv.appendChild(optVacia);
+  PROVINCIAS_ESPANA.forEach(prov=>{
+    const opt = document.createElement('option'); opt.value=prov; opt.textContent=prov; opt.selected = state.provincia===prov;
+    selProv.appendChild(opt);
+  });
+  selProv.onchange = e=>{ state.provincia = e.target.value; pintar(); };
+  f2b.appendChild(selProv);
+  row2.appendChild(f2b);
+  c.appendChild(row2);
+
+  const row3 = el('div','field-row');
   const f3 = el('div','field');
   f3.appendChild(el('label',null,'Posición'));
   const inpPos = document.createElement('input'); inpPos.type='text'; inpPos.value='Delantero'; inpPos.disabled = true;
   f3.appendChild(inpPos);
-  row2.appendChild(f3);
-  c.appendChild(row2);
+  row3.appendChild(f3);
+  c.appendChild(row3);
 
-  c.appendChild(el('div','field-hint', 'De la localidad sale toda la gente con la que creciste jugando al fútbol.'));
+  c.appendChild(el('div','field-hint', 'De la localidad sale toda la gente con la que creciste jugando al fútbol. La provincia decide con qué club real de Tercera RFEF empiezas.'));
 
   const ph = el('div','points-header');
   ph.appendChild(el('h3',null,'Elige tu estilo de juego'));
@@ -9850,13 +9983,13 @@ SCREENS.crear = function(){
 
   const btn = document.createElement('button'); btn.className='btn-main';
   btn.textContent = 'Empezar carrera';
-  btn.disabled = !state.estiloId || !state.nombrePila.trim() || !state.apellido.trim() || !state.localidad.trim();
+  btn.disabled = !state.estiloId || !state.nombrePila.trim() || !state.apellido.trim() || !state.localidad.trim() || !state.provincia;
   btn.onclick = ()=>{
     const estilo = ESTILOS_JUEGO.find(e=>e.id===state.estiloId);
     const extra = { mental: estilo.mental - ATRIBUTOS_BASE.mental };
     ATRIBUTOS_JUGADOR.forEach(a=>{ extra[a] = estilo.atributos[a] - ATRIBUTOS_BASE[a]; });
     const nombreCompleto = `${state.nombrePila.trim()} ${state.apellido.trim()}`;
-    S.jugador = nuevoJugador(nombreCompleto, state.pais, extra, null, state.localidad.trim());
+    S.jugador = nuevoJugador(nombreCompleto, state.pais, extra, null, state.localidad.trim(), state.provincia);
     trackEvento('nueva_partida', { estilo: estilo.id });
     S.screen = 'personalizarGrupo';
     render();
@@ -10020,7 +10153,7 @@ SCREENS.elegirClub = function(){
   const nivel = S.nivelPrueba || 1;
   if(!S.opcionesClubInicial){
     const config = CONFIG_NIVEL_PRUEBA[nivel];
-    const barajado = [...CLUBES_POR_CATEGORIA["Tercera RFEF"]].sort(()=>Math.random()-0.5);
+    const barajado = [...clubesTerceraRFEFPorProvincia(j.provincia)].sort(()=>Math.random()-0.5);
     S.opcionesClubInicial = barajado.slice(0, config.numClubes).map(club=>{
       const sueldo = Math.max(300, Math.round(SUELDO_BASE_POR_CATEGORIA["Tercera RFEF"] * config.factorSueldo * (0.85+Math.random()*0.3) / 50) * 50);
       const objetivo = elegirObjetivo({ club:{ nombre:club.nombre, categoria:"Tercera RFEF", ambicionNivel: ambicionInicial(club.nombre) } });

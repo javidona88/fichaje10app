@@ -46,7 +46,7 @@ nueva del modelo**.
 
 ```
 j = {
-  nombre, pais, posicion:"Delantero" (POSICION_FIJA), edad (empieza a 16), localidad,
+  nombre, pais, posicion:"Delantero" (POSICION_FIJA), edad (empieza a 16), localidad, provincia,
   club:{ nombre, categoria, colores:[hex1,hex2], extranjero?, pais?, liga?, grande?,
          nivelEuropeo?('champions'|'europa'|'conference'), ambicionNivel(1-4), objetivoActual? },
   contrato:{ sueldoAnual, duracionTemporadas, duracionOriginal },  // duracionOriginal = años al firmar; el tab Club muestra "X de Y años"
@@ -464,6 +464,23 @@ Dos minijuegos con dinero real de `j.stats.dinero`, ambos en `PANTALLAS_TAB`.
 - `CLUBES_POR_CATEGORIA`: clubes reales de España (temporada 2026-27), LaLiga / LaLiga2 /
   Primera RFEF / Segunda RFEF, cada uno `{nombre, colores:[hex1,hex2]}`. Categoría inicial del
   jugador: "Tercera RFEF" (`CATEGORIAS` es la escala completa).
+- **Tercera RFEF por provincia real** — `TERCERA_RFEF_GRUPOS`: los 18 grupos territoriales
+  oficiales de la RFEF (I-XVIII, temporada 2025-26, la más reciente investigada), cada uno
+  `{grupo, provincias:[...], clubes:[...]}` — casi todos cubren una única comunidad autónoma
+  (excepción: Andalucía se reparte en el IX -oriental: Granada/Málaga/Jaén/Almería/Melilla- y el
+  X -occidental: Sevilla/Cádiz/Huelva/Córdoba/Ceuta-). `CLUBES_POR_CATEGORIA["Tercera RFEF"]` es
+  la unión aplanada de los 18 (321 clubes, con colores vía `conColores`) — la usa el resto del
+  juego (rival, compañeros que fichan fuera, ascensos) para tener variedad de toda España.
+  `PROVINCIAS_ESPANA` (52: las 50 provincias + Ceuta y Melilla) sale de aplanar las `provincias`
+  de todos los grupos — nunca escribir esa lista a mano, así no se puede desincronizar del mapeo
+  real. `grupoTerceraRFEFPorProvincia(provincia)` busca el grupo de una provincia;
+  `clubesTerceraRFEFPorProvincia(provincia)` da los clubes (con colores) de ese grupo, o el pool
+  completo si la provincia no se reconoce (partidas viejas sin `j.provincia`, o vacío).
+  `SCREENS.crear` tiene un `<select>` de Provincia (obligatorio) junto a Localidad;
+  `SCREENS.elegirClub` (donde el jugador ficha por su primer club real) usa
+  `clubesTerceraRFEFPorProvincia(j.provincia)` en vez del pool completo, así que las ofertas de
+  debut son siempre de la región real elegida. `j.provincia` en el modelo del jugador (ver
+  `nuevoJugador` y `migrarJugadorGuardado`, que rellena `''` en partidas viejas).
 - `escudoSVG(nombre, tamano, colores)`: escudo genérico con iniciales + colores — NUNCA el
   escudo oficial. `PATRON_ESCUDO_LALIGA` da forma (escudo/círculo) y patrón (rayas/mitades/
   diagonal/sólido) por club de LaLiga. Excepción: escudo especial del Novelda CF por nombre.
