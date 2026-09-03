@@ -612,6 +612,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .dice-need b{ color:var(--gold); font-size:17px; font-family:'Space Grotesk',sans-serif; font-weight:700; }
 .dice-suma{ margin-top:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px; color:var(--ink); text-align:center; opacity:0; transform:translateY(-4px); transition:opacity .3s ease, transform .3s ease; }
 .dice-suma.show{ opacity:1; transform:translateY(0); }
+.dice-suma.natural20{ color:#D4AF37; letter-spacing:.03em; }
+.dice-suma.natural1{ color:#D9495C; letter-spacing:.03em; }
 .dice-caption{ margin-top:16px; font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink-soft); text-align:center; }
 .roll-result{
   font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:36px; letter-spacing:0;
@@ -3643,11 +3645,16 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.4.3';
+const VERSION_JUEGO = 'v1.4.4';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.4.4', titulo:'Tiradas naturales y Balón de Oro más justo', cambios:[
+    'Al sacar un 1 o un 20 natural, la tirada ya no muestra la suma con el bono: se ve directamente "1 NATURAL" / "20 NATURAL", porque el bono no influye en el resultado.',
+    'Suavizadas las opciones reales de ganar el Balón de Oro: una temporada perfecta (campeón, Pichichi, nota 10) ya no se quedaba corta contra el podio con tanta frecuencia.',
+    'Nuevas cajas en el dashboard de estadísticas (stats.html): más títulos ganados, mayor valor de mercado alcanzado, categoría de retiro y país de la carrera.'
+  ]},
   { version:'v1.4.3', titulo:'Motos, Supercopa de España y ajustes varios', cambios:[
     'Nuevo garaje de motos, con cuatro niveles igual que los coches.',
     'Nueva Supercopa de España (4 equipos, semifinal y final) para los campeones de Liga y Copa del Rey.',
@@ -6140,9 +6147,14 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   let balonDeOroPuesto = null;
   const clubEsEliteParaBalonOro = !j.club.extranjero || LIGAS_ELITE_EXTRANJERO.includes(j.club.pais);
   if(nota >= 9.0 && partidos >= 28 && (pichichi || mvp || campeon) && esMaximaCategoria && clubEsEliteParaBalonOro){
-    const probTop3 = Math.min(0.6, (nota - 8.7) * 0.7 + (campeon?0.15:0) + (pichichi?0.1:0));
+    // Ante una temporada perfecta (10, campeón y pichichi) el techo antiguo (60% de related al podio,
+    // 35% de ganar dentro de ese podio) dejaba solo ~21% de ganar realmente el Balón de Oro, algo
+    // demasiado duro para el mejor año posible. Se sube el techo de llegar al podio y se hace que
+    // ganar dentro del podio también dependa de lo dominante que haya sido la temporada.
+    const probTop3 = Math.min(0.88, (nota - 8.7) * 0.85 + (campeon?0.18:0) + (pichichi?0.12:0));
     if(Math.random() < probTop3){
-      balonDeOroPuesto = (Math.random() < 0.35) ? 1 : (Math.random() < 0.5 ? 2 : 3);
+      const probGanar = Math.min(0.65, 0.30 + (nota-9) * 0.25 + (campeon?0.08:0) + (pichichi?0.05:0));
+      balonDeOroPuesto = (Math.random() < probGanar) ? 1 : (Math.random() < 0.5 ? 2 : 3);
     }
   }
   if(balonDeOroPuesto === 1){
@@ -11758,7 +11770,15 @@ SCREENS.tirando = function(){
       if(r.natural1) die.classList.add('maldeojo');
       Sonido.tick();
       setTimeout(()=>{
-        sumaLbl.textContent = `${r.dado} ${r.bono>=0?'+':'-'} ${Math.abs(r.bono)} = ${r.total}`;
+        if(r.natural20){
+          sumaLbl.textContent = '20 NATURAL';
+          sumaLbl.classList.add('natural20');
+        } else if(r.natural1){
+          sumaLbl.textContent = '1 NATURAL';
+          sumaLbl.classList.add('natural1');
+        } else {
+          sumaLbl.textContent = `${r.dado} ${r.bono>=0?'+':'-'} ${Math.abs(r.bono)} = ${r.total}`;
+        }
         sumaLbl.classList.add('show');
       }, 450);
       setTimeout(()=>{
@@ -13483,7 +13503,7 @@ SCREENS.retiro = function(){
 
   const retirar = el('div','opt', retiradaForzosa ? 'Colgar las botas' : 'Colgar las botas ahora');
   retirar.onclick = ()=>{
-    trackEvento('retiro', { temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal: j.club.categoria, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais });
+    trackEvento('retiro', { temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal: j.club.categoria, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais, ascensos: j.carrera.ascensos||0, valorMercadoMaximo: j.carrera.valorMercadoMaximo||0, balonesDeOro: j.carrera.balonesDeOro||0, edadRetiro: j.edad, clubFinal: j.club.nombre, extranjero: !!j.club.extranjero, titulosSeleccion: (j.titulosSeleccion||[]).length });
     S.screen='final'; render();
   };
   c.appendChild(retirar);

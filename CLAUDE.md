@@ -102,9 +102,12 @@ desincronizado varias veces (racha gafada, crisis) y el jugador veía un % más 
 - **1 natural = FALLO automático, 20 natural = ÉXITO automático**, pase lo que pase con bono y
   dificultad (`exito = dado===1 ? false : (dado===20 ? true : total>=dificultad)`). Aplicado
   también en `probabilidadExito`, en la pantalla de lesión y en `SCREENS.resultado`.
-  **Durante la tirada (`SCREENS.tirando`) NO se adelanta el 1/20 automático** — el caption es
-  siempre "1d20 + N de <atributo>" y la suma siempre "dado + bono = total" (p. ej. "20 + 4 =
-  24"); el resultado auto solo se revela al final con ÉXITO/FALLO. `SCREENS.resultado` (pantalla
+  **Durante la tirada (`SCREENS.tirando`) NO se adelanta el 1/20 automático**: el caption es
+  siempre "1d20 + N de <atributo>", pero la línea de la suma sí distingue el caso natural —
+  en una tirada normal muestra "dado + bono = total" (p. ej. "12 + 3 = 15"), y en un 1 o 20
+  natural muestra directamente "1 NATURAL" / "20 NATURAL" (sin la suma, porque el bono no pesa
+  en el resultado), en rojo/dorado respectivamente (`.dice-suma.natural1` / `.natural20`); el
+  resultado ÉXITO/FALLO se revela igual al final, un poco después. `SCREENS.resultado` (pantalla
   de consecuencia, ya con el resultado a la vista) sí explicita "20 natural — éxito automático"
   en `.outcome-roll`.
 - `ventaja:true` → tira 2 dados y se queda con el mejor (objeto "Segunda Oportunidad").
@@ -593,8 +596,14 @@ también a Supabase (ver abajo) — es el único punto de entrada para analític
 `umami.track` directamente. Disparados actualmente:
 - `nueva_partida` (`{estilo}`) al pulsar "Empezar carrera" en `SCREENS.crear`.
 - `retiro` (`{temporada, partidos, goles, asistencias, dineroGanado, titulos, categoriaFinal,
-  nombreJugador, pais}`) al pulsar "Colgar las botas" en `SCREENS.retiro` (forzosa a los 42 o
-  voluntaria, mismo punto).
+  nombreJugador, pais, ascensos, valorMercadoMaximo, balonesDeOro, edadRetiro, clubFinal,
+  extranjero, titulosSeleccion}`) al pulsar "Colgar las botas" en `SCREENS.retiro` (forzosa a
+  los 42 o voluntaria, mismo punto). Los campos van todos en `datos` (JSONB), así que se puede
+  ampliar el payload en cualquier momento sin tocar el esquema de Supabase — pero solo alimenta
+  partidas que se retiren DESPUÉS del cambio; no hay forma de rellenar ese campo para carreras
+  ya terminadas (esos datos solo vivían en el `localStorage` de cada jugador y nunca se
+  enviaron). `stats.html` ya usa varios de estos campos en cajas propias (más títulos, mayor
+  valor de mercado, categoría de retiro, país).
 Al añadir un evento nuevo: nombre en minúsculas con guion bajo, payload pequeño (unas pocas
 claves), y pensar en el volumen si se dispara muy seguido (capa gratuita: 100.000 eventos/mes).
 
