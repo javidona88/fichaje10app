@@ -541,9 +541,9 @@ efectos en la topbar.
 
 Única dependencia externa deliberada del proyecto aparte de Google Fonts: un `<script>` de
 [Umami Cloud](https://cloud.umami.is) (capa gratuita, sin cookies, sin datos personales) en el
-`<head>` de `index.html`, con `data-website-id="TU-WEBSITE-ID"` — sustituir por el ID real que da
-Umami al dar de alta el sitio (crear cuenta gratis en cloud.umami.is → añadir sitio con la URL de
-GitHub Pages → copiar el Website ID). Cuenta visitas automáticamente sin código extra.
+`<head>` de `index.html`, con el `data-website-id` real del sitio (dado de alta en cloud.umami.is
+con el dominio pelado `javidona88.github.io`, SIN el `/fichaje10app/` de la ruta ni el protocolo
+— eso ya dio error una vez al añadir el sitio). Cuenta visitas automáticamente sin código extra.
 Eventos personalizados vía `trackEvento(nombre, datos)` (definida junto a `el()`, ~línea 7646;
 no rompe nada si el script no ha cargado — bloqueadores de anuncios, sin red — porque comprueba
 `typeof umami !== 'undefined'` dentro de un `try/catch`). Disparados actualmente:
