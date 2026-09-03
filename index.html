@@ -1344,9 +1344,13 @@ const BANCO_EVENTOS = [
       { texto:"Reservar clínica en Turquía para un injerto capilar", tirada:{atributo:"fisico", dificultadBase:17},
         costeEstimado: j => 4500,
         exito:{ texto: j => {
-            const revistas = ['¡Hola!','Semana','Diez Minutos'];
-            const revista = revistas[Math.floor(Math.random()*revistas.length)];
-            return `Sale redondo. Un par de semanas con gorra, algo de costra al principio, y en unos meses recuperas la línea del pelo de los veinte. Vuelves al campo estrenando look y hasta ${revista} te dedica un reportaje.`;
+            const cierres = [
+              'Vuelves al campo estrenando look y hasta ¡Hola! te dedica un reportaje.',
+              'Vuelves al campo estrenando look, y hasta Javi Hoyos lo comenta en directo entre risas durante una retransmisión.',
+              'Vuelves al campo estrenando look, aunque no te libras de que se abra un hilo de choteo en Forocoches con el "antes y después".'
+            ];
+            const cierre = cierres[Math.floor(Math.random()*cierres.length)];
+            return `Sale redondo. Un par de semanas con gorra, algo de costra al principio, y en unos meses recuperas la línea del pelo de los veinte. ${cierre}`;
           },
           efectos:{ dinero:-4500, popularidad:6, confianza:5, mental:2 } },
         fallo:{ texto:"La zona injertada se infecta a los pocos días. Fiebre alta, antibióticos por vía y una revisión de los servicios médicos del club que acaba en parte oficial: media temporada apartado hasta que aquello cicatrice del todo. En el vestuario ya nadie hace bromas.",
