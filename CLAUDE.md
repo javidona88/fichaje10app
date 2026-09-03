@@ -331,7 +331,12 @@ verdad rechazaste ofertas). `ABREVIATURA_OBJETIVO` da la versión corta.
 ### Torneos y selección nacional
 `TORNEOS_CONFIG`: entradas `tipo:'copa'|'europa'|'seleccion'|'seleccion_sub21'`, cada una con
 `condicion`, `probabilidad` (num o `j=>num`), `efectosVictoria`, `edadMax?`.
-- **Club**: copas nacionales y europeas (`j.club.nivelEuropeo`). Semifinal → final.
+- **Club**: copas nacionales y europeas (`j.club.nivelEuropeo`). Semifinal → final. `supercopa_europa`
+  (`sinSemifinal:true`, solo final) exige haber ganado Champions o Europa League la temporada
+  anterior con el mismo club. `supercopa_espana` (4 equipos, semifinal + final, sin
+  `sinSemifinal`, así que sigue el flujo normal semifinal→final) exige LaLiga o Copa del Rey la
+  temporada anterior con el mismo club, en España. Ambas Supercopas quedan excluidas del suceso
+  `celebracion_titulo` (que solo dispara tras títulos "grandes") vía su `trigger.condicion`.
 - **Selección**: `torneoDeVerano(S.temporada)` decide qué torneo de verano toca.
   `seleccion_absoluta` exige LaLiga + (trofeo individual la temporada anterior O reputación >=55);
   `seleccion_sub21` exige edad <=21, reputación 25-40, categoría >= Primera RFEF.
@@ -459,6 +464,26 @@ Dos minijuegos con dinero real de `j.stats.dinero`, ambos en `PANTALLAS_TAB`.
   `tragaGana` (arpegio ascendente + cascada de monedas), `tragaPierde` (dos notas cortas hacia
   abajo), `tragaRiesgo` (tic-toc de suspense). Ninguno se parece a los de los dados. Perder una
   apuesta grande resta algo de mental.
+
+### Garaje — coches y motos
+`TIENDA_COCHES` / `TIENDA_MOTOS`: dos garajes paralelos de 4 niveles cada uno, misma estructura
+(`{nivel, nombre, coste, efecto, desc, ...porCategoria(N)?}`), mismo patrón de render
+(`renderizarCoches` / `renderizarMotos`, calcados) y mismo campo en `j` (`cocheActual` /
+`motoActual`, índice de nivel, 0 = ninguno). `renderizarTienda` pinta primero
+SERVICIOS PROFESIONALES, luego GARAJE · COCHE, luego GARAJE · MOTO. Los servicios profesionales
+van en acordeón por categoría (una sola categoría abierta a la vez, `S.serviciosCategoriaAbierta`,
+mismo patrón que los grupos plegables de la ruleta) — se abre por defecto la categoría con algún
+servicio ya activo, o la primera si no hay ninguno.
+
+### Sanción por amaño de partido
+Suceso único `propuesta_amano_amoros` (Amorós "el Cabesa" te propone amañar un partido). Si sale
+mal, la rama `fallo` no usa el sistema de lesiones normal para el aviso (no es una lesión), pero
+sí reutiliza `j.lesionSemanas` para la baja en sí — así hereda gratis todo el bloqueo de pantallas,
+torneos y servicios de actividad física que ya tiene ese campo. Lo que la distingue de una lesión
+real es el flag `j.sancionActiva` (true mientras dura la baja, se limpia solo al llegar a 0
+semanas): `seccionEstado` usa ese flag para mostrar "Sancionado (X sem.)" en vez de "Lesionado
+(X sem.)" en la ficha. Al añadir cualquier otro sitio que lea `j.lesionSemanas > 0` para mostrar
+texto de "lesión", comprobar si también debería mirar `sancionActiva`.
 
 ### Clubes — bases de datos reales
 - `CLUBES_POR_CATEGORIA`: clubes reales de España (temporada 2026-27), LaLiga / LaLiga2 /

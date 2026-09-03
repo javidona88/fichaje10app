@@ -1240,7 +1240,7 @@ const TIENDA_SERVICIOS = [
     { nivel:2, costeAnual:2200, efectoTemporada:{forma:14}, desc:'Seguimiento mensual, estrategias de suplementación y recarga pre-partido.', ...porCategoria(1) },
     { nivel:3, costeAnual:11000, efectoTemporada:{forma:22}, desc:'Planes diarios personalizados y ajuste fino de composición corporal.', ...porCategoria(3) }
   ]},
-  { familia:'chef', nombre:'Chef privado / Meal prep', icono:'chef', categoria:'Rendimiento y Cuidado Físico', niveles:[
+  { familia:'chef', nombre:'Chef privado', icono:'chef', categoria:'Rendimiento y Cuidado Físico', niveles:[
     { nivel:1, costeAnual:4500, efectoTemporada:{forma:4, salud:4}, desc:'Tápers y menús semanales adaptados a la pauta del nutricionista.', ...porCategoria(3) },
     { nivel:2, costeAnual:9000, efectoTemporada:{forma:7, salud:7}, desc:'Servicio de mayor calidad, con más variedad y ajuste diario.', ...porCategoria(4) },
     { nivel:3, costeAnual:50000, efectoTemporada:{forma:12, salud:12}, desc:'Chef en casa a tiempo completo, cocinando cada comida al detalle.', ...porCategoria(4) }
@@ -1291,6 +1291,12 @@ const TIENDA_COCHES = [
   { nivel:2, nombre:'Berlina de gama media', coste:35000, efecto:{confianza:5, popularidad:2}, desc:'Cómodo, con algo de estilo. Empiezas a sentir que las cosas te van bien de verdad.', ...porCategoria(1) },
   { nivel:3, nombre:'Deportivo de lujo', coste:150000, efecto:{confianza:8, popularidad:6}, desc:'El tipo de coche con el que la gente se gira al verlo pasar por la calle.', ...porCategoria(3) },
   { nivel:4, nombre:'Superdeportivo exclusivo', coste:600000, efecto:{confianza:12, popularidad:12}, desc:'Una pieza de coleccionista, de las que solo se ven en las revistas de motor. Solo hay unos pocos como el tuyo en el mundo.', ...porCategoria(4) }
+];
+const TIENDA_MOTOS = [
+  { nivel:1, nombre:'Scooter urbana', coste:2500, efecto:{confianza:2}, desc:'Práctica para moverte por la ciudad sin depender de nadie. Nada llamativo, pero cumple.' },
+  { nivel:2, nombre:'Naked de gama media', coste:16000, efecto:{confianza:4, popularidad:2}, desc:'Empiezas a disfrutar de verdad de las salidas en moto los días libres.', ...porCategoria(1) },
+  { nivel:3, nombre:'Custom de alta gama', coste:65000, efecto:{confianza:7, popularidad:5}, desc:'Una moto con la que te paras a mirarla antes de arrancar. Se nota en cómo te miran también a ti.', ...porCategoria(3) },
+  { nivel:4, nombre:'Superbike de edición limitada', coste:260000, efecto:{confianza:11, popularidad:10}, desc:'Pocas unidades en el mundo, y una de ellas es tuya. Cada vez que sales con ella es un pequeño espectáculo.', ...porCategoria(4) }
 ];
 
 
@@ -1343,7 +1349,10 @@ const BANCO_EVENTOS = [
   })),
   {
     id:"celebracion_titulo", soloTrasTitulo:true,
-    trigger:{ probabilidad:1 },
+    trigger:{ probabilidad:1, condicion: () => {
+      const ultimoTitulo = (S.titulosTemporadaActual||[])[S.titulosTemporadaActual.length-1];
+      return ultimoTitulo !== 'Supercopa de Europa' && ultimoTitulo !== 'Supercopa de España';
+    } },
     texto: j => {
       const ultimoTitulo = (S.titulosTemporadaActual||[])[S.titulosTemporadaActual.length-1];
       const esSeleccion = ultimoTitulo && TITULOS_SELECCION_NOMBRES.includes(ultimoTitulo);
@@ -1417,7 +1426,9 @@ const BANCO_EVENTOS = [
     texto: j => {
       const tier = tierPatrocinio(j.club.categoria);
       const prensa = tier === 'nacional' ? 'la prensa nacional' : (tier === 'regional' ? 'la prensa regional' : 'la prensa local');
-      return `Perdéis 3-0 y ${prensa} te espera a la salida del vestuario para preguntarte qué ha pasado.`;
+      const resultados = ['3-0','4-1','2-0','3-1','1-0','4-0'];
+      const resultado = resultados[Math.floor(Math.random()*resultados.length)];
+      return `Perdéis ${resultado} y ${prensa} te espera a la salida del vestuario para preguntarte qué ha pasado.`;
     },
     variantes:[
       j => tierPatrocinio(j.club.categoria) === 'local'
@@ -1588,9 +1599,9 @@ const BANCO_EVENTOS = [
     trigger:{ edadMin:17, probabilidad:0.3, condicion: j => !j.patrocinio },
     texto: j => {
       const tier = tierPatrocinio(j.club.categoria);
-      if(tier==='nacional') return "Una marca deportiva de alcance nacional te propone ser su imagen a cambio de un buen dinero y varias apariciones al año.";
+      if(tier==='nacional') return "Una marca de alcance nacional te propone ser su imagen a cambio de un buen dinero y varias apariciones al año.";
       if(tier==='regional') return "Una marca con presencia regional te propone ser su imagen a cambio de un buen dinero y unas cuantas apariciones al año.";
-      return "Una marca deportiva de la zona te propone ser imagen de su tienda a cambio de un buen dinero y unas cuantas apariciones al mes.";
+      return "Una marca de la zona te propone ser su imagen a cambio de un buen dinero y unas cuantas apariciones al mes.";
     },
     opciones:[
       { texto:"Escuchar la propuesta y sentarte a negociar",
@@ -1617,7 +1628,11 @@ const BANCO_EVENTOS = [
       "Sale una noticia asegurando que hay un club interesado en ficharte. Nadie te ha llamado, pero el rumor ya corre.",
       j => {
         const tier = tierPatrocinio(j.club.categoria);
-        const medio = tier === 'nacional' ? 'Un programa deportivo de alcance nacional' : (tier === 'regional' ? 'Un programa deportivo regional' : 'Un programa deportivo local');
+        if(tier === 'nacional'){
+          const fuente = Math.random() < 0.5 ? 'Fabrizio Romano' : 'Jijantes';
+          return `${fuente} menciona tu nombre como posible fichaje de otro equipo. En el vestuario ya se comenta.`;
+        }
+        const medio = tier === 'regional' ? 'Un programa deportivo regional' : 'Un programa deportivo local';
         return `${medio} menciona tu nombre como posible fichaje de otro equipo. En el vestuario ya se comenta.`;
       }
     ],
@@ -1753,8 +1768,8 @@ const BANCO_EVENTOS = [
     trigger:{ probabilidad:0.2, condicion: j => CATEGORIAS.indexOf(j.club.categoria) >= 2 },
     texto:"Un columnista conocido escribe un artículo muy duro contigo, cuestionando tu nivel y tu actitud.",
     variantes:[
-      "Un análisis muy crítico sobre tu rendimiento circula por la prensa deportiva esta semana.",
-      "Un tertuliano habitual carga contra ti en su programa, poniendo en duda tu compromiso con el equipo."
+      "Julio Maldonado \"Maldini\" hace un análisis muy crítico sobre tu rendimiento en su canal de YouTube esta semana.",
+      "Josep Pedrerol carga contra ti en el programa Jugones de LaSexta, poniendo en duda tu compromiso con el equipo."
     ],
     opciones:[
       { texto:"Responder con goles sobre el campo", tirada:{atributo:"desmarque", dificultadBase:13},
@@ -1903,7 +1918,7 @@ const BANCO_EVENTOS = [
   {
     id:"presion_afición_local", cooldown:3, soloSiSano:true,
     trigger:{ probabilidad:0.18 },
-    texto:"La grada lleva todo el partido encima tuya, protestando cada balón que pierdes. Te llega un balón dividido en el centro del campo.",
+    texto:"La grada lleva todo el partido encima de ti, protestando cada balón que pierdes. Te llega un balón dividido en el centro del campo.",
     variantes:[
       "El ambiente está caldeado y cada pérdida de balón se paga cara en forma de pitos desde la grada.",
       "Notas la presión del público en cada contacto con el balón. Te llega uno dividido justo en el peor momento."
@@ -1931,6 +1946,7 @@ const BANCO_EVENTOS = [
         fallo:{ texto:"La conversación se vuelve incómoda y firmas igualmente, sin quedar del todo convencido.", efectosFn: j => ({dinero:-Math.round(j.contrato.sueldoAnual*0.04), mental:-2}) } },
       { texto:"Firmar y confiar en que todo está en orden",
         resultado:"Firmas sin darle más vueltas. Prefieres centrarte en el campo antes que en papeles que no terminas de entender del todo.",
+        costeEstimado: j => Math.round(j.contrato.sueldoAnual*0.02),
         efectosFn: j => ({dinero:-Math.round(j.contrato.sueldoAnual*0.02)}) }
     ]
   },
@@ -1973,10 +1989,10 @@ const BANCO_EVENTOS = [
   {
     id:"pretemporada_exigente", cooldown:3, soloSiSano:true,
     trigger:{ probabilidad:0.2, condicion: j => S.pasoIndex === 1 },
-    texto:"El nuevo preparador físico plantea una pretemporada mucho más dura de lo habitual. Varios compañeros ya se quejan del ritmo.",
+    texto:"El preparador físico plantea una tanda de trabajo mucho más dura de lo habitual. Varios compañeros ya se quejan del ritmo.",
     variantes:[
-      "La pretemporada de este año viene marcada por un ritmo de trabajo que deja a más de uno con las piernas destrozadas.",
-      "El nuevo cuerpo técnico aprieta de lo lindo en pretemporada. Se nota que quieren dejar huella desde el primer día."
+      "Esta semana viene marcada por un ritmo de trabajo que deja a más de uno con las piernas destrozadas.",
+      "El cuerpo técnico aprieta de lo lindo con la preparación física. Se nota que quieren dejar huella cuanto antes."
     ],
     opciones:[
       { texto:"Apretar los dientes y completarla al máximo nivel", tirada:{atributo:"fisico", dificultadBase:12},
@@ -2032,9 +2048,11 @@ const BANCO_EVENTOS = [
     opciones:[
       { texto:"Implicarte a fondo, poniendo tiempo y dinero de tu parte",
         resultado: j => `Donas parte de tu sueldo ${articuloClub(j.club.nombre)==='la'?'de la':'del'} ${j.club.nombre} y te presentas en persona a repartir material deportivo. Ver las caras de esos chavales te devuelve, por un momento, a quien eras tú antes de todo esto.`,
+        costeEstimado: j => Math.round(j.contrato.sueldoAnual*0.06),
         efectosFn: j => ({dinero:-Math.round(j.contrato.sueldoAnual*0.06), popularidad:10, reputacion:6}) },
       { texto:"Hacer una donación puntual y seguir con tu rutina",
         resultado:"Haces un ingreso discreto y sigues con tu semana. Nadie lo sabrá, pero tú sí.",
+        costeEstimado: j => Math.round(j.contrato.sueldoAnual*0.015),
         efectosFn: j => ({dinero:-Math.round(j.contrato.sueldoAnual*0.015), reputacion:2}) }
     ]
   },
@@ -2062,6 +2080,7 @@ const BANCO_EVENTOS = [
     opciones:[
       { texto:"Ayudar económicamente a tus padres antes que a ti mismo",
         resultado:"Les ingresas una parte importante sin avisar. Cuando tu madre te llama para preguntarte qué es eso, se le rompe la voz al otro lado del teléfono.",
+        costeEstimado: j => Math.round(j.contrato.sueldoAnual*0.10),
         efectosFn: j => ({dinero:-Math.round(j.contrato.sueldoAnual*0.10), mental:5, reputacion:3}) },
       { texto:"Ahorrarlo todo, no sabes cuánto va a durar esto",
         resultado:"Decides no gastar ni un euro de más. Después de tantos años sin nada, la prudencia pesa más que las ganas de celebrar.",
@@ -2083,6 +2102,7 @@ const BANCO_EVENTOS = [
         fallo:{ texto:"Los compromisos del club grande te lo impiden en el último momento. Envías un vídeo de disculpa, pero sabes que no es lo mismo.", efectos:{popularidad:-2,mental:-2} } },
       { texto:"Enviar una donación generosa en tu lugar",
         resultado:"No puedes ir en persona, pero mandas una ayuda económica importante para que renueven el campo. El gesto se agradece, aunque tu ausencia física se nota.",
+        costeEstimado: j => Math.round(j.contrato.sueldoAnual*0.05),
         efectosFn: j => ({dinero:-Math.round(j.contrato.sueldoAnual*0.05), reputacion:4, popularidad:3}) }
     ]
   },
@@ -2140,7 +2160,13 @@ const BANCO_EVENTOS = [
       "En una quedada informal, alguien capta tu atención de una forma que no esperabas, entre risas y una charla que se alarga más de la cuenta.",
       "En la cola de una cafetería, un comentario improvisado se convierte en media hora de charla que no viste venir.",
       j => `${j.companeros[Math.floor(Math.random()*j.companeros.length)].apodo} te insiste en apuntarte a una cita a ciegas. Vas sin muchas expectativas, y sales con bastantes más de las que llevabas.`,
-      "En una boda de un compañero de equipo, acabáis sentados en la misma mesa. Para cuando llega el baile, ya habéis hablado de todo menos de fútbol."
+      "En una boda de un compañero de equipo, acabáis sentados en la misma mesa. Para cuando llega el baile, ya habéis hablado de todo menos de fútbol.",
+      j => j.edad >= 18
+        ? "Empiezas a hablar con alguien por Instagram después de un comentario en una foto, y las conversaciones se alargan cada vez más."
+        : "Una amistad en común te presenta a alguien que, sin buscarlo, se te queda rondando la cabeza toda la semana.",
+      j => j.edad >= 18
+        ? "Le das una oportunidad a Tinder más por curiosidad que por otra cosa, y dais con una conversación que de verdad fluye."
+        : "En una quedada informal, alguien capta tu atención de una forma que no esperabas, entre risas y una charla que se alarga más de la cuenta."
     ],
     opciones:[
       { texto:"Atreverte a pedirle una cita", tirada:{atributo:"mental", dificultadBase:11},
@@ -2188,9 +2214,11 @@ const BANCO_EVENTOS = [
     opciones:[
       { texto:"Celebrar una boda por todo lo alto, con todos los que os queréis",
         resultado: j => `El día pasa volando entre nervios, lágrimas y baile. Ni el mejor gol de tu carrera te ha hecho sonreír así. Al día siguiente vuelves a los entrenos ${articuloClub(j.club.nombre)==='la'?'de la':'del'} ${j.club.nombre} como un hombre distinto, con ${j.pareja ? j.pareja.apodo : 'tu pareja'} como testigo de todo lo que viene.`,
+        costeEstimado: j => Math.round(j.contrato.sueldoAnual*0.15),
         efectosFn: j => { j.stats.felicidadPareja = Math.max(90, j.stats.felicidadPareja||0); return {dinero:-Math.round(j.contrato.sueldoAnual*0.15), mental:8, popularidad:6}; } },
       { texto:"Una boda íntima, solo los vuestros",
         resultado: j => `Sin photocall ni titulares, solo la gente que de verdad importa. Es, con diferencia, el mejor día de tu vida junto a ${j.pareja ? j.pareja.apodo : 'tu pareja'}.`,
+        costeEstimado: j => Math.round(j.contrato.sueldoAnual*0.03),
         efectosFn: j => { j.stats.felicidadPareja = Math.max(90, j.stats.felicidadPareja||0); return {dinero:-Math.round(j.contrato.sueldoAnual*0.03), mental:8}; } }
     ]
   },
@@ -2295,7 +2323,7 @@ const BANCO_EVENTOS = [
     id:"amigo_no_futbolista_aparece", unico:true,
     trigger:{ edadMin:19, probabilidad:0.2, condicion: j => !j.amigoNoFutbol },
     texto: j => {
-      if(!S._amigoNoFutbolCandidato) S._amigoNoFutbolCandidato = generarAmigoNoFutbol();
+      if(!S._amigoNoFutbolCandidato) S._amigoNoFutbolCandidato = generarAmigoNoFutbol(j);
       const base = S._amigoNoFutbolCandidato;
       const etiqueta = base.genero==='f' ? 'amiga' : 'amigo';
       const pronRelativo = base.genero==='f' ? 'La que' : 'El que';
@@ -2478,9 +2506,11 @@ const BANCO_EVENTOS = [
     opciones:[
       { texto:"Comprarle una casa nueva, sin decírselo hasta el final",
         resultado: j => { j.padreMadre.relacion = Math.min(100, j.padreMadre.relacion+25); return `La reacción al enseñarle las llaves no se te va a olvidar en la vida. Todo el sacrificio de tantos años, de golpe, parece tener sentido.`; },
+        costeEstimado: j => 80000,
         efectosFn: j => ({dinero:-80000, mental:10}) },
       { texto:"Ayudarle económicamente, pero dejando que decida en qué",
         resultado: j => { j.padreMadre.relacion = Math.min(100, j.padreMadre.relacion+15); return `Le ofreces la ayuda sin condiciones. ${j.padreMadre.apodo} decide con calma en qué invertirlo, agradecido pero sin dejarse deslumbrar.`; },
+        costeEstimado: j => 40000,
         efectosFn: j => ({dinero:-40000, mental:6}) }
     ]
   },
@@ -2525,7 +2555,8 @@ const BANCO_EVENTOS = [
     trigger:{ probabilidad:0.16, condicion: j => j.rival.trayectoriaIniciada },
     texto: j => {
       const ubicacion = j.rival.club ? `${articuloClub(j.rival.club)==='la'?'en la':'en el'} ${j.rival.club}` : 'en su club actual';
-      return `Un periodista te pregunta en rueda de prensa por ${j.rival.nombre}, que últimamente está dando que hablar ${ubicacion}. "¿Seguís en contacto?", te suelta con intención, buscando titular.`;
+      const medio = ['MARCA','AS','Mundo Deportivo'][Math.floor(Math.random()*3)];
+      return `Un periodista de ${medio} te pregunta en rueda de prensa por ${j.rival.nombre}, que últimamente está dando que hablar ${ubicacion}. "¿Seguís en contacto?", te suelta con intención, buscando titular.`;
     },
     opciones:[
       { texto:"Hablar bien de él, sin dobleces",
@@ -2787,7 +2818,7 @@ const BANCO_EVENTOS = [
   {
     id:"momento_viral_redes", cooldown:5,
     trigger:{ probabilidad:0.15 },
-    texto:"Un vídeo tuyo tropezando con el cubo de las bebidas en el banquillo, grabado por un aficionado, se ha hecho viral de la noche a la mañana. Millones de reproducciones y memes por todas partes.",
+    texto:"Un vídeo tuyo tropezando con el cubo de las bebidas en el banquillo, grabado por un aficionado, se ha hecho viral en TikTok de la noche a la mañana. Millones de reproducciones y memes por todas partes.",
     variantes:[
       "Alguien graba el momento exacto en que confundes el nombre de un compañero en una entrevista, y el clip lleva horas circulando sin parar.",
       "Un vídeo tuyo bailando fatal en la celebración de un gol se ha convertido en el meme del día en todas las redes."
@@ -3568,6 +3599,26 @@ const BANCO_EVENTOS = [
         resultado:"Declinas la oferta. Sigues llevando tú mismo las riendas de tu carrera, para bien y para mal.",
         efectos:{mental:1} }
     ]
+  },
+  { id:"propuesta_amano_amoros", unico:true, soloSiSano:true,
+    trigger:{ edadMin:18, probabilidad:0.05, condicion: j => !esClubGrande(j.club.nombre) && (j.stats.dinero||0) < 40000 },
+    texto:"Un tipo que no conoces de nada, se presenta como Amorós, «el Cabesa», te espera apoyado en tu coche a la salida del entreno. Dice tener contactos que mueven resultados de partidos sin que nadie se entere, y quiere meterte en el ajo: «Un partido, uno solo, y te llevas más de lo que ganas en medio año. Nadie tiene por qué saberlo».",
+    opciones:[
+      { texto:"Mandarlo a paseo ahí mismo",
+        resultado:"Le dejas claro que no quieres saber nada de eso y te das la vuelta. Amorós se encoge de hombros, como si ya se lo esperara, y no vuelves a verlo por la zona del campo.",
+        efectos:{mental:2,confianza:2} },
+      { texto:"Escuchar el plan y aceptar amañar el partido", tirada:{atributo:'mental', dificultadBase:15},
+        exito:{ texto:"El partido sale tal y como Amorós había prometido, y nadie sospecha nada. Un par de días después, el dinero aparece en tu cuenta sin dejar rastro alguno. Te queda la mala conciencia, pero también el alivio de haberlo hecho callado.",
+          efectos:{dinero:22000,confianza:-6} },
+        fallo:{ texto:"Un movimiento raro en las casas de apuestas enciende todas las alarmas. La investigación no tarda en salpicarte: la federación abre expediente, la prensa se lanza a por la historia y el club se desmarca de ti en público. La sanción es dura, y de Amorós no vuelves a saber nada.",
+          efectosFn: j => {
+            const semanasSancion = SEMANAS_POR_PASO * SECUENCIA_TEMPORADA.length * 2;
+            j.lesionSemanas = Math.max(j.lesionSemanas||0, semanasSancion);
+            j.sancionActiva = true;
+            mostrarNotificacion(`${iconoInline('fisico',15)}Sancionado por amaño (${formatearDuracionLesion(semanasSancion)})`, 'riesgo');
+            return { dinero:-6000, reputacion:-30, popularidad:-25, carinoAficion:-25, confianza:-15 };
+          } } }
+    ]
   }
 ];
 
@@ -3592,11 +3643,23 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.4.2';
+const VERSION_JUEGO = 'v1.4.3';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.4.3', titulo:'Motos, Supercopa de España y ajustes varios', cambios:[
+    'Nuevo garaje de motos, con cuatro niveles igual que los coches.',
+    'Nueva Supercopa de España (4 equipos, semifinal y final) para los campeones de Liga y Copa del Rey.',
+    'Nuevo suceso: una propuesta de amaño de partido, con premio si sale bien y una sanción larga si te pillan.',
+    'Servicios profesionales reorganizados en categorías plegables, como las apuestas de la ruleta.',
+    'Números rojos: ahora bloquean de verdad cualquier contratación o subida de nivel de un servicio, no solo lo que ya tenías activo.',
+    'Corregido: varios sucesos que te dejaban gastar dinero (ayudar a tu familia, donaciones, tu boda...) ya avisan si no te lo puedes permitir, en vez de dejarte caer en números rojos sin avisar.',
+    'Corregido: en una negociación de contrato ya no puedes pedir más años de los que tu edad permitiría en una oferta nueva.',
+    'Corregido: el Once ideal de la temporada exige ahora un mínimo de partidos jugados.',
+    'Banderas nuevas para México, Estados Unidos y Arabia Saudí; la bandera de la selección pasa al lado izquierdo en el resumen final, como los escudos de club.',
+    'Varios sucesos ahora mencionan medios y personajes reales (Josep Pedrerol y Jugones, Julio Maldonado "Maldini", Fabrizio Romano, Jijantes, MARCA/AS/Mundo Deportivo) y otros ajustes menores de texto.'
+  ]},
   { version:'v1.4.2', titulo:'Tu provincia real en la creación', cambios:[
     'Nuevo campo Provincia al crear personaje: tu primer club de Tercera RFEF sale ahora del grupo real de tu región (los 18 grupos territoriales de toda España, no solo uno).',
     'El campo de apellido pasa a ser uno solo ("Apellido"), y el de tus amigos queda claro que es opcional.'
@@ -4574,7 +4637,10 @@ const BANDERAS_SVG = {
   "Corea del Sur": '<rect width="40" height="40" fill="#FFFFFF"/><circle cx="20" cy="20" r="9" fill="#CD2E3A"/><path d="M20 11a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9 9 9 0 0 0 0-18z" fill="#0047A0"/>',
   "Ucrania": '<rect width="40" height="20" y="0" fill="#0057B7"/><rect width="40" height="20" y="20" fill="#FFD700"/>',
   "Chile": '<rect width="40" height="20" y="0" fill="#FFFFFF"/><rect width="40" height="20" y="20" fill="#D52B1E"/><rect width="16" height="20" x="0" y="0" fill="#0039A6"/><polygon points="8,7 9.4,10.5 13,10.7 10.2,13 11.2,16.5 8,14.4 4.8,16.5 5.8,13 3,10.7 6.6,10.5" fill="#FFFFFF"/>',
-  "República Checa": '<rect width="40" height="20" y="0" fill="#FFFFFF"/><rect width="40" height="20" y="20" fill="#D7141A"/><polygon points="0,0 0,40 20,20" fill="#11457E"/>'
+  "República Checa": '<rect width="40" height="20" y="0" fill="#FFFFFF"/><rect width="40" height="20" y="20" fill="#D7141A"/><polygon points="0,0 0,40 20,20" fill="#11457E"/>',
+  "México": '<rect width="13.3" height="40" x="0" fill="#006847"/><rect width="13.4" height="40" x="13.3" fill="#FFFFFF"/><rect width="13.3" height="40" x="26.6" fill="#CE1126"/>',
+  "Estados Unidos": '<rect width="40" height="40" fill="#FFFFFF"/><rect width="40" height="3.1" y="0" fill="#B22234"/><rect width="40" height="3.1" y="6.2" fill="#B22234"/><rect width="40" height="3.1" y="12.4" fill="#B22234"/><rect width="40" height="3.1" y="18.6" fill="#B22234"/><rect width="40" height="3.1" y="24.8" fill="#B22234"/><rect width="40" height="3.1" y="31" fill="#B22234"/><rect width="40" height="3.1" y="37.2" fill="#B22234"/><rect width="18" height="21.5" x="0" y="0" fill="#3C3B6E"/>',
+  "Arabia Saudí": '<rect width="40" height="40" fill="#006C35"/><rect x="6" y="15" width="20" height="3" fill="#FFFFFF"/><rect x="6" y="20" width="16" height="3" fill="#FFFFFF"/><polygon points="24,21.5 30,20 24,18.5" fill="#FFFFFF"/>'
 };
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
 const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog']);
@@ -4655,7 +4721,7 @@ const ANIMO_MARCA = {
   enfadado: { texto:'La marca está molesta. Un paso en falso y puede retirar la oferta' }
 };
 
-const NICE_STAT = {forma:"Forma",reputacion:"Reputación",salud:"Salud",dinero:"Dinero",popularidad:"Popularidad",valorMercado:"Valor de mercado",felicidadPareja:"Pareja",vestuario:"Vestuario",carinoAficion:"Cariño de la afición"};
+const NICE_STAT = {forma:"Forma",reputacion:"Reputación",salud:"Salud",dinero:"Dinero",popularidad:"Popularidad",valorMercado:"Valor de mercado",felicidadPareja:"Pareja",vestuario:"Vestuario",carinoAficion:"Cariño de la afición",confianza:"Confianza"};
 const CLAVES_STAT_INMEDIATA = ['forma','reputacion','dinero'];
 const NICE_TODO = Object.assign({}, NICE_ATTR, NICE_STAT, {tecnica:"Técnica"});
 
@@ -4668,6 +4734,7 @@ const LOGOS_COMPETICION = {
   "Copa Federación": { color:"#6E88A8", letra:"CF" },
   "Copa Libertadores": { color:"#7B2D8E", letra:"LIB" },
   "Supercopa de Europa": { color:"#D4AF37", letra:"SE" },
+  "Supercopa de España": { color:"#AA151B", letra:"SC" },
   "FA Cup": { color:"#0057B8", letra:"FA" },
   "Coppa Italia": { color:"#009246", letra:"CI" },
   "DFB-Pokal": { color:"#000000", letra:"DFB" },
@@ -4877,6 +4944,16 @@ const TORNEOS_CONFIG = [
       return (etapa.titulos||[]).some(t => (t.nombre==='Champions League' || t.nombre==='Europa League') && t.temporada === S.temporada-1);
     }, probabilidad:1,
     efectosVictoria:{forma:10,popularidad:10,reputacion:6} },
+  { id:'supercopa_espana', nombreCompeticion:'Supercopa de España', tipo:'club', tierMin:2, tierMax:4,
+    condicion: j => {
+      if(S.pasoIndex !== 2) return false;
+      if(j.club.extranjero) return false;
+      if(!j.trayectoria || !j.trayectoria.length) return false;
+      const etapa = j.trayectoria[j.trayectoria.length-1];
+      if(etapa.club !== j.club.nombre) return false;
+      return (etapa.titulos||[]).some(t => (t.nombre==='LaLiga' || t.nombre==='Copa del Rey') && t.temporada === S.temporada-1);
+    }, probabilidad:1,
+    efectosVictoria:{forma:9,popularidad:8,reputacion:5} },
   { id:'seleccion_absoluta', nombreCompeticion:null, tipo:'seleccion',
     condicion: j => {
       const torneo = torneoDeVerano(S.temporada);
@@ -5058,10 +5135,26 @@ function generarNombrePeriodista(){
 const PROFESIONES_AMIGO = ["profesor de instituto","enfermero","dependienta de una tienda","mecánico","administrativa en un ayuntamiento","camarero","fontanero","auxiliar de enfermería","cartero","peluquera"];
 const AMIGO_NO_FUTBOL_MASC = { nombres:["Carlos","David","Pablo","Javier","Alejandro","Raúl"], profesiones:["profesor de instituto","enfermero","mecánico","camarero","fontanero","cartero","auxiliar de enfermería"] };
 const AMIGO_NO_FUTBOL_FEM = { nombres:["Laura","Elena","Sara","Marta","Lucía","Claudia","Irene","Beatriz"], profesiones:["profesora de instituto","enfermera","dependienta de una tienda","administrativa en un ayuntamiento","auxiliar de enfermería","peluquera"] };
-function generarAmigoNoFutbol(){
-  const esMasc = Math.random() < 0.5;
-  const pool = esMasc ? AMIGO_NO_FUTBOL_MASC : AMIGO_NO_FUTBOL_FEM;
-  const nombre = pool.nombres[Math.floor(Math.random()*pool.nombres.length)];
+// Nombres ya en uso por otros personajes del jugador, para que el amigo nuevo no coincida con
+// ninguno (compañeros, rival, pareja, hermano, padre/madre, mentor, protegido, periodista).
+function nombresPersonajesEnUso(j){
+  const usados = new Set();
+  if(!j) return usados;
+  (j.companeros||[]).forEach(c=>{ if(c.apodo) usados.add(c.apodo.split(' ')[0]); });
+  [j.rival, j.pareja, j.hermano, j.padreMadre, j.mentor, j.protegido, j.periodista, j.amigoNoFutbol].forEach(p=>{
+    if(p && p.apodo) usados.add(p.apodo.split(' ')[0]);
+  });
+  return usados;
+}
+function generarAmigoNoFutbol(j){
+  const evitar = nombresPersonajesEnUso(j);
+  let esMasc, pool, nombre, intentos = 0;
+  do {
+    esMasc = Math.random() < 0.5;
+    pool = esMasc ? AMIGO_NO_FUTBOL_MASC : AMIGO_NO_FUTBOL_FEM;
+    nombre = pool.nombres[Math.floor(Math.random()*pool.nombres.length)];
+    intentos++;
+  } while(evitar.has(nombre) && intentos < 20);
   const apellido = APELLIDOS_PROTEGIDO[Math.floor(Math.random()*APELLIDOS_PROTEGIDO.length)];
   const profesion = pool.profesiones[Math.floor(Math.random()*pool.profesiones.length)];
   return { nombre: `${nombre} ${apellido}`, apodo: nombre, profesion, genero: esMasc ? 'm' : 'f' };
@@ -5531,6 +5624,8 @@ function migrarJugadorGuardado(j){
   if(j.objetos.vestuario === undefined) j.objetos.vestuario = 0;
   if(j.objetos.confianzaCiega === undefined) j.objetos.confianzaCiega = 0;
   if(j.stats.vestuario === undefined) j.stats.vestuario = 55;
+  if(j.sancionActiva === undefined) j.sancionActiva = false;
+  if(j.motoActual === undefined) j.motoActual = 0;
   if(j.estadoMental === undefined) j.estadoMental = 'normal';
   if(j.rachaResultados === undefined) j.rachaResultados = 0;
   if(j.promesasActivas === undefined) j.promesasActivas = [];
@@ -5619,8 +5714,8 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia){
     tienePareja:false,
     rachaGafada:false,
     comprasUnicas:[],
-    cocheActual:0,
-    lesionSemanas:0,
+    cocheActual:0, motoActual:0,
+    lesionSemanas:0, sancionActiva:false,
     carinoAficion:20,
     temporadasEnClub:0,
     maxCarinoAlcanzado:20,
@@ -5709,7 +5804,8 @@ function puedePagarServicio(j, familia, nuevoNivel){
   if(!servicio) return true;
   const nivelActual = j.suscripciones[familia] || 0;
   if(nuevoNivel === nivelActual || nuevoNivel === 0) return true; // cancelar, o quedarte igual, siempre está permitido
-  if(servicio.esPorcentaje) return (j.stats.dinero||0) >= 0; // la comisión no compite por presupuesto fijo, pero no en números rojos
+  if((j.stats.dinero||0) < 0) return false; // en números rojos no se puede contratar ni subir de nivel nada nuevo
+  if(servicio.esPorcentaje) return true; // ya se ha comprobado arriba que no estás en números rojos
   const infoActual = nivelActual ? servicio.niveles.find(n=>n.nivel===nivelActual) : null;
   const costeActualFamilia = infoActual ? infoActual.costeAnual : 0;
   const infoNuevo = servicio.niveles.find(n=>n.nivel===nuevoNivel);
@@ -6111,8 +6207,8 @@ function calcularResumenTemporada(j, ascensoPlayoff){
 
   const declive = aplicarDeclivePorEdad(j);
 
-  // Once ideal de la temporada (FIFA)
-  const enOnceIdeal = nota >= 7.8 && titular && esMaximaCategoria && !j.club.extranjero;
+  // Once ideal de la temporada (FIFA) — exige un mínimo de partidos, si no cualquier suplente con una nota puntual coleaba
+  const enOnceIdeal = nota >= 7.8 && titular && partidos >= 20 && esMaximaCategoria && !j.club.extranjero;
 
   j.carrera.valorMercadoMaximo = Math.max(j.carrera.valorMercadoMaximo||0, j.stats.valorMercado);
   return { partidos, goles, asistencias, ascenso, campeon, clasificacionEuropea, nivelEuropeo, titular, posicionFinal, crecimientoValor, pichichi, botaOro, mvp, nota, objetivoCumplido, objetivoTexto, objetivoTipo, declive, enOnceIdeal, balonDeOroPuesto, enPlayoff, fasesCompeticiones };
@@ -6533,6 +6629,7 @@ function avanzarPaso(j){
     j.lesionSemanas = Math.max(0, j.lesionSemanas - Math.floor(SEMANAS_POR_PASO * factorNivelVida));
     if(seguiaLesionado && j.lesionSemanas === 0){
       j.stats.salud = Math.min(85, Math.max(j.stats.salud, 65)); // el alta médica no te deja al 100%, necesitas coger ritmo de competición otra vez
+      j.sancionActiva = false;
     }
   }
   S.pasoIndex = (S.pasoIndex===undefined || S.pasoIndex===null) ? 0 : S.pasoIndex+1;
@@ -7134,13 +7231,22 @@ function calcularDuracionPatrocinio(j){
   return opciones[Math.floor(Math.random()*opciones.length)];
 }
 function calcularDuracionContrato(j){
+  const opciones = opcionesDuracionContrato(j);
+  return opciones[Math.floor(Math.random()*opciones.length)];
+}
+function opcionesDuracionContrato(j){
   let opciones = [2,3,4];
   if(j.edad <= 21) opciones = [3,4,5];
   else if(j.edad >= 38) opciones = [1];
   else if(j.edad >= 34) opciones = [1,2];
   else if(j.edad >= 29) opciones = [1,2,3];
   if(j.stats.reputacion >= 40 && j.edad < 34) opciones = opciones.map(o => Math.min(5, o+1));
-  return opciones[Math.floor(Math.random()*opciones.length)];
+  return opciones;
+}
+// Techo de años negociables en una renovación/fichaje: un veterano no puede "pedir" un contrato
+// largo que su edad ya no justificaría, aunque el club esté contento
+function duracionMaximaNegociable(j){
+  return Math.max(...opcionesDuracionContrato(j));
 }
 function calcularSueldoOferta(j, categoria, nombreClub, multiplicadorExtra){
   const rating = (j.atributos.fisico + j.atributos.velocidad + j.atributos.tiro + j.atributos.regate + j.atributos.pase + j.atributos.desmarque) / 6;
@@ -7234,10 +7340,12 @@ function generarOfertas(j){
       nombresUsados.add(clubExt.nombre);
       const esGrandeExt = CLUBES_GRANDES_EXTRANJERO.includes(clubExt.nombre);
       const duracion = calcularDuracionContrato(j);
+      // sin escala de categorías para el extranjero, la "subida" se mide comparando prestigio con tu club actual
+      const ascensoExt = (PRESTIGIO_CLUB[clubExt.nombre]||2) > (PRESTIGIO_CLUB[j.club.nombre]||2);
       const objetivoExt = elegirObjetivo({ club: { nombre: clubExt.nombre, categoria:"LaLiga", extranjero:true, grande: esGrandeExt || undefined, pais: clubExt.pais, ambicionNivel: ambicionInicial(clubExt.nombre) } });
       ofertas.push({
         nombre: clubExt.nombre, pais: clubExt.pais, liga: clubExt.liga, colores: clubExt.colores,
-        categoria:"LaLiga", ascenso:false, duracion, extranjero:true, grande: esGrandeExt || undefined, rivalDirecto: esRivalDirecto(j.club.nombre, clubExt.nombre) || undefined,
+        categoria:"LaLiga", ascenso:ascensoExt, duracion, extranjero:true, grande: esGrandeExt || undefined, rivalDirecto: esRivalDirecto(j.club.nombre, clubExt.nombre) || undefined,
         sueldo: esGrandeExt ? calcularSueldoOferta(j, "Grande") : calcularSueldoOferta(j, "Extranjero", clubExt.nombre, MULTIPLICADOR_SUELDO_LIGA[clubExt.liga] || 0.5),
         objetivo: objetivoExt ? objetivoExt.texto : OBJETIVOS_POR_CATEGORIA["Extranjero"][Math.floor(Math.random()*OBJETIVOS_POR_CATEGORIA["Extranjero"].length)],
         minutos: expectativaMinutos(j, true)
@@ -8000,7 +8108,7 @@ function seccionEstado(j){
   if(S.fichaAcordeon.estado){
     const gridEstado = el('div','stat-grid-3');
     const infoSalud = j.lesionSemanas>0
-      ? { texto:`Lesionado (${formatearDuracionLesion(j.lesionSemanas)})`, clase:'bad' }
+      ? { texto:`${j.sancionActiva ? 'Sancionado' : 'Lesionado'} (${formatearDuracionLesion(j.lesionSemanas)})`, clase:'bad' }
       : estadoSalud(j.stats.salud);
     gridEstado.appendChild(estadoItemConBarra(nicelabel.forma, estadoForma(j.stats.forma)));
     gridEstado.appendChild(estadoItemConBarra('Confianza', estadoConfianza(j.stats.confianza)));
@@ -9461,8 +9569,6 @@ SCREENS.blackjack = function(){
   // La fase 'interrupcion' no añade controles propios aquí: pintarInterrupcionCasino ya puso
   // sus botones de Seguir/Salir en la zona de mensaje, más arriba.
 
-  c.appendChild(el('div','bj-regla-hint','El crupier se planta en 17. Blackjack paga 3 a 2. Doblar: una carta más al doble de apuesta.<br>Un blackjack sube algo la confianza y el carácter; jugártelo todo y perderlo baja el carácter.'));
-
   const enJuego = ['repartiendo','jugando','crupier','interrupcion'].includes(S.bjFase);
   if(!enJuego){
     const btnSalir = document.createElement('button'); btnSalir.className='btn-main';
@@ -10453,7 +10559,7 @@ SCREENS.ofertas = function(){
       const izda = document.createElement('span');
       izda.className = 'oferta-club';
       izda.style.cssText = 'display:inline-flex;align-items:center;gap:8px;';
-      izda.innerHTML = `${escudoSVG(of.nombre,22,of.colores)} <span>${of.nombre}${of.ascenso ? ' ↑' : ''}${primerEquipoDeFilial(of.nombre) ? `<div style="font-size:10px;color:var(--ink-soft);font-weight:400;">Filial del ${primerEquipoDeFilial(of.nombre)}</div>` : ''}</span>`;
+      izda.innerHTML = `${escudoSVG(of.nombre,22,of.colores)} <span>${of.nombre}${of.ascenso ? ' <span style="color:var(--green);font-weight:400;">↑</span>' : ''}${primerEquipoDeFilial(of.nombre) ? `<div style="font-size:10px;color:var(--ink-soft);font-weight:400;">Filial del ${primerEquipoDeFilial(of.nombre)}</div>` : ''}</span>`;
       const etiquetaCategoria = of.extranjero ? of.liga : (TIER_CATEGORIA[of.categoria] || of.categoria);
       const bandera = of.extranjero ? banderaPais(of.pais,15) : banderaPais('España',15);
       const dcha = document.createElement('span');
@@ -10503,6 +10609,7 @@ SCREENS.ofertas = function(){
       if((S.ofertasActuales||[]).length > 0){
         const ganancia = gananciaEscalada(j.carinoAficion||0, 5, 100);
         j.carinoAficion = Math.min(100, (j.carinoAficion||0) + ganancia);
+        if(ganancia > 0) mostrarNotificacion(`${iconoInline('estrella',15)}Cariño de la afición <span style="color:var(--green);">↑ +${ganancia}</span>`, 'atributo');
       }
       iniciarTemporadaJuego(j);
       render();
@@ -10596,7 +10703,7 @@ function enviarPropuestaNegociacion(){
   if(p.duracionDelta !== 0){
     const costeDuracion = p.duracionDelta * (j.edad <= 29 ? -5 : 7);
     const fracDuracion = costeDuracion <= 0 ? 1 : frac;
-    if(neg.duracion + p.duracionDelta >= 1 && neg.duracion + p.duracionDelta <= 5 && Math.random() < fracDuracion){
+    if(neg.duracion + p.duracionDelta >= 1 && neg.duracion + p.duracionDelta <= duracionMaximaNegociable(j) && Math.random() < fracDuracion){
       neg.duracion += p.duracionDelta;
       partes.push(p.duracionDelta > 0 ? 'Aceptan alargar el contrato sin problema.' : 'Aceptan acortar el contrato sin problema.');
     } else {
@@ -11263,11 +11370,20 @@ function renderizarServiciosProfesionales(j, contenedor){
     categorias[s.categoria] = categorias[s.categoria] || [];
     categorias[s.categoria].push(s);
   });
+  if(S.serviciosCategoriaAbierta === undefined){
+    // por defecto se abre la categoría con algún servicio ya activo, o si no la primera
+    const conActivo = Object.entries(categorias).find(([,servicios])=> servicios.some(s=>(j.suscripciones[s.familia]||0) > 0));
+    S.serviciosCategoriaAbierta = conActivo ? conActivo[0] : Object.keys(categorias)[0];
+  }
   Object.entries(categorias).forEach(([nombreCategoria, servicios])=>{
-    const tituloCategoria = document.createElement('div');
-    tituloCategoria.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--ink-soft);text-transform:uppercase;margin:14px 0 8px;";
-    tituloCategoria.textContent = nombreCategoria;
+    const abiertaCategoria = S.serviciosCategoriaAbierta === nombreCategoria;
+    const tieneActivo = servicios.some(s=>(j.suscripciones[s.familia]||0) > 0);
+    const tituloCategoria = document.createElement('button');
+    tituloCategoria.style.cssText = `display:flex;justify-content:space-between;align-items:center;width:100%;padding:9px 12px;margin:14px 0 ${abiertaCategoria?'8px':'0'};border-radius:9px;border:1px solid ${tieneActivo?'var(--gold)':'var(--line)'};background:${tieneActivo?'rgba(212,175,55,0.1)':'transparent'};color:var(--ink);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;`;
+    tituloCategoria.innerHTML = `<span>${nombreCategoria}</span><span style="color:var(--ink-soft);font-size:12px;text-transform:none;">${abiertaCategoria?'▾':'▸'}</span>`;
+    tituloCategoria.onclick = ()=>{ S.serviciosCategoriaAbierta = abiertaCategoria ? null : nombreCategoria; pintar(); };
     contenedor.appendChild(tituloCategoria);
+    if(!abiertaCategoria) return;
     servicios.forEach(servicio=>{
     if(servicio.esPorcentaje && !j.suscripciones[servicio.familia] && j.representante){
       // sincronizar con un representante conseguido por evento narrativo, para reflejarlo aquí
@@ -11322,11 +11438,16 @@ function renderizarServiciosProfesionales(j, contenedor){
   });
 }
 function renderizarCoches(j, contenedor){
-  contenedor.appendChild(el('div','stat-section-titulo','GARAJE'));
+  const tituloGaraje = el('div','stat-section-titulo','GARAJE · COCHE');
+  tituloGaraje.style.marginTop = '24px';
+  contenedor.appendChild(tituloGaraje);
   const fila = el('div','servicio-fila');
   const cab = el('div','servicio-cab');
   const nombreActual = j.cocheActual > 0 ? TIENDA_COCHES.find(c=>c.nivel===j.cocheActual).nombre : null;
-  cab.innerHTML = `${iconoInsignia('dinero',26)}<span class="servicio-nombre">Coche</span>${nombreActual?`<span class="servicio-activo-tag">${nombreActual.toUpperCase()}</span>`:''}`;
+  const efectoBaseCoche = TIENDA_COCHES[0].efecto || {};
+  const mejoraTxtCoche = Object.keys(efectoBaseCoche).map(k => NICE_ATTR[k] || NICE_STAT[k] || k).join(' · ');
+  const mejoraSpanCoche = mejoraTxtCoche ? ` <span class="servicio-mejora" style="font-weight:400;font-size:11px;color:var(--gold);white-space:nowrap;">↑ ${mejoraTxtCoche}</span>` : '';
+  cab.innerHTML = `${iconoInsignia('dinero',26)}<span class="servicio-nombre">Coche</span>${mejoraSpanCoche}${nombreActual?`<span class="servicio-activo-tag">${nombreActual.toUpperCase()}</span>`:''}`;
   fila.appendChild(cab);
   const niveles = el('div','servicio-niveles');
   TIENDA_COCHES.forEach(info=>{
@@ -11365,9 +11486,57 @@ function renderizarCoches(j, contenedor){
   }
   contenedor.appendChild(fila);
 }
+function renderizarMotos(j, contenedor){
+  contenedor.appendChild(el('div','stat-section-titulo','GARAJE · MOTO'));
+  const fila = el('div','servicio-fila');
+  const cab = el('div','servicio-cab');
+  const nombreActual = j.motoActual > 0 ? TIENDA_MOTOS.find(c=>c.nivel===j.motoActual).nombre : null;
+  const efectoBaseMoto = TIENDA_MOTOS[0].efecto || {};
+  const mejoraTxtMoto = Object.keys(efectoBaseMoto).map(k => NICE_ATTR[k] || NICE_STAT[k] || k).join(' · ');
+  const mejoraSpanMoto = mejoraTxtMoto ? ` <span class="servicio-mejora" style="font-weight:400;font-size:11px;color:var(--gold);white-space:nowrap;">↑ ${mejoraTxtMoto}</span>` : '';
+  cab.innerHTML = `${iconoInsignia('dinero',26)}<span class="servicio-nombre">Moto</span>${mejoraSpanMoto}${nombreActual?`<span class="servicio-activo-tag">${nombreActual.toUpperCase()}</span>`:''}`;
+  fila.appendChild(cab);
+  const niveles = el('div','servicio-niveles');
+  TIENDA_MOTOS.forEach(info=>{
+    const yaComprado = j.motoActual === info.nivel;
+    const esInferior = j.motoActual > info.nivel;
+    const desbloqueado = !info.desbloqueo || info.desbloqueo(j);
+    const puedePagar = (j.stats.dinero||0) >= info.coste && (j.stats.dinero||0) >= 0;
+    const asequible = !desbloqueado || yaComprado || esInferior || puedePagar;
+    const btn = el('div','servicio-nivel-btn'+(yaComprado?' activo':'')+(!desbloqueado||!asequible||esInferior?' inasequible':''));
+    btn.innerHTML = `<div class="n">${info.nombre}</div><div class="c">${formatearDinero(info.coste)}</div>`;
+    if(!desbloqueado){
+      btn.title = info.etiquetaBloqueo || 'Todavía no disponible';
+    } else if(esInferior){
+      btn.title = 'Ya tienes una moto mejor que esta';
+    } else if(!asequible && !yaComprado){
+      btn.title = (j.stats.dinero||0) < 0
+        ? 'No puedes comprar nada mientras tu cuenta esté en números rojos'
+        : `Te falta dinero para permitirte esta moto (${formatearDinero(info.coste)})`;
+    }
+    if(desbloqueado && asequible && !yaComprado && !esInferior){
+      btn.onclick = ()=>{
+        aplicarEfectos(j, { dinero:-info.coste, ...info.efecto });
+        j.motoActual = info.nivel;
+        pintar();
+      };
+    }
+    niveles.appendChild(btn);
+  });
+  fila.appendChild(niveles);
+  const primerBloqueado = TIENDA_MOTOS.find(n => n.desbloqueo && !n.desbloqueo(j));
+  if(primerBloqueado && !j.motoActual){
+    fila.appendChild(el('div','servicio-desc', `🔒 ${primerBloqueado.nombre}: ${primerBloqueado.etiquetaBloqueo}`));
+  } else {
+    const infoDesc = TIENDA_MOTOS.find(n=>n.nivel === (j.motoActual || 1));
+    fila.appendChild(el('div','servicio-desc', infoDesc.desc));
+  }
+  contenedor.appendChild(fila);
+}
 function renderizarTienda(j, contenedor){
   renderizarServiciosProfesionales(j, contenedor);
   renderizarCoches(j, contenedor);
+  renderizarMotos(j, contenedor);
 }
 
 SCREENS.gastos = function(){
@@ -11635,7 +11804,7 @@ SCREENS.tirando = function(){
                 neg.sueldo = Math.round(neg.sueldo * 1.15 / 50) * 50;
                 neg.ultimoMensaje = "El club acepta mejorar tu sueldo. La negociación avanza a tu favor.";
               } else {
-                neg.duracion = Math.min(5, neg.duracion + 1);
+                neg.duracion = Math.min(duracionMaximaNegociable(j), neg.duracion + 1);
                 neg.ultimoMensaje = "El club accede a ampliar la duración del contrato.";
               }
               neg.ultimoTipoRechazado = null;
@@ -13598,8 +13767,11 @@ SCREENS.final = function(){
       totalTitulos += (j.titulosSeleccion||[]).length;
       const rowSel = el('div','club-row');
       const topSel = el('div','club-top');
+      const escudoSel = el('div','club-escudo');
+      escudoSel.innerHTML = banderaPais('España', 30);
+      topSel.appendChild(escudoSel);
       const infoSel = el('div','club-info');
-      infoSel.appendChild(el('div','club-nombre', `Selección española ${banderaPais('España')}`));
+      infoSel.appendChild(el('div','club-nombre', 'Selección española'));
       const nInt = (j.historialSeleccion||[]).length;
       if(nInt) infoSel.appendChild(el('div','club-meta', `${nInt} ${nInt===1?'gran torneo':'grandes torneos'} disputado${nInt===1?'':'s'}`));
       topSel.appendChild(infoSel);
