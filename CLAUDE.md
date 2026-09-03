@@ -3,9 +3,9 @@
 Juego de modo carrera de fútbol en HTML/JS de un solo archivo (`index.html`, ~10.970 líneas),
 inspirado en "El Ídolo" (potrerofutbol.ar). Interfaz en español (castellano de España). Todo
 —HTML, CSS y JS— vive en un único archivo autocontenido, sin dependencias externas ni build step.
-Pie de pantalla: "Fichaje 10 · v1.3" (`VERSION_JUEGO`). Al publicar cambios, subir
+Pie de pantalla: "Fichaje 10 · v1.3.4" (`VERSION_JUEGO`). Al publicar cambios, subir
 `VERSION_JUEGO` en `index.html` y, en el mismo commit, `CACHE` en `sw.js` al mismo número
-(`fichaje10-1.2` → `fichaje10-1.3`) para forzar el refresco en dispositivos instalados.
+(`fichaje10-1.3.3` → `fichaje10-1.3.4`) para forzar el refresco en dispositivos instalados.
 Desplegado en GitHub Pages: `https://javidona88.github.io/fichaje10app/` (repo `javidona88/fichaje10app`,
 workflow `.github/workflows/deploy.yml` en cada push a `main`).
 
@@ -163,6 +163,12 @@ Mismo diseño de tarjeta apilada (`estadoItem()` dentro de `cromo()`).
 - Con `lesionSemanas > 0`: `avanzarPaso` redirige a `SCREENS.recuperacion`; eventos con
   `soloSiSano:true` se filtran; hay eventos `soloSiLesionado:true` (`aburrimiento_lesion`,
   `duda_tras_lesion`) y variantes de relleno propias (`EVENTO_RELLENO_VARIANTES_LESIONADO`).
+- **Lesiones "sin tirada"**: algunos sucesos causan una baja fija que no sale de un `1d20`
+  (infección tras injerto capilar en `perdida_pelo`, golpe en la cabeza en
+  `despedida_soltero_banana`). El `efectosFn` monta a mano `S.pendienteLesionReveal =
+  {gravedad, origen, semanas, ventanas, sinTirada:true}` y fija `j.lesionSemanas` /
+  `S.temporadaSemanasLesion`. `SCREENS.lesionReveal` con `r.sinTirada` oculta la caja de
+  "1d20 + físico" y cambia el texto de cierre ("Los servicios médicos del club lo confirman…").
 - Servicios de "actividad física" (`prepFisico`, `entrenTecnico`) se pausan durante la lesión;
   fisio/nutrición/etc. siguen. Si te lesionas en verano: `SCREENS.veranoLesionado` y te pierdes
   el torneo de selección (`S.torneoPerdidoPorLesion`).
@@ -225,6 +231,11 @@ Sistema añadido en FICHAJE 10. Personajes en `j` (ver modelo). Puntos clave:
 - **Creación — `SCREENS.personalizarGrupo`** ("La gente con la que creciste"): pone nombre a los
   3 compañeros + el rival. Cada uno se muestra con su `titulo` (rótulo dorado, Space Grotesk)
   sobre la `desc`. El del rival vive en `RIVAL_CANTERA_BASE.titulo`.
+- **`refrescarApodosCompaneros(j)`**: recalcula `cmp.apodo` desde `cmp.nombre` (primer token);
+  si dos compañeros comparten nombre de pila, les añade el primer apellido ("Dani Roldán" /
+  "Dani Ibáñez") para poder distinguirlos en los textos. Idempotente. Se llama al confirmar
+  `personalizarGrupo` y en `migrarJugadorGuardado` (arregla saves viejos con colisión). Si un
+  compañero no tiene apellido, se queda el nombre de pila a secas.
 - **`SCREENS.origenCompaneros`** ("El resto de la pandilla"): reparte a los compañeros (32% se
   quedan en tu club, resto a clubes aleatorios de Tercera RFEF, en `SCREENS.elegirClub`, con
   `nivel:1` / `categoria:'Tercera RFEF'` / `retirado:false`) y lo narra. El texto de "fichan

@@ -1276,6 +1276,53 @@ const BANCO_EVENTOS = [
     ]
   },
   {
+    id:"perdida_pelo", unico:true, soloSiSano:true,
+    trigger:{ edadMin:29, edadMax:36, probabilidad:0.26 },
+    texto:"Te ves en una foto de perfil reciente y ya no puedes dejar de mirarte las entradas. Llevas meses notándolo en la ducha, pero verlo así, en primer plano, es otra cosa: con poco más de treinta, el pelo se te está yendo a marchas forzadas. En el vestuario ya te han caído las primeras bromas con la coronilla.",
+    opciones:[
+      { texto:"Reservar clínica en Turquía para un injerto capilar", tirada:{atributo:"fisico", dificultadBase:17},
+        costeEstimado: j => 4500,
+        exito:{ texto:"Sale redondo. Un par de semanas con gorra, algo de costra al principio, y en unos meses recuperas la línea del pelo de los veinte. Vuelves al campo estrenando look y hasta la prensa rosa te dedica un reportaje.",
+          efectos:{ dinero:-4500, popularidad:6, confianza:5, mental:2 } },
+        fallo:{ texto:"La zona injertada se infecta a los pocos días. Fiebre alta, antibióticos por vía y una revisión de los servicios médicos del club que acaba en parte oficial: media temporada apartado hasta que aquello cicatrice del todo. En el vestuario ya nadie hace bromas.",
+          efectosFn: j => {
+            const semanas = 4*SEMANAS_POR_PASO;
+            j.lesionSemanas = Math.max(j.lesionSemanas||0, semanas);
+            S.temporadaSemanasLesion = (S.temporadaSemanasLesion||0) + semanas;
+            S.pendienteLesionReveal = { gravedad:'grave', origen:'el postoperatorio de un injerto capilar', semanas, ventanas:4, sinTirada:true };
+            return { dinero:-4500, popularidad:-8, confianza:-12, mental:-3 };
+          } } },
+      { texto:"Aceptarlo y raparte al cero",
+        resultado:"Te pasas la maquinilla esa misma noche. Al principio se hace raro verte, pero en una semana ya es lo normal. Hay quien te dice que hasta te favorece — cara de tipo duro para pelear los balones divididos.",
+        efectos:{ confianza:2, popularidad:1 } }
+    ]
+  },
+  {
+    id:"despedida_soltero_banana", unico:true, soloSiSano:true,
+    trigger:{ edadMin:24, edadMax:34, probabilidad:0.24 },
+    texto: j => {
+      const pool = j.companeros || [];
+      if(pool.length && !S._amigoDespedida) S._amigoDespedida = pool[Math.floor(Math.random()*pool.length)].id;
+      const amigo = pool.find(c=>c.id===S._amigoDespedida);
+      return `Despedida de soltero de tu amigo ${amigo ? amigo.apodo : 'de toda la vida'}: día de playa, lancha y una banana acuática hinchable a la que se sube medio grupo entre gritos. Te hacen hueco en la parte de atrás y el piloto ya está acelerando.`;
+    },
+    opciones:[
+      { texto:"Subirte y agarrarte fuerte", tirada:{atributo:"fisico", dificultadBase:12},
+        exito:{ texto:"Un par de vuelcos, tragas agua salada y acabas con agujetas de aguantar el tirón, pero bajas entero y muerto de risa. Buen día.", efectos:{ mental:2, forma:-2 } },
+        fallo:{ texto:"En un giro brusco la banana te catapulta y caes de cabeza contra el agua, casi encima de otro del grupo. Pierdes el conocimiento unos segundos. En el hospital hablan de traumatismo craneoencefálico y de una amnesia que tarda semanas en despejarse: no te acuerdas ni de cómo llegaste a la playa. La temporada, para ti, se ha terminado antes de empezar.",
+          efectosFn: j => {
+            const semanas = 6*SEMANAS_POR_PASO;
+            j.lesionSemanas = Math.max(j.lesionSemanas||0, semanas);
+            S.temporadaSemanasLesion = (S.temporadaSemanasLesion||0) + semanas;
+            S.pendienteLesionReveal = { gravedad:'muy grave', origen:'la despedida de soltero de un amigo', semanas, ventanas:6, sinTirada:true };
+            return { forma:-25, confianza:-15, mental:-4, popularidad:-3 };
+          } } },
+      { texto:"Quedarte en la orilla, que tú de eso no",
+        resultado:"Les dices que vas a vigilar las toallas. Te caen las bromas de rigor por prudente, pero ves el numerito desde la arena con una bebida fría en la mano.",
+        efectos:{ mental:1 } }
+    ]
+  },
+  {
     id:"comentario_viral_redes", cooldown:2,
     trigger:{ probabilidad:0.25 },
     texto:"Una publicación tuya en X de hace tiempo se hace viral en el peor momento posible: justo antes de un partido importante.",
@@ -3331,6 +3378,11 @@ const CHANGELOG_JUEGO = [
     'El rival de esas semifinales y finales también pesa por prestigio y por país: ya no te puede tocar cualquier equipo al azar sea cual sea su nivel real.',
     'Corregido: al no renovar contrato, el "contrato de emergencia" que te hacía el club ya no obliga a pagar una cláusula de rescisión para fichar por el equipo que el propio juego te ofrece a continuación.'
   ]},
+  { version:'v1.3.4', titulo:'Nuevos sucesos y apodos sin ambigüedad', cambios:[
+    'Suceso nuevo: se te empiezan a notar las entradas — injértate el pelo en Turquía (con riesgo real si sale mal) o rápate al cero.',
+    'Suceso nuevo: banana acuática en la despedida de soltero de un amigo, con su propio riesgo de lesión.',
+    'Si dos compañeros de cantera comparten nombre de pila, se les añade el apellido en los textos para no confundirlos.'
+  ]},
   { version:'v1.3.3', titulo:'Escudos, patrocinadores y sucesos más realistas', cambios:[
     'El nombre de tu rival personalizado aparece de verdad en todos los sucesos donde antes salía un nombre de plantilla.',
     'Los sucesos de prensa (cámaras, zona mixta...) se adaptan a tu categoría: nada de eso en Segunda o Tercera RFEF.',
@@ -5286,6 +5338,7 @@ function migrarJugadorGuardado(j){
     if(cmp.retirado === undefined) cmp.retirado = false;
     if(cmp.nivel === undefined || cmp.nivel > 4) cmp.nivel = Math.max(1, CATEGORIAS.indexOf(cmp.categoria) + 1);
   });
+  refrescarApodosCompaneros(j);
   if(j.rival){
     if(j.rival.compartiendoVestuario === undefined) j.rival.compartiendoVestuario = false;
     if(j.rival.temporadasCompartiendo === undefined) j.rival.temporadasCompartiendo = 0;
@@ -9215,6 +9268,20 @@ function separarNombreApellido(nombreCompleto){
   const partes = (nombreCompleto||'').trim().split(' ');
   return { nombre: partes[0]||'', apellido: partes.slice(1).join(' ') };
 }
+// Si dos compañeros comparten nombre de pila (p. ej. el jugador llama "Dani" a dos de ellos),
+// se les añade el primer apellido al apodo para poder distinguirlos en los textos. Idempotente:
+// el apodo se recalcula siempre desde el nombre completo.
+function refrescarApodosCompaneros(j){
+  if(!j || !Array.isArray(j.companeros)) return;
+  const base = j.companeros.map(c => separarNombreApellido(c.nombre || c.apodo || ''));
+  j.companeros.forEach((c, i)=>{
+    const pila = base[i].nombre;
+    if(!pila) return;
+    const choca = base.some((b, k)=> k !== i && b.nombre && b.nombre.toLowerCase() === pila.toLowerCase());
+    const primerApellido = (base[i].apellido || '').split(' ')[0];
+    c.apodo = (choca && primerApellido) ? `${pila} ${primerApellido}` : pila;
+  });
+}
 SCREENS.personalizarGrupo = function(){
   const j = S.jugador;
   const state = SCREENS.personalizarGrupo._state || (SCREENS.personalizarGrupo._state = (()=>{
@@ -9267,6 +9334,7 @@ SCREENS.personalizarGrupo = function(){
     const stRival = state.rival;
     const nombreRivalFinal = `${(stRival.nombre||'').trim()} ${(stRival.apellido||'').trim()}`.trim();
     if(nombreRivalFinal){ j.rival.nombre = nombreRivalFinal; j.rival.apodo = (stRival.nombre||'').trim() || j.rival.apodo; }
+    refrescarApodosCompaneros(j);
     SCREENS.personalizarGrupo._state = null;
     S.screen = 'prologoIntro';
     render();
@@ -10621,18 +10689,22 @@ SCREENS.lesionReveal = function(){
   const tituloSemanas = c.appendChild(el('div','num', `${formatearDuracionLesion(r.semanas)} de baja`));
   tituloSemanas.style.fontSize = '32px';
 
-  const cajaDado = document.createElement('div');
-  cajaDado.style.cssText = 'background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:16px;margin:18px 0;text-align:center;';
-  cajaDado.innerHTML = `
-    <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--ink-soft);letter-spacing:.04em;margin-bottom:8px;">EL PARTE MÉDICO SE DECIDE CON UNA TIRADA</div>
-    <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:${r.dado===1?'var(--red)':'var(--ink)'};">
-      1d20 (${r.dado}) ${r.bonoFisico>0?`+ ${r.bonoFisico} de físico`:''} ${r.dado===1?'':`= ${r.total}`}
-    </div>
-    ${r.dado===1 ? '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;color:var(--red);margin-top:6px;">Un 1 natural es siempre la peor lesión posible, sin importar tu físico.</div>' : ''}
-  `;
-  c.appendChild(cajaDado);
+  if(!r.sinTirada){
+    const cajaDado = document.createElement('div');
+    cajaDado.style.cssText = 'background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:16px;margin:18px 0;text-align:center;';
+    cajaDado.innerHTML = `
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--ink-soft);letter-spacing:.04em;margin-bottom:8px;">EL PARTE MÉDICO SE DECIDE CON UNA TIRADA</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:${r.dado===1?'var(--red)':'var(--ink)'};">
+        1d20 (${r.dado}) ${r.bonoFisico>0?`+ ${r.bonoFisico} de físico`:''} ${r.dado===1?'':`= ${r.total}`}
+      </div>
+      ${r.dado===1 ? '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;color:var(--red);margin-top:6px;">Un 1 natural es siempre la peor lesión posible, sin importar tu físico.</div>' : ''}
+    `;
+    c.appendChild(cajaDado);
+  }
 
-  c.appendChild(el('div','event-text', `El fisio te confirma la baja: ${formatearDuracionLesion(r.semanas)} fuera de los terrenos de juego (${(r.ventanas)} ${r.ventanas===1?'ventana':'ventanas'} de la temporada).`));
+  c.appendChild(el('div','event-text', r.sinTirada
+    ? `Los servicios médicos del club lo confirman: ${formatearDuracionLesion(r.semanas)} fuera de los terrenos de juego (${(r.ventanas)} ${r.ventanas===1?'ventana':'ventanas'} de la temporada).`
+    : `El fisio te confirma la baja: ${formatearDuracionLesion(r.semanas)} fuera de los terrenos de juego (${(r.ventanas)} ${r.ventanas===1?'ventana':'ventanas'} de la temporada).`));
 
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Entendido →';
   btn.onclick = ()=>{
