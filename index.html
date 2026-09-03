@@ -4385,6 +4385,28 @@ const DIVISION_NUMERICA = {"LaLiga":"1ª división", "LaLiga2":"2ª división", 
 /* ============ TORNEOS ELIMINATORIOS (Champions, Europa League, Conference, Libertadores, Eurocopa, Mundial) ============ */
 const RIVALES_EUROCOPA = ["Inglaterra","Italia","Alemania","Francia","Portugal","Países Bajos","Bélgica","Turquía","Croacia","Escocia","Suiza","Grecia"];
 const RIVALES_MUNDIAL = ["Inglaterra","Italia","Alemania","Francia","Portugal","Países Bajos","Bélgica","Brasil","Argentina","Uruguay","Croacia","México"];
+// Todos son rivales plausibles en semis de un torneo grande, pero no todos igual de habituales:
+// las selecciones históricamente más fuertes pesan algo más al elegir semifinal/final.
+const POTENCIA_SELECCION = {
+  "Francia":3, "Alemania":3, "Inglaterra":3, "Brasil":3, "Argentina":3,
+  "Italia":2.2, "Portugal":2.2, "Países Bajos":2, "Bélgica":2, "Uruguay":1.8, "Croacia":1.8,
+  "México":1.2, "Turquía":1, "Escocia":1, "Suiza":1, "Grecia":1
+};
+function elegirRivalesSeleccion(pool){
+  const disponibles = [...pool];
+  const elegir = () => {
+    const pesoTotal = disponibles.reduce((s,pais)=> s+(POTENCIA_SELECCION[pais]||1), 0);
+    let dado = Math.random()*pesoTotal;
+    for(let i=0;i<disponibles.length;i++){
+      dado -= (POTENCIA_SELECCION[disponibles[i]]||1);
+      if(dado <= 0){ const [pais] = disponibles.splice(i,1); return pais; }
+    }
+    return disponibles.pop();
+  };
+  const semi = elegir();
+  const final = elegir();
+  return [semi, final];
+}
 
 const TEXTOS_SEMIFINAL_CLUB = [
   d => `El sorteo os empareja con ${articuloClub(d.rival)} ${d.rival}. Toca la ida y la vuelta para decidir quién sigue vivo en la ${d.competicion}.`,
@@ -4539,13 +4561,21 @@ const TORNEOS_CONFIG = [
       const fueDecisivo = ultimaTemp && ultimaTemp.trofeosIndividuales > 0; // Pichichi o MVP la temporada anterior
       return fueDecisivo || j.stats.reputacion >= 55;
     }, probabilidad: j => {
+      // La selección no tiene "categoría" propia como un club — España es siempre España —
+      // así que aquí el peso lo lleva tu situación personal (edad, si fuiste decisivo, tu
+      // reputación) tal cual estaba, y se le añade tu nota media real de la última temporada
+      // como matiz adicional: a igualdad de reputación, quien venga de jugar de verdad bien
+      // (no solo "sonar" para la lista) tiene algo más de opciones de ir hasta el final.
       const ultimaTemp = (j.historialTemporadas||[])[j.historialTemporadas.length-1];
       const fueDecisivo = ultimaTemp && ultimaTemp.trofeosIndividuales > 0;
-      if(fueDecisivo) return 0.85; // ser decisivo pesa mucho, pero la competencia por la camiseta sigue siendo dura
-      if(j.edad >= 34) return 0.1;
-      if(j.edad >= 32) return 0.25;
-      if(j.edad >= 30) return 0.45;
-      return Math.min(0.65, 0.25 + (j.stats.reputacion-55)/120);
+      const factorNota = multiplicadorPorNota(j.ultimaNotaTemporada != null ? j.ultimaNotaTemporada : 6.5);
+      let base;
+      if(fueDecisivo) base = 0.85; // ser decisivo pesa mucho, pero la competencia por la camiseta sigue siendo dura
+      else if(j.edad >= 34) base = 0.1;
+      else if(j.edad >= 32) base = 0.25;
+      else if(j.edad >= 30) base = 0.45;
+      else base = Math.min(0.65, 0.25 + (j.stats.reputacion-55)/120);
+      return Math.max(0.05, Math.min(0.92, base * factorNota));
     },
     efectosVictoria:{forma:15,popularidad:25,reputacion:15,valorMercado:80000} },
   { id:'seleccion_sub21', nombreCompeticion:null, tipo:'seleccion_sub21', edadMax:21,
@@ -4557,7 +4587,13 @@ const TORNEOS_CONFIG = [
       if(CATEGORIAS.indexOf(j.club.categoria) < 2) return false;
       if(j.stats.reputacion >= 40) return false; // con ese perfil ya suena para la absoluta
       return true;
-    }, probabilidad:0.6,
+    }, probabilidad: j => {
+      // Antes era un 60% fijo igual para todos los que llegaban al filtro. La Sub-21 española
+      // es un proyecto fuerte de por sí (referencia 0,45), y tu nota media real de la
+      // temporada pasada matiza esa base igual que en la absoluta.
+      const factorNota = multiplicadorPorNota(j.ultimaNotaTemporada != null ? j.ultimaNotaTemporada : 6.5);
+      return Math.max(0.15, Math.min(0.85, 0.45 * factorNota));
+    },
     efectosVictoria:{forma:10,popularidad:14,reputacion:9,valorMercado:35000} }
 ];
 
@@ -11214,9 +11250,9 @@ function iniciarTorneoEliminatorio(cfg){
   if(esSeleccion){
     const nombreTorneo = torneoDeVerano(S.temporada) || 'Torneo internacional';
     const poolRivales = nombreTorneo === 'Eurocopa' ? RIVALES_EUROCOPA : RIVALES_MUNDIAL;
-    const paisesBarajados = [...poolRivales].sort(()=>Math.random()-0.5);
-    rivalSemi = { nombre: paisesBarajados[0] };
-    rivalFinal = { nombre: paisesBarajados[1] };
+    const [paisSemi, paisFinal] = elegirRivalesSeleccion(poolRivales);
+    rivalSemi = { nombre: paisSemi };
+    rivalFinal = { nombre: paisFinal };
     nombreCompeticion = nombreTorneo + (cfg.tipo === 'seleccion_sub21' ? ' Sub-21' : '');
   } else {
     const clubSemi = rivalClubTorneo(cfg);
