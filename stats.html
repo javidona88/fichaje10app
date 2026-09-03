@@ -171,8 +171,16 @@ function formatearDinero(v){
   return t + ' €';
 }
 
+// Sesiones (localStorage.fichaje10_sesion_id de ese navegador) a excluir de las estadísticas
+// públicas — partidas de prueba del propio desarrollador, no de jugadores reales.
+const SESIONES_EXCLUIDAS = ['0d116e89-988c-407a-87f4-61540557a5a6'];
+
 async function consultarSupabase(pathQuery){
-  const res = await fetch(`https://${SUPABASE_URL}/rest/v1/${pathQuery}`, {
+  let query = pathQuery;
+  if(query.startsWith('eventos?') && SESIONES_EXCLUIDAS.length){
+    query += SESIONES_EXCLUIDAS.map(id => `&sesion_id=neq.${id}`).join('');
+  }
+  const res = await fetch(`https://${SUPABASE_URL}/rest/v1/${query}`, {
     headers: {
       'apikey': SUPABASE_ANON_KEY,
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
