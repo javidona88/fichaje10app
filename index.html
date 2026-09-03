@@ -467,10 +467,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .bj-accion-btn:hover:not(:disabled):not(.primaria){ border-color:var(--gold); }
 .bj-accion-btn:disabled{ opacity:.32; cursor:not-allowed; }
 .bj-regla-hint{ text-align:center; font-size:11px; color:var(--ink-soft); margin-top:12px; line-height:1.5; font-style:italic; }
-.bj-interrupcion{ display:flex; gap:12px; align-items:flex-start; background:rgba(212,175,55,0.07); border:1px solid rgba(212,175,55,0.28); border-radius:12px; padding:14px; margin-bottom:14px; }
-.bj-interrupcion-icono{ font-size:23px; line-height:1; flex-shrink:0; }
-.bj-interrupcion-texto{ font-family:'Space Grotesk',sans-serif; font-size:14px; line-height:1.55; color:var(--ink); }
-.bj-interrupcion-etq{ font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--gold-dim); margin-bottom:3px; }
+/* Aviso "llevas mucho tiempo en el casino": compartido por ruleta, tragaperras y blackjack. */
+.casino-interrupcion{ display:flex; gap:12px; align-items:flex-start; background:rgba(212,175,55,0.07); border:1px solid rgba(212,175,55,0.28); border-radius:12px; padding:14px; margin-bottom:14px; }
+.casino-interrupcion-icono{ font-size:23px; line-height:1; flex-shrink:0; }
+.casino-interrupcion-texto{ font-family:'Space Grotesk',sans-serif; font-size:14px; line-height:1.55; color:var(--ink); }
+.casino-interrupcion-etq{ font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--gold-dim); margin-bottom:3px; }
 
 /* ---- fin de temporada / informe de partido ---- */
 .press{
@@ -8440,6 +8441,7 @@ function cobrarBoteTraga(j){
   S.tragaBote = 0;
   S.tragaFase = null;
   S.tragaComboGanador = null;
+  registrarRondaCasino(j);
 }
 SCREENS.tragaperras = function(){
   const j = S.jugador;
@@ -8506,6 +8508,12 @@ SCREENS.tragaperras = function(){
   cuerpo.appendChild(rodillosWrap);
   c.appendChild(cuerpo);
 
+  if(S.casinoInterrupcionId && !enRiesgo && !S.tragaGirando){
+    pintarInterrupcionCasino(c, j);
+    app.appendChild(c);
+    return;
+  }
+
   // ---- Selector de apuesta (fichas) ----
   const fichaWrap = document.createElement('div');
   fichaWrap.style.cssText = 'display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;';
@@ -8560,6 +8568,7 @@ SCREENS.tragaperras = function(){
           Sonido.tragaPierde();
           S.tragaMensaje = 'Lo pierdes todo en el riesgo';
           S.tragaBote = 0; S.tragaFase = null; S.tragaComboGanador = null;
+          registrarRondaCasino(j);
         }
         pintar();
       }, 850);
@@ -8591,6 +8600,7 @@ SCREENS.tragaperras = function(){
         } else {
           S.tragaMensaje = 'Sin premio esta vez';
           setTimeout(()=> Sonido.tragaPierde(), 120);
+          registrarRondaCasino(j);
         }
         pintar();
       };
@@ -8689,6 +8699,12 @@ SCREENS.ruleta = function(){
   }
   plato.appendChild(centro);
   c.appendChild(wheelWrap);
+
+  if(S.casinoInterrupcionId && !S.ruletaGirando){
+    pintarInterrupcionCasino(c, j);
+    app.appendChild(c);
+    return;
+  }
 
   if(S.ruletaUltimoResultado && !S.ruletaGirando){
     const r = S.ruletaUltimoResultado;
@@ -8853,6 +8869,7 @@ SCREENS.ruleta = function(){
       if(gano) Sonido.ruletaGana(); else Sonido.ruletaPierde();
       S.ruletaUltimoResultado = { numero:numeroGanador, colorTexto, gano, ganancia: gano?ganancia-apuesta:0, apuesta };
       S.ruletaGirando = false;
+      registrarRondaCasino(j);
       pintar();
     }, 3300);
   };
@@ -8908,13 +8925,13 @@ const INTERRUPCIONES_CASINO = [
   { id:'rep2', tipo:'representante', requiere:j=>!!j.representante, texto:j=>`Tu agente, ${j.representante.agente.apodo}, al teléfono, sin rodeos: «Como el director deportivo se entere de que sigues ahí metido, no respondo de lo que pase.»` },
   { id:'rep3', tipo:'representante', requiere:j=>!!j.representante, texto:j=>`Tres llamadas perdidas. A la cuarta contestas. «¿Qué?» — «Que llevas ahí toda la tarde, eso pasa.» Tu agente, ${j.representante.agente.apodo}, no suena nada contento.` },
   { id:'rep4', tipo:'representante', requiere:j=>!!j.representante, texto:j=>`Un mensaje de tu agente, ${j.representante.agente.apodo}: «Como no me digas ya que vas de camino a casa, mañana desayunamos los dos con el club.»` },
-  { id:'rep5', tipo:'representante', requiere:j=>!!j.representante, texto:j=>`Tu agente, ${j.representante.agente.apodo}, te escribe otra vez: «En serio, ¿todavía ahí? Empiezo a pensar que te gusta más la ruleta que el fútbol.»` },
+  { id:'rep5', tipo:'representante', requiere:j=>!!j.representante, texto:j=>`Tu agente, ${j.representante.agente.apodo}, te escribe otra vez: «En serio, ¿todavía ahí? Empiezo a pensar que te gustan más los casinos que el fútbol.»` },
   { id:'pren1', tipo:'prensa', requiere:()=>true, texto:()=>`Corre un titular por redes: «Captado en un casino de la ciudad — ¿demasiadas horas de más?» Nada grave, pero ya circula.` },
-  { id:'pren2', tipo:'prensa', requiere:()=>true, texto:()=>`Una foto borrosa tuya en la mesa de juego aparece en un grupo de aficionados. Nadie dice nada... por ahora.` },
+  { id:'pren2', tipo:'prensa', requiere:()=>true, texto:()=>`Una foto borrosa tuya en el casino aparece en un grupo de aficionados. Nadie dice nada... por ahora.` },
   { id:'pren3', tipo:'prensa', requiere:j=>!!j.periodista, texto:j=>`Tu periodista de cabecera, ${j.periodista.apodo}, te avisa por privado: «Te han visto salir del casino dos veces esta semana. Como sigas así, alguien lo va a publicar.»` },
-  { id:'pren4', tipo:'prensa', requiere:()=>true, texto:()=>`Un tuit con una foto tuya de espaldas en la mesa de juego se hace viral entre la afición: «¿Ese no es...?»` },
+  { id:'pren4', tipo:'prensa', requiere:()=>true, texto:()=>`Un tuit con una foto tuya de espaldas en el casino se hace viral entre la afición: «¿Ese no es...?»` },
   { id:'pren5', tipo:'prensa', requiere:()=>true, texto:()=>`La prensa deportiva local menciona de pasada tus «noches largas» en el casino. Nada explícito, pero el rumor ya está sembrado.` },
-  { id:'pareja1', tipo:'pareja', requiere:j=>!!j.pareja, texto:j=>`Tu pareja, ${j.pareja.apodo}, te escribe: «Llevas toda la tarde sin dar señales de vida. ¿Sigues vivo o te ha comido la ruleta?»` },
+  { id:'pareja1', tipo:'pareja', requiere:j=>!!j.pareja, texto:j=>`Tu pareja, ${j.pareja.apodo}, te escribe: «Llevas toda la tarde sin dar señales de vida. ¿Sigues vivo o te ha comido el casino?»` },
   { id:'pareja2', tipo:'pareja', requiere:j=>!!j.pareja, texto:j=>`Un mensaje de tu pareja, ${j.pareja.apodo}: «La cena se enfría. Y tú, sin aparecer.»` },
   { id:'pareja3', tipo:'pareja', requiere:j=>!!j.pareja, texto:j=>`Tu pareja, ${j.pareja.apodo}, te llama: «Como sigas ahí una hora más, cenamos por videollamada.»` },
   { id:'pareja4', tipo:'pareja', requiere:j=>!!j.pareja, texto:j=>`Tu pareja, ${j.pareja.apodo}, te manda un audio de doce segundos que empieza con un suspiro. No hace falta escucharlo entero para saber de qué va.` },
@@ -8922,7 +8939,7 @@ const INTERRUPCIONES_CASINO = [
   { id:'amigo1', tipo:'amigo', requiere:j=>!!j.amigoNoFutbol, texto:j=>`${j.amigoNoFutbol.genero==='f'?'Tu amiga':'Tu amigo'} ${j.amigoNoFutbol.apodo} te escribe: «¿Sigues en el casino? Te dije que la suerte no es lo tuyo, ¿eh?»` },
   { id:'amigo2', tipo:'amigo', requiere:j=>!!j.amigoNoFutbol, texto:j=>`${j.amigoNoFutbol.genero==='f'?'Tu amiga':'Tu amigo'} ${j.amigoNoFutbol.apodo} te manda un meme sobre gente que se arruina jugando, sin comentario. El mensaje lo dice todo.` },
   { id:'amigo3', tipo:'amigo', requiere:j=>!!j.amigoNoFutbol, texto:j=>`${j.amigoNoFutbol.genero==='f'?'Tu amiga':'Tu amigo'} ${j.amigoNoFutbol.apodo} te llama: «Llevo media hora esperándote en la puerta. ¿Sigues ahí o qué?»` },
-  { id:'amigo4', tipo:'amigo', requiere:j=>!!j.amigoNoFutbol, texto:j=>`${j.amigoNoFutbol.genero==='f'?'Tu amiga':'Tu amigo'} ${j.amigoNoFutbol.apodo} te escribe: «Como pierdas el sueldo del mes en la ruleta, no pienso prestarte para el cine.»` },
+  { id:'amigo4', tipo:'amigo', requiere:j=>!!j.amigoNoFutbol, texto:j=>`${j.amigoNoFutbol.genero==='f'?'Tu amiga':'Tu amigo'} ${j.amigoNoFutbol.apodo} te escribe: «Como pierdas el sueldo del mes en el casino, no pienso prestarte para el cine.»` },
   { id:'amigo5', tipo:'amigo', requiere:j=>!!j.amigoNoFutbol, texto:j=>{ const etq = j.amigoNoFutbol.genero==='f'?'tu amiga':'tu amigo'; return `Un wasap de ${etq} ${j.amigoNoFutbol.apodo}: «Te veo raro últimamente. ¿Todo bien con eso del casino?»`; } }
 ];
 function candidatosInterrupcionCasino(j){
@@ -8933,6 +8950,58 @@ function etiquetaInterrupcionCasino(entry, j){
   if(entry.tipo==='prensa') return 'Prensa';
   if(entry.tipo==='pareja') return 'Tu pareja';
   return (j.amigoNoFutbol && j.amigoNoFutbol.genero==='f') ? 'Tu amiga' : 'Tu amigo';
+}
+// Cuenta rondas jugadas en CUALQUIER juego del casino (ruleta, tragaperras, blackjack) —
+// contador único y compartido, no uno por juego — y cada UMBRAL_INTERRUPCION_CASINO deja
+// listo un aviso compartido que las tres pantallas comprueban en su render
+// (S.casinoInterrupcionId) antes de dejarte jugar otra ronda, sea cual sea el juego en el
+// que te pille. Los textos del aviso (INTERRUPCIONES_CASINO) son deliberadamente genéricos
+// ("el casino", nunca un juego concreto) para que valgan estés donde estés.
+function registrarRondaCasino(j){
+  S.casinoManosJugadas = (S.casinoManosJugadas||0) + 1;
+  if(S.casinoManosJugadas % UMBRAL_INTERRUPCION_CASINO === 0){
+    let candidatas = candidatosInterrupcionCasino(j).filter(v => v.id !== S.casinoUltimaInterrupcionId);
+    if(!candidatas.length) candidatas = candidatosInterrupcionCasino(j);
+    const elegida = candidatas[Math.floor(Math.random()*candidatas.length)];
+    S.casinoUltimaInterrupcionId = elegida.id;
+    S.casinoInterrupcionId = elegida.id;
+    if(elegida.tipo === 'representante') Sonido.casinoLlamada(); else Sonido.casinoNotificacion();
+  }
+}
+function seguirTrasInterrupcionCasino(j){
+  const entry = INTERRUPCIONES_CASINO.find(v => v.id === S.casinoInterrupcionId);
+  const efectos = { carinoAficion:-6 };
+  if(entry && entry.tipo === 'pareja') efectos.felicidadPareja = -8;
+  aplicarEfectos(j, efectos).forEach(c2=>{
+    const nombre = NICE_TODO[c2.clave] || cap(c2.clave);
+    const texto = `${nombre} ${textoCambioStat(c2.clave, c2.delta)}`;
+    mostrarNotificacion(`<b style="color:var(--red);">${texto}</b>`, 'atributo');
+  });
+  S.casinoInterrupcionId = null;
+}
+function salirTrasInterrupcionCasino(){
+  S.casinoInterrupcionId = null;
+  S.screen = 'casino';
+  render();
+}
+// Pinta el aviso compartido (representante/prensa/pareja/amigo) en el hueco donde iría la
+// siguiente acción de juego. Devuelve true si lo ha pintado — el llamante debe omitir sus
+// propios controles de apuesta/acción en ese caso.
+function pintarInterrupcionCasino(c, j){
+  if(!S.casinoInterrupcionId) return false;
+  const entry = INTERRUPCIONES_CASINO.find(v=>v.id===S.casinoInterrupcionId);
+  if(!entry) return false;
+  const box = el('div','casino-interrupcion');
+  box.innerHTML = `<span class="casino-interrupcion-icono">${ICONOS_INTERRUPCION_CASINO[entry.tipo]}</span>
+    <span><div class="casino-interrupcion-etq">${etiquetaInterrupcionCasino(entry, j)}</div><div class="casino-interrupcion-texto">${entry.texto(j)}</div></span>`;
+  c.appendChild(box);
+  const optSeguir = el('div','opt','Seguir jugando');
+  optSeguir.onclick = ()=>{ seguirTrasInterrupcionCasino(j); pintar(); };
+  const optSalir = el('div','opt','Salir del casino');
+  optSalir.onclick = ()=> salirTrasInterrupcionCasino();
+  c.appendChild(optSeguir);
+  c.appendChild(optSalir);
+  return true;
 }
 
 function bjSacarCarta(){ return S.bjBaraja.pop(); }
@@ -9017,7 +9086,7 @@ function bjResolver(j, tipo, msg){
   S.bjFase = 'resultado';
   S.bjResultadoTipo = tipo;
   S.bjMensaje = msg;
-  S.bjManosJugadas = (S.bjManosJugadas||0) + 1;
+  registrarRondaCasino(j);
   const dineroAntes = j.stats.dinero;
   let cambios = [];
   // Mismas reglas que la ruleta: un premio grande sube algo la confianza y el carácter;
@@ -9043,42 +9112,14 @@ function bjNuevaMano(j){
   S.bjManoJugador = []; S.bjManoCrupier = [];
   S.bjResultadoTipo = null;
   S.bjCambios = [];
-  if(S.bjManosJugadas > 0 && S.bjManosJugadas % UMBRAL_INTERRUPCION_CASINO === 0){
-    bjDispararInterrupcion(j);
+  if(S.casinoInterrupcionId){
+    S.bjFase = 'interrupcion';
+    pintar();
     return;
   }
   S.bjFase = 'apostando';
   S.bjMensaje = 'Elige tu apuesta y reparte.';
   pintar();
-}
-function bjDispararInterrupcion(j){
-  let candidatas = candidatosInterrupcionCasino(j).filter(v => v.id !== S.bjUltimaInterrupcionId);
-  if(!candidatas.length) candidatas = candidatosInterrupcionCasino(j);
-  const elegida = candidatas[Math.floor(Math.random()*candidatas.length)];
-  S.bjUltimaInterrupcionId = elegida.id;
-  S.bjInterrupcionId = elegida.id;
-  S.bjFase = 'interrupcion';
-  S.bjCambios = [];
-  if(elegida.tipo === 'representante') Sonido.casinoLlamada(); else Sonido.casinoNotificacion();
-  pintar();
-}
-function bjSeguirTrasInterrupcion(j){
-  const entry = INTERRUPCIONES_CASINO.find(v => v.id === S.bjInterrupcionId);
-  const efectos = { carinoAficion:-6 };
-  if(entry && entry.tipo === 'pareja') efectos.felicidadPareja = -8;
-  S.bjCambios = aplicarEfectos(j, efectos);
-  S.bjInterrupcionId = null;
-  S.bjFase = 'apostando';
-  S.bjMensaje = 'Vuelves a la mesa como si nada.';
-  pintar();
-}
-function bjSalirTrasInterrupcion(){
-  S.bjInterrupcionId = null;
-  S.bjCambios = [];
-  S.bjFase = 'apostando';
-  S.bjMensaje = 'Elige tu apuesta y reparte.';
-  S.screen = 'casino';
-  render();
 }
 SCREENS.blackjack = function(){
   const j = S.jugador;
@@ -9088,7 +9129,6 @@ SCREENS.blackjack = function(){
   S.bjFase = S.bjFase || 'apostando';
   S.bjMensaje = S.bjMensaje || 'Elige tu apuesta y reparte.';
   S.bjCrupierOculto = S.bjCrupierOculto === undefined ? true : S.bjCrupierOculto;
-  S.bjManosJugadas = S.bjManosJugadas || 0;
   S.bjCambios = S.bjCambios || [];
   topbar("Blackjack");
   const c = el('div','card');
@@ -9143,14 +9183,8 @@ SCREENS.blackjack = function(){
     const clase = (S.bjResultadoTipo === 'gana' || S.bjResultadoTipo === 'blackjack') ? 'gana' : (S.bjResultadoTipo === 'pierde' ? 'pierde' : 'empate');
     c.appendChild(el('div', 'bj-resultado '+clase, S.bjMensaje));
     pintarCambiosBj(c);
-  } else if(S.bjFase === 'interrupcion' && S.bjInterrupcionId){
-    const entry = INTERRUPCIONES_CASINO.find(v=>v.id===S.bjInterrupcionId);
-    if(entry){
-      const box = el('div','bj-interrupcion');
-      box.innerHTML = `<span class="bj-interrupcion-icono">${ICONOS_INTERRUPCION_CASINO[entry.tipo]}</span>
-        <span><div class="bj-interrupcion-etq">${etiquetaInterrupcionCasino(entry, j)}</div><div class="bj-interrupcion-texto">${entry.texto(j)}</div></span>`;
-      c.appendChild(box);
-    }
+  } else if(S.bjFase === 'interrupcion'){
+    pintarInterrupcionCasino(c, j);
   } else {
     c.appendChild(el('div','bj-mensaje', S.bjMensaje));
     pintarCambiosBj(c);
@@ -9205,13 +9239,9 @@ SCREENS.blackjack = function(){
     btn.disabled = j.stats.dinero <= 0;
     btn.onclick = ()=> bjNuevaMano(j);
     c.appendChild(btn);
-  } else if(S.bjFase === 'interrupcion'){
-    const optSeguir = el('div','opt','Seguir jugando');
-    optSeguir.onclick = ()=> bjSeguirTrasInterrupcion(j);
-    const optSalir = el('div','opt','Salir del casino');
-    optSalir.onclick = ()=> bjSalirTrasInterrupcion();
-    c.appendChild(optSeguir); c.appendChild(optSalir);
   }
+  // La fase 'interrupcion' no añade controles propios aquí: pintarInterrupcionCasino ya puso
+  // sus botones de Seguir/Salir en la zona de mensaje, más arriba.
 
   c.appendChild(el('div','bj-regla-hint','El crupier se planta en 17. Blackjack paga 3 a 2. Doblar: una carta más al doble de apuesta.<br>Un blackjack sube algo la confianza y el carácter; jugártelo todo y perderlo baja el carácter.'));
 
