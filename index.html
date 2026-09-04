@@ -728,6 +728,10 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .rk-table-val{ flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; }
 
 /* ============ Logros: pantalla, toast de esquina y aviso a pantalla completa ============ */
+/* Pestañas superiores de la pantalla "Colección" (Logros / Cromos del mundo) */
+.coleccion-tabs{ display:flex; gap:8px; margin-bottom:18px; }
+.ctab{ flex:1; text-align:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; padding:10px 6px; border-radius:10px; border:1px solid var(--line); color:var(--ink-soft); background:none; cursor:pointer; }
+.ctab.activo{ border-color:var(--gold); color:var(--gold); background:rgba(212,175,55,.1); }
 .logros-resumen{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .logros-resumen .num{ font-size:22px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; white-space:nowrap; font-family:'Space Grotesk',sans-serif; }
 .logros-track{ flex:1; height:8px; border-radius:5px; background:rgba(255,255,255,.06); overflow:hidden; }
@@ -773,19 +777,20 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 
 /* ============ Cromos del mundo: rejilla y carta ampliada ============ */
 .cromo-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-.cromo{ aspect-ratio:3/4.1; border-radius:10px; position:relative; overflow:hidden; cursor:pointer; transition:transform .15s ease; background:linear-gradient(165deg,#262b3c,#1b1e2a); display:flex; flex-direction:column; align-items:center; }
-.cromo:active{ transform:scale(.94); }
-.cromo.tenido{ border:1px solid rgba(212,175,55,.55); box-shadow:0 5px 12px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.03); }
-.cromo.falta{ border:1.5px dashed var(--line); }
-.cromo.falta.shake{ animation:cromoshake .4s; }
+/* .cromo-item (no ".cromo": esa clase ya la usa el carné del jugador, cromo() más arriba) */
+.cromo-item{ aspect-ratio:3/4.1; border-radius:10px; position:relative; overflow:hidden; cursor:pointer; transition:transform .15s ease; background:linear-gradient(165deg,#262b3c,#1b1e2a); display:flex; flex-direction:column; align-items:center; }
+.cromo-item:active{ transform:scale(.94); }
+.cromo-item.tenido{ border:1px solid rgba(212,175,55,.55); box-shadow:0 5px 12px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.03); }
+.cromo-item.falta{ border:1.5px dashed var(--line); }
+.cromo-item.falta.shake{ animation:cromoshake .4s; }
 @keyframes cromoshake{ 20%{ transform:translateX(-4px); } 40%{ transform:translateX(4px); } 60%{ transform:translateX(-3px); } 80%{ transform:translateX(3px); } 100%{ transform:translateX(0); } }
 .cromo-flagbox{ width:60%; aspect-ratio:1/1; border-radius:6px; overflow:hidden; margin-top:18%; box-shadow:0 3px 9px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08); flex-shrink:0; }
 .cromo-flagbox svg{ width:100%; height:100%; display:block; }
-.cromo.falta .cromo-flagbox{ filter:grayscale(1) brightness(.4); opacity:.5; }
+.cromo-item.falta .cromo-flagbox{ filter:grayscale(1) brightness(.4); opacity:.5; }
 .cromo-num{ position:absolute; top:5px; left:5px; z-index:3; min-width:15px; height:15px; padding:0 3px; border-radius:8px; background:rgba(10,11,16,.55); backdrop-filter:blur(1px); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:7.5px; font-weight:700; color:#fff; letter-spacing:.02em; }
 .cromo-plate{ margin-top:auto; width:100%; padding:0 4px 11px; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:700; color:var(--ink); letter-spacing:.01em; }
-.cromo.falta .cromo-plate{ color:var(--ink-soft); opacity:.7; }
-.cromo.tenido .cromo-corner{ position:absolute; top:0; right:0; z-index:3; width:13px; height:13px; background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.16) 50%); border-radius:0 10px 0 8px; }
+.cromo-item.falta .cromo-plate{ color:var(--ink-soft); opacity:.7; }
+.cromo-item.tenido .cromo-corner{ position:absolute; top:0; right:0; z-index:3; width:13px; height:13px; background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.16) 50%); border-radius:0 10px 0 8px; }
 .cromo-tooltip{ position:fixed; z-index:73; background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:8px 11px; font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); box-shadow:var(--shadow); max-width:190px; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .2s ease; }
 .cromo-tooltip.show{ opacity:1; }
 .cromo-zoom-perspective{ position:fixed; z-index:71; perspective:1400px; pointer-events:none; display:none; }
@@ -3984,14 +3989,17 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.4.7';
+const VERSION_JUEGO = 'v1.4.8';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.4.8', titulo:'Logros y cromos, en una sola pantalla', cambios:[
+    'Los cromos del mundo pasan a vivir dentro de la pantalla de Logros, como una segunda pestaña — al entrar (desde el trofeo de la topbar o desde Ajustes) siempre ves primero tus logros, y desde ahí cambias a "Cromos del mundo" con un toque.'
+  ]},
   { version:'v1.4.7', titulo:'Logros y cromos del mundo', cambios:[
     'Nuevo sistema de logros: 37 hitos de tu carrera (partidos, títulos, selección, vida personal, estilo de vida y alguna rareza), guardados de por vida en tu perfil, no en la partida. Accede desde el trofeo nuevo junto al engranaje de Ajustes. Los más raros se anuncian a pantalla completa; el resto, con un aviso discreto en la esquina.',
-    'Nuevo álbum de "Cromos del mundo": se desbloquea el cromo de un país la primera vez que fichas por un club de allí, con curiosidades de fútbol reales sobre cada selección. Accede desde Ajustes → "Ver tus cromos del mundo".'
+    'Nuevo álbum de "Cromos del mundo": se desbloquea el cromo de un país la primera vez que fichas por un club de allí, con curiosidades de fútbol reales sobre cada selección.'
   ]},
   { version:'v1.4.6', titulo:'Rankings de la comunidad, dentro del juego', cambios:[
     'Nueva pantalla de rankings (Ajustes → "Ver los rankings de todos los jugadores"): máximos goleadores, asistentes, dinero generado, títulos, valor de mercado, Balones de Oro, títulos con la selección, ascensos y nota media, con desgloses por categoría, país y club de retiro.',
@@ -5062,7 +5070,7 @@ const PAISES_CROMO = [
     curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.'] }
 ];
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','cromos']);
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
 const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras','blackjack']);
@@ -8520,6 +8528,7 @@ function topbar(titulo){
     if(hayLogrosSinVer()) logrosBtn.innerHTML += '<span class="tb-dot-logros"></span>';
     logrosBtn.onclick = ()=>{
       S.pantallaAnteriorLogros = S.pantallaBase || S.screen;
+      S.logrosVistaActiva = 'logros';
       S.screen = 'logros';
       render();
     };
@@ -10289,13 +10298,9 @@ SCREENS.ajustes = function(){
 
   c.appendChild(crearEyebrow('Colección'));
   const filaLogros = el('div','opt');
-  filaLogros.textContent = 'Ver tus logros';
-  filaLogros.onclick = ()=>{ S.pantallaAnteriorLogros = 'ajustes'; S.screen = 'logros'; render(); };
+  filaLogros.textContent = 'Ver tus logros y cromos';
+  filaLogros.onclick = ()=>{ S.pantallaAnteriorLogros = 'ajustes'; S.logrosVistaActiva = 'logros'; S.screen = 'logros'; render(); };
   c.appendChild(filaLogros);
-  const filaCromos = el('div','opt');
-  filaCromos.textContent = 'Ver tus cromos del mundo';
-  filaCromos.onclick = ()=>{ S.pantallaAnteriorCromos = 'ajustes'; S.screen = 'cromos'; render(); };
-  c.appendChild(filaCromos);
 
   const version = el('div', null, `Fichaje 10 · ${VERSION_JUEGO}`);
   version.style.cssText = 'text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-soft);opacity:.6;margin-top:20px;';
@@ -10439,10 +10444,20 @@ SCREENS.rankings = function(){
   });
 };
 
+function svgBanderaCuadrada(pais){
+  const patron = BANDERAS_SVG[pais];
+  if(!patron) return '';
+  return `<svg viewBox="0 0 40 40">${patron}</svg>`;
+}
+let _cromoZoomOrigenRect = null;
+
+// Pantalla única "Colección": logros y cromos del mundo comparten pantalla, con una pestaña
+// superior para cambiar de vista (S.logrosVistaActiva, 'logros' por defecto). Entrar desde el
+// trofeo de la topbar o desde Ajustes fuerza siempre la vista de logros primero.
 SCREENS.logros = function(){
   const j = S.jugador;
-  topbar("Logros");
-  marcarLogrosVistos();
+  if(S.logrosVistaActiva === undefined) S.logrosVistaActiva = 'logros';
+  topbar(S.logrosVistaActiva==='cromos' ? 'Cromos' : 'Logros');
   const c = el('div','card');
 
   const btnVolver = document.createElement('button');
@@ -10457,8 +10472,27 @@ SCREENS.logros = function(){
   c.appendChild(btnVolver);
 
   c.appendChild(crearEyebrow('Colección'));
-  c.appendChild(el('h2',null,'Tus logros'));
+  c.appendChild(el('h2',null, S.logrosVistaActiva==='cromos' ? 'Cromos del mundo' : 'Tus logros'));
 
+  const vistaTabs = el('div','coleccion-tabs');
+  [['logros','Logros'], ['cromos','Cromos del mundo']].forEach(([id,nombre])=>{
+    const btn = el('div', 'ctab'+(S.logrosVistaActiva===id?' activo':''), nombre);
+    btn.onclick = ()=>{ if(S.logrosVistaActiva===id) return; S.logrosVistaActiva = id; pintar(); };
+    vistaTabs.appendChild(btn);
+  });
+  c.appendChild(vistaTabs);
+
+  if(S.logrosVistaActiva === 'cromos'){
+    pintarVistaCromos(c);
+  }else{
+    marcarLogrosVistos();
+    pintarVistaLogros(c);
+  }
+
+  app.appendChild(c);
+};
+
+function pintarVistaLogros(c){
   const guardados = cargarLogrosGuardados();
   const total = LOGROS.length;
   const conseguidos = LOGROS.filter(l=>guardados[l.id]).length;
@@ -10495,34 +10529,9 @@ SCREENS.logros = function(){
   c.appendChild(tabs);
   pintarListaLogros();
   c.appendChild(listaLogros);
-  app.appendChild(c);
-};
-
-function svgBanderaCuadrada(pais){
-  const patron = BANDERAS_SVG[pais];
-  if(!patron) return '';
-  return `<svg viewBox="0 0 40 40">${patron}</svg>`;
 }
-let _cromoZoomOrigenRect = null;
-SCREENS.cromos = function(){
-  const j = S.jugador;
-  topbar("Cromos");
-  const c = el('div','card');
 
-  const btnVolver = document.createElement('button');
-  btnVolver.className = 'btn-secondary';
-  btnVolver.textContent = '← Volver';
-  btnVolver.style.marginBottom = '16px';
-  btnVolver.onclick = ()=>{
-    S.screen = S.pantallaAnteriorCromos || (j ? 'tabJugador' : 'menu');
-    S.pantallaAnteriorCromos = null;
-    render();
-  };
-  c.appendChild(btnVolver);
-
-  c.appendChild(crearEyebrow('Colección'));
-  c.appendChild(el('h2',null,'Cromos del mundo'));
-
+function pintarVistaCromos(c){
   const total = PAISES_CROMO.length;
   const conseguidos = PAISES_CROMO.filter(p=>tieneCromo(p.pais)).length;
   const resumen = el('div','logros-resumen');
@@ -10536,7 +10545,7 @@ SCREENS.cromos = function(){
   PAISES_CROMO.forEach((p, i)=>{
     const num = String(i+1).padStart(2,'0');
     const tenido = tieneCromo(p.pais);
-    const cromo = el('div', 'cromo '+(tenido?'tenido':'falta'));
+    const cromo = el('div', 'cromo-item '+(tenido?'tenido':'falta'));
     if(tenido) cromo.appendChild(el('div','cromo-corner'));
     cromo.appendChild(el('div','cromo-num', num));
     cromo.appendChild(el('div','cromo-flagbox', svgBanderaCuadrada(p.pais)));
@@ -10552,7 +10561,6 @@ SCREENS.cromos = function(){
     grid.appendChild(cromo);
   });
   c.appendChild(grid);
-  app.appendChild(c);
 
   const backdrop = el('div','logro-backdrop', ''); backdrop.id = 'cromo-backdrop';
   const tooltip = el('div','cromo-tooltip', 'Se consigue jugando en un club de este país'); tooltip.id = 'cromo-tooltip';
@@ -10592,7 +10600,8 @@ SCREENS.cromos = function(){
   app.appendChild(backdrop);
   app.appendChild(tooltip);
   app.appendChild(zoomPerspective);
-};
+}
+
 function mostrarTooltipCromo(cromo){
   const tooltip = document.getElementById('cromo-tooltip');
   const r = cromo.getBoundingClientRect();

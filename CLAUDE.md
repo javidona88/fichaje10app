@@ -513,12 +513,19 @@ Nuevos contadores `j.carrera.pichichis`/`mvps`/`botasOro` (antes solo se sumaban
   COMPLETA` (10) sale a pantalla completa (`mostrarLogroPantallaCompleta`, con backdrop, como los
   reveals de título); si no, un aviso de esquina que se cierra solo a los ~4s
   (`mostrarLogroEsquina`). Se decidió así tras probar las dos opciones por separado en una demo.
-- `SCREENS.logros`: pestañas por categoría, barra de progreso, fila con candado + "???" en los
-  bloqueados. Accesible desde un botón de trofeo nuevo en la topbar (a la izquierda de Ajustes,
-  con un punto dorado si hay logros sin ver — `hayLogrosSinVer()`/`marcarLogrosVistos()`) y desde
-  Ajustes → "Ver tus logros".
+- `SCREENS.logros`: pantalla única de "Colección", compartida con los cromos del mundo (ver
+  abajo) mediante dos pestañas superiores (`.coleccion-tabs`/`.ctab`, estado `S.logrosVistaActiva`
+  = `'logros'`|`'cromos'`, por defecto `'logros'`) — `pintarVistaLogros(c)` y `pintarVistaCromos(c)`
+  pintan el contenido de cada una dentro de la misma tarjeta. La vista de logros: pestañas por
+  categoría, barra de progreso, fila con candado + "???" en los bloqueados. Accesible desde un
+  botón de trofeo nuevo en la topbar (a la izquierda de Ajustes, con un punto dorado si hay logros
+  sin ver — `hayLogrosSinVer()`/`marcarLogrosVistos()`) y desde Ajustes → "Ver tus logros y
+  cromos" — ambas entradas fijan `S.logrosVistaActiva = 'logros'` antes de navegar, así que
+  **siempre aterrizas en Logros primero**, nunca en Cromos, aunque la sesión anterior se quedara
+  en esa pestaña. Cambiar de pestaña llama a `pintar()` directo (no `render()`) para que sea
+  instantáneo, sin el fundido de 260ms.
 
-### Cromos del mundo — colección de por vida
+### Cromos del mundo — colección de por vida, pestaña dentro de Logros
 Mismo patrón que los logros (de por vida, `localStorage['fichaje10_cromos_v1']`,
 `cargarCromosGuardados`/`guardarCromosGuardados`/`tieneCromo`/`desbloquearCromo`), pero un cromo
 por país en vez de un hito de carrera. `PAISES_CROMO` (27 entradas — los mismos países que tienen
@@ -528,17 +535,24 @@ siempre `true` sin necesidad de guardar nada (tu país de origen viene desbloque
 principio). `desbloquearCromo(pais)` se llama en `iniciarFichaje` cuando `nuevoClub.extranjero`,
 manda `trackEvento('cromo', {pais})` y avisa con `mostrarNotificacion` (sin aviso a pantalla
 completa ni de esquina tipo logro — es un descubrimiento más discreto).
-- `SCREENS.cromos`: álbum en **orden alfabético fijo** (mezclando conseguidos y por conseguir,
-  no agrupados). Tocar un cromo ya conseguido lo hace crecer desde su sitio en la rejilla hasta
-  el centro de la pantalla (animación de posición/tamaño sobre `#cromo-zoom-perspective`, con la
-  medida de origen guardada en `_cromoZoomOrigenRect`), donde pasa a ser la carta grande; tocarla
-  otra vez gira en 3D (`.cromo-zoom-card.flipped`) para enseñar las curiosidades por detrás.
-  Tocar uno bloqueado da un tembleque + aviso ("se consigue jugando en un club de este país").
-  Esta interacción (crecer + girar) se validó antes con una demo aparte, igual que la elección
-  entre banderas SVG reales (reutilizando `BANDERAS_SVG`, vía `svgBanderaCuadrada`) frente a
-  emoji de bandera — en Windows, sin fuente de emoji de banderas, esas caen a mostrar el código
-  de país en texto ("ES", "BR"...), así que las SVG son necesarias, no solo estéticas. Accesible
-  desde Ajustes → "Ver tus cromos del mundo".
+- Vive como segunda pestaña de `SCREENS.logros` (`pintarVistaCromos`, antes era una pantalla
+  propia `SCREENS.cromos` — se fusionaron a petición expresa: "que una vez entres te aparezca
+  primero los logros y puedas pasar a los cromos mediante otra pestaña"). Álbum en **orden
+  alfabético fijo** (mezclando conseguidos y por conseguir, no agrupados). Tocar un cromo ya
+  conseguido lo hace crecer desde su sitio en la rejilla hasta el centro de la pantalla (animación
+  de posición/tamaño sobre `#cromo-zoom-perspective`, con la medida de origen guardada en
+  `_cromoZoomOrigenRect`), donde pasa a ser la carta grande; tocarla otra vez gira en 3D
+  (`.cromo-zoom-card.flipped`) para enseñar las curiosidades por detrás. Tocar uno bloqueado da un
+  tembleque + aviso ("se consigue jugando en un club de este país"). Esta interacción (crecer +
+  girar) se validó antes con una demo aparte, igual que la elección entre banderas SVG reales
+  (reutilizando `BANDERAS_SVG`, vía `svgBanderaCuadrada`) frente a emoji de bandera — en Windows,
+  sin fuente de emoji de banderas, esas caen a mostrar el código de país en texto ("ES", "BR"...),
+  así que las SVG son necesarias, no solo estéticas.
+- **Cuidado con el nombre de clase `.cromo`**: ya existía de antes para el carné del jugador
+  (`cromo(j)`, tarjeta apilada de ESTADO). La rejilla de países usaba también `.cromo` para cada
+  celda y heredaba sin querer el padding/margin/box-shadow de esa clase (bug real, no solo
+  cosmético — corregido al fusionar pantallas). La celda de la rejilla es `.cromo-item`
+  (`tenido`/`falta`), nunca `.cromo` a secas.
 
 ### Clubes — bases de datos reales
 - `CLUBES_POR_CATEGORIA`: clubes reales de España (temporada 2026-27), LaLiga / LaLiga2 /
