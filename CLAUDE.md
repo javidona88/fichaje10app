@@ -3,9 +3,13 @@
 Juego de modo carrera de fútbol en HTML/JS de un solo archivo (`index.html`, ~10.970 líneas),
 inspirado en "El Ídolo" (potrerofutbol.ar). Interfaz en español (castellano de España). Todo
 —HTML, CSS y JS— vive en un único archivo autocontenido, sin dependencias externas ni build step.
-Pie de pantalla: "Fichaje 10 · v1.3.4" (`VERSION_JUEGO`). Al publicar cambios, subir
-`VERSION_JUEGO` en `index.html` y, en el mismo commit, `CACHE` en `sw.js` al mismo número
-(`fichaje10-1.3.3` → `fichaje10-1.3.4`) para forzar el refresco en dispositivos instalados.
+Pie de pantalla: "Fichaje 10 · v1.3.4" (`VERSION_JUEGO`). **No subir `VERSION_JUEGO` (ni el
+`CACHE` de `sw.js`) por iniciativa propia** — solo cuando el usuario lo pida explícitamente.
+Si toca varias veces seguidas algo recién publicado sin pedir versión nueva, esos cambios se
+publican bajo la MISMA versión ya en curso (commit y push normales, sin tocar `VERSION_JUEGO`/
+`CACHE`). Cuando sí toque subir versión: `VERSION_JUEGO` en `index.html` y, en el mismo commit,
+`CACHE` en `sw.js` al mismo número (`fichaje10-1.3.3` → `fichaje10-1.3.4`) para forzar el
+refresco en dispositivos instalados.
 Desplegado en GitHub Pages: `https://javidona88.github.io/fichaje10app/` (repo `javidona88/fichaje10app`,
 workflow `.github/workflows/deploy.yml` en cada push a `main`).
 

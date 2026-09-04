@@ -4018,16 +4018,14 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.4.9';
+const VERSION_JUEGO = 'v1.4.8';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
-  { version:'v1.4.9', titulo:'Logros y cromos, solo a partir de aquí', cambios:[
-    'Los logros y los cromos del mundo se reinician una vez: a partir de ahora solo se consiguen jugando con una partida iniciada en la versión 1.4.8 o posterior — las partidas más antiguas ya en marcha no puntúan retroactivamente.'
-  ]},
   { version:'v1.4.8', titulo:'Logros y cromos, en una sola pantalla', cambios:[
-    'Los cromos del mundo pasan a vivir dentro de la pantalla de Logros, como una segunda pestaña — al entrar (desde el trofeo de la topbar o desde Ajustes) siempre ves primero tus logros, y desde ahí cambias a "Cromos del mundo" con un toque.'
+    'Los cromos del mundo pasan a vivir dentro de la pantalla de Logros, como una segunda pestaña — al entrar (desde el trofeo de la topbar o desde Ajustes) siempre ves primero tus logros, y desde ahí cambias a "Cromos del mundo" con un toque.',
+    'Los logros y los cromos se reinician una vez: a partir de esta versión solo se consiguen jugando con una partida iniciada en la 1.4.8 o posterior — las partidas más antiguas ya en marcha no puntúan retroactivamente.'
   ]},
   { version:'v1.4.7', titulo:'Logros y cromos del mundo', cambios:[
     'Nuevo sistema de logros: 37 hitos de tu carrera (partidos, títulos, selección, vida personal, estilo de vida y alguna rareza), guardados de por vida en tu perfil, no en la partida. Accede desde el trofeo nuevo junto al engranaje de Ajustes. Los más raros se anuncian a pantalla completa; el resto, con un aviso discreto en la esquina.',
