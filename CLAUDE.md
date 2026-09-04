@@ -601,18 +601,18 @@ también a Supabase (ver abajo) — es el único punto de entrada para analític
 - `nueva_partida` (`{estilo}`) al pulsar "Empezar carrera" en `SCREENS.crear`.
 - `retiro` (`{idCarrera, temporada, partidos, goles, asistencias, dineroGanado, titulos,
   categoriaFinal, nombreJugador, pais, ascensos, valorMercadoMaximo, balonesDeOro, edadRetiro,
-  clubFinal, extranjero, titulosSeleccion}`) al pulsar "Colgar las botas" en `SCREENS.retiro`
-  (forzosa a los 42 o voluntaria, mismo punto). Los campos van todos en `datos` (JSONB), así que
-  se puede ampliar el payload en cualquier momento sin tocar el esquema de Supabase — pero solo
-  alimenta partidas que se retiren DESPUÉS del cambio; no hay forma de rellenar ese campo para
-  carreras ya terminadas (esos datos solo vivían en el `localStorage` de cada jugador y nunca se
-  enviaron). `stats.html` ya usa varios de estos campos en cajas propias: rankings de más
-  títulos, mayor valor de mercado, más Balones de Oro, más títulos con la selección, más
-  ascensos y mejor promedio goleador (goles/temporada, solo carreras de 3+ temporadas);
-  desgloses por categoría de retiro, país, club de retiro y versión jugada (`version_juego`,
-  columna de la tabla, no de `datos`); y una caja de cifras colectivas (suma de goles,
-  asistencias, partidos, títulos y dinero de todas las carreras, más cuántas acabaron en el
-  extranjero).
+  clubFinal, extranjero, titulosSeleccion, notaMediaCarrera}`) al pulsar "Colgar las botas" en
+  `SCREENS.retiro` (forzosa a los 42 o voluntaria, mismo punto); `notaMediaCarrera` es la media
+  de `j.historialTemporadas[].nota` de toda la carrera. Los campos van todos en `datos` (JSONB),
+  así que se puede ampliar el payload en cualquier momento sin tocar el esquema de Supabase —
+  pero solo alimenta partidas que se retiren DESPUÉS del cambio; no hay forma de rellenar ese
+  campo para carreras ya terminadas (esos datos solo vivían en el `localStorage` de cada
+  jugador y nunca se enviaron). `stats.html` ya usa varios de estos campos en cajas propias:
+  rankings de más títulos, mayor valor de mercado, más Balones de Oro, más títulos con la
+  selección, más ascensos y mejor nota media de carrera; desgloses por categoría de retiro,
+  país, club de retiro y versión jugada (`version_juego`, columna de la tabla, no de `datos`);
+  y una caja de cifras colectivas (suma de goles, asistencias, partidos, títulos y dinero de
+  todas las carreras, más cuántas acabaron en el extranjero).
   - **Retiros duplicados**: si cargas un slot de guardado anterior a un retiro ya enviado (p. ej.
     otro slot con la misma carrera más atrás en el tiempo) y vuelves a retirarte, el suceso
     `retiro` se dispara otra vez con el mismo `idCarrera`. `stats.html` (`deduplicarPorCarrera`)

@@ -214,12 +214,11 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
         </table>
       </div>
       <div class="card">
-        <h2>⚡ Mejor promedio goleador</h2>
+        <h2>⭐ Mejor nota media de la carrera</h2>
         <table>
-          <thead><tr><th></th><th>Jugador</th><th class="num">Goles/temp.</th></tr></thead>
-          <tbody id="tabla-mediagoles"></tbody>
+          <thead><tr><th></th><th>Jugador</th><th class="num">Nota media</th></tr></thead>
+          <tbody id="tabla-notamedia"></tbody>
         </table>
-        <div class="nota">Solo carreras de 3 temporadas o más, para no premiar carreras muy cortas.</div>
       </div>
     </div>
   </div>
@@ -354,12 +353,7 @@ async function cargarEstadisticas(){
   const porBalonesOro = filasRetiro.filter(f => (f.datos?.balonesDeOro||0) > 0).sort((a,b)=> (b.datos?.balonesDeOro||0) - (a.datos?.balonesDeOro||0));
   const porTitulosSeleccion = filasRetiro.filter(f => (f.datos?.titulosSeleccion||0) > 0).sort((a,b)=> (b.datos?.titulosSeleccion||0) - (a.datos?.titulosSeleccion||0));
   const porAscensos = filasRetiro.filter(f => (f.datos?.ascensos||0) > 0).sort((a,b)=> (b.datos?.ascensos||0) - (a.datos?.ascensos||0));
-  // Promedio de goles por temporada: solo carreras de 3+ temporadas, para que un debut fulgurante
-  // de una sola temporada no encabece el ranking por pura casualidad de muestra pequeña.
-  const porMediaGoles = filasRetiro
-    .filter(f => (f.datos?.temporada||0) >= 3)
-    .map(f => ({ ...f, datos: { ...f.datos, mediaGoles: Math.round((f.datos.goles||0) / f.datos.temporada * 10) / 10 } }))
-    .sort((a,b)=> b.datos.mediaGoles - a.datos.mediaGoles);
+  const porNotaMedia = filasRetiro.filter(f => f.datos?.notaMediaCarrera != null).sort((a,b)=> b.datos.notaMediaCarrera - a.datos.notaMediaCarrera);
 
   pintarTablaRanking(document.getElementById('tabla-goles'), porGoles, 'goles');
   pintarTablaRanking(document.getElementById('tabla-asistencias'), porAsistencias, 'asistencias');
@@ -370,7 +364,7 @@ async function cargarEstadisticas(){
   pintarTablaRanking(document.getElementById('tabla-balonesoro'), porBalonesOro, 'balonesDeOro');
   pintarTablaRanking(document.getElementById('tabla-titulosseleccion'), porTitulosSeleccion, 'titulosSeleccion');
   pintarTablaRanking(document.getElementById('tabla-ascensos'), porAscensos, 'ascensos');
-  pintarTablaRanking(document.getElementById('tabla-mediagoles'), porMediaGoles, 'mediaGoles');
+  pintarTablaRanking(document.getElementById('tabla-notamedia'), porNotaMedia, 'notaMediaCarrera');
 
   const conteoCategoria = {};
   filasRetiro.forEach(f=>{ const c = f.datos?.categoriaFinal || 'desconocida'; conteoCategoria[c] = (conteoCategoria[c]||0)+1; });
