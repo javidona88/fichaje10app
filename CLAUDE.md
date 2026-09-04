@@ -623,6 +623,35 @@ aviso a pantalla completa ni de esquina tipo logro — es un descubrimiento más
   **nuevo entero** (nunca mutan el existente), y pasan por `S.ofertaFichajePendiente` /
   `SCREENS.ofertas` → negociación → (regresoClub?) → rueda de prensa.
 
+### Escudos personalizados — mod local, opcional
+`escudoSVG` genera siempre un escudo genérico (iniciales + colores), **nunca el oficial**: son
+marcas registradas de cada club/federación. Para quien quiera meter los reales por su cuenta,
+`SCREENS.escudosPersonalizados` (accesible desde `SCREENS.menu`, sin necesidad de partida en
+curso — botón "Personalizar escudos") deja subir una imagen propia por club o por selección.
+- **100% local**: `localStorage['fichaje10_escudos_custom_v1']` = `{ clubes:{nombre:dataURL},
+  paises:{pais:dataURL} }` (`cargarEscudosPersonalizados`/`guardarEscudosPersonalizados`/
+  `escudoPersonalizado(tipo,nombre)`/`fijarEscudoPersonalizado`/`quitarEscudoPersonalizado`). No
+  se sube a ningún sitio (ni Supabase ni Umami) — el juego no distribuye ni empaqueta escudos
+  reales, cada jugador aporta los suyos para su propia copia.
+  `redimensionarImagenEscudo(file)` recorta la imagen a cuadrado (mismo criterio "cover" que el
+  resto de escudos) y la reduce a 160×160 antes de guardarla en PNG, para que cientos de escudos
+  personalizados no agoten la cuota de `localStorage`.
+- **Dos únicos puntos de enganche**, reutilizados por todo lo demás: `escudoSVG(nombre,...)`
+  mira `escudoPersonalizado('clubes', nombre)` antes de generar nada; `banderaPais(pais,...)` y
+  `svgBanderaCuadrada(pais)` (la de la pantalla de Cromos) miran `escudoPersonalizado('paises',
+  pais)`. Si hay imagen, se devuelve un `<img>` en vez de `<svg>` — todas las llamadas ya
+  vuelcan el resultado en `innerHTML`, así que es un reemplazo transparente en cualquier
+  pantalla del juego sin tocar cada sitio donde se usan.
+- **Listas maestras del buscador**: `todosLosClubesDelJuego()` / `todosLosPaisesDelJuego()` se
+  calculan a partir de `CLUBES_POR_CATEGORIA` + `CLUBES_EXTRANJERO` / `BANDERAS_SVG` — nunca a
+  mano, para no desincronizarse si se añaden clubes o países. `coloresClubDelJuego(nombre)`
+  (con `_mapaColoresClubes` cacheado la primera vez) da los colores reales de cada club para que
+  la miniatura del buscador coincida con el escudo que se ve en el resto del juego.
+- **`mostrarNotificacion` no sirve aquí**: depende de `S.jugador` (la tabbar —y con ella el
+  hueco de notificaciones— se oculta sin partida activa, ver `pintarTabbar`), y esta pantalla es
+  accesible sin ninguna. Usa su propio aviso en pantalla (`mostrarAvisoEscudos`, div `.escudos-
+  aviso` con clase `.show`), por ejemplo si `fijarEscudoPersonalizado` falla por falta de cuota.
+
 ### Iconos
 `ICONOS_SVG` + `iconoInsignia(clave, tamano)` / `iconoInline(clave, tamano)`: insignia circular
 dorada con icono SVG en trazo. Aplicado a los 6 atributos (físico, velocidad, tiro, regate,

@@ -732,6 +732,29 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .coleccion-tabs{ display:flex; gap:8px; margin-bottom:18px; }
 .ctab{ flex:1; text-align:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; padding:10px 6px; border-radius:10px; border:1px solid var(--line); color:var(--ink-soft); background:none; cursor:pointer; }
 .ctab.activo{ border-color:var(--gold); color:var(--gold); background:rgba(212,175,55,.1); }
+
+/* ============ Escudos personalizados (mod local) ============ */
+.escudos-buscador{
+  width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line); background:var(--bg2);
+  font-family:'Space Grotesk',sans-serif; font-size:14px; color:var(--ink); margin-bottom:10px;
+}
+.escudos-buscador:focus{ outline:none; border-color:var(--gold); }
+.escudos-aviso{ display:none; font-size:12.5px; font-weight:600; color:#D9495C; background:rgba(217,73,92,.12); border:1px solid rgba(217,73,92,.4); border-radius:9px; padding:9px 12px; margin-bottom:14px; }
+.escudos-aviso.show{ display:block; }
+.escudos-contador{ font-size:11px; color:var(--ink-soft); margin-bottom:8px; }
+.escudos-vacio{ font-size:13px; color:var(--ink-soft); text-align:center; padding:24px 0; }
+.fila-escudo{ display:flex; align-items:center; gap:11px; padding:9px 2px; border-bottom:1px solid var(--line); }
+.fila-escudo:last-child{ border-bottom:none; }
+.fila-escudo .miniatura{ width:34px; height:34px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.fila-escudo .miniatura svg, .fila-escudo .miniatura img{ display:block; }
+.fila-escudo .nombre{ flex:1; min-width:0; font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fila-escudo .acciones{ display:flex; gap:6px; flex-shrink:0; }
+.fila-escudo .acciones button{
+  font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; padding:7px 11px; border-radius:8px;
+  border:1px solid var(--line); background:none; color:var(--ink-soft); cursor:pointer;
+}
+.fila-escudo .acciones button.cambiar{ border-color:var(--gold-dim); color:var(--gold); }
+.fila-escudo .acciones button.quitar{ color:#D9495C; border-color:rgba(217,73,92,.4); }
 .logros-resumen{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .logros-resumen .num{ font-size:22px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; white-space:nowrap; font-family:'Space Grotesk',sans-serif; }
 .logros-track{ flex:1; height:8px; border-radius:5px; background:rgba(255,255,255,.06); overflow:hidden; }
@@ -785,7 +808,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .cromo-item.falta.shake{ animation:cromoshake .4s; }
 @keyframes cromoshake{ 20%{ transform:translateX(-4px); } 40%{ transform:translateX(4px); } 60%{ transform:translateX(-3px); } 80%{ transform:translateX(3px); } 100%{ transform:translateX(0); } }
 .cromo-flagbox{ width:60%; aspect-ratio:1/1; border-radius:6px; overflow:hidden; margin-top:18%; box-shadow:0 3px 9px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08); flex-shrink:0; }
-.cromo-flagbox svg{ width:100%; height:100%; display:block; }
+.cromo-flagbox svg, .cromo-flagbox img{ width:100%; height:100%; display:block; object-fit:cover; }
 .cromo-item.falta .cromo-flagbox{ filter:grayscale(1) brightness(.4); opacity:.5; }
 .cromo-num{ position:absolute; top:5px; left:5px; z-index:3; min-width:15px; height:15px; padding:0 3px; border-radius:8px; background:rgba(10,11,16,.55); backdrop-filter:blur(1px); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:7.5px; font-weight:700; color:#fff; letter-spacing:.02em; }
 .cromo-plate{ margin-top:auto; width:100%; padding:0 4px 11px; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:700; color:var(--ink); letter-spacing:.01em; }
@@ -802,7 +825,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .cromo-zoom-content{ opacity:0; transition:opacity .2s ease; transition-delay:0s; width:100%; height:100%; display:flex; flex-direction:column; }
 .cromo-zoom-perspective.landed .cromo-zoom-content{ opacity:1; transition-delay:.22s; }
 .cromo-zoom-front .flag-banner{ position:relative; height:52%; flex-shrink:0; }
-.cromo-zoom-front .flag-banner svg{ width:100%; height:100%; display:block; }
+.cromo-zoom-front .flag-banner svg, .cromo-zoom-front .flag-banner img{ width:100%; height:100%; display:block; object-fit:cover; }
 .cromo-zoom-front .flag-banner .gloss{ position:absolute; inset:0; background:linear-gradient(115deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 72%, rgba(255,255,255,.08) 100%); }
 .cromo-zoom-front .flag-banner .fade{ position:absolute; left:0; right:0; bottom:0; height:60%; background:linear-gradient(0deg, var(--panel) 0%, rgba(31,35,48,0) 100%); }
 .cromo-zoom-front .cerrar{ position:absolute; top:9px; right:9px; z-index:3; width:25px; height:25px; border-radius:50%; border:1px solid rgba(255,255,255,.25); background:rgba(10,11,16,.5); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; }
@@ -5100,7 +5123,7 @@ const PAISES_CROMO = [
     curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.'] }
 ];
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros']);
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','escudosPersonalizados']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
 const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras','blackjack']);
@@ -5964,6 +5987,8 @@ function escudoDortmund(tamano){
 }
 function escudoSVG(nombre, tamano, colores){
   tamano = tamano || 30;
+  const custom = escudoPersonalizado('clubes', nombre);
+  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" style="border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 0 0 1px rgba(255,255,255,0.18);">`;
   if(nombre === 'Real Madrid CF') return escudoRealMadrid(tamano);
   if(nombre === 'Atlético de Madrid') return escudoAtletico(tamano);
   if(nombre === 'FC Barcelona') return escudoBarcelona(tamano);
@@ -7469,9 +7494,87 @@ function elegirObjetivo(j){
 function nombreCopaNacional(pais){
   return COPA_NACIONAL_POR_PAIS[pais] || "Copa nacional";
 }
+/* ============ Escudos personalizados (mod local, opcional) ============
+   Cualquier jugador puede sustituir el escudo generado de un club, o la bandera de una
+   selección, por una imagen propia — pensado para quien quiera meter los escudos reales de
+   las federaciones/clubes por su cuenta, sin que el juego los incluya ni los distribuya (son
+   marcas registradas, ver escudoSVG). Todo vive SOLO en el localStorage de ese navegador
+   (fichaje10_escudos_custom_v1, { clubes:{nombre:dataURL}, paises:{pais:dataURL} }); nunca se
+   sube a ningún sitio. Gestión desde el menú principal — SCREENS.escudosPersonalizados. */
+function cargarEscudosPersonalizados(){
+  try{ return JSON.parse(localStorage.getItem('fichaje10_escudos_custom_v1')) || { clubes:{}, paises:{} }; }catch(e){ return { clubes:{}, paises:{} }; }
+}
+function guardarEscudosPersonalizados(mapa){
+  try{ localStorage.setItem('fichaje10_escudos_custom_v1', JSON.stringify(mapa)); return true; }catch(e){ return false; }
+}
+function escudoPersonalizado(tipo, nombre){
+  const mapa = cargarEscudosPersonalizados();
+  return (mapa[tipo] && mapa[tipo][nombre]) || null;
+}
+function fijarEscudoPersonalizado(tipo, nombre, dataUrl){
+  const mapa = cargarEscudosPersonalizados();
+  mapa[tipo] = mapa[tipo] || {};
+  mapa[tipo][nombre] = dataUrl;
+  return guardarEscudosPersonalizados(mapa);
+}
+function quitarEscudoPersonalizado(tipo, nombre){
+  const mapa = cargarEscudosPersonalizados();
+  if(mapa[tipo]) delete mapa[tipo][nombre];
+  guardarEscudosPersonalizados(mapa);
+}
+function quitarTodosLosEscudosPersonalizados(){
+  guardarEscudosPersonalizados({ clubes:{}, paises:{} });
+}
+// Lee el archivo elegido, lo recorta a cuadrado (mismo criterio "cover" que el resto de escudos)
+// y lo reduce a un tamaño de icono — así cientos de escudos personalizados no agotan el
+// localStorage (una foto de móvil sin redimensionar podría pesar varios MB ella sola).
+function redimensionarImagenEscudo(file){
+  const TAM = 160;
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=> reject(new Error('No se pudo leer el archivo'));
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onerror = ()=> reject(new Error('No es una imagen válida'));
+      img.onload = ()=>{
+        const canvas = document.createElement('canvas');
+        canvas.width = TAM; canvas.height = TAM;
+        const ctx = canvas.getContext('2d');
+        const escala = Math.max(TAM / img.width, TAM / img.height);
+        const w = img.width * escala, h = img.height * escala;
+        ctx.drawImage(img, (TAM - w) / 2, (TAM - h) / 2, w, h);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+// Listas maestras para el buscador de la pantalla de gestión — se calculan a partir de las
+// mismas bases de datos que usa el resto del juego, nunca a mano, para no desincronizarse.
+// _mapaColoresClubes se construye una sola vez (perezoso) y sirve también para pintar la
+// miniatura de cada club con sus colores reales, no un color derivado del nombre.
+let _mapaColoresClubes = null;
+function asegurarMapaColoresClubes(){
+  if(_mapaColoresClubes) return;
+  _mapaColoresClubes = new Map();
+  Object.values(CLUBES_POR_CATEGORIA).forEach(arr=> arr.forEach(c=>{ if(!_mapaColoresClubes.has(c.nombre)) _mapaColoresClubes.set(c.nombre, c.colores); }));
+  CLUBES_EXTRANJERO.forEach(c=>{ if(!_mapaColoresClubes.has(c.nombre)) _mapaColoresClubes.set(c.nombre, c.colores); });
+}
+function coloresClubDelJuego(nombre){ asegurarMapaColoresClubes(); return _mapaColoresClubes.get(nombre) || null; }
+function todosLosClubesDelJuego(){
+  asegurarMapaColoresClubes();
+  return [..._mapaColoresClubes.keys()].sort((a,b)=> a.localeCompare(b,'es'));
+}
+function todosLosPaisesDelJuego(){
+  return Object.keys(BANDERAS_SVG).sort((a,b)=> a.localeCompare(b,'es'));
+}
+
 let _banderaIdSeq = 0;
 function banderaPais(pais, tamano){
   tamano = tamano || 14;
+  const custom = escudoPersonalizado('paises', pais);
+  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${pais}" style="border-radius:50%;object-fit:cover;vertical-align:middle;box-shadow:0 0 0 1px rgba(255,255,255,0.18);flex-shrink:0;">`;
   const patron = BANDERAS_SVG[pais];
   if(!patron) return '🌍';
   _banderaIdSeq++;
@@ -10479,6 +10582,8 @@ SCREENS.rankings = function(){
 };
 
 function svgBanderaCuadrada(pais){
+  const custom = escudoPersonalizado('paises', pais);
+  if(custom) return `<img src="${custom}" alt="${pais}">`;
   const patron = BANDERAS_SVG[pais];
   if(!patron) return '';
   return `<svg viewBox="0 0 40 40">${patron}</svg>`;
@@ -10779,11 +10884,154 @@ SCREENS.menu = function(){
   };
   c.appendChild(btnAjustes);
 
+  const btnEscudos = document.createElement('button'); btnEscudos.className='btn-secondary'; btnEscudos.textContent='Personalizar escudos';
+  btnEscudos.onclick = ()=>{
+    S.pantallaAnteriorEscudos = 'menu';
+    S.screen = 'escudosPersonalizados';
+    render();
+  };
+  c.appendChild(btnEscudos);
+
   app.appendChild(c);
 
   const pie = el('div', null, `Fichaje 10 · ${VERSION_JUEGO}`);
   pie.style.cssText = 'text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-soft);opacity:.6;margin-top:22px;';
   app.appendChild(pie);
+};
+
+// Pantalla de gestión del mod de escudos personalizados — accesible desde el menú principal
+// (no depende de tener una partida en curso). Dos pestañas (clubes / selecciones) con buscador
+// sobre las listas maestras reales del juego; cada fila deja subir una imagen propia (se recorta
+// y reduce a icono en el propio navegador) o quitar la que ya hubiera.
+SCREENS.escudosPersonalizados = function(){
+  const c = el('div','card');
+
+  const btnVolver = document.createElement('button');
+  btnVolver.className = 'btn-secondary';
+  btnVolver.textContent = '← Volver';
+  btnVolver.style.marginBottom = '16px';
+  btnVolver.onclick = ()=>{
+    S.screen = S.pantallaAnteriorEscudos || (S.jugador ? 'tabJugador' : 'menu');
+    S.pantallaAnteriorEscudos = null;
+    render();
+  };
+  c.appendChild(btnVolver);
+
+  c.appendChild(crearEyebrow('Mod local · opcional'));
+  c.appendChild(el('h2',null,'Personalizar escudos'));
+  const intro = el('div', null, 'Sustituye el escudo generado de cualquier club, o la bandera de cualquier selección, por una imagen tuya. Se guarda solo en este dispositivo — el juego no incluye ni reparte escudos oficiales.');
+  intro.style.cssText = 'font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:16px;';
+  c.appendChild(intro);
+
+  // Aviso propio en pantalla — mostrarNotificacion() depende de S.jugador (la tabbar se oculta
+  // sin partida activa) y esta pantalla es accesible sin ninguna, así que no sirve aquí.
+  const aviso = el('div','escudos-aviso');
+  c.appendChild(aviso);
+  function mostrarAvisoEscudos(msg){
+    aviso.textContent = msg;
+    aviso.classList.add('show');
+    clearTimeout(aviso._t);
+    aviso._t = setTimeout(()=> aviso.classList.remove('show'), 4200);
+  }
+
+  if(S.escudosVista === undefined) S.escudosVista = 'clubes';
+  const tabs = el('div','coleccion-tabs');
+  [['clubes','Clubes'], ['paises','Selecciones']].forEach(([id,nombre])=>{
+    const btn = el('div', 'ctab'+(S.escudosVista===id?' activo':''), nombre);
+    btn.onclick = ()=>{ if(S.escudosVista===id) return; S.escudosVista = id; S.escudosBusqueda = ''; pintar(); };
+    tabs.appendChild(btn);
+  });
+  c.appendChild(tabs);
+
+  const buscador = document.createElement('input');
+  buscador.type = 'text';
+  buscador.placeholder = S.escudosVista === 'clubes' ? 'Buscar club…' : 'Buscar selección…';
+  buscador.value = S.escudosBusqueda || '';
+  buscador.className = 'escudos-buscador';
+  buscador.oninput = ()=>{ S.escudosBusqueda = buscador.value; pintarFilas(); };
+  c.appendChild(buscador);
+
+  const contador = el('div','escudos-contador');
+  c.appendChild(contador);
+
+  const lista = el('div');
+  c.appendChild(lista);
+
+  const inputArchivo = document.createElement('input');
+  inputArchivo.type = 'file';
+  inputArchivo.accept = 'image/*';
+  inputArchivo.style.display = 'none';
+  c.appendChild(inputArchivo);
+
+  function pintarFilas(){
+    const tipo = S.escudosVista;
+    const todos = tipo === 'clubes' ? todosLosClubesDelJuego() : todosLosPaisesDelJuego();
+    const q = (S.escudosBusqueda||'').trim().toLowerCase();
+    const filtrados = q ? todos.filter(n=> n.toLowerCase().includes(q)) : todos;
+    contador.textContent = `${filtrados.length} de ${todos.length}${tipo==='clubes' ? ' clubes' : ' selecciones'}`;
+    lista.innerHTML = '';
+    if(!filtrados.length){
+      lista.appendChild(el('div','escudos-vacio', 'Nada con ese nombre.'));
+      return;
+    }
+    filtrados.forEach(nombre=>{
+      const tieneCustom = !!escudoPersonalizado(tipo, nombre);
+      const fila = el('div','fila-escudo');
+      const miniatura = el('div','miniatura');
+      miniatura.innerHTML = tipo === 'clubes' ? escudoSVG(nombre, 34, coloresClubDelJuego(nombre)) : banderaPais(nombre, 34);
+      fila.appendChild(miniatura);
+      fila.appendChild(el('div','nombre', nombre));
+      const acciones = el('div','acciones');
+      const btnCambiar = document.createElement('button');
+      btnCambiar.className = 'cambiar';
+      btnCambiar.textContent = tieneCustom ? 'Cambiar' : 'Subir';
+      btnCambiar.onclick = ()=>{
+        inputArchivo.onchange = async ()=>{
+          const file = inputArchivo.files && inputArchivo.files[0];
+          inputArchivo.value = '';
+          if(!file) return;
+          try{
+            const dataUrl = await redimensionarImagenEscudo(file);
+            const ok = fijarEscudoPersonalizado(tipo, nombre, dataUrl);
+            if(!ok){ mostrarAvisoEscudos('No hay espacio para guardar más imágenes personalizadas. Quita alguna e inténtalo de nuevo.'); return; }
+            pintarFilas();
+          }catch(e){
+            mostrarAvisoEscudos('No se ha podido usar esa imagen.');
+          }
+        };
+        inputArchivo.click();
+      };
+      acciones.appendChild(btnCambiar);
+      if(tieneCustom){
+        const btnQuitar = document.createElement('button');
+        btnQuitar.className = 'quitar';
+        btnQuitar.textContent = 'Quitar';
+        btnQuitar.onclick = ()=>{ quitarEscudoPersonalizado(tipo, nombre); pintarFilas(); };
+        acciones.appendChild(btnQuitar);
+      }
+      fila.appendChild(acciones);
+      lista.appendChild(fila);
+    });
+  }
+  pintarFilas();
+
+  const guardados = cargarEscudosPersonalizados();
+  const hayAlguno = Object.keys(guardados.clubes||{}).length || Object.keys(guardados.paises||{}).length;
+  if(hayAlguno){
+    const btnReset = document.createElement('button');
+    btnReset.className = 'btn-secondary';
+    btnReset.textContent = 'Quitar todos los escudos personalizados';
+    btnReset.style.marginTop = '18px';
+    btnReset.onclick = ()=>{
+      if(confirm('¿Quitar todas las imágenes personalizadas y volver a los escudos generados por el juego? No se puede deshacer.')){
+        quitarTodosLosEscudosPersonalizados();
+        pintar();
+      }
+    };
+    c.appendChild(btnReset);
+  }
+
+  app.appendChild(c);
 };
 
 const CLAVE_TUTORIAL_VISTO = 'fichaje10_tutorialVisto_v1';
