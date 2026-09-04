@@ -492,6 +492,54 @@ semanas): `seccionEstado` usa ese flag para mostrar "Sancionado (X sem.)" en vez
 (X sem.)" en la ficha. Al añadir cualquier otro sitio que lea `j.lesionSemanas > 0` para mostrar
 texto de "lesión", comprobar si también debería mirar `sancionActiva`.
 
+### Logros — colección de por vida
+`LOGROS` (37 hitos en 6 categorías: carrera, títulos, selección, vida, estilo de vida, rarezas).
+A diferencia de todo lo demás en `j`, se guardan en `localStorage['fichaje10_logros_v1']`
+(`cargarLogrosGuardados`/`guardarLogrosGuardados`/`tieneLogro`), **aparte de la partida** — es tu
+perfil, no la carrera: sobreviven a borrar personajes o empezar de cero. Cada logro tiene
+`cond(j)` (se comprueba contra el jugador activo) y `pesoRareza` (0-100, estimación editorial,
+no dato real). `comprobarLogros(j)` se llama en cada `pintar()` con partida en curso y evalúa
+solo los aún no conseguidos; al cumplirse uno se guarda con fecha/temporada, se manda
+`trackEvento('logro', {id})` y se encola en `S.logrosPendientesAviso`. La mayoría de condiciones
+leen contadores que ya existían (`j.carrera.partidos`, `j.trayectoria`, `j.titulosSeleccion`...);
+para los pocos hitos sin forma de detectarse por sí solos (fichar por el rival directo, volver a
+un club, quedarte en números rojos, un bote grande de tragaperras) se guarda un flag propio en
+`j.hitosLogro` justo donde ocurre (`iniciarFichaje`, `comprobarNumerosRojos`, `cobrarBoteTraga`).
+Nuevos contadores `j.carrera.pichichis`/`mvps`/`botasOro` (antes solo se sumaban juntos en
+`trofeosIndividuales`) para poder distinguir esos logros entre sí.
+- **Aviso mixto**: `procesarAvisosLogros()` (llamada al final de `pintar()`) saca los logros de
+  la cola de uno en uno, en `#logro-aviso-root` (fuera de `#app`, para no desaparecer si la
+  pantalla se repinta mientras el aviso sigue visible). Si `pesoRareza < UMBRAL_LOGRO_PANTALLA_
+  COMPLETA` (10) sale a pantalla completa (`mostrarLogroPantallaCompleta`, con backdrop, como los
+  reveals de título); si no, un aviso de esquina que se cierra solo a los ~4s
+  (`mostrarLogroEsquina`). Se decidió así tras probar las dos opciones por separado en una demo.
+- `SCREENS.logros`: pestañas por categoría, barra de progreso, fila con candado + "???" en los
+  bloqueados. Accesible desde un botón de trofeo nuevo en la topbar (a la izquierda de Ajustes,
+  con un punto dorado si hay logros sin ver — `hayLogrosSinVer()`/`marcarLogrosVistos()`) y desde
+  Ajustes → "Ver tus logros".
+
+### Cromos del mundo — colección de por vida
+Mismo patrón que los logros (de por vida, `localStorage['fichaje10_cromos_v1']`,
+`cargarCromosGuardados`/`guardarCromosGuardados`/`tieneCromo`/`desbloquearCromo`), pero un cromo
+por país en vez de un hito de carrera. `PAISES_CROMO` (27 entradas — los mismos países que tienen
+bandera en `BANDERAS_SVG`; al añadir un país nuevo allí, añadir también su ficha aquí) con
+selección/apodo, dos datos rápidos y 2-3 curiosidades de fútbol reales. `tieneCromo('España')` es
+siempre `true` sin necesidad de guardar nada (tu país de origen viene desbloqueado desde el
+principio). `desbloquearCromo(pais)` se llama en `iniciarFichaje` cuando `nuevoClub.extranjero`,
+manda `trackEvento('cromo', {pais})` y avisa con `mostrarNotificacion` (sin aviso a pantalla
+completa ni de esquina tipo logro — es un descubrimiento más discreto).
+- `SCREENS.cromos`: álbum en **orden alfabético fijo** (mezclando conseguidos y por conseguir,
+  no agrupados). Tocar un cromo ya conseguido lo hace crecer desde su sitio en la rejilla hasta
+  el centro de la pantalla (animación de posición/tamaño sobre `#cromo-zoom-perspective`, con la
+  medida de origen guardada en `_cromoZoomOrigenRect`), donde pasa a ser la carta grande; tocarla
+  otra vez gira en 3D (`.cromo-zoom-card.flipped`) para enseñar las curiosidades por detrás.
+  Tocar uno bloqueado da un tembleque + aviso ("se consigue jugando en un club de este país").
+  Esta interacción (crecer + girar) se validó antes con una demo aparte, igual que la elección
+  entre banderas SVG reales (reutilizando `BANDERAS_SVG`, vía `svgBanderaCuadrada`) frente a
+  emoji de bandera — en Windows, sin fuente de emoji de banderas, esas caen a mostrar el código
+  de país en texto ("ES", "BR"...), así que las SVG son necesarias, no solo estéticas. Accesible
+  desde Ajustes → "Ver tus cromos del mundo".
+
 ### Clubes — bases de datos reales
 - `CLUBES_POR_CATEGORIA`: clubes reales de España (temporada 2026-27), LaLiga / LaLiga2 /
   Primera RFEF / Segunda RFEF, cada uno `{nombre, colores:[hex1,hex2]}`. Categoría inicial del
