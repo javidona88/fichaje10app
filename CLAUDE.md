@@ -611,9 +611,11 @@ también a Supabase (ver abajo) — es el único punto de entrada para analític
   - **Retiros duplicados**: si cargas un slot de guardado anterior a un retiro ya enviado (p. ej.
     otro slot con la misma carrera más atrás en el tiempo) y vuelves a retirarte, el suceso
     `retiro` se dispara otra vez con el mismo `idCarrera`. `stats.html` (`deduplicarPorCarrera`)
-    agrupa las filas de `retiro` por `idCarrera` y se queda solo con la más reciente (por
-    `created_at`) antes de contar "Carreras completadas" o calcular cualquier ranking — así una
-    misma carrera rejugada no cuenta dos veces. Las filas de antes de este cambio no llevan
+    agrupa las filas de `retiro` por `idCarrera` y se queda solo con la **primera** (por
+    `created_at`, no la más reciente) antes de contar "Carreras completadas" o calcular
+    cualquier ranking — así una misma carrera rejugada no cuenta dos veces, y además no se
+    puede recargar un guardado antiguo para reintentar el final hasta sacar mejores números y
+    desplazar el resultado original en los rankings. Las filas de antes de este cambio no llevan
     `idCarrera` y no se pueden deduplicar entre sí (se cuentan todas, como antes).
 Al añadir un evento nuevo: nombre en minúsculas con guion bajo, payload pequeño (unas pocas
 claves), y pensar en el volumen si se dispara muy seguido (capa gratuita: 100.000 eventos/mes).

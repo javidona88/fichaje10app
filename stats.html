@@ -262,7 +262,10 @@ function deduplicarPorCarrera(filas){
     const id = f.datos && f.datos.idCarrera;
     if(!id){ sinId.push(f); return; }
     const previa = porId.get(id);
-    if(!previa || new Date(f.created_at) > new Date(previa.created_at)) porId.set(id, f);
+    // Se queda con la PRIMERA vez que se retiró esa carrera, no la más reciente: si se queda
+    // con la última, recargar un guardado anterior y reintentar el final hasta sacar mejores
+    // números permitiría inflar los rankings a base de repetir el mismo final.
+    if(!previa || new Date(f.created_at) < new Date(previa.created_at)) porId.set(id, f);
   });
   return [...porId.values(), ...sinId];
 }
