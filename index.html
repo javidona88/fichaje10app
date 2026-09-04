@@ -1538,6 +1538,25 @@ function guardarLogrosGuardados(mapa){
 function tieneLogro(id){
   return !!cargarLogrosGuardados()[id];
 }
+// Cromos del mundo: misma idea que los logros (colección de por vida, aparte de la partida),
+// pero se desbloquean al fichar por un club de ese país — ver iniciarFichaje.
+function cargarCromosGuardados(){
+  try{ return JSON.parse(localStorage.getItem('fichaje10_cromos_v1')) || {}; }catch(e){ return {}; }
+}
+function guardarCromosGuardados(mapa){
+  try{ localStorage.setItem('fichaje10_cromos_v1', JSON.stringify(mapa)); }catch(e){}
+}
+function tieneCromo(pais){
+  return pais === 'España' || !!cargarCromosGuardados()[pais];
+}
+function desbloquearCromo(pais){
+  if(tieneCromo(pais)) return;
+  const guardados = cargarCromosGuardados();
+  guardados[pais] = { fecha: new Date().toISOString(), temporada: S.temporada };
+  guardarCromosGuardados(guardados);
+  trackEvento('cromo', { pais });
+  mostrarNotificacion(`🌍 Nuevo cromo: <b>${pais}</b>`, 'atributo');
+}
 function hayLogrosSinVer(){
   return Object.values(cargarLogrosGuardados()).some(v=>!v.visto);
 }
@@ -4976,6 +4995,68 @@ const BANDERAS_SVG = {
   "Estados Unidos": '<rect width="40" height="40" fill="#FFFFFF"/><rect width="40" height="3.1" y="0" fill="#B22234"/><rect width="40" height="3.1" y="6.2" fill="#B22234"/><rect width="40" height="3.1" y="12.4" fill="#B22234"/><rect width="40" height="3.1" y="18.6" fill="#B22234"/><rect width="40" height="3.1" y="24.8" fill="#B22234"/><rect width="40" height="3.1" y="31" fill="#B22234"/><rect width="40" height="3.1" y="37.2" fill="#B22234"/><rect width="18" height="21.5" x="0" y="0" fill="#3C3B6E"/>',
   "Arabia Saudí": '<rect width="40" height="40" fill="#006C35"/><rect x="6" y="15" width="20" height="3" fill="#FFFFFF"/><rect x="6" y="20" width="16" height="3" fill="#FFFFFF"/><polygon points="24,21.5 30,20 24,18.5" fill="#FFFFFF"/>'
 };
+/* ============ Cromos del mundo: ficha de cada país con curiosidades de fútbol reales ============
+   Colección de por vida (localStorage, no de la partida) — se desbloquea un país la primera vez
+   que fichas por un club de allí; España viene desbloqueada desde el principio, por ser siempre
+   el país de origen del jugador. Orden alfabético fijo, mezclando conseguidos y por conseguir,
+   igual que en la pantalla de logros. Los 27 países son exactamente los mismos que tienen bandera
+   en BANDERAS_SVG — al añadir un país nuevo allí, añadir también su ficha aquí. */
+const PAISES_CROMO = [
+  { pais:'Alemania', sel:'Die Mannschaft', s1:['4','Mundiales'], s2:['1954','Milagro de Berna'],
+    curiosidades:['Ha ganado <b>4 Mundiales</b> (1954, 1974, 1990 y 2014).','El "Milagro de Berna" de 1954 fue su primer título, tumbando a la gran favorita Hungría en la final.','La Bundesliga es célebre por la regla del "50+1", que mantiene el control de los clubes en manos de los socios.'] },
+  { pais:'Arabia Saudí', sel:'Los Halcones Verdes', s1:['2034','Sede Mundial'], s2:['2022','Sorpresa a Argentina'],
+    curiosidades:['Dio una de las sorpresas del Mundial de <b>Qatar 2022</b> al ganar a Argentina en la fase de grupos.','En los últimos años, la Saudi Pro League ha fichado a estrellas mundiales como Cristiano Ronaldo o Neymar.','Será la sede del Mundial de <b>2034</b>.'] },
+  { pais:'Argentina', sel:'La Albiceleste', s1:['3','Mundiales'], s2:['2022','Último título'],
+    curiosidades:['Maradona firmó el "Gol del Siglo" en el Mundial de <b>1986</b>.','Messi levantó por fin el Mundial en <b>Qatar 2022</b>.','Es, junto a Uruguay, la selección con más Copas América de la historia.'] },
+  { pais:'Austria', sel:'El Wunderteam', s1:['1934','4º en el Mundial'], s2:['Salzburgo','Dominador reciente'],
+    curiosidades:['El "Wunderteam" de los años 30 fue una de las mejores selecciones de su época, cuarta en el Mundial de <b>1934</b>.','El Red Bull Salzburgo domina la liga austriaca en los últimos años.','Viena acogió la final de la primera Eurocopa de la historia, en 2008 compartida con Suiza.'] },
+  { pais:'Bélgica', sel:'Los Diablos Rojos', s1:['2018','3º en el Mundial'], s2:['1º','Ranking FIFA'],
+    curiosidades:['Su "generación dorada" (De Bruyne, Hazard, Lukaku) llegó a ser <b>número 1</b> del ranking FIFA.','Quedó <b>tercera</b> en el Mundial de 2018, su mejor resultado histórico.','El sistema de cantera belga es una referencia para el resto de Europa.'] },
+  { pais:'Brasil', sel:'Selección Canarinha', s1:['5','Mundiales'], s2:['1950','Maracanazo'],
+    curiosidades:['Es la <b>única selección</b> que ha jugado todos los Mundiales desde 1930.','Pelé marcó su primer gol mundialista con <b>17 años</b>, en 1958.','El Maracaná de Río llegó a reunir a <b>casi 200.000</b> espectadores en la final de 1950.'] },
+  { pais:'Chile', sel:'La Roja', s1:['2015','Primera Copa América'], s2:['2016','Bicampeón'],
+    curiosidades:['Ganó su primera Copa América como local en <b>2015</b>, y la revalidó en 2016 (edición del Centenario).','Arturo Vidal y Alexis Sánchez fueron las grandes figuras de esa generación.','Pese a su nivel individual, nunca ha pasado de octavos en un Mundial.'] },
+  { pais:'Corea del Sur', sel:'Guerreros Taeguk', s1:['2002','Semifinal Mundial'], s2:['Son','Estrella actual'],
+    curiosidades:['Fue semifinalista del Mundial <b>2002</b>, que coorganizó con Japón — su mejor resultado histórico.','Fue la primera selección asiática en llegar tan lejos en un Mundial.','Son Heung-min, su gran estrella actual, ha brillado durante años en la Premier League.'] },
+  { pais:'Croacia', sel:'Vatreni', s1:['2018','Subcampeona Mundial'], s2:['Modrić','Balón de Oro 2018'],
+    curiosidades:['Fue <b>subcampeona</b> del Mundial 2018 siendo un país de apenas 4 millones de habitantes.','Luka Modrić ganó el Balón de Oro ese mismo año, rompiendo la racha de Messi y Ronaldo.','También acabó <b>tercera</b> en el Mundial de 2022.'] },
+  { pais:'Dinamarca', sel:'Los Dinamitas', s1:['1992','Campeona de Europa'], s2:['Sorpresa','Ni clasificada estaba'],
+    curiosidades:['Ganó la Eurocopa <b>1992</b> sin ni siquiera haberse clasificado originalmente: entró por la exclusión de Yugoslavia.','El "cuento de hadas danés" está considerado una de las mayores sorpresas de la historia del fútbol europeo.'] },
+  { pais:'Escocia', sel:'La Tartan Army', s1:['1872','Primer internacional'], s2:['0','Pasar de grupos en un Mundial'],
+    curiosidades:['Disputó junto a Inglaterra el <b>primer partido internacional</b> de la historia, en 1872.','Pese a esa tradición, nunca ha superado la fase de grupos en un Mundial.'] },
+  { pais:'España', sel:'La Roja', s1:['2010','Mundial'], s2:['3','Eurocopas'],
+    curiosidades:['Ganó su único Mundial en <b>2010</b>, en Sudáfrica, con un gol de Iniesta en la prórroga de la final.','El <b>Real Madrid</b> es el club con más Champions League de la historia (15 títulos).','El tiki-taka de la selección campeona hizo escuela en todo el mundo.'] },
+  { pais:'Estados Unidos', sel:'Las Barras y Estrellas', s1:['2026','Sede Mundial'], s2:['MLS','En crecimiento'],
+    curiosidades:['Coorganizará el Mundial de <b>2026</b> junto a México y Canadá.','La MLS ha crecido mucho en las últimas décadas, atrayendo a grandes estrellas veteranas europeas.','Su selección femenina es históricamente mucho más laureada que la masculina.'] },
+  { pais:'Francia', sel:'Les Bleus', s1:['2','Mundiales'], s2:['Mbappé','19 años en 2018'],
+    curiosidades:['Ha ganado <b>2 Mundiales</b>: 1998 como anfitriona y 2018 en Rusia.','Kylian Mbappé se convirtió en estrella mundial en el Mundial de 2018 con solo <b>19 años</b>.','Zinedine Zidane es una de sus grandes leyendas históricas.'] },
+  { pais:'Grecia', sel:'Το Πειρατικό', s1:['2004','Campeona de Europa'], s2:['Sorpresa','Ganó de local a Portugal'],
+    curiosidades:['Ganó la Eurocopa <b>2004</b>, una de las mayores sorpresas de la historia del fútbol.','En la final venció a Portugal, la selección anfitriona del torneo.'] },
+  { pais:'Inglaterra', sel:'Cuna del fútbol', s1:['1863','Fundación'], s2:['1966','Mundial'],
+    curiosidades:['La Football Association, la primera del mundo, se fundó en <b>1863</b>.','En 1888 nació la Football League, la primera liga profesional de la historia.','Ganó su único Mundial en <b>1966</b>, como anfitriona, en Wembley.'] },
+  { pais:'Italia', sel:'Gli Azzurri', s1:['4','Mundiales'], s2:['2021','Eurocopa'],
+    curiosidades:['Ha ganado <b>4 Mundiales</b> (1934, 1938, 1982 y 2006).','Ganó la Eurocopa 2020 (disputada en 2021) tras años sin grandes títulos.','Su fútbol está históricamente asociado al "catenaccio", un sistema defensivo muy sólido.'] },
+  { pais:'Japón', sel:'Samurai Blue', s1:['1993','J-League'], s2:['7','Mundiales seguidos'],
+    curiosidades:['La J-League, su liga profesional, se fundó en <b>1993</b>.','El manga "Oliver y Benji" inspiró a toda una generación de futbolistas japoneses reales.','Ha eliminado a varias potencias europeas en fases de grupos de Mundiales recientes.'] },
+  { pais:'México', sel:'El Tri', s1:['2026','3ª vez como sede'], s2:['1970 y 1986','Mundiales ya organizados'],
+    curiosidades:['Ha sido sede de dos Mundiales (1970 y 1986) y volverá a serlo en <b>2026</b>.','Es una potencia habitual de la Concacaf, aunque nunca ha pasado de octavos jugando un Mundial fuera de casa.'] },
+  { pais:'Países Bajos', sel:'La Naranja Mecánica', s1:['3','Finales de Mundial'], s2:['0','Ganados'],
+    curiosidades:['Johan Cruyff popularizó el "fútbol total" con el Ajax y la selección de los años 70.','Ha llegado a <b>3 finales</b> de Mundial (1974, 1978 y 2010) sin ganar ninguna.','La "Cruyff turn", el regate que lleva su nombre, nació en el Mundial de 1974.'] },
+  { pais:'Polonia', sel:'Biało-czerwoni', s1:['1974 y 1982','3º en Mundiales'], s2:['Lewandowski','Máximo goleador reciente'],
+    curiosidades:['Robert Lewandowski es uno de los máximos goleadores de la historia del fútbol europeo.','La selección polaca quedó <b>tercera</b> en los Mundiales de 1974 y 1982, sus mejores resultados históricos.'] },
+  { pais:'Portugal', sel:'A Seleção', s1:['2016','Eurocopa'], s2:['Ronaldo','Máx. goleador histórico'],
+    curiosidades:['Ganó su primera gran competición internacional en la Eurocopa <b>2016</b>.','Cristiano Ronaldo, su gran estrella histórica, es el máximo goleador histórico del fútbol de selecciones.','Benfica, Porto y Sporting dominan históricamente su liga.'] },
+  { pais:'República Checa', sel:'Národní tým', s1:['1996','Subcampeona de Europa'], s2:['1934 y 1962','Finales con Checoslovaquia'],
+    curiosidades:['Fue subcampeona de la Eurocopa <b>1996</b> como selección checa, tras la disolución de Checoslovaquia.','Como Checoslovaquia, fue subcampeona del Mundial en 1934 y 1962.'] },
+  { pais:'Suiza', sel:'La Nati', s1:['Zúrich','Sede FIFA'], s2:['Nyon','Sede UEFA'],
+    curiosidades:['Acoge las sedes de la <b>FIFA</b> (Zúrich) y la <b>UEFA</b> (Nyon), aunque nunca ha ganado un gran título.','Suele destacar por su disciplina táctica, y ha eliminado a potencias como Francia en fases finales de Eurocopas.'] },
+  { pais:'Turquía', sel:'Ay-Yıldızlılar', s1:['2002','3º en el Mundial'], s2:['Estambul','Derbis pasionales'],
+    curiosidades:['Sorprendió al quedar <b>tercera</b> en el Mundial 2002, su mejor resultado histórico.','El fútbol turco tiene una de las aficiones más pasionales de Europa, especialmente en los derbis de Estambul.'] },
+  { pais:'Ucrania', sel:'Збірна України', s1:['2006','Semifinal Mundial'], s2:['Shevchenko','Balón de Oro 2004'],
+    curiosidades:['Fue semifinalista del Mundial <b>2006</b>, en su primera participación como país independiente.','Andriy Shevchenko, su gran estrella histórica, ganó el Balón de Oro en 2004.'] },
+  { pais:'Uruguay', sel:'La Celeste', s1:['1930 y 1950','Mundiales ganados'], s2:['Maracanazo','1950 ante Brasil'],
+    curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.'] }
+];
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
 const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','cromos']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
@@ -7267,6 +7348,7 @@ function iniciarFichaje(j, nuevoClub, nuevoContrato, pantallaSiguiente){
     mostrarNotificacion(`⚠️ Fichas por ${articuloClub(nuevoClub.nombre)} ${nuevoClub.nombre}, el rival directo ${articuloClub(clubAnteriorNombre)==='la'?'de la':'del'} ${clubAnteriorNombre}. La afición que dejas atrás no te lo va a perdonar.`, 'riesgo');
     j.hitosLogro = j.hitosLogro || {}; j.hitosLogro.fichajePolemico = true;
   }
+  if(nuevoClub.extranjero && nuevoClub.pais) desbloquearCromo(nuevoClub.pais);
   j.club = nuevoClub;
   if(nuevoContrato){
     if(nuevoContrato.duracionOriginal == null) nuevoContrato.duracionOriginal = nuevoContrato.duracionTemporadas;
@@ -10201,6 +10283,16 @@ SCREENS.ajustes = function(){
   filaRankings.onclick = ()=>{ S.pantallaAnteriorRankings = 'ajustes'; S.rankingsDatos = undefined; S.screen = 'rankings'; render(); };
   c.appendChild(filaRankings);
 
+  c.appendChild(crearEyebrow('Colección'));
+  const filaLogros = el('div','opt');
+  filaLogros.textContent = 'Ver tus logros';
+  filaLogros.onclick = ()=>{ S.pantallaAnteriorLogros = 'ajustes'; S.screen = 'logros'; render(); };
+  c.appendChild(filaLogros);
+  const filaCromos = el('div','opt');
+  filaCromos.textContent = 'Ver tus cromos del mundo';
+  filaCromos.onclick = ()=>{ S.pantallaAnteriorCromos = 'ajustes'; S.screen = 'cromos'; render(); };
+  c.appendChild(filaCromos);
+
   const version = el('div', null, `Fichaje 10 · ${VERSION_JUEGO}`);
   version.style.cssText = 'text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-soft);opacity:.6;margin-top:20px;';
   c.appendChild(version);
@@ -10401,6 +10493,172 @@ SCREENS.logros = function(){
   c.appendChild(listaLogros);
   app.appendChild(c);
 };
+
+function svgBanderaCuadrada(pais){
+  const patron = BANDERAS_SVG[pais];
+  if(!patron) return '';
+  return `<svg viewBox="0 0 40 40">${patron}</svg>`;
+}
+let _cromoZoomOrigenRect = null;
+SCREENS.cromos = function(){
+  const j = S.jugador;
+  topbar("Cromos");
+  const c = el('div','card');
+
+  const btnVolver = document.createElement('button');
+  btnVolver.className = 'btn-secondary';
+  btnVolver.textContent = '← Volver';
+  btnVolver.style.marginBottom = '16px';
+  btnVolver.onclick = ()=>{
+    S.screen = S.pantallaAnteriorCromos || (j ? 'tabJugador' : 'menu');
+    S.pantallaAnteriorCromos = null;
+    render();
+  };
+  c.appendChild(btnVolver);
+
+  c.appendChild(crearEyebrow('Colección'));
+  c.appendChild(el('h2',null,'Cromos del mundo'));
+
+  const total = PAISES_CROMO.length;
+  const conseguidos = PAISES_CROMO.filter(p=>tieneCromo(p.pais)).length;
+  const resumen = el('div','logros-resumen');
+  resumen.appendChild(el('div','num', `${conseguidos}/${total}`));
+  const track = el('div','logros-track');
+  track.appendChild(el('div','logros-fill')).style.width = `${Math.round(conseguidos/total*100)}%`;
+  resumen.appendChild(track);
+  c.appendChild(resumen);
+
+  const grid = el('div','cromo-grid');
+  PAISES_CROMO.forEach((p, i)=>{
+    const num = String(i+1).padStart(2,'0');
+    const tenido = tieneCromo(p.pais);
+    const cromo = el('div', 'cromo '+(tenido?'tenido':'falta'));
+    if(tenido) cromo.appendChild(el('div','cromo-corner'));
+    cromo.appendChild(el('div','cromo-num', num));
+    cromo.appendChild(el('div','cromo-flagbox', svgBanderaCuadrada(p.pais)));
+    cromo.appendChild(el('div','cromo-plate', p.pais));
+    cromo.onclick = ()=>{
+      if(!tenido){
+        cromo.classList.remove('shake'); void cromo.offsetWidth; cromo.classList.add('shake');
+        mostrarTooltipCromo(cromo);
+        return;
+      }
+      abrirZoomCromo(cromo, p);
+    };
+    grid.appendChild(cromo);
+  });
+  c.appendChild(grid);
+  app.appendChild(c);
+
+  const backdrop = el('div','logro-backdrop', ''); backdrop.id = 'cromo-backdrop';
+  const tooltip = el('div','cromo-tooltip', 'Se consigue jugando en un club de este país'); tooltip.id = 'cromo-tooltip';
+  const zoomPerspective = el('div','cromo-zoom-perspective'); zoomPerspective.id = 'cromo-zoom-perspective';
+  zoomPerspective.innerHTML = `<div class="cromo-zoom-card" id="cromo-zoom-card">
+    <div class="cromo-zoom-face cromo-zoom-front">
+      <div class="cromo-zoom-content" id="cromo-zoom-content-front">
+        <div class="flag-banner" id="cromo-flag-banner"><div class="gloss"></div><div class="fade"></div></div>
+        <div class="rareza-tag">★ CONSEGUIDO</div>
+        <div class="info">
+          <div class="pais-nombre" id="cromo-z-nombre"></div>
+          <div class="pais-sub" id="cromo-z-sel"></div>
+          <div class="stats-mini" id="cromo-z-stats"></div>
+          <div class="toca">Toca la carta para ver curiosidades ↻</div>
+        </div>
+      </div>
+    </div>
+    <div class="cromo-zoom-face cromo-zoom-back">
+      <div class="cromo-zoom-content" id="cromo-zoom-content-back">
+        <div class="cab">
+          <div class="izq"><span class="mini-bandera" id="cromo-z-mini-bandera"></span><b id="cromo-z-nombre2"></b></div>
+        </div>
+        <div class="curio-tit">Sabías que…</div>
+        <ul id="cromo-z-curio"></ul>
+        <div class="volver">Toca la carta para volver</div>
+      </div>
+    </div>
+  </div>`;
+  backdrop.onclick = ()=> cerrarZoomCromo();
+  // La cruz del frente está posicionada en absoluto (flota sobre la bandera); la del reverso
+  // vive dentro de la cabecera (.cab), como un elemento flex más junto al nombre del país.
+  [zoomPerspective.querySelector('.cromo-zoom-front'), zoomPerspective.querySelector('.cromo-zoom-back .cab')].forEach(destino=>{
+    const cerrarBtn = el('button','cerrar','✕');
+    cerrarBtn.onclick = (e)=>{ e.stopPropagation(); cerrarZoomCromo(); };
+    destino.appendChild(cerrarBtn);
+  });
+  app.appendChild(backdrop);
+  app.appendChild(tooltip);
+  app.appendChild(zoomPerspective);
+};
+function mostrarTooltipCromo(cromo){
+  const tooltip = document.getElementById('cromo-tooltip');
+  const r = cromo.getBoundingClientRect();
+  tooltip.style.left = Math.max(8, r.left - 20) + 'px';
+  tooltip.style.top = (r.bottom + 8) + 'px';
+  tooltip.classList.add('show');
+  clearTimeout(tooltip._t);
+  tooltip._t = setTimeout(()=> tooltip.classList.remove('show'), 1800);
+}
+function medidasDestinoCromo(){
+  const w = Math.min(280, window.innerWidth * 0.72);
+  const h = w * 1.42;
+  return { width:w, height:h, left:(window.innerWidth-w)/2, top:(window.innerHeight-h)/2 };
+}
+function abrirZoomCromo(cromo, p){
+  const zoomPerspective = document.getElementById('cromo-zoom-perspective');
+  const zoomCard = document.getElementById('cromo-zoom-card');
+  const backdrop = document.getElementById('cromo-backdrop');
+  document.getElementById('cromo-flag-banner').innerHTML = svgBanderaCuadrada(p.pais) + '<div class="gloss"></div><div class="fade"></div>';
+  document.getElementById('cromo-z-nombre').textContent = p.pais;
+  document.getElementById('cromo-z-nombre2').textContent = p.pais;
+  document.getElementById('cromo-z-sel').textContent = p.sel;
+  document.getElementById('cromo-z-stats').innerHTML = `<div><div class="v">${p.s1[0]}</div><div class="l">${p.s1[1]}</div></div><div><div class="v">${p.s2[0]}</div><div class="l">${p.s2[1]}</div></div>`;
+  document.getElementById('cromo-z-mini-bandera').innerHTML = svgBanderaCuadrada(p.pais);
+  document.getElementById('cromo-z-curio').innerHTML = p.curiosidades.map(cur=>`<li>${cur}</li>`).join('');
+
+  _cromoZoomOrigenRect = cromo.getBoundingClientRect();
+  zoomPerspective.style.display = 'block';
+  zoomPerspective.style.left = _cromoZoomOrigenRect.left + 'px';
+  zoomPerspective.style.top = _cromoZoomOrigenRect.top + 'px';
+  zoomPerspective.style.width = _cromoZoomOrigenRect.width + 'px';
+  zoomPerspective.style.height = _cromoZoomOrigenRect.height + 'px';
+  zoomPerspective.style.borderRadius = '10px';
+  zoomPerspective.classList.remove('landed');
+  zoomCard.classList.remove('flipped');
+  zoomPerspective.classList.add('activo');
+  backdrop.classList.add('show');
+  void zoomPerspective.offsetWidth;
+
+  zoomPerspective.style.transition = 'left .5s cubic-bezier(.2,.9,.3,1), top .5s cubic-bezier(.2,.9,.3,1), width .5s cubic-bezier(.2,.9,.3,1), height .5s cubic-bezier(.2,.9,.3,1)';
+  const dest = medidasDestinoCromo();
+  zoomPerspective.style.left = dest.left + 'px';
+  zoomPerspective.style.top = dest.top + 'px';
+  zoomPerspective.style.width = dest.width + 'px';
+  zoomPerspective.style.height = dest.height + 'px';
+  setTimeout(()=> zoomPerspective.classList.add('landed'), 480);
+
+  zoomCard.onclick = (e)=>{
+    if(e.target.closest('.cerrar')) return;
+    zoomCard.classList.toggle('flipped');
+  };
+}
+function cerrarZoomCromo(){
+  const zoomPerspective = document.getElementById('cromo-zoom-perspective');
+  const zoomCard = document.getElementById('cromo-zoom-card');
+  const backdrop = document.getElementById('cromo-backdrop');
+  if(!zoomPerspective || !_cromoZoomOrigenRect) return;
+  zoomPerspective.classList.remove('landed');
+  zoomCard.classList.remove('flipped');
+  zoomPerspective.style.left = _cromoZoomOrigenRect.left + 'px';
+  zoomPerspective.style.top = _cromoZoomOrigenRect.top + 'px';
+  zoomPerspective.style.width = _cromoZoomOrigenRect.width + 'px';
+  zoomPerspective.style.height = _cromoZoomOrigenRect.height + 'px';
+  zoomPerspective.style.borderRadius = '10px';
+  backdrop.classList.remove('show');
+  setTimeout(()=>{
+    zoomPerspective.classList.remove('activo');
+    zoomPerspective.style.display = 'none';
+  }, 500);
+}
 
 SCREENS.menu = function(){
   const hero = el('div');
