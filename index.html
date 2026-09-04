@@ -3645,11 +3645,14 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.4.4';
+const VERSION_JUEGO = 'v1.4.5';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.4.5', titulo:'Las estadísticas ya no duplican una carrera repetida', cambios:[
+    'Corregido: si recargabas un guardado anterior a un retiro y volvías a retirarte, esa misma carrera se contaba dos veces en stats.html. Ahora cada carrera lleva un identificador propio y solo se cuenta una vez, aunque la termines más de una vez.'
+  ]},
   { version:'v1.4.4', titulo:'Tiradas naturales y Balón de Oro más justo', cambios:[
     'Al sacar un 1 o un 20 natural, la tirada ya no muestra la suma con el bono: se ve directamente "1 NATURAL" / "20 NATURAL", porque el bono no influye en el resultado.',
     'Suavizadas las opciones reales de ganar el Balón de Oro: una temporada perfecta (campeón, Pichichi, nota 10) ya no se quedaba corta contra el podio con tanta frecuencia.',
@@ -5655,6 +5658,7 @@ function migrarJugadorGuardado(j){
   if(j.temporadasSinEquipo === undefined) j.temporadasSinEquipo = [];
   if(j.enParo === undefined) j.enParo = false;
   if(j.provincia === undefined) j.provincia = '';
+  if(j.idCarrera === undefined) j.idCarrera = generarIdCarrera();
   if(j.contrato && j.contrato.duracionOriginal == null) j.contrato.duracionOriginal = j.contrato.duracionTemporadas;
   if(j.tienePareja && !j.pareja) j.pareja = generarNombrePareja(); // reconcilia desincronía legacy pareja/tienePareja
   // Arreglo retroactivo: partidas viejas podían tener a la madre con el primer apellido del jugador.
@@ -5697,6 +5701,9 @@ function borrarPartidaGuardada(slot){
   try{ localStorage.removeItem(claveSlot(slot)); }catch(e){}
 }
 
+function generarIdCarrera(){
+  try{ return crypto.randomUUID(); }catch(e){ return 'carrera-' + Date.now() + '-' + Math.random().toString(36).slice(2); }
+}
 function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia){
   const atributos = {};
   const atributosProgreso = {};
@@ -5704,6 +5711,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia){
   const mentalidad = ATRIBUTOS_BASE.mental + (extra.mental||0);
   const club = clubInicial || { nombre: "Amateur", categoria:"Tercera RFEF", colores:['#4C566A','#FFFFFF'] };
   return {
+    idCarrera: generarIdCarrera(),
     nombre, pais, posicion: POSICION_FIJA, edad:16,
     localidad: (localidad||'').trim() || 'tu ciudad',
     provincia: provincia || '',
@@ -13503,7 +13511,7 @@ SCREENS.retiro = function(){
 
   const retirar = el('div','opt', retiradaForzosa ? 'Colgar las botas' : 'Colgar las botas ahora');
   retirar.onclick = ()=>{
-    trackEvento('retiro', { temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal: j.club.categoria, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais, ascensos: j.carrera.ascensos||0, valorMercadoMaximo: j.carrera.valorMercadoMaximo||0, balonesDeOro: j.carrera.balonesDeOro||0, edadRetiro: j.edad, clubFinal: j.club.nombre, extranjero: !!j.club.extranjero, titulosSeleccion: (j.titulosSeleccion||[]).length });
+    trackEvento('retiro', { idCarrera: j.idCarrera, temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal: j.club.categoria, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais, ascensos: j.carrera.ascensos||0, valorMercadoMaximo: j.carrera.valorMercadoMaximo||0, balonesDeOro: j.carrera.balonesDeOro||0, edadRetiro: j.edad, clubFinal: j.club.nombre, extranjero: !!j.club.extranjero, titulosSeleccion: (j.titulosSeleccion||[]).length });
     S.screen='final'; render();
   };
   c.appendChild(retirar);

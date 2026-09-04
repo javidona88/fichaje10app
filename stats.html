@@ -248,10 +248,28 @@ function pintarTablaRanking(contenedor, filas, claveValor, formatear){
   });
 }
 
+// Si retomas una partida ya retirada desde un slot de guardado más antiguo (previo al retiro) y
+// vuelves a terminarla, el suceso "retiro" se dispara otra vez: sin esto contaría como dos
+// carreras distintas en las estadísticas. `idCarrera` (UUID fijado en nuevoJugador, ver
+// CLAUDE.md) identifica la partida en sí, así que si dos filas comparten idCarrera solo se
+// cuenta una vez (la más reciente, que es la que el jugador decidió como final). Las filas
+// de antes de este cambio no llevan idCarrera y no se pueden deduplicar entre sí — se cuentan
+// todas, como hasta ahora.
+function deduplicarPorCarrera(filas){
+  const porId = new Map();
+  const sinId = [];
+  filas.forEach(f=>{
+    const id = f.datos && f.datos.idCarrera;
+    if(!id){ sinId.push(f); return; }
+    const previa = porId.get(id);
+    if(!previa || new Date(f.created_at) > new Date(previa.created_at)) porId.set(id, f);
+  });
+  return [...porId.values(), ...sinId];
+}
+
 async function cargarEstadisticas(){
-  const [partidas, retiros] = await Promise.all([contarEventos('nueva_partida'), contarEventos('retiro')]);
+  const partidas = await contarEventos('nueva_partida');
   document.getElementById('t-partidas').textContent = partidas.toLocaleString('es-ES');
-  document.getElementById('t-retiros').textContent = retiros.toLocaleString('es-ES');
 
   const { datos: filasSesion } = await consultarSupabase('eventos?select=sesion_id&limit=10000');
   const sesionesUnicas = new Set(filasSesion.map(f=>f.sesion_id)).size;
@@ -268,7 +286,10 @@ async function cargarEstadisticas(){
   const topTimezones = Object.fromEntries(Object.entries(conteoTimezone).sort((a,b)=>b[1]-a[1]).slice(0,8));
   pintarBarras(document.getElementById('barras-timezone'), topTimezones);
 
-  const { datos: filasRetiro } = await consultarSupabase('eventos?nombre=eq.retiro&select=datos,created_at&limit=2000');
+  const { datos: filasRetiroCrudas } = await consultarSupabase('eventos?nombre=eq.retiro&select=datos,created_at&limit=2000');
+  const filasRetiro = deduplicarPorCarrera(filasRetiroCrudas);
+  document.getElementById('t-retiros').textContent = filasRetiro.length.toLocaleString('es-ES');
+
   const porGoles = [...filasRetiro].sort((a,b)=> (b.datos?.goles||0) - (a.datos?.goles||0));
   const porAsistencias = [...filasRetiro].sort((a,b)=> (b.datos?.asistencias||0) - (a.datos?.asistencias||0));
   const porDinero = [...filasRetiro].sort((a,b)=> (b.datos?.dineroGanado||0) - (a.datos?.dineroGanado||0));

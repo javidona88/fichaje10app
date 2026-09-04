@@ -46,6 +46,10 @@ nueva del modelo**.
 
 ```
 j = {
+  idCarrera,  // UUID fijo por partida (generarIdCarrera(), asignado en nuevoJugador y en la
+              // migración para saves viejos) — identifica la carrera en sí, no el navegador ni
+              // la sesión; usado por el evento "retiro" para que stats.html pueda deduplicar si
+              // recargas un guardado anterior y vuelves a retirarte con la misma carrera
   nombre, pais, posicion:"Delantero" (POSICION_FIJA), edad (empieza a 16), localidad, provincia,
   club:{ nombre, categoria, colores:[hex1,hex2], extranjero?, pais?, liga?, grande?,
          nivelEuropeo?('champions'|'europa'|'conference'), ambicionNivel(1-4), objetivoActual? },
@@ -595,15 +599,22 @@ no rompe nada si el script no ha cargado — bloqueadores de anuncios, sin red �
 también a Supabase (ver abajo) — es el único punto de entrada para analítica, nunca llamar a
 `umami.track` directamente. Disparados actualmente:
 - `nueva_partida` (`{estilo}`) al pulsar "Empezar carrera" en `SCREENS.crear`.
-- `retiro` (`{temporada, partidos, goles, asistencias, dineroGanado, titulos, categoriaFinal,
-  nombreJugador, pais, ascensos, valorMercadoMaximo, balonesDeOro, edadRetiro, clubFinal,
-  extranjero, titulosSeleccion}`) al pulsar "Colgar las botas" en `SCREENS.retiro` (forzosa a
-  los 42 o voluntaria, mismo punto). Los campos van todos en `datos` (JSONB), así que se puede
-  ampliar el payload en cualquier momento sin tocar el esquema de Supabase — pero solo alimenta
-  partidas que se retiren DESPUÉS del cambio; no hay forma de rellenar ese campo para carreras
-  ya terminadas (esos datos solo vivían en el `localStorage` de cada jugador y nunca se
+- `retiro` (`{idCarrera, temporada, partidos, goles, asistencias, dineroGanado, titulos,
+  categoriaFinal, nombreJugador, pais, ascensos, valorMercadoMaximo, balonesDeOro, edadRetiro,
+  clubFinal, extranjero, titulosSeleccion}`) al pulsar "Colgar las botas" en `SCREENS.retiro`
+  (forzosa a los 42 o voluntaria, mismo punto). Los campos van todos en `datos` (JSONB), así que
+  se puede ampliar el payload en cualquier momento sin tocar el esquema de Supabase — pero solo
+  alimenta partidas que se retiren DESPUÉS del cambio; no hay forma de rellenar ese campo para
+  carreras ya terminadas (esos datos solo vivían en el `localStorage` de cada jugador y nunca se
   enviaron). `stats.html` ya usa varios de estos campos en cajas propias (más títulos, mayor
   valor de mercado, categoría de retiro, país).
+  - **Retiros duplicados**: si cargas un slot de guardado anterior a un retiro ya enviado (p. ej.
+    otro slot con la misma carrera más atrás en el tiempo) y vuelves a retirarte, el suceso
+    `retiro` se dispara otra vez con el mismo `idCarrera`. `stats.html` (`deduplicarPorCarrera`)
+    agrupa las filas de `retiro` por `idCarrera` y se queda solo con la más reciente (por
+    `created_at`) antes de contar "Carreras completadas" o calcular cualquier ranking — así una
+    misma carrera rejugada no cuenta dos veces. Las filas de antes de este cambio no llevan
+    `idCarrera` y no se pueden deduplicar entre sí (se cuentan todas, como antes).
 Al añadir un evento nuevo: nombre en minúsculas con guion bajo, payload pequeño (unas pocas
 claves), y pensar en el volumen si se dispara muy seguido (capa gratuita: 100.000 eventos/mes).
 
