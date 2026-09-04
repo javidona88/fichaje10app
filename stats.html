@@ -71,6 +71,7 @@ tbody td{ padding:9px 8px; border-bottom:1px solid var(--line); color:var(--ink)
 tbody tr:last-child td{ border-bottom:none; }
 tbody td.num{ font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; }
 tbody td.rank{ color:var(--ink-soft); width:22px; }
+.id-corto{ display:block; font-family:monospace; font-size:10px; color:var(--ink-soft); margin-top:1px; letter-spacing:.02em; }
 .tablas-grid{ display:grid; grid-template-columns:1fr; gap:18px; }
 @media (min-width:680px){ .tablas-grid{ grid-template-columns:1fr 1fr; } }
 
@@ -287,13 +288,22 @@ function pintarBarras(contenedor, conteos, totalMax){
   });
 }
 
+// Muestra un fragmento corto de idCarrera junto al nombre — con pocos jugadores es habitual que
+// dos carreras compartan nombre de jugador, y así se pueden distinguir en los rankings. Las filas
+// de antes de idCarrera no tienen nada que mostrar aquí (se quedan solo con el nombre).
+function idCorto(datos){
+  return datos && datos.idCarrera ? datos.idCarrera.slice(0,8) : null;
+}
+
 function pintarTablaRanking(contenedor, filas, claveValor, formatear){
   contenedor.innerHTML = '';
   if(!filas.length){ contenedor.innerHTML = '<tr><td colspan="3" class="nota">Sin datos todavía.</td></tr>'; return; }
   filas.slice(0, 10).forEach((f, i)=>{
     const tr = document.createElement('tr');
     const valor = f.datos ? f.datos[claveValor] : undefined;
-    tr.innerHTML = `<td class="rank">${i+1}</td><td>${(f.datos && f.datos.nombreJugador) || 'Jugador anónimo'}</td>
+    const nombre = (f.datos && f.datos.nombreJugador) || 'Jugador anónimo';
+    const id = idCorto(f.datos);
+    tr.innerHTML = `<td class="rank">${i+1}</td><td>${nombre}${id ? `<span class="id-corto">#${id}</span>` : ''}</td>
       <td class="num">${formatear ? formatear(valor) : (valor ?? '—')}</td>`;
     contenedor.appendChild(tr);
   });
