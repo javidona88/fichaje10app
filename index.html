@@ -726,6 +726,102 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .rk-table-nombre .id{ font-family:monospace; font-size:9.5px; color:var(--ink-soft); }
 .rk-table-nombre .tu-fila{ color:var(--gold); font-weight:700; }
 .rk-table-val{ flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; }
+
+/* ============ Logros: pantalla, toast de esquina y aviso a pantalla completa ============ */
+.logros-resumen{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.logros-resumen .num{ font-size:22px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; white-space:nowrap; font-family:'Space Grotesk',sans-serif; }
+.logros-track{ flex:1; height:8px; border-radius:5px; background:rgba(255,255,255,.06); overflow:hidden; }
+.logros-fill{ height:100%; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); border-radius:5px; }
+.logros-tabs{ display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+.ltab{ font-size:11px; font-weight:600; padding:6px 11px; border-radius:20px; border:1px solid var(--line); color:var(--ink-soft); background:none; cursor:pointer; font-family:'Space Grotesk',sans-serif; }
+.ltab.activo{ border-color:var(--gold); color:var(--gold); background:rgba(212,175,55,.1); }
+.logro-fila{ display:flex; gap:12px; padding:12px 2px; border-bottom:1px solid var(--line); }
+.logro-fila:last-child{ border-bottom:none; }
+.logro-ico{ width:42px; height:42px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:19px; }
+.logro-fila.conseguido .logro-ico{ background:linear-gradient(160deg,rgba(212,175,55,.22),rgba(212,175,55,.06)); border:1px solid rgba(212,175,55,.45); color:var(--gold); }
+.logro-fila.bloqueado .logro-ico{ background:var(--bg2); border:1px solid var(--line); color:var(--ink-soft); }
+.logro-txt{ flex:1; min-width:0; }
+.logro-nombre{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:700; }
+.logro-fila.bloqueado .logro-nombre{ color:var(--ink-soft); }
+.logro-desc{ font-family:'Space Grotesk',sans-serif; font-size:11.5px; color:var(--ink-soft); margin-top:2px; line-height:1.4; }
+.logro-meta{ display:flex; gap:10px; margin-top:5px; font-family:'Space Grotesk',sans-serif; font-size:10px; color:var(--ink-soft); }
+
+.logro-backdrop{ position:fixed; inset:0; background:rgba(10,11,16,0); z-index:70; opacity:0; pointer-events:none; transition:background .3s ease, opacity .3s ease; }
+.logro-backdrop.show{ background:rgba(10,11,16,.86); opacity:1; pointer-events:auto; backdrop-filter:blur(3px); }
+.logro-overlay{ position:fixed; inset:0; z-index:71; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+.logro-overlay-card{ width:min(320px,86vw); background:var(--panel); border:1px solid rgba(212,175,55,.5); border-radius:20px; padding:32px 24px 24px; text-align:center; box-shadow:0 24px 60px rgba(0,0,0,.6); transform:scale(.85) translateY(14px); opacity:0; transition:transform .35s cubic-bezier(.2,1.4,.4,1), opacity .3s ease; pointer-events:auto; }
+.logro-overlay.show .logro-overlay-card{ transform:scale(1) translateY(0); opacity:1; }
+.logro-overlay-badge{ width:76px; height:76px; margin:0 auto 14px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#F5DE87,var(--gold) 60%,var(--gold-dim)); display:flex; align-items:center; justify-content:center; font-size:32px; box-shadow:0 0 0 6px rgba(212,175,55,.14), 0 10px 28px rgba(212,175,55,.35); }
+.logro-overlay-eyebrow{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.12em; color:var(--gold); text-transform:uppercase; }
+.logro-overlay-nombre{ font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; margin:8px 0 6px; color:var(--ink); }
+.logro-overlay-desc{ font-family:'Space Grotesk',sans-serif; font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:20px; }
+.logro-overlay-cerrar{ width:100%; padding:11px; border-radius:10px; border:none; background:var(--gold); color:#1a1408; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; cursor:pointer; }
+
+.logro-toast{ position:fixed; top:16px; right:16px; width:min(300px,calc(100% - 32px)); z-index:72; transform:translateX(130%); transition:transform .4s cubic-bezier(.16,1,.3,1); }
+.logro-toast.show{ transform:translateX(0); }
+.logro-toast-card{ position:relative; overflow:hidden; background:var(--panel); border:1px solid rgba(212,175,55,.5); border-radius:13px; padding:12px; display:flex; gap:11px; align-items:center; box-shadow:0 14px 34px rgba(0,0,0,.5); cursor:pointer; }
+.logro-toast-ico{ width:40px; height:40px; border-radius:50%; flex-shrink:0; background:radial-gradient(circle at 35% 30%,#F5DE87,var(--gold) 60%,var(--gold-dim)); display:flex; align-items:center; justify-content:center; font-size:18px; }
+.logro-toast-eyebrow{ font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; color:var(--gold); text-transform:uppercase; }
+.logro-toast-nombre{ font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; margin-top:1px; color:var(--ink); }
+.logro-toast-desc{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); margin-top:1px; }
+.logro-toast-bar{ position:absolute; left:0; bottom:0; height:2px; background:var(--gold); width:100%; transform-origin:left; }
+.logro-toast-bar.anim{ animation:logrotoastdrain 4.2s linear forwards; }
+@keyframes logrotoastdrain{ from{ transform:scaleX(1); } to{ transform:scaleX(0); } }
+
+.tb-btn-logros{ position:relative; }
+.tb-dot-logros{ position:absolute; top:-3px; right:-3px; width:8px; height:8px; border-radius:50%; background:var(--gold); border:1.5px solid var(--bg); }
+
+/* ============ Cromos del mundo: rejilla y carta ampliada ============ */
+.cromo-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.cromo{ aspect-ratio:3/4.1; border-radius:10px; position:relative; overflow:hidden; cursor:pointer; transition:transform .15s ease; background:linear-gradient(165deg,#262b3c,#1b1e2a); display:flex; flex-direction:column; align-items:center; }
+.cromo:active{ transform:scale(.94); }
+.cromo.tenido{ border:1px solid rgba(212,175,55,.55); box-shadow:0 5px 12px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.03); }
+.cromo.falta{ border:1.5px dashed var(--line); }
+.cromo.falta.shake{ animation:cromoshake .4s; }
+@keyframes cromoshake{ 20%{ transform:translateX(-4px); } 40%{ transform:translateX(4px); } 60%{ transform:translateX(-3px); } 80%{ transform:translateX(3px); } 100%{ transform:translateX(0); } }
+.cromo-flagbox{ width:60%; aspect-ratio:1/1; border-radius:6px; overflow:hidden; margin-top:18%; box-shadow:0 3px 9px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08); flex-shrink:0; }
+.cromo-flagbox svg{ width:100%; height:100%; display:block; }
+.cromo.falta .cromo-flagbox{ filter:grayscale(1) brightness(.4); opacity:.5; }
+.cromo-num{ position:absolute; top:5px; left:5px; z-index:3; min-width:15px; height:15px; padding:0 3px; border-radius:8px; background:rgba(10,11,16,.55); backdrop-filter:blur(1px); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:7.5px; font-weight:700; color:#fff; letter-spacing:.02em; }
+.cromo-plate{ margin-top:auto; width:100%; padding:0 4px 11px; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:700; color:var(--ink); letter-spacing:.01em; }
+.cromo.falta .cromo-plate{ color:var(--ink-soft); opacity:.7; }
+.cromo.tenido .cromo-corner{ position:absolute; top:0; right:0; z-index:3; width:13px; height:13px; background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.16) 50%); border-radius:0 10px 0 8px; }
+.cromo-tooltip{ position:fixed; z-index:73; background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:8px 11px; font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); box-shadow:var(--shadow); max-width:190px; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .2s ease; }
+.cromo-tooltip.show{ opacity:1; }
+.cromo-zoom-perspective{ position:fixed; z-index:71; perspective:1400px; pointer-events:none; display:none; }
+.cromo-zoom-perspective.activo{ pointer-events:auto; }
+.cromo-zoom-card{ width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform .5s cubic-bezier(.2,.9,.3,1); cursor:pointer; }
+.cromo-zoom-card.flipped{ transform:rotateY(180deg); }
+.cromo-zoom-face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:16px; overflow:hidden; }
+.cromo-zoom-front{ background:var(--panel); border:1px solid rgba(212,175,55,.55); box-shadow:0 22px 50px rgba(0,0,0,.55); display:flex; flex-direction:column; }
+.cromo-zoom-content{ opacity:0; transition:opacity .2s ease; transition-delay:0s; width:100%; height:100%; display:flex; flex-direction:column; }
+.cromo-zoom-perspective.landed .cromo-zoom-content{ opacity:1; transition-delay:.22s; }
+.cromo-zoom-front .flag-banner{ position:relative; height:52%; flex-shrink:0; }
+.cromo-zoom-front .flag-banner svg{ width:100%; height:100%; display:block; }
+.cromo-zoom-front .flag-banner .gloss{ position:absolute; inset:0; background:linear-gradient(115deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 72%, rgba(255,255,255,.08) 100%); }
+.cromo-zoom-front .flag-banner .fade{ position:absolute; left:0; right:0; bottom:0; height:60%; background:linear-gradient(0deg, var(--panel) 0%, rgba(31,35,48,0) 100%); }
+.cromo-zoom-front .cerrar{ position:absolute; top:9px; right:9px; z-index:3; width:25px; height:25px; border-radius:50%; border:1px solid rgba(255,255,255,.25); background:rgba(10,11,16,.5); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; }
+.cromo-zoom-front .rareza-tag{ position:absolute; top:11px; left:11px; z-index:3; font-family:'Space Grotesk',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:.07em; color:#1a1408; background:var(--gold); padding:4px 8px; border-radius:20px; }
+.cromo-zoom-front .info{ flex:1; display:flex; flex-direction:column; align-items:center; padding:0 16px 14px; margin-top:-6px; overflow-y:auto; }
+.cromo-zoom-front .pais-nombre{ font-family:'PT Serif',Georgia,serif; font-size:18px; font-weight:700; text-align:center; color:var(--ink); }
+.cromo-zoom-front .pais-sub{ font-family:'Space Grotesk',sans-serif; font-size:10px; color:var(--gold-dim); margin-top:2px; letter-spacing:.02em; text-align:center; }
+.cromo-zoom-front .stats-mini{ margin-top:auto; width:100%; display:flex; justify-content:space-around; border-top:1px solid var(--line); padding-top:11px; }
+.cromo-zoom-front .stats-mini div{ text-align:center; }
+.cromo-zoom-front .stats-mini .v{ font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; color:var(--ink); }
+.cromo-zoom-front .stats-mini .l{ font-family:'Space Grotesk',sans-serif; font-size:8px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
+.cromo-zoom-front .toca{ font-family:'Space Grotesk',sans-serif; font-size:9.5px; color:var(--ink-soft); margin-top:9px; }
+.cromo-zoom-back{ background:var(--panel2); border:1px solid var(--line); box-shadow:0 22px 50px rgba(0,0,0,.55); transform:rotateY(180deg); padding:18px; display:flex; flex-direction:column; }
+.cromo-zoom-back .cab{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.cromo-zoom-back .cab .izq{ display:flex; align-items:center; gap:8px; }
+.cromo-zoom-back .cab .mini-bandera{ width:22px; height:16px; border-radius:2px; overflow:hidden; flex-shrink:0; box-shadow:0 0 0 1px rgba(255,255,255,.15); }
+.cromo-zoom-back .cab .mini-bandera svg{ width:100%; height:100%; display:block; }
+.cromo-zoom-back .cab b{ font-family:'Space Grotesk',sans-serif; font-size:13px; color:var(--ink); }
+.cromo-zoom-back .cerrar{ width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; flex-shrink:0; }
+.cromo-zoom-back .curio-tit{ font-family:'Space Grotesk',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.08em; color:var(--gold-dim); text-transform:uppercase; margin-bottom:8px; }
+.cromo-zoom-back ul{ margin:0; padding-left:15px; display:flex; flex-direction:column; gap:8px; flex:1; overflow-y:auto; }
+.cromo-zoom-back li{ font-family:'Space Grotesk',sans-serif; font-size:11px; line-height:1.5; color:var(--ink); }
+.cromo-zoom-back li b{ color:var(--gold); }
+.cromo-zoom-back .volver{ font-family:'Space Grotesk',sans-serif; font-size:9.5px; color:var(--ink-soft); text-align:center; margin-top:10px; }
 </style>
 </head>
 <body>
@@ -733,6 +829,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 <div class="wrap" id="app"></div>
 <div id="tabbar-root"></div>
 <div id="panel-entreno-root"></div>
+<div id="logro-aviso-root"></div>
 
 <script>/* ============================================================
    DATOS DEL JUEGO — clubes, eventos, tienda, objetivos, torneos,
@@ -1322,6 +1419,208 @@ const TIENDA_MOTOS = [
   { nivel:4, nombre:'Superbike de edición limitada', coste:260000, efecto:{confianza:11, popularidad:10}, desc:'Pocas unidades en el mundo, y una de ellas es tuya. Cada vez que sales con ella es un pequeño espectáculo.', ...porCategoria(4) }
 ];
 
+/* ============ LOGROS (colección de por vida, independiente de la partida) ============
+   Se guardan en localStorage aparte de los guardados de partida (fichaje10_logros_v1), así que
+   sobreviven a borrar personajes o empezar carreras nuevas — es "tu perfil", no la carrera.
+   `cond(j)` se comprueba contra el jugador activo en cada pintar() (ver comprobarLogros). Varios
+   logros se apoyan en contadores/flags ya existentes en el modelo; los pocos que no tenían forma
+   de detectarse (fichaje al rival, regreso a un club, números rojos, bote grande de tragaperras)
+   guardan un flag propio en j.hitosLogro al ocurrir, ver iniciarFichaje/comprobarNumerosRojos/
+   cobrarBoteTraga. `pesoRareza` es una estimación editorial (0-100, look de "cuánta gente lo
+   tendría") que decide el aviso: por debajo de UMBRAL_LOGRO_PANTALLA_COMPLETA sale a pantalla
+   completa, el resto en la esquina — ver mostrarAvisoLogro. */
+const UMBRAL_LOGRO_PANTALLA_COMPLETA = 10;
+function titulosPorTemporada(j){
+  const mapa = {};
+  (j.trayectoria||[]).forEach(e=> (e.titulos||[]).forEach(t=>{
+    mapa[t.temporada] = mapa[t.temporada] || new Set();
+    mapa[t.temporada].add(t.nombre);
+  }));
+  return mapa;
+}
+const LOGROS = [
+  // ---- Carrera ----
+  { id:'debut', cat:'carrera', nombre:'Debut', desc:'Juega tu primer partido como profesional.', icono:'⚽', pesoRareza:97,
+    cond:j=> j.carrera.partidos >= 1 },
+  { id:'centenario', cat:'carrera', nombre:'Centenario', desc:'Alcanza los 100 partidos jugados.', icono:'💯', pesoRareza:55,
+    cond:j=> j.carrera.partidos >= 100 },
+  { id:'veterano', cat:'carrera', nombre:'Veterano', desc:'Alcanza los 300 partidos jugados.', icono:'🎖️', pesoRareza:20,
+    cond:j=> j.carrera.partidos >= 300 },
+  { id:'toda_vida', cat:'carrera', nombre:'Toda una vida', desc:'Alcanza los 500 partidos jugados.', icono:'👑', pesoRareza:6,
+    cond:j=> j.carrera.partidos >= 500 },
+  { id:'pichichi', cat:'carrera', nombre:'Pichichi', desc:'Gana el trofeo Pichichi.', icono:'🥅', pesoRareza:12,
+    cond:j=> (j.carrera.pichichis||0) > 0 },
+  { id:'bota_oro', cat:'carrera', nombre:'Bota de Oro', desc:'Gana la Bota de Oro europea.', icono:'👢', pesoRareza:5,
+    cond:j=> (j.carrera.botasOro||0) > 0 },
+  { id:'mvp', cat:'carrera', nombre:'El mejor de la liga', desc:'Gana el MVP de tu liga.', icono:'🏅', pesoRareza:10,
+    cond:j=> (j.carrera.mvps||0) > 0 },
+  { id:'cambio_aires', cat:'carrera', nombre:'Cambio de aires', desc:'Ficha por un club extranjero.', icono:'✈️', pesoRareza:35,
+    cond:j=> (j.trayectoria||[]).some(e=>e.extranjero) },
+  { id:'los_grandes', cat:'carrera', nombre:'Los grandes te llaman', desc:'Ficha por uno de los grandes clubes del mundo.', icono:'⭐', pesoRareza:15,
+    cond:j=> (j.trayectoria||[]).some(e=>esClubGrande(e.club)) },
+  { id:'ultima_etapa', cat:'carrera', nombre:'Última gran etapa', desc:'Firma el gran contrato de fin de carrera.', icono:'💰', pesoRareza:10,
+    cond:j=> (j.trayectoria||[]).some(e=>PAISES_ULTIMA_ETAPA.includes(e.pais)) },
+  { id:'llegar_arriba', cat:'carrera', nombre:'Desde abajo', desc:'Llega a jugar en LaLiga.', icono:'🔝', pesoRareza:30,
+    cond:j=> (j.trayectoria||[]).some(e=>e.categoria==='LaLiga') || j.club.categoria==='LaLiga' },
+
+  // ---- Títulos ----
+  { id:'primer_titulo', cat:'titulos', nombre:'Primer título', desc:'Levanta tu primer trofeo, del nivel que sea.', icono:'🏆', pesoRareza:55,
+    cond:j=> (j.carrera.titulos||0) > 0 },
+  { id:'campeon_europa', cat:'titulos', nombre:'Campeón de Europa', desc:'Gana la Champions League.', icono:'🏆', pesoRareza:8,
+    cond:j=> (j.trayectoria||[]).some(e=>(e.titulos||[]).some(t=>t.nombre==='Champions League')) },
+  { id:'doblete', cat:'titulos', nombre:'Doblete', desc:'Gana dos títulos distintos la misma temporada.', icono:'🏆', pesoRareza:20,
+    cond:j=> Object.values(titulosPorTemporada(j)).some(s=>s.size>=2) },
+  { id:'triplete', cat:'titulos', nombre:'Triplete', desc:'Gana tres títulos distintos la misma temporada.', icono:'🏆', pesoRareza:6,
+    cond:j=> Object.values(titulosPorTemporada(j)).some(s=>s.size>=3) },
+  { id:'supercampeon', cat:'titulos', nombre:'Supercampeón', desc:'Gana una Supercopa, de España o de Europa.', icono:'🏆', pesoRareza:12,
+    cond:j=> (j.trayectoria||[]).some(e=>(e.titulos||[]).some(t=>t.nombre.includes('Supercopa'))) },
+  { id:'balon_oro', cat:'titulos', nombre:'Balón de Oro', desc:'Gana el Balón de Oro al mejor jugador del mundo.', icono:'🥇', pesoRareza:5,
+    cond:j=> (j.carrera.balonesDeOro||0) > 0 },
+  { id:'leyenda_balon', cat:'titulos', nombre:'Leyenda del balón', desc:'Gana 2 o más Balones de Oro.', icono:'🥇', pesoRareza:1,
+    cond:j=> (j.carrera.balonesDeOro||0) >= 2 },
+
+  // ---- Selección ----
+  { id:'primera_convocatoria', cat:'seleccion', nombre:'La llamada', desc:'Tu primera convocatoria con la selección.', icono:'🎽', pesoRareza:25,
+    cond:j=> !!(j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21) },
+  { id:'euro_seleccion', cat:'seleccion', nombre:'Campeón de Europa con la Roja', desc:'Gana la Eurocopa con la selección.', icono:'🌍', pesoRareza:6,
+    cond:j=> (j.titulosSeleccion||[]).some(t=>t.nombre==='Eurocopa') },
+  { id:'mundial', cat:'seleccion', nombre:'Campeón del Mundo', desc:'Gana el Mundial con la selección.', icono:'🌍', pesoRareza:5,
+    cond:j=> (j.titulosSeleccion||[]).some(t=>t.nombre==='Mundial') },
+
+  // ---- Vida, más allá del fútbol ----
+  { id:'boda', cat:'vida', nombre:'Contigo hasta la meta', desc:'Te casas con tu pareja.', icono:'💍', pesoRareza:40,
+    cond:j=> (j.eventosVistos||[]).some(e=>e.id==='boda_propia') },
+  { id:'hijo', cat:'vida', nombre:'Papá/mamá primerizo', desc:'Nace tu hijo.', icono:'👶', pesoRareza:30,
+    cond:j=> !!j.hijo },
+  { id:'reconciliacion', cat:'vida', nombre:'Reconciliación', desc:'Tu relación con tu rival de toda la vida llega a buen puerto.', icono:'🤝', pesoRareza:20,
+    cond:j=> j.rival && tierRelacionRival(j.rival.relacion)==='reconciliacion' },
+  { id:'discipulo', cat:'vida', nombre:'Discípulo aventajado', desc:'Tu protegido llega al máximo nivel.', icono:'🌱', pesoRareza:15,
+    cond:j=> j.protegido && j.protegido.nivel >= 4 },
+  { id:'pandilla_siempre', cat:'vida', nombre:'La pandilla de siempre', desc:'Mantén buena relación con tus 3 compañeros de cantera.', icono:'👥', pesoRareza:25,
+    cond:j=> (j.companeros||[]).length >= 3 && j.companeros.every(c=>(c.relacion||0) >= 60) },
+  { id:'vuelve_a_casa', cat:'vida', nombre:'Vuelves a casa', desc:'Regresas a un club en el que ya habías jugado.', icono:'🏠', pesoRareza:20,
+    cond:j=> !!(j.hitosLogro && j.hitosLogro.regresoClub) },
+
+  // ---- Estilo de vida ----
+  { id:'ruedas_otro_nivel', cat:'estilo', nombre:'Ruedas de otro nivel', desc:'Cómprate el coche tope de gama.', icono:'🏎️', pesoRareza:15,
+    cond:j=> (j.cocheActual||0) >= 4 },
+  { id:'dos_ruedas', cat:'estilo', nombre:'Sobre dos ruedas', desc:'Cómprate la moto tope de gama.', icono:'🏍️', pesoRareza:15,
+    cond:j=> (j.motoActual||0) >= 4 },
+  { id:'vida_elite', cat:'estilo', nombre:'Vida de élite', desc:'Alcanza el nivel de vida más alto (sueldo de 2M€ o más).', icono:'🥂', pesoRareza:12,
+    cond:j=> nivelDeVida(j.contrato.sueldoAnual).id === 'elite' },
+  { id:'banca_no_gana', cat:'estilo', nombre:'La banca no siempre gana', desc:'Llévate un bote grande en la tragaperras.', icono:'🎰', pesoRareza:10,
+    cond:j=> !!(j.hitosLogro && j.hitosLogro.boteGrande) },
+  { id:'millonario', cat:'estilo', nombre:'Millonario', desc:'Llega a tener 5 millones de euros ahorrados.', icono:'💵', pesoRareza:15,
+    cond:j=> (j.stats.dinero||0) >= 5000000 },
+
+  // ---- Rarezas ----
+  { id:'sancion_amano', cat:'rarezas', nombre:'El Cabesa te tendió una trampa', desc:'Sobrevive a una sanción por amaño de partido.', icono:'🎲', pesoRareza:8,
+    cond:j=> j.sancionActiva === true },
+  { id:'numeros_rojos', cat:'rarezas', nombre:'Números rojos', desc:'Te quedas sin blanca alguna vez.', icono:'📉', pesoRareza:35,
+    cond:j=> !!(j.hitosLogro && j.hitosLogro.numerosRojos) },
+  { id:'fichaje_polemico', cat:'rarezas', nombre:'Fichaje polémico', desc:'Fichas por el rival directo de tu afición.', icono:'⚠️', pesoRareza:15,
+    cond:j=> !!(j.hitosLogro && j.hitosLogro.fichajePolemico) },
+  { id:'leyenda', cat:'rarezas', nombre:'Leyenda', desc:'Alcanza el cariño máximo de la afición en un club.', icono:'👑', pesoRareza:18,
+    cond:j=> (j.maxCarinoAlcanzado||0) >= 80 },
+  { id:'carrera_completa', cat:'rarezas', nombre:'Carrera completa', desc:'Cuelga las botas, sea como sea.', icono:'🎬', pesoRareza:90,
+    cond:j=> !!S.retiroConfirmado }
+];
+const CATEGORIAS_LOGRO = [
+  { id:'carrera', nombre:'Carrera' }, { id:'titulos', nombre:'Títulos' }, { id:'seleccion', nombre:'Selección' },
+  { id:'vida', nombre:'Vida' }, { id:'estilo', nombre:'Estilo de vida' }, { id:'rarezas', nombre:'Rarezas' }
+];
+function cargarLogrosGuardados(){
+  try{ return JSON.parse(localStorage.getItem('fichaje10_logros_v1')) || {}; }catch(e){ return {}; }
+}
+function guardarLogrosGuardados(mapa){
+  try{ localStorage.setItem('fichaje10_logros_v1', JSON.stringify(mapa)); }catch(e){}
+}
+function tieneLogro(id){
+  return !!cargarLogrosGuardados()[id];
+}
+function hayLogrosSinVer(){
+  return Object.values(cargarLogrosGuardados()).some(v=>!v.visto);
+}
+function marcarLogrosVistos(){
+  const guardados = cargarLogrosGuardados();
+  let cambios = false;
+  Object.values(guardados).forEach(v=>{ if(!v.visto){ v.visto = true; cambios = true; } });
+  if(cambios) guardarLogrosGuardados(guardados);
+}
+// Recorre los logros aún no conseguidos y comprueba su condición contra el jugador activo.
+// Se llama en cada pintar() con partida en curso — las condiciones son consultas baratas sobre
+// contadores ya calculados, así que revisarlas de más no cuesta nada perceptible.
+function comprobarLogros(j){
+  if(!j) return;
+  const guardados = cargarLogrosGuardados();
+  let cambios = false;
+  LOGROS.forEach(l=>{
+    if(guardados[l.id]) return;
+    let cumple = false;
+    try{ cumple = !!l.cond(j); }catch(e){ cumple = false; }
+    if(!cumple) return;
+    guardados[l.id] = { fecha: new Date().toISOString(), temporada: S.temporada };
+    cambios = true;
+    S.logrosPendientesAviso = S.logrosPendientesAviso || [];
+    S.logrosPendientesAviso.push(l.id);
+    trackEvento('logro', { id: l.id });
+  });
+  if(cambios) guardarLogrosGuardados(guardados);
+}
+// Cola de avisos: como puede desbloquearse más de un logro a la vez (p. ej. al retirarte),
+// se muestran de uno en uno. El aviso vive en #logro-aviso-root, fuera de #app, para no
+// desaparecer si pintar() repinta la pantalla mientras el aviso sigue visible.
+function procesarAvisosLogros(){
+  const root = document.getElementById('logro-aviso-root');
+  if(root.children.length) return;
+  if(!(S.logrosPendientesAviso && S.logrosPendientesAviso.length)) return;
+  const id = S.logrosPendientesAviso.shift();
+  const l = LOGROS.find(x=>x.id===id);
+  if(!l){ procesarAvisosLogros(); return; }
+  Sonido.subeNivel();
+  if(l.pesoRareza < UMBRAL_LOGRO_PANTALLA_COMPLETA) mostrarLogroPantallaCompleta(l);
+  else mostrarLogroEsquina(l);
+}
+function cerrarAvisoLogro(){
+  document.getElementById('logro-aviso-root').innerHTML = '';
+  procesarAvisosLogros();
+}
+function mostrarLogroPantallaCompleta(l){
+  const root = document.getElementById('logro-aviso-root');
+  const backdrop = el('div','logro-backdrop');
+  const overlay = el('div','logro-overlay');
+  overlay.innerHTML = `<div class="logro-overlay-card">
+    <div class="logro-overlay-badge">${l.icono}</div>
+    <div class="logro-overlay-eyebrow">Logro desbloqueado</div>
+    <div class="logro-overlay-nombre">${l.nombre}</div>
+    <div class="logro-overlay-desc">${l.desc}</div>
+    <button class="logro-overlay-cerrar">Continuar</button>
+  </div>`;
+  root.appendChild(backdrop);
+  root.appendChild(overlay);
+  overlay.querySelector('.logro-overlay-cerrar').onclick = cerrarAvisoLogro;
+  requestAnimationFrame(()=>{ backdrop.classList.add('show'); overlay.classList.add('show'); });
+}
+function mostrarLogroEsquina(l){
+  const root = document.getElementById('logro-aviso-root');
+  const toast = el('div','logro-toast');
+  toast.innerHTML = `<div class="logro-toast-card">
+      <div class="logro-toast-ico">${l.icono}</div>
+      <div>
+        <div class="logro-toast-eyebrow">Logro desbloqueado</div>
+        <div class="logro-toast-nombre">${l.nombre}</div>
+        <div class="logro-toast-desc">${l.desc}</div>
+      </div>
+      <div class="logro-toast-bar"></div>
+    </div>`;
+  root.appendChild(toast);
+  toast.querySelector('.logro-toast-card').onclick = cerrarAvisoLogro;
+  requestAnimationFrame(()=>{
+    toast.classList.add('show');
+    toast.querySelector('.logro-toast-bar').classList.add('anim');
+  });
+  setTimeout(cerrarAvisoLogro, 4300);
+}
 
 /* ============ BANCO DE EVENTOS ============ */
 const ENCARGOS_TACTICOS = [
@@ -4678,7 +4977,7 @@ const BANDERAS_SVG = {
   "Arabia Saudí": '<rect width="40" height="40" fill="#006C35"/><rect x="6" y="15" width="20" height="3" fill="#FFFFFF"/><rect x="6" y="20" width="16" height="3" fill="#FFFFFF"/><polygon points="24,21.5 30,20 24,18.5" fill="#FFFFFF"/>'
 };
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings']);
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','cromos']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
 const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras','blackjack']);
@@ -5661,6 +5960,7 @@ function migrarJugadorGuardado(j){
   if(j.stats.vestuario === undefined) j.stats.vestuario = 55;
   if(j.sancionActiva === undefined) j.sancionActiva = false;
   if(j.motoActual === undefined) j.motoActual = 0;
+  if(j.hitosLogro === undefined) j.hitosLogro = {};
   if(j.estadoMental === undefined) j.estadoMental = 'normal';
   if(j.rachaResultados === undefined) j.rachaResultados = 0;
   if(j.promesasActivas === undefined) j.promesasActivas = [];
@@ -5737,6 +6037,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia){
   const club = clubInicial || { nombre: "Amateur", categoria:"Tercera RFEF", colores:['#4C566A','#FFFFFF'] };
   return {
     idCarrera: generarIdCarrera(),
+    hitosLogro:{},
     nombre, pais, posicion: POSICION_FIJA, edad:16,
     localidad: (localidad||'').trim() || 'tu ciudad',
     provincia: provincia || '',
@@ -5861,6 +6162,7 @@ function puedePagarServicio(j, familia, nuevoNivel){
 }
 function comprobarNumerosRojos(j){
   if(j.stats.dinero >= 0) return null;
+  j.hitosLogro = j.hitosLogro || {}; j.hitosLogro.numerosRojos = true;
   j.suscripciones = j.suscripciones || {};
   const activas = Object.keys(j.suscripciones).filter(fam => j.suscripciones[fam] > 0);
   if(!activas.length) return null;
@@ -6565,6 +6867,11 @@ function procesarFinTemporada(j, ascensoPlayoff){
   j.carrera.partidos += S.temporadaResumen.partidos;
   j.carrera.goles += S.temporadaResumen.goles;
   j.carrera.asistencias += S.temporadaResumen.asistencias;
+  // Desglose de trofeos individuales (aparte del recuento combinado trofeosIndividuales de abajo),
+  // para poder distinguir logros como "Pichichi" o "Bota de Oro" de "MVP"
+  if(S.temporadaResumen.pichichi) j.carrera.pichichis = (j.carrera.pichichis||0) + 1;
+  if(S.temporadaResumen.mvp) j.carrera.mvps = (j.carrera.mvps||0) + 1;
+  if(S.temporadaResumen.botaOro) j.carrera.botasOro = (j.carrera.botasOro||0) + 1;
   j.historialTemporadas = j.historialTemporadas || [];
   j.historialTemporadas.push({
     temporada: S.temporada, club: j.club.nombre, categoria: j.club.categoria, liga: j.club.liga || null,
@@ -6958,6 +7265,7 @@ function iniciarFichaje(j, nuevoClub, nuevoContrato, pantallaSiguiente){
     if(etapaAnterior) etapaAnterior.carino = Math.min(etapaAnterior.carino||0, 3);
     S.esFichajeRival = { desde: clubAnteriorNombre, hacia: nuevoClub.nombre };
     mostrarNotificacion(`⚠️ Fichas por ${articuloClub(nuevoClub.nombre)} ${nuevoClub.nombre}, el rival directo ${articuloClub(clubAnteriorNombre)==='la'?'de la':'del'} ${clubAnteriorNombre}. La afición que dejas atrás no te lo va a perdonar.`, 'riesgo');
+    j.hitosLogro = j.hitosLogro || {}; j.hitosLogro.fichajePolemico = true;
   }
   j.club = nuevoClub;
   if(nuevoContrato){
@@ -6978,6 +7286,7 @@ function iniciarFichaje(j, nuevoClub, nuevoContrato, pantallaSiguiente){
   else if(prestigioClubNuevo === 3) j.stats.popularidad = Math.max(j.stats.popularidad, 15);
   S.esRegresoClub = esRegreso;
   if(esRegreso){
+    j.hitosLogro = j.hitosLogro || {}; j.hitosLogro.regresoClub = true;
     const totalPartidos = etapasPrevias.reduce((s,e)=>s+(e.partidos||0),0);
     const totalGoles = etapasPrevias.reduce((s,e)=>s+(e.goles||0),0);
     const totalAsistencias = etapasPrevias.reduce((s,e)=>s+(e.asistencias||0),0);
@@ -7893,8 +8202,10 @@ function pintar(){
   if(S.jugador && !S.enFaseCreacion && !PANTALLAS_SIN_TABBAR.has(S.screen) && !PANTALLAS_CREACION.has(S.screen) && !excluirDePantallaBase){
     S.pantallaBase = S.screen;
   }
+  if(S.jugador) comprobarLogros(S.jugador);
   SCREENS[S.screen]();
   pintarTabbar();
+  procesarAvisosLogros();
   document.getElementById('panel-entreno-root').innerHTML = '';
   if(S.mostrandoPanelEntreno && S.jugador){
     pintarPanelEntreno(S.jugador);
@@ -8112,6 +8423,22 @@ function topbar(titulo){
   t.appendChild(left);
 
   if(S.jugador){
+    const botonesDcha = el('div');
+    botonesDcha.style.cssText = 'display:flex;gap:8px;flex-shrink:0;';
+
+    const logrosBtn = document.createElement('button');
+    logrosBtn.innerHTML = ICONOS_SVG.trofeo;
+    logrosBtn.title = 'Logros';
+    logrosBtn.className = 'tb-btn-logros';
+    logrosBtn.style.cssText = 'background:none;border:1px solid var(--line);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex-shrink:0;position:relative;';
+    if(hayLogrosSinVer()) logrosBtn.innerHTML += '<span class="tb-dot-logros"></span>';
+    logrosBtn.onclick = ()=>{
+      S.pantallaAnteriorLogros = S.pantallaBase || S.screen;
+      S.screen = 'logros';
+      render();
+    };
+    botonesDcha.appendChild(logrosBtn);
+
     const ajustesBtn = document.createElement('button');
     ajustesBtn.innerHTML = ICONOS_SVG.ajustes;
     ajustesBtn.title = 'Ajustes';
@@ -8121,7 +8448,8 @@ function topbar(titulo){
       S.screen = 'ajustes';
       render();
     };
-    t.appendChild(ajustesBtn);
+    botonesDcha.appendChild(ajustesBtn);
+    t.appendChild(botonesDcha);
   }
 
   const raiz = document.getElementById('topbar-root');
@@ -8912,6 +9240,7 @@ function cobrarBoteTraga(j){
   if(S.tragaBote > 0){
     aplicarEfectos(j, { dinero: S.tragaBote });
     if(S.tragaBote >= (S.tragaApuesta||10)*35) aplicarEfectos(j, { mental:3, confianza:3 });
+    if(S.tragaBote >= 50000){ j.hitosLogro = j.hitosLogro || {}; j.hitosLogro.boteGrande = true; }
   }
   S.tragaMensaje = S.tragaBote > 0 ? `Cobras ${formatearDinero(S.tragaBote)}` : S.tragaMensaje;
   S.tragaBote = 0;
@@ -10012,6 +10341,65 @@ SCREENS.rankings = function(){
     cRk.appendChild(wrap);
     app.appendChild(cRk);
   });
+};
+
+SCREENS.logros = function(){
+  const j = S.jugador;
+  topbar("Logros");
+  marcarLogrosVistos();
+  const c = el('div','card');
+
+  const btnVolver = document.createElement('button');
+  btnVolver.className = 'btn-secondary';
+  btnVolver.textContent = '← Volver';
+  btnVolver.style.marginBottom = '16px';
+  btnVolver.onclick = ()=>{
+    S.screen = S.pantallaAnteriorLogros || (j ? 'tabJugador' : 'menu');
+    S.pantallaAnteriorLogros = null;
+    render();
+  };
+  c.appendChild(btnVolver);
+
+  c.appendChild(crearEyebrow('Colección'));
+  c.appendChild(el('h2',null,'Tus logros'));
+
+  const guardados = cargarLogrosGuardados();
+  const total = LOGROS.length;
+  const conseguidos = LOGROS.filter(l=>guardados[l.id]).length;
+  const resumen = el('div','logros-resumen');
+  resumen.appendChild(el('div','num', `${conseguidos}/${total}`));
+  const track = el('div','logros-track');
+  track.appendChild(el('div','logros-fill')).style.width = `${Math.round(conseguidos/total*100)}%`;
+  resumen.appendChild(track);
+  c.appendChild(resumen);
+
+  if(S.logrosCategoriaActiva === undefined) S.logrosCategoriaActiva = 'todos';
+  const tabs = el('div','logros-tabs');
+  const listaLogros = el('div');
+  function pintarListaLogros(){
+    listaLogros.innerHTML = '';
+    LOGROS.filter(l=> S.logrosCategoriaActiva==='todos' || l.cat===S.logrosCategoriaActiva).forEach(l=>{
+      const g = guardados[l.id];
+      const fila = el('div','logro-fila '+(g?'conseguido':'bloqueado'));
+      fila.appendChild(el('div','logro-ico', g ? l.icono : '🔒'));
+      const txt = el('div','logro-txt');
+      txt.appendChild(el('div','logro-nombre', l.nombre));
+      txt.appendChild(el('div','logro-desc', g ? l.desc : '???'));
+      if(g) txt.appendChild(el('div','logro-meta', `Conseguido · Temp. ${g.temporada}`));
+      fila.appendChild(txt);
+      listaLogros.appendChild(fila);
+    });
+  }
+  [['todos','Todos'], ...CATEGORIAS_LOGRO.map(cl=>[cl.id,cl.nombre])].forEach(([id,nombre])=>{
+    const btn = el('div', 'ltab'+(S.logrosCategoriaActiva===id?' activo':''), nombre);
+    btn.onclick = ()=>{ S.logrosCategoriaActiva = id; pintarListaLogros();
+      tabs.querySelectorAll('.ltab').forEach(t=>t.classList.remove('activo')); btn.classList.add('activo'); };
+    tabs.appendChild(btn);
+  });
+  c.appendChild(tabs);
+  pintarListaLogros();
+  c.appendChild(listaLogros);
+  app.appendChild(c);
 };
 
 SCREENS.menu = function(){
@@ -13747,6 +14135,7 @@ SCREENS.retiro = function(){
     const datosRetiro = { idCarrera: j.idCarrera, temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal: j.club.categoria, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais, ascensos: j.carrera.ascensos||0, valorMercadoMaximo: j.carrera.valorMercadoMaximo||0, balonesDeOro: j.carrera.balonesDeOro||0, edadRetiro: j.edad, clubFinal: j.club.nombre, extranjero: !!j.club.extranjero, titulosSeleccion: (j.titulosSeleccion||[]).length, notaMediaCarrera };
     trackEvento('retiro', datosRetiro);
     calcularPosicionesRanking(datosRetiro);
+    S.retiroConfirmado = true;
     S.screen='final'; render();
   };
   c.appendChild(retirar);
