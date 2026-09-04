@@ -1435,6 +1435,20 @@ const TIENDA_MOTOS = [
    tendría") que decide el aviso: por debajo de UMBRAL_LOGRO_PANTALLA_COMPLETA sale a pantalla
    completa, el resto en la esquina — ver mostrarAvisoLogro. */
 const UMBRAL_LOGRO_PANTALLA_COMPLETA = 10;
+// Logros y cromos solo se conceden en partidas creadas con esta versión o posterior — ver
+// j.versionCreacion (nuevoJugador/migrarJugadorGuardado) y versionAlMenos. Las partidas más
+// viejas ya tenían recorrido hecho sin que ninguno de los dos sistemas existiera, así que no
+// tiene sentido premiarlas retroactivamente por hitos que ni siquiera vieron nacer.
+const VERSION_MINIMA_LOGROS_CROMOS = 'v1.4.8';
+function versionAlMenos(v, minimo){
+  const norm = s => String(s||'').replace(/^v/i,'').split('.').map(n=>parseInt(n,10)||0);
+  const a = norm(v), b = norm(minimo);
+  for(let i=0;i<Math.max(a.length,b.length);i++){
+    const x = a[i]||0, y = b[i]||0;
+    if(x !== y) return x > y;
+  }
+  return true;
+}
 function titulosPorTemporada(j){
   const mapa = {};
   (j.trayectoria||[]).forEach(e=> (e.titulos||[]).forEach(t=>{
@@ -1554,6 +1568,20 @@ function guardarCromosGuardados(mapa){
 function tieneCromo(pais){
   return pais === 'España' || !!cargarCromosGuardados()[pais];
 }
+// Reinicio único al llegar la restricción de versión mínima (v1.4.8): antes de esa versión
+// logros y cromos se concedían en cualquier partida, así que el progreso ganado hasta ahora no
+// distingue partidas viejas de nuevas. Se limpia una sola vez (marcador propio en localStorage)
+// para que, a partir de aquí, solo cuenten los hitos de partidas creadas con VERSION_MINIMA_
+// LOGROS_CROMOS o posterior.
+(function reiniciarLogrosCromosV148(){
+  try{
+    if(!localStorage.getItem('fichaje10_reset_logros_cromos_v148')){
+      localStorage.removeItem('fichaje10_logros_v1');
+      localStorage.removeItem('fichaje10_cromos_v1');
+      localStorage.setItem('fichaje10_reset_logros_cromos_v148', '1');
+    }
+  }catch(e){}
+})();
 function desbloquearCromo(pais){
   if(tieneCromo(pais)) return;
   const guardados = cargarCromosGuardados();
@@ -1576,6 +1604,7 @@ function marcarLogrosVistos(){
 // contadores ya calculados, así que revisarlas de más no cuesta nada perceptible.
 function comprobarLogros(j){
   if(!j) return;
+  if(!versionAlMenos(j.versionCreacion, VERSION_MINIMA_LOGROS_CROMOS)) return; // partida vieja, no cuenta
   const guardados = cargarLogrosGuardados();
   let cambios = false;
   LOGROS.forEach(l=>{
@@ -3989,11 +4018,14 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.4.8';
+const VERSION_JUEGO = 'v1.4.9';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.4.9', titulo:'Logros y cromos, solo a partir de aquí', cambios:[
+    'Los logros y los cromos del mundo se reinician una vez: a partir de ahora solo se consiguen jugando con una partida iniciada en la versión 1.4.8 o posterior — las partidas más antiguas ya en marcha no puntúan retroactivamente.'
+  ]},
   { version:'v1.4.8', titulo:'Logros y cromos, en una sola pantalla', cambios:[
     'Los cromos del mundo pasan a vivir dentro de la pantalla de Logros, como una segunda pestaña — al entrar (desde el trofeo de la topbar o desde Ajustes) siempre ves primero tus logros, y desde ahí cambias a "Cromos del mundo" con un toque.'
   ]},
@@ -6077,6 +6109,9 @@ function migrarJugadorGuardado(j){
   if(j.enParo === undefined) j.enParo = false;
   if(j.provincia === undefined) j.provincia = '';
   if(j.idCarrera === undefined) j.idCarrera = generarIdCarrera();
+  // Partida guardada antes de que existiera este campo: por definición es anterior a la versión
+  // que restringe logros/cromos (VERSION_MINIMA_LOGROS_CROMOS), así que se queda fuera de ambos.
+  if(j.versionCreacion === undefined) j.versionCreacion = 'v1.4.7';
   if(j.contrato && j.contrato.duracionOriginal == null) j.contrato.duracionOriginal = j.contrato.duracionTemporadas;
   if(j.tienePareja && !j.pareja) j.pareja = generarNombrePareja(); // reconcilia desincronía legacy pareja/tienePareja
   // Arreglo retroactivo: partidas viejas podían tener a la madre con el primer apellido del jugador.
@@ -6130,6 +6165,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia){
   const club = clubInicial || { nombre: "Amateur", categoria:"Tercera RFEF", colores:['#4C566A','#FFFFFF'] };
   return {
     idCarrera: generarIdCarrera(),
+    versionCreacion: VERSION_JUEGO,
     hitosLogro:{},
     nombre, pais, posicion: POSICION_FIJA, edad:16,
     localidad: (localidad||'').trim() || 'tu ciudad',
@@ -7360,7 +7396,7 @@ function iniciarFichaje(j, nuevoClub, nuevoContrato, pantallaSiguiente){
     mostrarNotificacion(`⚠️ Fichas por ${articuloClub(nuevoClub.nombre)} ${nuevoClub.nombre}, el rival directo ${articuloClub(clubAnteriorNombre)==='la'?'de la':'del'} ${clubAnteriorNombre}. La afición que dejas atrás no te lo va a perdonar.`, 'riesgo');
     j.hitosLogro = j.hitosLogro || {}; j.hitosLogro.fichajePolemico = true;
   }
-  if(nuevoClub.extranjero && nuevoClub.pais) desbloquearCromo(nuevoClub.pais);
+  if(nuevoClub.extranjero && nuevoClub.pais && versionAlMenos(j.versionCreacion, VERSION_MINIMA_LOGROS_CROMOS)) desbloquearCromo(nuevoClub.pais);
   j.club = nuevoClub;
   if(nuevoContrato){
     if(nuevoContrato.duracionOriginal == null) nuevoContrato.duracionOriginal = nuevoContrato.duracionTemporadas;

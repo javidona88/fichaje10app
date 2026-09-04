@@ -50,6 +50,11 @@ j = {
               // migración para saves viejos) — identifica la carrera en sí, no el navegador ni
               // la sesión; usado por el evento "retiro" para que stats.html pueda deduplicar si
               // recargas un guardado anterior y vuelves a retirarte con la misma carrera
+  versionCreacion,  // VERSION_JUEGO en el momento de nuevoJugador(); en saves viejos sin este
+              // campo, migrarJugadorGuardado lo rellena con 'v1.4.7' (anterior a la versión que
+              // introdujo el campo). Usado por versionAlMenos(j.versionCreacion,
+              // VERSION_MINIMA_LOGROS_CROMOS) para que logros y cromos del mundo solo se concedan
+              // en partidas creadas con v1.4.8 en adelante — ver comprobarLogros/desbloquearCromo
   nombre, pais, posicion:"Delantero" (POSICION_FIJA), edad (empieza a 16), localidad, provincia,
   club:{ nombre, categoria, colores:[hex1,hex2], extranjero?, pais?, liga?, grande?,
          nivelEuropeo?('champions'|'europa'|'conference'), ambicionNivel(1-4), objetivoActual? },
@@ -507,6 +512,13 @@ un club, quedarte en números rojos, un bote grande de tragaperras) se guarda un
 `j.hitosLogro` justo donde ocurre (`iniciarFichaje`, `comprobarNumerosRojos`, `cobrarBoteTraga`).
 Nuevos contadores `j.carrera.pichichis`/`mvps`/`botasOro` (antes solo se sumaban juntos en
 `trofeosIndividuales`) para poder distinguir esos logros entre sí.
+- **Versión mínima**: `comprobarLogros(j)` no hace nada si `!versionAlMenos(j.versionCreacion,
+  VERSION_MINIMA_LOGROS_CROMOS)` (`'v1.4.8'`) — logros (y cromos, ver abajo) solo se conceden en
+  partidas creadas con esa versión o posterior; una partida vieja cargada nunca desbloquea nada
+  nuevo, aunque cumpla la condición. Al llegar v1.4.8 se hizo además un reinicio único de
+  `fichaje10_logros_v1`/`fichaje10_cromos_v1` (marcador `fichaje10_reset_logros_cromos_v148` en
+  localStorage, ver justo antes de `desbloquearCromo`) para borrar el progreso ganado cuando la
+  restricción aún no existía.
 - **Aviso mixto**: `procesarAvisosLogros()` (llamada al final de `pintar()`) saca los logros de
   la cola de uno en uno, en `#logro-aviso-root` (fuera de `#app`, para no desaparecer si la
   pantalla se repinta mientras el aviso sigue visible). Si `pesoRareza < UMBRAL_LOGRO_PANTALLA_
@@ -532,9 +544,10 @@ por país en vez de un hito de carrera. `PAISES_CROMO` (27 entradas — los mism
 bandera en `BANDERAS_SVG`; al añadir un país nuevo allí, añadir también su ficha aquí) con
 selección/apodo, dos datos rápidos y 2-3 curiosidades de fútbol reales. `tieneCromo('España')` es
 siempre `true` sin necesidad de guardar nada (tu país de origen viene desbloqueado desde el
-principio). `desbloquearCromo(pais)` se llama en `iniciarFichaje` cuando `nuevoClub.extranjero`,
-manda `trackEvento('cromo', {pais})` y avisa con `mostrarNotificacion` (sin aviso a pantalla
-completa ni de esquina tipo logro — es un descubrimiento más discreto).
+principio). `desbloquearCromo(pais)` se llama en `iniciarFichaje` cuando `nuevoClub.extranjero` y
+`versionAlMenos(j.versionCreacion, VERSION_MINIMA_LOGROS_CROMOS)` (misma versión mínima que los
+logros, ver arriba), manda `trackEvento('cromo', {pais})` y avisa con `mostrarNotificacion` (sin
+aviso a pantalla completa ni de esquina tipo logro — es un descubrimiento más discreto).
 - Vive como segunda pestaña de `SCREENS.logros` (`pintarVistaCromos`, antes era una pantalla
   propia `SCREENS.cromos` — se fusionaron a petición expresa: "que una vez entres te aparezca
   primero los logros y puedas pasar a los cromos mediante otra pestaña"). Álbum en **orden
