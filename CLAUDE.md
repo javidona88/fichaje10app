@@ -653,15 +653,43 @@ Supabase directamente desde el navegador del que la abre.
   personal), `timezone` (`Intl.DateTimeFormat().resolvedOptions().timeZone` — aproximación de
   región SIN pedir permiso de geolocalización real, a propósito) y `dispositivo`
   (`movil`/`tablet`/`escritorio`, por `navigator.userAgent`).
-- **`stats.html`**: mismo tema oscuro y paleta que el juego (variables CSS duplicadas de
-  `index.html`, no hay forma de compartir CSS entre archivos sin build step). Contadores de
-  partidas iniciadas / carreras completadas / jugadores distintos, desglose por dispositivo y
-  por zona horaria (barras), y 4 rankings (goles, asistencias, dinero generado, temporadas
-  jugadas) leyendo los eventos `retiro`. Cuenta filas trayendo `select=id` y usando
-  `.length` en vez de la cabecera `Content-Range` de PostgREST — esa cabecera no es fiable en
-  peticiones cross-origin salvo que el servidor la exponga explícitamente vía CORS, y a esta
-  escala (unos amigos jugando) traer las filas es insignificante en coste. Accesible desde
-  "← Volver al juego" / enlazando a `./` desde el juego si se añade un botón (aún no añadido).
+- **`stats.html`**: pensado como panel de ADMINISTRACIÓN (para mí, no para los jugadores) — mismo
+  tema oscuro y paleta que el juego (variables CSS duplicadas de `index.html`, no hay forma de
+  compartir CSS entre archivos sin build step). Contadores de partidas iniciadas / carreras
+  completadas / jugadores distintos, desglose por dispositivo, zona horaria y versión jugada
+  (`version_juego`), y rankings (goles, asistencias, dinero, títulos, valor de mercado, Balones
+  de Oro, títulos con la selección, ascensos, nota media) más desgloses por categoría/país/club
+  de retiro, leyendo los eventos `retiro` con `deduplicarPorCarrera` (ver más abajo). Sin "Carreras
+  más largas": se quitó porque el retiro forzoso a los 42 años hace que casi todas las carreras
+  largas empaten en el mismo techo de temporadas, así que no decía nada interesante. Cuenta filas
+  trayendo `select=id` y usando `.length` en vez de la cabecera `Content-Range` de PostgREST — esa
+  cabecera no es fiable en peticiones cross-origin salvo que el servidor la exponga explícitamente
+  vía CORS, y a esta escala (unos amigos jugando) traer las filas es insignificante en coste.
+  Accesible desde "← Volver al juego"; el juego NO enlaza a `stats.html` a propósito (es la parte
+  de admin) — la parte visible para los jugadores es `SCREENS.rankings`, ver abajo.
+- **`SCREENS.rankings`** (dentro de `index.html`): versión "para jugadores" de los mismos
+  rankings, sin nada de admin (sin dispositivo/zona horaria/jugadores distintos). Accesible desde
+  Ajustes ("Ver los rankings de todos los jugadores", `S.pantallaAnteriorRankings` guarda de dónde
+  vienes) y desde `SCREENS.final` (botón "Ver todos los rankings →"). Usa sus propias funciones de
+  lectura en `index.html` (`consultarSupabaseLectura`, `deduplicarRetirosPorCarrera` — misma lógica
+  que `deduplicarPorCarrera` de `stats.html`, quedarse con la PRIMERA vez que se retiró cada
+  `idCarrera`) porque `index.html` y `stats.html` no comparten JS. `RANKINGS_JUGADORES` define
+  cada ranking (título, clave del campo, si solo cuenta valores positivos/presentes, y si es de
+  los "destacados"); `calcularRankingOrdenado` / `pintarTablaRankingJuego` / `pintarBarrasJuego`
+  hacen el trabajo. Cada fila de un ranking muestra el nombre del jugador y, debajo, los 8
+  primeros caracteres de `idCarrera` en pequeño (para distinguir jugadores con el mismo nombre);
+  si la fila es la del jugador actual (`j.idCarrera` coincide) se resalta en dorado con "· tú".
+  Sin "Carreras más largas", mismo motivo que en `stats.html`.
+- **Puesto en el resumen final**: al pulsar "Colgar las botas" (`SCREENS.retiro`), justo después
+  de `trackEvento('retiro', ...)`, se llama a `calcularPosicionesRanking(datosRetiro)`, que
+  consulta Supabase y calcula en qué puesto queda esta carrera dentro de los rankings marcados
+  `destacar:true` en `RANKINGS_JUGADORES` (goles, dinero, títulos, nota media). Como el insert de
+  `trackEvento` es fire-and-forget (no se espera), la fila propia puede no estar todavía en lo que
+  devuelve la lectura — si no aparece, se mete a mano en la lista local (con el mismo
+  `datosRetiro` que se acaba de mandar) antes de calcular puestos, así el jugador siempre se ve a
+  sí mismo. El resultado se guarda en `S.posicionesRanking` (`undefined` = cargando, `null` = sin
+  Supabase configurado o fallo de red, array = listo) y `SCREENS.final` lo pinta en la tarjeta
+  "Cómo te comparas" en cuanto llega, con un botón a `SCREENS.rankings`.
 - **`sw.js`**: al cachear páginas HTML, cada una se guarda bajo su propia URL (`request` como
   clave), no todas bajo `./index.html` — con dos páginas HTML en el sitio (`index.html` y
   `stats.html`), cachear todo bajo una sola clave las mezclaría (bug ya corregido: antes SIEMPRE

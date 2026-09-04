@@ -705,6 +705,27 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .servicio-nivel-btn.activo .n, .servicio-nivel-btn.activo .c{ color:var(--gold); }
 .servicio-nivel-btn.inasequible{ opacity:.4; cursor:not-allowed; }
 .servicio-desc{ font-family:'Space Grotesk',sans-serif; font-size:11.5px; color:var(--ink-soft); margin-top:8px; line-height:1.5; }
+
+/* Pantalla de rankings (jugadores) */
+.rk-tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:6px; }
+.rk-tile{ background:var(--bg2); border:1px solid var(--line); border-radius:12px; padding:14px 10px; text-align:center; }
+.rk-tile .num{ font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; line-height:1.1; }
+.rk-tile .lbl{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); margin-top:5px; letter-spacing:.01em; }
+.rk-bar-row{ display:flex; align-items:center; gap:9px; margin-bottom:9px; }
+.rk-bar-row:last-child{ margin-bottom:0; }
+.rk-bar-lbl{ width:108px; flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink); overflow-wrap:anywhere; line-height:1.3; }
+.rk-bar-track{ flex:1; height:12px; background:rgba(255,255,255,0.05); border-radius:6px; overflow:hidden; }
+.rk-bar-fill{ height:100%; background:linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius:6px; min-width:2px; }
+.rk-bar-val{ width:26px; text-align:right; flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; }
+.rk-table{ margin-top:4px; }
+.rk-table-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); }
+.rk-table-row:last-child{ border-bottom:none; }
+.rk-table-rank{ width:16px; flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-size:12.5px; color:var(--ink-soft); }
+.rk-table-nombre{ flex:1; min-width:0; }
+.rk-table-nombre .n{ font-family:'Space Grotesk',sans-serif; font-size:13px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rk-table-nombre .id{ font-family:monospace; font-size:9.5px; color:var(--ink-soft); }
+.rk-table-nombre .tu-fila{ color:var(--gold); font-weight:700; }
+.rk-table-val{ flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; }
 </style>
 </head>
 <body>
@@ -3645,11 +3666,15 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.4.5';
+const VERSION_JUEGO = 'v1.4.6';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.4.6', titulo:'Rankings de la comunidad, dentro del juego', cambios:[
+    'Nueva pantalla de rankings (Ajustes → "Ver los rankings de todos los jugadores"): máximos goleadores, asistentes, dinero generado, títulos, valor de mercado, Balones de Oro, títulos con la selección, ascensos y nota media, con desgloses por categoría, país y club de retiro.',
+    'Al retirarte, el resumen final ahora dice en qué puesto quedas entre todos los jugadores en los rankings más importantes, con un enlace directo a verlos todos.'
+  ]},
   { version:'v1.4.5', titulo:'Las estadísticas ya no duplican una carrera repetida', cambios:[
     'Corregido: si recargabas un guardado anterior a un retiro y volvías a retirarte, esa misma carrera se contaba dos veces en stats.html. Ahora cada carrera lleva un identificador propio y solo se cuenta una vez (la primera), aunque la termines más de una vez.'
   ]},
@@ -4653,7 +4678,7 @@ const BANDERAS_SVG = {
   "Arabia Saudí": '<rect width="40" height="40" fill="#006C35"/><rect x="6" y="15" width="20" height="3" fill="#FFFFFF"/><rect x="6" y="20" width="16" height="3" fill="#FFFFFF"/><polygon points="24,21.5 30,20 24,18.5" fill="#FFFFFF"/>'
 };
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog']);
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
 const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras','blackjack']);
@@ -7943,6 +7968,111 @@ function trackEvento(nombre, datos){
   enviarEventoSupabase(nombre, datos);
 }
 
+// ---- Lectura de Supabase para la pantalla de rankings (jugadores) y las posiciones en SCREENS.final.
+// Versión "para jugadores" del mismo dashboard que stats.html usa para administración: aquí solo se
+// muestran los rankings con gracia (nada de dispositivo/zona horaria/versión, eso es cosa de admin).
+async function consultarSupabaseLectura(pathQuery){
+  const res = await fetch(`https://${SUPABASE_URL}/rest/v1/${pathQuery}`, {
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+  });
+  if(!res.ok) throw new Error('Supabase respondió ' + res.status);
+  return res.json();
+}
+// Igual que deduplicarPorCarrera en stats.html: si una misma carrera (idCarrera) se retiró más de
+// una vez (recargando un guardado anterior), solo cuenta la primera vez.
+function deduplicarRetirosPorCarrera(filas){
+  const porId = new Map();
+  const sinId = [];
+  filas.forEach(f=>{
+    const id = f.datos && f.datos.idCarrera;
+    if(!id){ sinId.push(f); return; }
+    const previa = porId.get(id);
+    if(!previa || new Date(f.created_at) < new Date(previa.created_at)) porId.set(id, f);
+  });
+  return [...porId.values(), ...sinId];
+}
+async function obtenerRetirosDeduplicados(){
+  if(!SUPABASE_URL || SUPABASE_URL.startsWith('TU-')) return null; // sin configurar
+  const filas = await consultarSupabaseLectura('eventos?nombre=eq.retiro&select=datos,created_at&limit=2000');
+  return deduplicarRetirosPorCarrera(filas);
+}
+// Rankings que se muestran a los jugadores, en el mismo orden en SCREENS.rankings y como
+// candidatos a mencionar en SCREENS.final. clave = campo en datos; mayor = true si gana el que más tiene.
+const RANKINGS_JUGADORES = [
+  { id:'goles', titulo:'🥅 Máximos goleadores', etiqueta:'Goles', clave:'goles', destacar:true, fraseFinal:'goles marcados' },
+  { id:'asistencias', titulo:'🎯 Máximos asistentes', etiqueta:'Asist.', clave:'asistencias' },
+  { id:'dineroGanado', titulo:'💰 Mayor dinero generado', etiqueta:'Total', clave:'dineroGanado', formatear:'dinero', destacar:true, fraseFinal:'dinero generado' },
+  { id:'titulos', titulo:'🏆 Más títulos ganados', etiqueta:'Títulos', clave:'titulos', destacar:true, fraseFinal:'títulos ganados' },
+  { id:'valorMercadoMaximo', titulo:'📈 Mayor valor de mercado alcanzado', etiqueta:'Máximo', clave:'valorMercadoMaximo', formatear:'dinero', soloPositivos:true },
+  { id:'balonesDeOro', titulo:'🥇 Más Balones de Oro', etiqueta:'Balones', clave:'balonesDeOro', soloPositivos:true },
+  { id:'titulosSeleccion', titulo:'🎖️ Más títulos con la selección', etiqueta:'Títulos', clave:'titulosSeleccion', soloPositivos:true },
+  { id:'ascensos', titulo:'⬆️ Más ascensos logrados', etiqueta:'Ascensos', clave:'ascensos', soloPositivos:true },
+  { id:'notaMediaCarrera', titulo:'⭐ Mejor nota media de la carrera', etiqueta:'Nota media', clave:'notaMediaCarrera', formatear:'nota', soloPresentes:true, destacar:true, fraseFinal:'nota media de la carrera' }
+];
+// Ordena las filas de retiro (deduplicadas) por el campo de un ranking, aplicando sus filtros propios.
+function calcularRankingOrdenado(filas, def){
+  let lista = filas.filter(f => f.datos && f.datos[def.clave] != null);
+  if(def.soloPositivos) lista = lista.filter(f => (f.datos[def.clave]||0) > 0);
+  return lista.sort((a,b)=> (b.datos[def.clave]||0) - (a.datos[def.clave]||0));
+}
+function formatearValorRanking(def, valor){
+  if(def.formatear === 'dinero') return formatearDinero(valor);
+  if(def.formatear === 'nota') return formatearNumero(valor);
+  return valor;
+}
+function pintarTablaRankingJuego(contenedor, filas, def, idPropio){
+  contenedor.innerHTML = '';
+  if(!filas.length){
+    contenedor.appendChild(el('div', null, `<span style="color:var(--ink-soft);font-size:12.5px;">Sin datos todavía.</span>`));
+    return;
+  }
+  filas.slice(0, 10).forEach((f,i)=>{
+    const row = el('div','rk-table-row');
+    row.appendChild(el('div','rk-table-rank', i+1));
+    const esPropia = !!idPropio && f.datos.idCarrera === idPropio;
+    const idc = f.datos.idCarrera ? f.datos.idCarrera.slice(0,8) : null;
+    const nombreWrap = el('div','rk-table-nombre',
+      `<div class="n${esPropia?' tu-fila':''}">${(f.datos.nombreJugador||'Jugador anónimo')}${esPropia?' · tú':''}</div>${idc?`<div class="id">#${idc}</div>`:''}`);
+    row.appendChild(nombreWrap);
+    row.appendChild(el('div','rk-table-val', formatearValorRanking(def, f.datos[def.clave])));
+    contenedor.appendChild(row);
+  });
+}
+function pintarBarrasJuego(contenedor, conteos){
+  contenedor.innerHTML = '';
+  const entradas = Object.entries(conteos).sort((a,b)=> b[1]-a[1]);
+  if(!entradas.length){ contenedor.appendChild(el('div', null, `<span style="color:var(--ink-soft);font-size:12.5px;">Sin datos todavía.</span>`)); return; }
+  const max = Math.max(...entradas.map(e=>e[1]));
+  entradas.slice(0, 10).forEach(([nombre, valor])=>{
+    const fila = el('div','rk-bar-row');
+    fila.appendChild(el('div','rk-bar-lbl', nombre));
+    const track = el('div','rk-bar-track');
+    track.appendChild(el('div','rk-bar-fill')).style.width = `${Math.max(2, Math.round(valor/max*100))}%`;
+    fila.appendChild(track);
+    fila.appendChild(el('div','rk-bar-val', valor));
+    contenedor.appendChild(fila);
+  });
+}
+// Se llama justo al retirarse: calcula en qué puesto queda la carrera recién terminada dentro de
+// los rankings "destacados" (los que se mencionan en SCREENS.final), para mostrarlo ahí en cuanto
+// llegue la respuesta. datosRetiro es el mismo payload que se acaba de mandar a Supabase — como el
+// insert es fire-and-forget (trackEvento no se espera), esa fila puede no estar todavía en lo que
+// devuelva la consulta de lectura; por eso se mete a mano en la lista antes de calcular puestos.
+function calcularPosicionesRanking(datosRetiro){
+  S.posicionesRanking = undefined;
+  obtenerRetirosDeduplicados().then(datos=>{
+    if(!datos){ S.posicionesRanking = null; if(S.screen==='final') pintar(); return; }
+    const yaEsta = datos.some(f => f.datos && f.datos.idCarrera === datosRetiro.idCarrera);
+    const filas = yaEsta ? datos : [...datos, { datos: datosRetiro, created_at: new Date().toISOString() }];
+    S.posicionesRanking = RANKINGS_JUGADORES.filter(d=>d.destacar).map(def=>{
+      const lista = calcularRankingOrdenado(filas, def);
+      const idx = lista.findIndex(f=>f.datos.idCarrera === datosRetiro.idCarrera);
+      return idx>=0 ? { def, puesto: idx+1, total: lista.length } : null;
+    }).filter(Boolean);
+    if(S.screen==='final') pintar();
+  }).catch(()=>{ S.posicionesRanking = null; if(S.screen==='final') pintar(); });
+}
+
 function logoCamiseta(tamano){
   tamano = tamano || 22;
   return `<svg viewBox="0 0 24 24" width="${tamano}" height="${tamano}" xmlns="http://www.w3.org/2000/svg">
@@ -9736,6 +9866,12 @@ SCREENS.ajustes = function(){
   filaChangelog.onclick = ()=>{ S.screen = 'changelog'; render(); };
   c.appendChild(filaChangelog);
 
+  c.appendChild(crearEyebrow('Comunidad'));
+  const filaRankings = el('div','opt');
+  filaRankings.textContent = 'Ver los rankings de todos los jugadores';
+  filaRankings.onclick = ()=>{ S.pantallaAnteriorRankings = 'ajustes'; S.rankingsDatos = undefined; S.screen = 'rankings'; render(); };
+  c.appendChild(filaRankings);
+
   const version = el('div', null, `Fichaje 10 · ${VERSION_JUEGO}`);
   version.style.cssText = 'text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-soft);opacity:.6;margin-top:20px;';
   c.appendChild(version);
@@ -9781,6 +9917,101 @@ SCREENS.changelog = function(){
   });
 
   app.appendChild(c);
+};
+
+SCREENS.rankings = function(){
+  const j = S.jugador;
+  topbar("Rankings");
+  const c = el('div','card');
+
+  const btnVolver = document.createElement('button');
+  btnVolver.className = 'btn-secondary';
+  btnVolver.textContent = '← Volver';
+  btnVolver.style.marginBottom = '16px';
+  btnVolver.onclick = ()=>{
+    S.screen = S.pantallaAnteriorRankings || (j ? 'tabJugador' : 'menu');
+    S.pantallaAnteriorRankings = null;
+    render();
+  };
+  c.appendChild(btnVolver);
+
+  c.appendChild(crearEyebrow('Comunidad'));
+  c.appendChild(el('h2',null,'Rankings de todas las carreras'));
+
+  if(S.rankingsDatos === undefined){
+    if(!S._rankingsFetchEnCurso){
+      S._rankingsFetchEnCurso = true;
+      obtenerRetirosDeduplicados().then(datos=>{
+        S.rankingsDatos = datos;
+        S._rankingsFetchEnCurso = false;
+        if(S.screen === 'rankings') pintar();
+      }).catch(()=>{
+        S.rankingsDatos = null;
+        S._rankingsFetchEnCurso = false;
+        if(S.screen === 'rankings') pintar();
+      });
+    }
+    c.appendChild(el('p',null,`<span style="color:var(--ink-soft);font-size:12.5px;">Cargando rankings…</span>`));
+    app.appendChild(c);
+    return;
+  }
+
+  if(!S.rankingsDatos){
+    c.appendChild(el('p',null,`<span style="color:var(--ink-soft);font-size:12.5px;">Los rankings no están disponibles ahora mismo. Prueba de nuevo más tarde.</span>`));
+    app.appendChild(c);
+    return;
+  }
+  const filas = S.rankingsDatos;
+  if(!filas.length){
+    c.appendChild(el('p',null,`<span style="color:var(--ink-soft);font-size:12.5px;">Todavía no hay ninguna carrera completada.</span>`));
+    app.appendChild(c);
+    return;
+  }
+  const idPropio = j ? j.idCarrera : null;
+
+  const sumar = clave => filas.reduce((acc,f)=> acc + (f.datos?.[clave]||0), 0);
+  const tiles = el('div','rk-tiles');
+  [
+    [filas.length.toLocaleString('es-ES'), 'Carreras completadas'],
+    [sumar('goles').toLocaleString('es-ES'), 'Goles marcados'],
+    [sumar('asistencias').toLocaleString('es-ES'), 'Asistencias'],
+    [sumar('titulos').toLocaleString('es-ES'), 'Títulos levantados'],
+    [formatearDinero(sumar('dineroGanado')), 'Dinero generado']
+  ].forEach(([num,lbl])=>{
+    const t = el('div','rk-tile');
+    t.appendChild(el('div','num', num));
+    t.appendChild(el('div','lbl', lbl));
+    tiles.appendChild(t);
+  });
+  c.appendChild(tiles);
+  app.appendChild(c);
+
+  const cDesglose = el('div','card');
+  cDesglose.appendChild(crearEyebrow('Desgloses'));
+  [
+    ['Categoría al retirarse', 'categoriaFinal'],
+    ['País de la carrera', 'pais'],
+    ['Club en el que se retiró', 'clubFinal']
+  ].forEach(([titulo, clave], idx)=>{
+    if(idx > 0) cDesglose.appendChild(document.createElement('hr')).style.cssText = 'border:none;border-top:1px solid var(--line);margin:16px 0;';
+    cDesglose.appendChild(el('div','stat-section-titulo', titulo.toUpperCase()));
+    const conteo = {};
+    filas.forEach(f=>{ const v = f.datos?.[clave]; if(v) conteo[v] = (conteo[v]||0)+1; });
+    const wrap = document.createElement('div');
+    pintarBarrasJuego(wrap, conteo);
+    cDesglose.appendChild(wrap);
+  });
+  app.appendChild(cDesglose);
+
+  RANKINGS_JUGADORES.forEach(def=>{
+    const cRk = el('div','card');
+    cRk.appendChild(crearEyebrow('Ranking'));
+    cRk.appendChild(el('h2',null, def.titulo));
+    const wrap = el('div','rk-table');
+    pintarTablaRankingJuego(wrap, calcularRankingOrdenado(filas, def), def, idPropio);
+    cRk.appendChild(wrap);
+    app.appendChild(cRk);
+  });
 };
 
 SCREENS.menu = function(){
@@ -13513,7 +13744,9 @@ SCREENS.retiro = function(){
   retirar.onclick = ()=>{
     const historial = j.historialTemporadas||[];
     const notaMediaCarrera = historial.length ? Math.round((historial.reduce((s,h)=>s+(h.nota||0),0) / historial.length) * 10) / 10 : null;
-    trackEvento('retiro', { idCarrera: j.idCarrera, temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal: j.club.categoria, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais, ascensos: j.carrera.ascensos||0, valorMercadoMaximo: j.carrera.valorMercadoMaximo||0, balonesDeOro: j.carrera.balonesDeOro||0, edadRetiro: j.edad, clubFinal: j.club.nombre, extranjero: !!j.club.extranjero, titulosSeleccion: (j.titulosSeleccion||[]).length, notaMediaCarrera });
+    const datosRetiro = { idCarrera: j.idCarrera, temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal: j.club.categoria, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais, ascensos: j.carrera.ascensos||0, valorMercadoMaximo: j.carrera.valorMercadoMaximo||0, balonesDeOro: j.carrera.balonesDeOro||0, edadRetiro: j.edad, clubFinal: j.club.nombre, extranjero: !!j.club.extranjero, titulosSeleccion: (j.titulosSeleccion||[]).length, notaMediaCarrera };
+    trackEvento('retiro', datosRetiro);
+    calcularPosicionesRanking(datosRetiro);
     S.screen='final'; render();
   };
   c.appendChild(retirar);
@@ -13865,6 +14098,31 @@ SCREENS.final = function(){
     sc.appendChild(el('p', null, `<span style="color:var(--ink-soft);font-size:12.5px;">La carrera de ${capitalizarNombre(j.nombre)} fue, sobre todo, la del vestuario y el césped: pocas distracciones, mucho fútbol.</span>`));
   }
   app.appendChild(sc);
+
+  const cRank = el('div','card');
+  cRank.appendChild(crearEyebrow('Comunidad'));
+  cRank.appendChild(el('h2',null,'Cómo te comparas'));
+  if(S.posicionesRanking === undefined){
+    cRank.appendChild(el('p',null,`<span style="color:var(--ink-soft);font-size:12.5px;">Calculando tu puesto entre todos los jugadores…</span>`));
+  } else if(S.posicionesRanking && S.posicionesRanking.length){
+    const lista = document.createElement('ul');
+    lista.style.cssText = 'margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;';
+    S.posicionesRanking.forEach(p=>{
+      const li = document.createElement('li');
+      li.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink);line-height:1.4;";
+      li.innerHTML = `<b style="color:var(--gold);">${p.puesto}º</b> de ${p.total} en ${p.def.fraseFinal}`;
+      lista.appendChild(li);
+    });
+    cRank.appendChild(lista);
+  } else {
+    cRank.appendChild(el('p',null,`<span style="color:var(--ink-soft);font-size:12.5px;">Todavía no hay suficientes carreras para comparar.</span>`));
+  }
+  const btnRankings = document.createElement('button');
+  btnRankings.className = 'btn-secondary'; btnRankings.style.marginTop = '14px';
+  btnRankings.textContent = 'Ver todos los rankings →';
+  btnRankings.onclick = ()=>{ S.pantallaAnteriorRankings = 'final'; S.rankingsDatos = undefined; S.screen = 'rankings'; render(); };
+  cRank.appendChild(btnRankings);
+  app.appendChild(cRank);
 
   const c = el('div','card');
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Empezar una nueva carrera';

@@ -173,13 +173,6 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
         </table>
       </div>
       <div class="card">
-        <h2>⏱️ Carreras más largas</h2>
-        <table>
-          <thead><tr><th></th><th>Jugador</th><th class="num">Temp.</th></tr></thead>
-          <tbody id="tabla-temporadas"></tbody>
-        </table>
-      </div>
-      <div class="card">
         <h2>🏆 Más títulos ganados</h2>
         <table>
           <thead><tr><th></th><th>Jugador</th><th class="num">Títulos</th></tr></thead>
@@ -357,7 +350,6 @@ async function cargarEstadisticas(){
   const porGoles = [...filasRetiro].sort((a,b)=> (b.datos?.goles||0) - (a.datos?.goles||0));
   const porAsistencias = [...filasRetiro].sort((a,b)=> (b.datos?.asistencias||0) - (a.datos?.asistencias||0));
   const porDinero = [...filasRetiro].sort((a,b)=> (b.datos?.dineroGanado||0) - (a.datos?.dineroGanado||0));
-  const porTemporadas = [...filasRetiro].sort((a,b)=> (b.datos?.temporada||0) - (a.datos?.temporada||0));
   const porTitulos = [...filasRetiro].sort((a,b)=> (b.datos?.titulos||0) - (a.datos?.titulos||0));
   const porValorMercado = filasRetiro.filter(f => (f.datos?.valorMercadoMaximo||0) > 0).sort((a,b)=> (b.datos?.valorMercadoMaximo||0) - (a.datos?.valorMercadoMaximo||0));
   const porBalonesOro = filasRetiro.filter(f => (f.datos?.balonesDeOro||0) > 0).sort((a,b)=> (b.datos?.balonesDeOro||0) - (a.datos?.balonesDeOro||0));
@@ -368,7 +360,6 @@ async function cargarEstadisticas(){
   pintarTablaRanking(document.getElementById('tabla-goles'), porGoles, 'goles');
   pintarTablaRanking(document.getElementById('tabla-asistencias'), porAsistencias, 'asistencias');
   pintarTablaRanking(document.getElementById('tabla-dinero'), porDinero, 'dineroGanado', formatearDinero);
-  pintarTablaRanking(document.getElementById('tabla-temporadas'), porTemporadas, 'temporada');
   pintarTablaRanking(document.getElementById('tabla-titulos'), porTitulos, 'titulos');
   pintarTablaRanking(document.getElementById('tabla-valormercado'), porValorMercado, 'valorMercadoMaximo', formatearDinero);
   pintarTablaRanking(document.getElementById('tabla-balonesoro'), porBalonesOro, 'balonesDeOro');
