@@ -628,14 +628,24 @@ aviso a pantalla completa ni de esquina tipo logro — es un descubrimiento más
 marcas registradas de cada club/federación. Para quien quiera meter los reales por su cuenta,
 `SCREENS.escudosPersonalizados` (accesible desde `SCREENS.menu`, sin necesidad de partida en
 curso — botón "Personalizar escudos") deja subir una imagen propia por club o por selección.
-- **100% local**: `localStorage['fichaje10_escudos_custom_v1']` = `{ clubes:{nombre:dataURL},
-  paises:{pais:dataURL} }` (`cargarEscudosPersonalizados`/`guardarEscudosPersonalizados`/
+- **100% local**: `localStorage['fichaje10_escudos_custom_v1']` = `{ clubes:{nombre:valor},
+  paises:{pais:valor} }` (`cargarEscudosPersonalizados`/`guardarEscudosPersonalizados`/
   `escudoPersonalizado(tipo,nombre)`/`fijarEscudoPersonalizado`/`quitarEscudoPersonalizado`). No
   se sube a ningún sitio (ni Supabase ni Umami) — el juego no distribuye ni empaqueta escudos
-  reales, cada jugador aporta los suyos para su propia copia.
-  `redimensionarImagenEscudo(file)` recorta la imagen a cuadrado (mismo criterio "cover" que el
-  resto de escudos) y la reduce a 160×160 antes de guardarla en PNG, para que cientos de escudos
-  personalizados no agoten la cuota de `localStorage`.
+  reales, cada jugador aporta los suyos para su propia copia. Cada `valor` es indistintamente un
+  `data:` URI (botón "Subir"/"Cambiar": `redimensionarImagenEscudo(file)` recorta la imagen a
+  cuadrado —mismo criterio "cover" que el resto de escudos— y la reduce a 160×160 antes de
+  guardarla en PNG, para que cientos de escudos no agoten la cuota de `localStorage`) o una URL
+  `http(s)://` normal pegada directamente (botón "URL", valida el prefijo antes de guardar) —
+  `<img src="...">` los pinta igual sin distinguirlos, así que el resto del código no necesita
+  saber cuál es cuál. La URL no se descarga ni se procesa: cuesta menos espacio, pero deja de
+  verse si el dispositivo está sin conexión o el host de la imagen cae.
+- **Exportar/importar en bloque** (`exportarEscudosPersonalizados`/`importarEscudosPersonalizados`,
+  botones en la propia pantalla): pensado para quien prepare un lote grande de escudos (suyo, no
+  del juego) y quiera aplicarlo de una vez en vez de subirlo uno a uno. Exportar descarga el JSON
+  tal cual; importar **fusiona** con lo que ya hubiera (no borra lo que el archivo no menciona),
+  descarta cualquier valor que no sea string y devuelve un error legible si el archivo no tiene
+  la forma `{clubes:{}, paises:{}}` esperada.
 - **Dos únicos puntos de enganche**, reutilizados por todo lo demás: `escudoSVG(nombre,...)`
   mira `escudoPersonalizado('clubes', nombre)` antes de generar nada; `banderaPais(pais,...)` y
   `svgBanderaCuadrada(pais)` (la de la pantalla de Cromos) miran `escudoPersonalizado('paises',

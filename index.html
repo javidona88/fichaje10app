@@ -741,16 +741,23 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .escudos-buscador:focus{ outline:none; border-color:var(--gold); }
 .escudos-aviso{ display:none; font-size:12.5px; font-weight:600; color:#D9495C; background:rgba(217,73,92,.12); border:1px solid rgba(217,73,92,.4); border-radius:9px; padding:9px 12px; margin-bottom:14px; }
 .escudos-aviso.show{ display:block; }
+.escudos-aviso.ok{ color:var(--gold); background:rgba(212,175,55,.1); border-color:rgba(212,175,55,.4); }
+.escudos-io{ display:flex; gap:8px; margin-bottom:14px; }
+.escudos-io button{
+  flex:1; font-family:'Space Grotesk',sans-serif; font-size:11.5px; font-weight:700; padding:9px 6px; border-radius:9px;
+  border:1px solid var(--line); background:none; color:var(--ink-soft); cursor:pointer;
+}
+.escudos-io button:hover{ border-color:var(--gold); color:var(--gold); }
 .escudos-contador{ font-size:11px; color:var(--ink-soft); margin-bottom:8px; }
 .escudos-vacio{ font-size:13px; color:var(--ink-soft); text-align:center; padding:24px 0; }
-.fila-escudo{ display:flex; align-items:center; gap:11px; padding:9px 2px; border-bottom:1px solid var(--line); }
+.fila-escudo{ display:flex; align-items:center; gap:9px; padding:9px 2px; border-bottom:1px solid var(--line); }
 .fila-escudo:last-child{ border-bottom:none; }
 .fila-escudo .miniatura{ width:34px; height:34px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .fila-escudo .miniatura svg, .fila-escudo .miniatura img{ display:block; }
-.fila-escudo .nombre{ flex:1; min-width:0; font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.fila-escudo .acciones{ display:flex; gap:6px; flex-shrink:0; }
+.fila-escudo .nombre{ flex:1; min-width:0; font-size:12.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fila-escudo .acciones{ display:flex; gap:5px; flex-shrink:0; }
 .fila-escudo .acciones button{
-  font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; padding:7px 11px; border-radius:8px;
+  font-family:'Space Grotesk',sans-serif; font-size:10.5px; font-weight:700; padding:6px 8px; border-radius:7px;
   border:1px solid var(--line); background:none; color:var(--ink-soft); cursor:pointer;
 }
 .fila-escudo .acciones button.cambiar{ border-color:var(--gold-dim); color:var(--gold); }
@@ -7525,6 +7532,43 @@ function quitarEscudoPersonalizado(tipo, nombre){
 function quitarTodosLosEscudosPersonalizados(){
   guardarEscudosPersonalizados({ clubes:{}, paises:{} });
 }
+// Exportar/importar en bloque: el valor de cada clave puede ser tanto un data: URI (subido como
+// archivo) como una URL http(s) normal (pegada directamente) — da igual, ambos casos se guardan
+// como el mismo string y <img src="..."> los pinta exactamente igual, sin distinción en el resto
+// del código. Pensado para que quien prepare un lote de escudos (suyo, no del juego) lo aplique
+// de golpe en vez de subirlos uno a uno.
+function exportarEscudosPersonalizados(){
+  const datos = cargarEscudosPersonalizados();
+  const blob = new Blob([JSON.stringify(datos, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'fichaje10-escudos-personalizados.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+// Fusiona con lo que ya hubiera (no borra lo que el archivo importado no menciona). Devuelve
+// {ok, clubes, paises} o {ok:false, error} si el archivo no tiene la forma esperada.
+function importarEscudosPersonalizados(objeto){
+  if(!objeto || typeof objeto !== 'object') return { ok:false, error:'El archivo no tiene el formato esperado.' };
+  const limpiar = (campo)=>{
+    const entrada = objeto[campo];
+    if(entrada === undefined) return {};
+    if(typeof entrada !== 'object' || entrada === null) throw new Error('formato');
+    const limpio = {};
+    Object.entries(entrada).forEach(([nombre,valor])=>{
+      if(typeof nombre === 'string' && typeof valor === 'string' && valor.length) limpio[nombre] = valor;
+    });
+    return limpio;
+  };
+  let clubesNuevos, paisesNuevos;
+  try{ clubesNuevos = limpiar('clubes'); paisesNuevos = limpiar('paises'); }
+  catch(e){ return { ok:false, error:'El archivo no tiene el formato esperado.' }; }
+  const actual = cargarEscudosPersonalizados();
+  const combinado = { clubes: { ...actual.clubes, ...clubesNuevos }, paises: { ...actual.paises, ...paisesNuevos } };
+  const ok = guardarEscudosPersonalizados(combinado);
+  if(!ok) return { ok:false, error:'No hay espacio suficiente para importar todo el archivo.' };
+  return { ok:true, clubes: Object.keys(clubesNuevos).length, paises: Object.keys(paisesNuevos).length };
+}
 // Lee el archivo elegido, lo recorta a cuadrado (mismo criterio "cover" que el resto de escudos)
 // y lo reduce a un tamaño de icono — así cientos de escudos personalizados no agotan el
 // localStorage (una foto de móvil sin redimensionar podría pesar varios MB ella sola).
@@ -10927,12 +10971,43 @@ SCREENS.escudosPersonalizados = function(){
   // sin partida activa) y esta pantalla es accesible sin ninguna, así que no sirve aquí.
   const aviso = el('div','escudos-aviso');
   c.appendChild(aviso);
-  function mostrarAvisoEscudos(msg){
+  function mostrarAvisoEscudos(msg, ok){
     aviso.textContent = msg;
+    aviso.classList.toggle('ok', !!ok);
     aviso.classList.add('show');
     clearTimeout(aviso._t);
     aviso._t = setTimeout(()=> aviso.classList.remove('show'), 4200);
   }
+
+  const filaIO = el('div','escudos-io');
+  const btnExportar = document.createElement('button');
+  btnExportar.textContent = 'Exportar todo';
+  btnExportar.onclick = ()=> exportarEscudosPersonalizados();
+  filaIO.appendChild(btnExportar);
+  const btnImportar = document.createElement('button');
+  btnImportar.textContent = 'Importar desde archivo';
+  const inputImportar = document.createElement('input');
+  inputImportar.type = 'file';
+  inputImportar.accept = 'application/json';
+  inputImportar.style.display = 'none';
+  btnImportar.onclick = ()=> inputImportar.click();
+  inputImportar.onchange = async ()=>{
+    const file = inputImportar.files && inputImportar.files[0];
+    inputImportar.value = '';
+    if(!file) return;
+    try{
+      const texto = await file.text();
+      const resultado = importarEscudosPersonalizados(JSON.parse(texto));
+      if(!resultado.ok){ mostrarAvisoEscudos(resultado.error); return; }
+      mostrarAvisoEscudos(`Importados ${resultado.clubes} clubes y ${resultado.paises} selecciones.`, true);
+      pintarFilas();
+    }catch(e){
+      mostrarAvisoEscudos('El archivo no es un JSON válido.');
+    }
+  };
+  filaIO.appendChild(btnImportar);
+  filaIO.appendChild(inputImportar);
+  c.appendChild(filaIO);
 
   if(S.escudosVista === undefined) S.escudosVista = 'clubes';
   const tabs = el('div','coleccion-tabs');
@@ -11002,6 +11077,21 @@ SCREENS.escudosPersonalizados = function(){
         inputArchivo.click();
       };
       acciones.appendChild(btnCambiar);
+      const btnUrl = document.createElement('button');
+      btnUrl.className = 'url';
+      btnUrl.textContent = 'URL';
+      btnUrl.onclick = ()=>{
+        const actual = escudoPersonalizado(tipo, nombre);
+        const valor = prompt(`Pega la URL de la imagen para "${nombre}":`, actual && !actual.startsWith('data:') ? actual : '');
+        if(valor === null) return;
+        const url = valor.trim();
+        if(!url) return;
+        if(!/^https?:\/\//i.test(url)){ mostrarAvisoEscudos('Tiene que ser una URL que empiece por http:// o https://'); return; }
+        const ok = fijarEscudoPersonalizado(tipo, nombre, url);
+        if(!ok){ mostrarAvisoEscudos('No se ha podido guardar.'); return; }
+        pintarFilas();
+      };
+      acciones.appendChild(btnUrl);
       if(tieneCustom){
         const btnQuitar = document.createElement('button');
         btnQuitar.className = 'quitar';
