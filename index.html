@@ -3651,7 +3651,8 @@ const VERSION_JUEGO = 'v1.4.5';
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
   { version:'v1.4.5', titulo:'Las estadísticas ya no duplican una carrera repetida', cambios:[
-    'Corregido: si recargabas un guardado anterior a un retiro y volvías a retirarte, esa misma carrera se contaba dos veces en stats.html. Ahora cada carrera lleva un identificador propio y solo se cuenta una vez, aunque la termines más de una vez.'
+    'Corregido: si recargabas un guardado anterior a un retiro y volvías a retirarte, esa misma carrera se contaba dos veces en stats.html. Ahora cada carrera lleva un identificador propio y solo se cuenta una vez (la primera), aunque la termines más de una vez.',
+    'stats.html: nueva caja "Fichaje 10, en cifras" con los totales colectivos de todas las carreras (goles, asistencias, partidos, títulos, dinero, cuántas acabaron en el extranjero), más rankings de Balones de Oro, títulos con la selección, ascensos logrados y mejor promedio goleador, y desgloses por club de retiro y versión jugada.'
   ]},
   { version:'v1.4.4', titulo:'Tiradas naturales y Balón de Oro más justo', cambios:[
     'Al sacar un 1 o un 20 natural, la tirada ya no muestra la suma con el bono: se ve directamente "1 NATURAL" / "20 NATURAL", porque el bono no influye en el resultado.',

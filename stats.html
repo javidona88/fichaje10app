@@ -56,6 +56,7 @@ body{
 .barra-fila{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
 .barra-fila:last-child{ margin-bottom:0; }
 .barra-lbl{ width:120px; flex-shrink:0; font-size:12.5px; color:var(--ink); text-transform:capitalize; overflow-wrap:anywhere; line-height:1.3; }
+#barras-version .barra-lbl{ text-transform:none; }
 .barra-track{ flex:1; height:14px; background:rgba(255,255,255,0.05); border-radius:7px; overflow:hidden; }
 .barra-fill{ height:100%; background:linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius:7px; min-width:2px; }
 .barra-val{ width:40px; text-align:right; flex-shrink:0; font-size:12.5px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; }
@@ -106,6 +107,18 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
     </div>
 
     <div class="card">
+      <h2>⚽ Fichaje 10, en cifras</h2>
+      <div class="tiles" style="margin-bottom:0;">
+        <div class="tile"><div class="num" id="c-goles">—</div><div class="lbl">Goles marcados entre todos</div></div>
+        <div class="tile"><div class="num" id="c-asistencias">—</div><div class="lbl">Asistencias repartidas</div></div>
+        <div class="tile"><div class="num" id="c-partidos">—</div><div class="lbl">Partidos disputados</div></div>
+        <div class="tile"><div class="num" id="c-titulos">—</div><div class="lbl">Títulos levantados</div></div>
+        <div class="tile"><div class="num" id="c-dinero">—</div><div class="lbl">Dinero generado</div></div>
+        <div class="tile"><div class="num" id="c-extranjero">—</div><div class="lbl">Carreras acabadas fuera de España</div></div>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>Dispositivo</h2>
       <div id="barras-dispositivo"></div>
     </div>
@@ -124,6 +137,16 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
     <div class="card">
       <h2>País de la carrera</h2>
       <div id="barras-pais"></div>
+    </div>
+
+    <div class="card">
+      <h2>Club en el que se retiró</h2>
+      <div id="barras-clubfinal"></div>
+    </div>
+
+    <div class="card">
+      <h2>Versión jugada</h2>
+      <div id="barras-version"></div>
     </div>
 
     <div class="tablas-grid">
@@ -168,6 +191,35 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
           <thead><tr><th></th><th>Jugador</th><th class="num">Máximo</th></tr></thead>
           <tbody id="tabla-valormercado"></tbody>
         </table>
+      </div>
+      <div class="card">
+        <h2>🥇 Más Balones de Oro</h2>
+        <table>
+          <thead><tr><th></th><th>Jugador</th><th class="num">Balones</th></tr></thead>
+          <tbody id="tabla-balonesoro"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>🎖️ Más títulos con la selección</h2>
+        <table>
+          <thead><tr><th></th><th>Jugador</th><th class="num">Títulos</th></tr></thead>
+          <tbody id="tabla-titulosseleccion"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>⬆️ Más ascensos logrados</h2>
+        <table>
+          <thead><tr><th></th><th>Jugador</th><th class="num">Ascensos</th></tr></thead>
+          <tbody id="tabla-ascensos"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>⚡ Mejor promedio goleador</h2>
+        <table>
+          <thead><tr><th></th><th>Jugador</th><th class="num">Goles/temp.</th></tr></thead>
+          <tbody id="tabla-mediagoles"></tbody>
+        </table>
+        <div class="nota">Solo carreras de 3 temporadas o más, para no premiar carreras muy cortas.</div>
       </div>
     </div>
   </div>
@@ -252,9 +304,9 @@ function pintarTablaRanking(contenedor, filas, claveValor, formatear){
 // vuelves a terminarla, el suceso "retiro" se dispara otra vez: sin esto contaría como dos
 // carreras distintas en las estadísticas. `idCarrera` (UUID fijado en nuevoJugador, ver
 // CLAUDE.md) identifica la partida en sí, así que si dos filas comparten idCarrera solo se
-// cuenta una vez (la más reciente, que es la que el jugador decidió como final). Las filas
-// de antes de este cambio no llevan idCarrera y no se pueden deduplicar entre sí — se cuentan
-// todas, como hasta ahora.
+// cuenta una vez (la primera, para que no se pueda reintentar el final hasta sacar mejores
+// números). Las filas de antes de este cambio no llevan idCarrera y no se pueden deduplicar
+// entre sí — se cuentan todas, como hasta ahora.
 function deduplicarPorCarrera(filas){
   const porId = new Map();
   const sinId = [];
@@ -299,6 +351,15 @@ async function cargarEstadisticas(){
   const porTemporadas = [...filasRetiro].sort((a,b)=> (b.datos?.temporada||0) - (a.datos?.temporada||0));
   const porTitulos = [...filasRetiro].sort((a,b)=> (b.datos?.titulos||0) - (a.datos?.titulos||0));
   const porValorMercado = filasRetiro.filter(f => (f.datos?.valorMercadoMaximo||0) > 0).sort((a,b)=> (b.datos?.valorMercadoMaximo||0) - (a.datos?.valorMercadoMaximo||0));
+  const porBalonesOro = filasRetiro.filter(f => (f.datos?.balonesDeOro||0) > 0).sort((a,b)=> (b.datos?.balonesDeOro||0) - (a.datos?.balonesDeOro||0));
+  const porTitulosSeleccion = filasRetiro.filter(f => (f.datos?.titulosSeleccion||0) > 0).sort((a,b)=> (b.datos?.titulosSeleccion||0) - (a.datos?.titulosSeleccion||0));
+  const porAscensos = filasRetiro.filter(f => (f.datos?.ascensos||0) > 0).sort((a,b)=> (b.datos?.ascensos||0) - (a.datos?.ascensos||0));
+  // Promedio de goles por temporada: solo carreras de 3+ temporadas, para que un debut fulgurante
+  // de una sola temporada no encabece el ranking por pura casualidad de muestra pequeña.
+  const porMediaGoles = filasRetiro
+    .filter(f => (f.datos?.temporada||0) >= 3)
+    .map(f => ({ ...f, datos: { ...f.datos, mediaGoles: Math.round((f.datos.goles||0) / f.datos.temporada * 10) / 10 } }))
+    .sort((a,b)=> b.datos.mediaGoles - a.datos.mediaGoles);
 
   pintarTablaRanking(document.getElementById('tabla-goles'), porGoles, 'goles');
   pintarTablaRanking(document.getElementById('tabla-asistencias'), porAsistencias, 'asistencias');
@@ -306,6 +367,10 @@ async function cargarEstadisticas(){
   pintarTablaRanking(document.getElementById('tabla-temporadas'), porTemporadas, 'temporada');
   pintarTablaRanking(document.getElementById('tabla-titulos'), porTitulos, 'titulos');
   pintarTablaRanking(document.getElementById('tabla-valormercado'), porValorMercado, 'valorMercadoMaximo', formatearDinero);
+  pintarTablaRanking(document.getElementById('tabla-balonesoro'), porBalonesOro, 'balonesDeOro');
+  pintarTablaRanking(document.getElementById('tabla-titulosseleccion'), porTitulosSeleccion, 'titulosSeleccion');
+  pintarTablaRanking(document.getElementById('tabla-ascensos'), porAscensos, 'ascensos');
+  pintarTablaRanking(document.getElementById('tabla-mediagoles'), porMediaGoles, 'mediaGoles');
 
   const conteoCategoria = {};
   filasRetiro.forEach(f=>{ const c = f.datos?.categoriaFinal || 'desconocida'; conteoCategoria[c] = (conteoCategoria[c]||0)+1; });
@@ -314,6 +379,28 @@ async function cargarEstadisticas(){
   const conteoPais = {};
   filasRetiro.forEach(f=>{ const p = f.datos?.pais || 'desconocido'; conteoPais[p] = (conteoPais[p]||0)+1; });
   pintarBarras(document.getElementById('barras-pais'), conteoPais);
+
+  const conteoClubFinal = {};
+  filasRetiro.forEach(f=>{ const c = f.datos?.clubFinal; if(c) conteoClubFinal[c] = (conteoClubFinal[c]||0)+1; });
+  const topClubes = Object.fromEntries(Object.entries(conteoClubFinal).sort((a,b)=>b[1]-a[1]).slice(0,10));
+  pintarBarras(document.getElementById('barras-clubfinal'), topClubes);
+
+  // Cifras colectivas: suma de todas las carreras deduplicadas. dineroGanado/valorMercadoMaximo
+  // no tienen por qué estar en la misma moneda percibida por el jugador, pero sí son sumables
+  // sin problema (ambos en euros de la propia economía del juego).
+  const sumar = clave => filasRetiro.reduce((acc,f)=> acc + (f.datos?.[clave]||0), 0);
+  document.getElementById('c-goles').textContent = sumar('goles').toLocaleString('es-ES');
+  document.getElementById('c-asistencias').textContent = sumar('asistencias').toLocaleString('es-ES');
+  document.getElementById('c-partidos').textContent = sumar('partidos').toLocaleString('es-ES');
+  document.getElementById('c-titulos').textContent = sumar('titulos').toLocaleString('es-ES');
+  document.getElementById('c-dinero').textContent = formatearDinero(sumar('dineroGanado'));
+  const conExtranjero = filasRetiro.filter(f => f.datos?.extranjero === true).length;
+  document.getElementById('c-extranjero').textContent = filasRetiro.length ? `${conExtranjero}/${filasRetiro.length}` : '—';
+
+  const { datos: filasVersion } = await consultarSupabase('eventos?select=version_juego&limit=10000');
+  const conteoVersion = {};
+  filasVersion.forEach(f=>{ const v = f.version_juego || 'desconocida'; conteoVersion[v] = (conteoVersion[v]||0)+1; });
+  pintarBarras(document.getElementById('barras-version'), conteoVersion);
 }
 
 (async function(){
