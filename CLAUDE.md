@@ -634,12 +634,22 @@ curso — botón "Personalizar escudos") deja subir una imagen propia por club o
   se sube a ningún sitio (ni Supabase ni Umami) — el juego no distribuye ni empaqueta escudos
   reales, cada jugador aporta los suyos para su propia copia. Cada `valor` es indistintamente un
   `data:` URI (botón "Subir"/"Cambiar": `redimensionarImagenEscudo(file)` recorta la imagen a
-  cuadrado —mismo criterio "cover" que el resto de escudos— y la reduce a 160×160 antes de
-  guardarla en PNG, para que cientos de escudos no agoten la cuota de `localStorage`) o una URL
-  `http(s)://` normal pegada directamente (botón "URL", valida el prefijo antes de guardar) —
-  `<img src="...">` los pinta igual sin distinguirlos, así que el resto del código no necesita
-  saber cuál es cuál. La URL no se descarga ni se procesa: cuesta menos espacio, pero deja de
-  verse si el dispositivo está sin conexión o el host de la imagen cae.
+  cuadrado —mismo criterio "cover" que el resto de escudos—, la reduce a 160×160 y le quita el
+  fondo blanco antes de guardarla en PNG, para que cientos de escudos no agoten la cuota de
+  `localStorage`) o una URL `http(s)://` normal pegada directamente (botón "URL", valida el
+  prefijo antes de guardar) — `<img src="...">` los pinta igual sin distinguirlos, así que el
+  resto del código no necesita saber cuál es cuál.
+  - **Quitar fondo blanco** (`quitarFondoBlanco(ctx, tam)`): muchas imágenes "sin fondo" que
+    circulan por internet no llevan transparencia real, llevan blanco quemado en el propio
+    píxel. Se inunda (flood fill) el blanco desde los 4 bordes hacia dentro — así solo se vacía
+    el fondo que TOCA el borde; un blanco de verdad en mitad del escudo (una estrella, una
+    letra) no se toca porque no está conectado al borde. Se aplica siempre a los archivos
+    subidos; para una URL se intenta lo mismo vía `procesarUrlParaEscudo(url)` (crea una imagen
+    con `crossOrigin:'anonymous'` y repite el mismo proceso) — si el servidor de esa URL no
+    permite CORS, leer los píxeles del canvas falla (queda "contaminado") y se cae al
+    comportamiento antiguo: guardar la URL tal cual, sin procesar ni quitar el fondo.
+  - La URL sin procesar no se descarga: cuesta menos espacio, pero deja de verse si el
+    dispositivo está sin conexión o el host de la imagen cae.
 - **Exportar/importar en bloque** (`exportarEscudosPersonalizados`/`importarEscudosPersonalizados`,
   botones en la propia pantalla): pensado para quien prepare un lote grande de escudos (suyo, no
   del juego) y quiera aplicarlo de una vez en vez de subirlo uno a uno. Exportar descarga el JSON
