@@ -12,6 +12,10 @@ publican bajo la MISMA versión ya en curso (commit y push normales, sin tocar `
 refresco en dispositivos instalados.
 Desplegado en GitHub Pages: `https://javidona88.github.io/fichaje10app/` (repo `javidona88/fichaje10app`,
 workflow `.github/workflows/deploy.yml` en cada push a `main`).
+**No publicar en `main` (producción) por iniciativa propia** — solo cuando el usuario lo pida
+explícitamente ("publica", "despliega", etc.). El trabajo normal (commit + push) va siempre a la
+rama de desarrollo (`claude/v1-3-blank-screen-ts6sfi`, el "entorno de pruebas"); solo un pedido
+explícito de publicar hace el fast-forward de esa rama a `main`.
 
 ## Historial de desarrollo
 
@@ -625,48 +629,75 @@ aviso a pantalla completa ni de esquina tipo logro — es un descubrimiento más
 
 ### Escudos personalizados — mod local, opcional
 `escudoSVG` genera siempre un escudo genérico (iniciales + colores), **nunca el oficial**: son
-marcas registradas de cada club/federación. Para quien quiera meter los reales por su cuenta,
-`SCREENS.escudosPersonalizados` (accesible desde `SCREENS.menu`, sin necesidad de partida en
-curso — botón "Personalizar escudos") deja subir una imagen propia por club o por selección.
+marcas registradas de cada club/federación/liga. Para quien quiera meter los reales por su
+cuenta, `SCREENS.escudosPersonalizados` (accesible desde `SCREENS.menu`, sin necesidad de
+partida en curso — botón "Personalizar escudos") deja subir una imagen propia por **club**,
+por **selección nacional** o por **liga/categoría** — tres pestañas independientes.
+- **País ≠ selección — no confundir**: la bandera geográfica de un país (nacionalidad de un
+  jugador o de un club, `banderaPais(pais,tamano)`) **no se personaliza nunca** — "las banderas
+  de los países son las que son". Lo que sí se personaliza es el escudo de la SELECCIÓN nacional
+  que compite en torneos (`escudoSeleccion(pais,tamano)`, tipo `'selecciones'`): sin imagen
+  propia cae en la misma bandera de `banderaPais`, así que es un añadido transparente. Los
+  textos de la pantalla lo dejan explícito para que no se preste a confusión.
+  - `escudoSeleccion` se usa allí donde el escudo representa al EQUIPO nacional en un partido/
+    torneo: `SCREENS.primeraConvocatoria`, el rival de `SCREENS.torneoFinalIntro`/
+    `torneoFinalReveal` cuando `esSeleccion`, y la fila "Selección española" de `SCREENS.final`.
+    `svgBanderaCuadrada` (la pantalla de Cromos) también es tipo `'selecciones'`, porque un
+    cromo es de la selección (apodo, curiosidades de su fútbol), no del país en abstracto.
+  - Todos los demás usos de `banderaPais` (país de origen del jugador, país de un club
+    extranjero, categoría/país de una oferta o negociación...) son geográficos y se quedan tal
+    cual, sin tocar.
 - **100% local**: `localStorage['fichaje10_escudos_custom_v1']` = `{ clubes:{nombre:valor},
-  paises:{pais:valor} }` (`cargarEscudosPersonalizados`/`guardarEscudosPersonalizados`/
-  `escudoPersonalizado(tipo,nombre)`/`fijarEscudoPersonalizado`/`quitarEscudoPersonalizado`). No
-  se sube a ningún sitio (ni Supabase ni Umami) — el juego no distribuye ni empaqueta escudos
-  reales, cada jugador aporta los suyos para su propia copia. Cada `valor` es indistintamente un
-  `data:` URI (botón "Subir"/"Cambiar": `redimensionarImagenEscudo(file)` recorta la imagen a
-  cuadrado —mismo criterio "cover" que el resto de escudos—, la reduce a 160×160 y le quita el
-  fondo blanco antes de guardarla en PNG, para que cientos de escudos no agoten la cuota de
-  `localStorage`) o una URL `http(s)://` normal pegada directamente (botón "URL", valida el
-  prefijo antes de guardar) — `<img src="...">` los pinta igual sin distinguirlos, así que el
-  resto del código no necesita saber cuál es cuál.
-  - **Quitar fondo blanco** (`quitarFondoBlanco(ctx, tam)`): muchas imágenes "sin fondo" que
-    circulan por internet no llevan transparencia real, llevan blanco quemado en el propio
-    píxel. Se inunda (flood fill) el blanco desde los 4 bordes hacia dentro — así solo se vacía
-    el fondo que TOCA el borde; un blanco de verdad en mitad del escudo (una estrella, una
+  selecciones:{pais:valor}, ligas:{nombre:valor} }` (`cargarEscudosPersonalizados` migra sola
+  una clave `paises` más antigua a `selecciones` la primera vez que se lee —
+  `guardarEscudosPersonalizados`/`escudoPersonalizado(tipo,nombre)`/`fijarEscudoPersonalizado`/
+  `quitarEscudoPersonalizado`, `tipo` es `'clubes'|'selecciones'|'ligas'`). No se sube a ningún
+  sitio (ni Supabase ni Umami) — el juego no distribuye ni empaqueta escudos reales, cada
+  jugador aporta los suyos para su propia copia. Cada `valor` es indistintamente un `data:` URI
+  (subido como archivo) o una URL `http(s)://` normal pegada directamente — `<img src="...">`
+  los pinta igual sin distinguirlos, así que el resto del código no necesita saber cuál es cuál.
+  - **Clubes y selecciones** (botón "Subir"/"Cambiar": `redimensionarImagenEscudo(file)`) se
+    recortan a cuadrado —mismo criterio "cover" que el resto de escudos— y se reducen a 160×160.
+  - **Ligas** (`redimensionarImagenLiga(file)`) NO se recortan a cuadrado: muchos logos de liga
+    son un logotipo ancho (texto), y forzarlos a un "cover" cuadrado los mutilaría. Se ajustan
+    enteros dentro de una caja de 240×120 conservando su proporción (letterbox,
+    `ajustarImagenLigaEnCanvas`). Una liga **no tiene escudo generado de reserva**: sin imagen
+    propia no se pinta nada (`logoLiga` devuelve `''`), el nombre de la liga ya se ve como texto
+    en todos los sitios donde se usa — la miniatura del buscador muestra un hueco con borde de
+    puntos en vez de romperse.
+  - **Quitar fondo blanco** (`quitarFondoBlanco(ctx, ancho, alto?)`): muchas imágenes "sin
+    fondo" que circulan por internet no llevan transparencia real, llevan blanco quemado en el
+    propio píxel. Se inunda (flood fill) el blanco desde los 4 bordes hacia dentro — así solo se
+    vacía el fondo que TOCA el borde; un blanco de verdad en mitad del escudo (una estrella, una
     letra) no se toca porque no está conectado al borde. Se aplica siempre a los archivos
-    subidos; para una URL se intenta lo mismo vía `procesarUrlParaEscudo(url)` (crea una imagen
-    con `crossOrigin:'anonymous'` y repite el mismo proceso) — si el servidor de esa URL no
-    permite CORS, leer los píxeles del canvas falla (queda "contaminado") y se cae al
-    comportamiento antiguo: guardar la URL tal cual, sin procesar ni quitar el fondo.
+    subidos (clubes/selecciones y ligas); para una URL se intenta lo mismo vía
+    `procesarUrlParaEscudo(url)` / `procesarUrlParaLiga(url)` (crea una imagen con
+    `crossOrigin:'anonymous'` y repite el mismo proceso) — si el servidor de esa URL no permite
+    CORS, leer los píxeles del canvas falla (queda "contaminado") y se cae al comportamiento
+    antiguo: guardar la URL tal cual, sin procesar ni quitar el fondo.
   - La URL sin procesar no se descarga: cuesta menos espacio, pero deja de verse si el
     dispositivo está sin conexión o el host de la imagen cae.
 - **Exportar/importar en bloque** (`exportarEscudosPersonalizados`/`importarEscudosPersonalizados`,
   botones en la propia pantalla): pensado para quien prepare un lote grande de escudos (suyo, no
   del juego) y quiera aplicarlo de una vez en vez de subirlo uno a uno. Exportar descarga el JSON
-  tal cual; importar **fusiona** con lo que ya hubiera (no borra lo que el archivo no menciona),
-  descarta cualquier valor que no sea string y devuelve un error legible si el archivo no tiene
-  la forma `{clubes:{}, paises:{}}` esperada.
-- **Dos únicos puntos de enganche**, reutilizados por todo lo demás: `escudoSVG(nombre,...)`
-  mira `escudoPersonalizado('clubes', nombre)` antes de generar nada; `banderaPais(pais,...)` y
-  `svgBanderaCuadrada(pais)` (la de la pantalla de Cromos) miran `escudoPersonalizado('paises',
-  pais)`. Si hay imagen, se devuelve un `<img>` en vez de `<svg>` — todas las llamadas ya
-  vuelcan el resultado en `innerHTML`, así que es un reemplazo transparente en cualquier
-  pantalla del juego sin tocar cada sitio donde se usan.
-- **Listas maestras del buscador**: `todosLosClubesDelJuego()` / `todosLosPaisesDelJuego()` se
-  calculan a partir de `CLUBES_POR_CATEGORIA` + `CLUBES_EXTRANJERO` / `BANDERAS_SVG` — nunca a
-  mano, para no desincronizarse si se añaden clubes o países. `coloresClubDelJuego(nombre)`
-  (con `_mapaColoresClubes` cacheado la primera vez) da los colores reales de cada club para que
-  la miniatura del buscador coincida con el escudo que se ve en el resto del juego.
+  tal cual (`{clubes, selecciones, ligas}`); importar **fusiona** con lo que ya hubiera (no borra
+  lo que el archivo no menciona), acepta también un archivo exportado antes de separar
+  "selecciones" de "paises" (backup viejo), descarta cualquier valor que no sea string y devuelve
+  un error legible si el archivo no tiene la forma esperada.
+- **Tres únicos puntos de enganche**, reutilizados por todo lo demás: `escudoSVG(nombre,...)`
+  mira `escudoPersonalizado('clubes', nombre)`; `escudoSeleccion(pais,...)` y
+  `svgBanderaCuadrada(pais)` (Cromos) miran `escudoPersonalizado('selecciones', pais)`;
+  `logoLiga(nombre,...)` mira `escudoPersonalizado('ligas', nombre)`. Si hay imagen, se devuelve
+  un `<img>` en vez de `<svg>`/nada — todas las llamadas ya vuelcan el resultado en `innerHTML`,
+  así que es un reemplazo transparente en cualquier pantalla sin tocarlas una a una.
+  `logoLiga` está enganchado en `SCREENS.ofertas`, `SCREENS.negociacionFichaje` y la cabecera de
+  `SCREENS.tabClub` — quien quiera extenderlo a más sitios, mismo patrón.
+- **Listas maestras del buscador**: `todosLosClubesDelJuego()` / `todosLosPaisesDelJuego()` /
+  `todasLasLigasDelJuego()` se calculan a partir de `CLUBES_POR_CATEGORIA` + `CLUBES_EXTRANJERO`
+  / `BANDERAS_SVG` / `CATEGORIAS` + los `liga` de `CLUBES_EXTRANJERO` — nunca a mano, para no
+  desincronizarse si se añaden clubes, países o ligas. `coloresClubDelJuego(nombre)` (con
+  `_mapaColoresClubes` cacheado la primera vez) da los colores reales de cada club para que la
+  miniatura del buscador coincida con el escudo que se ve en el resto del juego.
 - **Filiales sin escudo propio**: en la vida real, un filial lleva el mismo escudo que su primer
   equipo. `escudoSVG(nombre,...)` empieza comprobando `primerEquipoDeFilial(nombre)` (la misma
   función que ya usaba `SCREENS.ofertas` para el badge "Filial del X") y, si `nombre` es un

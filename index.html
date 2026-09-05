@@ -753,7 +753,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .fila-escudo{ display:flex; align-items:center; gap:9px; padding:9px 2px; border-bottom:1px solid var(--line); }
 .fila-escudo:last-child{ border-bottom:none; }
 .fila-escudo .miniatura{ width:34px; height:34px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-.fila-escudo .miniatura svg, .fila-escudo .miniatura img{ display:block; }
+.fila-escudo .miniatura svg, .fila-escudo .miniatura img{ display:block; max-width:100%; max-height:100%; }
+.fila-escudo .miniatura.vacia{ border:1.5px dashed var(--line); border-radius:8px; }
 .fila-escudo .nombre{ flex:1; min-width:0; font-size:12.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .fila-escudo .acciones{ display:flex; gap:5px; flex-shrink:0; }
 .fila-escudo .acciones button{
@@ -7507,14 +7508,28 @@ function nombreCopaNacional(pais){
   return COPA_NACIONAL_POR_PAIS[pais] || "Copa nacional";
 }
 /* ============ Escudos personalizados (mod local, opcional) ============
-   Cualquier jugador puede sustituir el escudo generado de un club, o la bandera de una
-   selección, por una imagen propia — pensado para quien quiera meter los escudos reales de
-   las federaciones/clubes por su cuenta, sin que el juego los incluya ni los distribuya (son
-   marcas registradas, ver escudoSVG). Todo vive SOLO en el localStorage de ese navegador
-   (fichaje10_escudos_custom_v1, { clubes:{nombre:dataURL}, paises:{pais:dataURL} }); nunca se
-   sube a ningún sitio. Gestión desde el menú principal — SCREENS.escudosPersonalizados. */
+   Cualquier jugador puede sustituir el escudo generado de un club, el de una selección nacional
+   o el logo de una liga/categoría, por una imagen propia — pensado para quien quiera meter los
+   reales por su cuenta, sin que el juego los incluya ni los distribuya (son marcas registradas,
+   ver escudoSVG). Todo vive SOLO en el localStorage de ese navegador (fichaje10_escudos_custom_v1,
+   { clubes:{nombre:valor}, selecciones:{pais:valor}, ligas:{nombre:valor} }); nunca se sube a
+   ningún sitio. Gestión desde el menú principal — SCREENS.escudosPersonalizados.
+   IMPORTANTE: "selecciones" es la identidad de la FEDERACIÓN/equipo nacional que juega torneos
+   (ver escudoSeleccion) — la bandera del PAÍS (nacionalidad de un jugador o de un club, ver
+   banderaPais) es un dato geográfico aparte y nunca se personaliza; son cosas distintas aunque
+   compartan el mismo nombre de país. */
 function cargarEscudosPersonalizados(){
-  try{ return JSON.parse(localStorage.getItem('fichaje10_escudos_custom_v1')) || { clubes:{}, paises:{} }; }catch(e){ return { clubes:{}, paises:{} }; }
+  const vacio = { clubes:{}, selecciones:{}, ligas:{} };
+  try{
+    const datos = JSON.parse(localStorage.getItem('fichaje10_escudos_custom_v1')) || {};
+    // Migración: la clave se llamaba "paises" antes de separar bandera de selección.
+    if(datos.paises && !datos.selecciones){
+      const normalizado = { clubes: datos.clubes||{}, selecciones: datos.paises, ligas: datos.ligas||{} };
+      guardarEscudosPersonalizados(normalizado);
+      return normalizado;
+    }
+    return { clubes: datos.clubes||{}, selecciones: datos.selecciones||{}, ligas: datos.ligas||{} };
+  }catch(e){ return vacio; }
 }
 function guardarEscudosPersonalizados(mapa){
   try{ localStorage.setItem('fichaje10_escudos_custom_v1', JSON.stringify(mapa)); return true; }catch(e){ return false; }
@@ -7535,8 +7550,9 @@ function quitarEscudoPersonalizado(tipo, nombre){
   guardarEscudosPersonalizados(mapa);
 }
 function quitarTodosLosEscudosPersonalizados(){
-  guardarEscudosPersonalizados({ clubes:{}, paises:{} });
+  guardarEscudosPersonalizados({ clubes:{}, selecciones:{}, ligas:{} });
 }
+const CAMPOS_ESCUDOS_PERSONALIZADOS = ['clubes', 'selecciones', 'ligas'];
 // Exportar/importar en bloque: el valor de cada clave puede ser tanto un data: URI (subido como
 // archivo) como una URL http(s) normal (pegada directamente) — da igual, ambos casos se guardan
 // como el mismo string y <img src="..."> los pinta exactamente igual, sin distinción en el resto
@@ -7551,8 +7567,10 @@ function exportarEscudosPersonalizados(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-// Fusiona con lo que ya hubiera (no borra lo que el archivo importado no menciona). Devuelve
-// {ok, clubes, paises} o {ok:false, error} si el archivo no tiene la forma esperada.
+// Fusiona con lo que ya hubiera (no borra lo que el archivo importado no menciona). Acepta
+// también un archivo exportado antes de separar "paises" en "selecciones", para no romper copias
+// de seguridad viejas. Devuelve {ok, clubes, selecciones, ligas} o {ok:false, error} si el
+// archivo no tiene la forma esperada.
 function importarEscudosPersonalizados(objeto){
   if(!objeto || typeof objeto !== 'object') return { ok:false, error:'El archivo no tiene el formato esperado.' };
   const limpiar = (campo)=>{
@@ -7565,14 +7583,16 @@ function importarEscudosPersonalizados(objeto){
     });
     return limpio;
   };
-  let clubesNuevos, paisesNuevos;
-  try{ clubesNuevos = limpiar('clubes'); paisesNuevos = limpiar('paises'); }
-  catch(e){ return { ok:false, error:'El archivo no tiene el formato esperado.' }; }
+  let nuevos;
+  try{
+    nuevos = { clubes: limpiar('clubes'), selecciones: { ...limpiar('paises'), ...limpiar('selecciones') }, ligas: limpiar('ligas') };
+  }catch(e){ return { ok:false, error:'El archivo no tiene el formato esperado.' }; }
   const actual = cargarEscudosPersonalizados();
-  const combinado = { clubes: { ...actual.clubes, ...clubesNuevos }, paises: { ...actual.paises, ...paisesNuevos } };
+  const combinado = {};
+  CAMPOS_ESCUDOS_PERSONALIZADOS.forEach(campo=>{ combinado[campo] = { ...actual[campo], ...nuevos[campo] }; });
   const ok = guardarEscudosPersonalizados(combinado);
   if(!ok) return { ok:false, error:'No hay espacio suficiente para importar todo el archivo.' };
-  return { ok:true, clubes: Object.keys(clubesNuevos).length, paises: Object.keys(paisesNuevos).length };
+  return { ok:true, clubes: Object.keys(nuevos.clubes).length, selecciones: Object.keys(nuevos.selecciones).length, ligas: Object.keys(nuevos.ligas).length };
 }
 // Muchas imágenes "recortadas" que la gente encuentra sueltas por internet no llevan
 // transparencia de verdad: lo que parece fondo transparente en el visor es en realidad blanco
@@ -7580,27 +7600,28 @@ function importarEscudosPersonalizados(objeto){
 // los cuatro bordes hacia dentro, así que solo se vacía el fondo que TOCA el borde de la imagen
 // — un detalle blanco de verdad en mitad del escudo (una estrella, una letra) no se toca porque
 // no está conectado con el borde.
-function quitarFondoBlanco(ctx, tam){
-  const datos = ctx.getImageData(0, 0, tam, tam);
+function quitarFondoBlanco(ctx, ancho, alto){
+  alto = alto === undefined ? ancho : alto;
+  const datos = ctx.getImageData(0, 0, ancho, alto);
   const px = datos.data;
   const UMBRAL = 240;
-  const visitado = new Uint8Array(tam * tam);
+  const visitado = new Uint8Array(ancho * alto);
   const cola = [];
   function encolarSiBlanco(x, y){
-    if(x < 0 || y < 0 || x >= tam || y >= tam) return;
-    const idx = y * tam + x;
+    if(x < 0 || y < 0 || x >= ancho || y >= alto) return;
+    const idx = y * ancho + x;
     if(visitado[idx]) return;
     const i = idx * 4;
     if(px[i] < UMBRAL || px[i+1] < UMBRAL || px[i+2] < UMBRAL) return;
     visitado[idx] = 1;
     cola.push(idx);
   }
-  for(let x=0; x<tam; x++){ encolarSiBlanco(x,0); encolarSiBlanco(x,tam-1); }
-  for(let y=0; y<tam; y++){ encolarSiBlanco(0,y); encolarSiBlanco(tam-1,y); }
+  for(let x=0; x<ancho; x++){ encolarSiBlanco(x,0); encolarSiBlanco(x,alto-1); }
+  for(let y=0; y<alto; y++){ encolarSiBlanco(0,y); encolarSiBlanco(ancho-1,y); }
   let cabeza = 0;
   while(cabeza < cola.length){
     const idx = cola[cabeza++];
-    const x = idx % tam, y = (idx / tam) | 0;
+    const x = idx % ancho, y = (idx / ancho) | 0;
     px[idx*4 + 3] = 0;
     encolarSiBlanco(x+1,y); encolarSiBlanco(x-1,y); encolarSiBlanco(x,y+1); encolarSiBlanco(x,y-1);
   }
@@ -7658,6 +7679,54 @@ function procesarUrlParaEscudo(url){
     img.src = url;
   });
 }
+// El logo de una liga NO se recorta a cuadrado: muchos son un logotipo ancho (texto), y
+// forzarlos a un "cover" cuadrado los mutilaría. Se ajustan enteros dentro de una caja
+// rectangular (letterbox, conservando su proporción) antes de quitar el fondo blanco.
+function ajustarImagenLigaEnCanvas(img, ctx, ancho, alto){
+  const escala = Math.min(ancho / img.width, alto / img.height, 1) || 1;
+  const w = img.width * escala, h = img.height * escala;
+  ctx.drawImage(img, (ancho - w) / 2, (alto - h) / 2, w, h);
+}
+function redimensionarImagenLiga(file){
+  const ANCHO = 240, ALTO = 120;
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=> reject(new Error('No se pudo leer el archivo'));
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onerror = ()=> reject(new Error('No es una imagen válida'));
+      img.onload = ()=>{
+        const canvas = document.createElement('canvas');
+        canvas.width = ANCHO; canvas.height = ALTO;
+        const ctx = canvas.getContext('2d');
+        ajustarImagenLigaEnCanvas(img, ctx, ANCHO, ALTO);
+        quitarFondoBlanco(ctx, ANCHO, ALTO);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function procesarUrlParaLiga(url){
+  const ANCHO = 240, ALTO = 120;
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onerror = ()=> reject(new Error('No se pudo cargar esa URL'));
+    img.onload = ()=>{
+      try{
+        const canvas = document.createElement('canvas');
+        canvas.width = ANCHO; canvas.height = ALTO;
+        const ctx = canvas.getContext('2d');
+        ajustarImagenLigaEnCanvas(img, ctx, ANCHO, ALTO);
+        quitarFondoBlanco(ctx, ANCHO, ALTO);
+        resolve(canvas.toDataURL('image/png'));
+      }catch(e){ reject(e); }
+    };
+    img.src = url;
+  });
+}
 // Listas maestras para el buscador de la pantalla de gestión — se calculan a partir de las
 // mismas bases de datos que usa el resto del juego, nunca a mano, para no desincronizarse.
 // _mapaColoresClubes se construye una sola vez (perezoso) y sirve también para pintar la
@@ -7679,17 +7748,41 @@ function todosLosClubesDelJuego(){
 function todosLosPaisesDelJuego(){
   return Object.keys(BANDERAS_SVG).sort((a,b)=> a.localeCompare(b,'es'));
 }
+// Ligas/categorías del juego: los 5 escalafones españoles (CATEGORIAS) + las ligas extranjeras
+// reales que aparecen en CLUBES_EXTRANJERO (Premier League, Serie A, Bundesliga...).
+function todasLasLigasDelJuego(){
+  const nombres = new Set(CATEGORIAS);
+  CLUBES_EXTRANJERO.forEach(c=>{ if(c.liga) nombres.add(c.liga); });
+  return [...nombres].sort((a,b)=> a.localeCompare(b,'es'));
+}
+// A diferencia de clubes/selecciones, una liga no tiene escudo generado de reserva — sin imagen
+// personalizada no se pinta nada (el nombre de la liga ya se muestra como texto donde se usa).
+function logoLiga(nombre, tamano){
+  const custom = escudoPersonalizado('ligas', nombre);
+  if(!custom) return '';
+  tamano = tamano || 18;
+  return `<img src="${custom}" alt="${nombre}" style="height:${tamano}px;width:auto;max-width:${Math.round(tamano*2.6)}px;object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
+}
 
+// Bandera de un país (nacionalidad de un jugador o de un club) — geográfica, no se personaliza:
+// "las banderas de los países son las que son". Para el escudo de la SELECCIÓN nacional que
+// juega torneos, ver escudoSeleccion (sí personalizable, aparte).
 let _banderaIdSeq = 0;
 function banderaPais(pais, tamano){
   tamano = tamano || 14;
-  const custom = escudoPersonalizado('paises', pais);
-  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${pais}" style="border-radius:50%;object-fit:cover;vertical-align:middle;box-shadow:0 0 0 1px rgba(255,255,255,0.18);flex-shrink:0;">`;
   const patron = BANDERAS_SVG[pais];
   if(!patron) return '🌍';
   _banderaIdSeq++;
   const clipId = 'bandera-clip-' + _banderaIdSeq;
   return `<svg viewBox="0 0 40 40" width="${tamano}" height="${tamano}" style="border-radius:50%;vertical-align:middle;box-shadow:0 0 0 1px rgba(255,255,255,0.18);flex-shrink:0;"><clipPath id="${clipId}"><circle cx="20" cy="20" r="20"/></clipPath><g clip-path="url(#${clipId})">${patron}</g></svg>`;
+}
+// Escudo de la selección nacional (federación) que compite en torneos — distinto de la bandera
+// geográfica del país. Sin imagen personalizada, cae en la misma bandera de banderaPais.
+function escudoSeleccion(pais, tamano){
+  tamano = tamano || 14;
+  const custom = escudoPersonalizado('selecciones', pais);
+  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${pais}" style="border-radius:50%;object-fit:cover;vertical-align:middle;box-shadow:0 0 0 1px rgba(255,255,255,0.18);flex-shrink:0;">`;
+  return banderaPais(pais, tamano);
 }
 // Calendario real de grandes torneos: Eurocopa y Mundial se alternan cada 2 años (2028 Eurocopa, 2030
 // Mundial, 2032 Eurocopa...). El Mundial de 2026 ya habría pasado antes de empezar la carrera (temporada 1).
@@ -9450,8 +9543,8 @@ SCREENS.tabClub = function(){
   const nombreClub = el('div', null, j.club.nombre);
   nombreClub.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;color:var(--ink);margin-top:10px;";
   head.appendChild(nombreClub);
-  const ligaClub = el('div', null, `${nombreLigaConDivision(j.club)}${j.enFilial ? ' · Filial' : ''}`);
-  ligaClub.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12.5px;color:var(--ink-soft);margin-top:4px;";
+  const ligaClub = el('div', null, `${logoLiga(j.club.extranjero ? j.club.liga : j.club.categoria, 16)} ${nombreLigaConDivision(j.club)}${j.enFilial ? ' · Filial' : ''}`);
+  ligaClub.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12.5px;color:var(--ink-soft);margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px;";
   head.appendChild(ligaClub);
   const paisClub = j.club.extranjero ? j.club.pais : 'España';
   const paisClubEl = el('div', null, `${banderaPais(paisClub,13)} ${paisClub}`);
@@ -10692,7 +10785,9 @@ SCREENS.rankings = function(){
 };
 
 function svgBanderaCuadrada(pais){
-  const custom = escudoPersonalizado('paises', pais);
+  // Los cromos son de la SELECCIÓN nacional (curiosidades de su fútbol, apodo del equipo...),
+  // no del país en abstracto — mismo tipo que escudoSeleccion.
+  const custom = escudoPersonalizado('selecciones', pais);
   if(custom) return `<img src="${custom}" alt="${pais}">`;
   const patron = BANDERAS_SVG[pais];
   if(!patron) return '';
@@ -11029,7 +11124,7 @@ SCREENS.escudosPersonalizados = function(){
 
   c.appendChild(crearEyebrow('Mod local · opcional'));
   c.appendChild(el('h2',null,'Personalizar escudos'));
-  const intro = el('div', null, 'Sustituye el escudo generado de cualquier club, o la bandera de cualquier selección, por una imagen tuya. Se guarda solo en este dispositivo — el juego no incluye ni reparte escudos oficiales.');
+  const intro = el('div', null, 'Sustituye el escudo generado de un club, el de una selección nacional o el logo de una liga, por una imagen tuya. Se guarda solo en este dispositivo — el juego no incluye ni reparte escudos oficiales. (La bandera geográfica de un país no se toca: esta pantalla es solo para el escudo de la selección que compite, no para la bandera en sí.)');
   intro.style.cssText = 'font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:16px;';
   c.appendChild(intro);
 
@@ -11065,7 +11160,7 @@ SCREENS.escudosPersonalizados = function(){
       const texto = await file.text();
       const resultado = importarEscudosPersonalizados(JSON.parse(texto));
       if(!resultado.ok){ mostrarAvisoEscudos(resultado.error); return; }
-      mostrarAvisoEscudos(`Importados ${resultado.clubes} clubes y ${resultado.paises} selecciones.`, true);
+      mostrarAvisoEscudos(`Importados ${resultado.clubes} clubes, ${resultado.selecciones} selecciones y ${resultado.ligas} ligas.`, true);
       pintarFilas();
     }catch(e){
       mostrarAvisoEscudos('El archivo no es un JSON válido.');
@@ -11076,9 +11171,10 @@ SCREENS.escudosPersonalizados = function(){
   c.appendChild(filaIO);
 
   if(S.escudosVista === undefined) S.escudosVista = 'clubes';
+  const ETIQUETAS_TIPO_ESCUDO = { clubes:{ tab:'Clubes', singular:'club', plural:'clubes' }, selecciones:{ tab:'Selecciones', singular:'selección', plural:'selecciones' }, ligas:{ tab:'Ligas', singular:'liga', plural:'ligas' } };
   const tabs = el('div','coleccion-tabs');
-  [['clubes','Clubes'], ['paises','Selecciones']].forEach(([id,nombre])=>{
-    const btn = el('div', 'ctab'+(S.escudosVista===id?' activo':''), nombre);
+  Object.entries(ETIQUETAS_TIPO_ESCUDO).forEach(([id,{tab}])=>{
+    const btn = el('div', 'ctab'+(S.escudosVista===id?' activo':''), tab);
     btn.onclick = ()=>{ if(S.escudosVista===id) return; S.escudosVista = id; S.escudosBusqueda = ''; pintar(); };
     tabs.appendChild(btn);
   });
@@ -11086,7 +11182,7 @@ SCREENS.escudosPersonalizados = function(){
 
   const buscador = document.createElement('input');
   buscador.type = 'text';
-  buscador.placeholder = S.escudosVista === 'clubes' ? 'Buscar club…' : 'Buscar selección…';
+  buscador.placeholder = `Buscar ${ETIQUETAS_TIPO_ESCUDO[S.escudosVista].singular}…`;
   buscador.value = S.escudosBusqueda || '';
   buscador.className = 'escudos-buscador';
   buscador.oninput = ()=>{ S.escudosBusqueda = buscador.value; pintarFilas(); };
@@ -11104,12 +11200,26 @@ SCREENS.escudosPersonalizados = function(){
   inputArchivo.style.display = 'none';
   c.appendChild(inputArchivo);
 
+  function todosDelTipo(tipo){
+    if(tipo === 'clubes') return todosLosClubesDelJuego();
+    if(tipo === 'selecciones') return todosLosPaisesDelJuego();
+    return todasLasLigasDelJuego();
+  }
+  function miniaturaDelTipo(tipo, nombre){
+    if(tipo === 'clubes') return escudoSVG(nombre, 34, coloresClubDelJuego(nombre));
+    if(tipo === 'selecciones') return escudoSeleccion(nombre, 34);
+    return logoLiga(nombre, 30); // sin generado de reserva: puede volver vacío, ver CSS .miniatura
+  }
+  function resizeDelTipo(tipo, file){ return tipo === 'ligas' ? redimensionarImagenLiga(file) : redimensionarImagenEscudo(file); }
+  function procesarUrlDelTipo(tipo, url){ return tipo === 'ligas' ? procesarUrlParaLiga(url) : procesarUrlParaEscudo(url); }
+
   function pintarFilas(){
     const tipo = S.escudosVista;
-    const todos = tipo === 'clubes' ? todosLosClubesDelJuego() : todosLosPaisesDelJuego();
+    const etiquetas = ETIQUETAS_TIPO_ESCUDO[tipo];
+    const todos = todosDelTipo(tipo);
     const q = (S.escudosBusqueda||'').trim().toLowerCase();
     const filtrados = q ? todos.filter(n=> n.toLowerCase().includes(q)) : todos;
-    contador.textContent = `${filtrados.length} de ${todos.length}${tipo==='clubes' ? ' clubes' : ' selecciones'}`;
+    contador.textContent = `${filtrados.length} de ${todos.length} ${filtrados.length===1 ? etiquetas.singular : etiquetas.plural}`;
     lista.innerHTML = '';
     if(!filtrados.length){
       lista.appendChild(el('div','escudos-vacio', 'Nada con ese nombre.'));
@@ -11119,7 +11229,8 @@ SCREENS.escudosPersonalizados = function(){
       const tieneCustom = !!escudoPersonalizado(tipo, nombre);
       const fila = el('div','fila-escudo');
       const miniatura = el('div','miniatura');
-      miniatura.innerHTML = tipo === 'clubes' ? escudoSVG(nombre, 34, coloresClubDelJuego(nombre)) : banderaPais(nombre, 34);
+      const html = miniaturaDelTipo(tipo, nombre);
+      if(html) miniatura.innerHTML = html; else miniatura.classList.add('vacia');
       fila.appendChild(miniatura);
       fila.appendChild(el('div','nombre', nombre));
       const acciones = el('div','acciones');
@@ -11132,7 +11243,7 @@ SCREENS.escudosPersonalizados = function(){
           inputArchivo.value = '';
           if(!file) return;
           try{
-            const dataUrl = await redimensionarImagenEscudo(file);
+            const dataUrl = await resizeDelTipo(tipo, file);
             const ok = fijarEscudoPersonalizado(tipo, nombre, dataUrl);
             if(!ok){ mostrarAvisoEscudos('No hay espacio para guardar más imágenes personalizadas. Quita alguna e inténtalo de nuevo.'); return; }
             pintarFilas();
@@ -11158,9 +11269,10 @@ SCREENS.escudosPersonalizados = function(){
           if(!ok){ mostrarAvisoEscudos('No se ha podido guardar.'); return; }
           pintarFilas();
         };
-        // Se intenta recortar y quitar el fondo blanco, igual que al subir un archivo; si el
-        // servidor de esa URL no permite leer la imagen (CORS), se guarda tal cual, sin procesar.
-        procesarUrlParaEscudo(url).then(guardarYActualizar).catch(()=> guardarYActualizar(url));
+        // Se intenta recortar (o ajustar, si es una liga) y quitar el fondo blanco, igual que al
+        // subir un archivo; si el servidor de esa URL no permite leer la imagen (CORS), se
+        // guarda tal cual, sin procesar.
+        procesarUrlDelTipo(tipo, url).then(guardarYActualizar).catch(()=> guardarYActualizar(url));
       };
       acciones.appendChild(btnUrl);
       if(tieneCustom){
@@ -11177,7 +11289,7 @@ SCREENS.escudosPersonalizados = function(){
   pintarFilas();
 
   const guardados = cargarEscudosPersonalizados();
-  const hayAlguno = Object.keys(guardados.clubes||{}).length || Object.keys(guardados.paises||{}).length;
+  const hayAlguno = Object.keys(guardados.clubes||{}).length || Object.keys(guardados.selecciones||{}).length || Object.keys(guardados.ligas||{}).length;
   if(hayAlguno){
     const btnReset = document.createElement('button');
     btnReset.className = 'btn-secondary';
@@ -11917,7 +12029,7 @@ SCREENS.ofertas = function(){
       const bandera = of.extranjero ? banderaPais(of.pais,15) : banderaPais('España',15);
       const dcha = document.createElement('span');
       dcha.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--ink-soft);white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;";
-      dcha.innerHTML = `${etiquetaCategoria} ${bandera}`;
+      dcha.innerHTML = `${logoLiga(of.extranjero ? of.liga : of.categoria, 15)} ${etiquetaCategoria} ${bandera}`;
       cabecera.appendChild(izda);
       cabecera.appendChild(dcha);
       card.appendChild(cabecera);
@@ -12285,7 +12397,7 @@ SCREENS.negociacionFichaje = function(){
   cab.innerHTML = `${escudoSVG(neg.club.nombre,32,neg.club.colores)}
     <div>
       <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--ink);">${neg.club.nombre}</div>
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--ink-soft);">${banderaPais(paisClub,13)} ${paisClub} · ${neg.club.extranjero ? (neg.club.liga||'') : (TIER_CATEGORIA[neg.club.categoria]||neg.club.categoria)}</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--ink-soft);">${banderaPais(paisClub,13)} ${paisClub} · ${logoLiga(neg.club.extranjero ? neg.club.liga : neg.club.categoria, 13)} ${neg.club.extranjero ? (neg.club.liga||'') : (TIER_CATEGORIA[neg.club.categoria]||neg.club.categoria)}</div>
     </div>`;
   c.appendChild(cab);
 
@@ -13876,7 +13988,7 @@ SCREENS.primeraConvocatoria = function(){
   topbar("Convocatoria histórica");
   const c = el('div','season-reveal campeon');
   const iconoBox = el('div','icon','');
-  iconoBox.innerHTML = banderaPais('España', 52);
+  iconoBox.innerHTML = escudoSeleccion('España', 52);
   iconoBox.style.display = 'flex';
   iconoBox.style.justifyContent = 'center';
   c.appendChild(iconoBox);
@@ -14018,7 +14130,7 @@ SCREENS.torneoFinalIntro = function(){
   }
   const rivalBox = el('div','club-eleccion');
   rivalBox.innerHTML = esSeleccion
-    ? `${banderaPais(cfg.rival.nombre,30)} <span class="club-eleccion-nombre">${cfg.rival.nombre}</span>`
+    ? `${escudoSeleccion(cfg.rival.nombre,30)} <span class="club-eleccion-nombre">${cfg.rival.nombre}</span>`
     : `${escudoSVG(cfg.rival.nombre,30,cfg.rival.colores)} <span class="club-eleccion-nombre">${cfg.rival.nombre}</span>`;
   c.appendChild(rivalBox);
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Jugar la final →';
@@ -14105,8 +14217,8 @@ SCREENS.torneoFinalReveal = function(){
 
   const marcador = el('div','final-reveal-item');
   marcador.style.cssText = 'display:flex;align-items:flex-start;justify-content:center;gap:16px;margin:10px 0 12px;';
-  const escudoPropio = esSeleccion ? banderaPais('España',32) : escudoSVG(j.club.nombre,32,j.club.colores);
-  const escudoRival = esSeleccion ? banderaPais(cfg.rival.nombre,32) : escudoSVG(cfg.rival.nombre,32,cfg.rival.colores);
+  const escudoPropio = esSeleccion ? escudoSeleccion('España',32) : escudoSVG(j.club.nombre,32,j.club.colores);
+  const escudoRival = esSeleccion ? escudoSeleccion(cfg.rival.nombre,32) : escudoSVG(cfg.rival.nombre,32,cfg.rival.colores);
   const nombrePropio = esSeleccion ? 'España' : j.club.nombre;
   marcador.innerHTML = `
     <div style="display:flex;flex-direction:column;align-items:center;gap:5px;width:76px;">
@@ -15134,7 +15246,7 @@ SCREENS.final = function(){
       const rowSel = el('div','club-row');
       const topSel = el('div','club-top');
       const escudoSel = el('div','club-escudo');
-      escudoSel.innerHTML = banderaPais('España', 30);
+      escudoSel.innerHTML = escudoSeleccion('España', 30);
       topSel.appendChild(escudoSel);
       const infoSel = el('div','club-info');
       infoSel.appendChild(el('div','club-nombre', 'Selección española'));
