@@ -667,6 +667,14 @@ curso — botón "Personalizar escudos") deja subir una imagen propia por club o
   mano, para no desincronizarse si se añaden clubes o países. `coloresClubDelJuego(nombre)`
   (con `_mapaColoresClubes` cacheado la primera vez) da los colores reales de cada club para que
   la miniatura del buscador coincida con el escudo que se ve en el resto del juego.
+- **Filiales sin escudo propio**: en la vida real, un filial lleva el mismo escudo que su primer
+  equipo. `escudoSVG(nombre,...)` empieza comprobando `primerEquipoDeFilial(nombre)` (la misma
+  función que ya usaba `SCREENS.ofertas` para el badge "Filial del X") y, si `nombre` es un
+  filial, se redirige entero — nombre y colores reales incluidos, vía `coloresClubDelJuego` — al
+  primer equipo antes de mirar nada más (escudo personalizado, los 14 clubes con dibujo propio,
+  o el patrón genérico). Así, personalizar el escudo del primer equipo lo cambia también en su
+  filial sin guardar nada aparte, y `todosLosClubesDelJuego()` excluye directamente los filiales
+  de la lista del buscador (aparecer ahí no tendría ningún efecto).
 - **`mostrarNotificacion` no sirve aquí**: depende de `S.jugador` (la tabbar —y con ella el
   hueco de notificaciones— se oculta sin partida activa, ver `pintarTabbar`), y esta pantalla es
   accesible sin ninguna. Usa su propio aviso en pantalla (`mostrarAvisoEscudos`, div `.escudos-

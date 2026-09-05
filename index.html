@@ -5994,6 +5994,11 @@ function escudoDortmund(tamano){
 }
 function escudoSVG(nombre, tamano, colores){
   tamano = tamano || 30;
+  // Un filial no tiene escudo propio: en la vida real lleva el mismo que su primer equipo, así
+  // que se redirige entero (nombre + colores reales) a él — incluye cualquier escudo
+  // personalizado que tenga el primer equipo, sin necesidad de guardar nada aparte para el filial.
+  const primero = primerEquipoDeFilial(nombre);
+  if(primero) return escudoSVG(primero, tamano, coloresClubDelJuego(primero) || colores);
   const custom = escudoPersonalizado('clubes', nombre);
   if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" style="border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 0 0 1px rgba(255,255,255,0.18);">`;
   if(nombre === 'Real Madrid CF') return escudoRealMadrid(tamano);
@@ -7665,9 +7670,11 @@ function asegurarMapaColoresClubes(){
   CLUBES_EXTRANJERO.forEach(c=>{ if(!_mapaColoresClubes.has(c.nombre)) _mapaColoresClubes.set(c.nombre, c.colores); });
 }
 function coloresClubDelJuego(nombre){ asegurarMapaColoresClubes(); return _mapaColoresClubes.get(nombre) || null; }
+// Los filiales quedan fuera: no tienen escudo propio, muestran siempre el de su primer equipo
+// (ver el redirect al principio de escudoSVG), así que personalizarlos aparte no tendría efecto.
 function todosLosClubesDelJuego(){
   asegurarMapaColoresClubes();
-  return [..._mapaColoresClubes.keys()].sort((a,b)=> a.localeCompare(b,'es'));
+  return [..._mapaColoresClubes.keys()].filter(n=> !primerEquipoDeFilial(n)).sort((a,b)=> a.localeCompare(b,'es'));
 }
 function todosLosPaisesDelJuego(){
   return Object.keys(BANDERAS_SVG).sort((a,b)=> a.localeCompare(b,'es'));
