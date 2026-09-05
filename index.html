@@ -809,7 +809,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* ============ Cromos del mundo: rejilla y carta ampliada ============ */
 .cromo-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
 /* .cromo-item (no ".cromo": esa clase ya la usa el carné del jugador, cromo() más arriba) */
-.cromo-item{ aspect-ratio:3/4.1; border-radius:10px; position:relative; overflow:hidden; cursor:pointer; transition:transform .15s ease; background:linear-gradient(165deg,#262b3c,#1b1e2a); display:flex; flex-direction:column; align-items:center; }
+.cromo-item{ aspect-ratio:3/4.1; border-radius:0; position:relative; overflow:hidden; cursor:pointer; transition:transform .15s ease; background:linear-gradient(165deg,#262b3c,#1b1e2a); display:flex; flex-direction:column; align-items:center; }
 .cromo-item:active{ transform:scale(.94); }
 .cromo-item.tenido{ border:1px solid rgba(212,175,55,.55); box-shadow:0 5px 12px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.03); }
 .cromo-item.falta{ border:1.5px dashed var(--line); }
@@ -821,14 +821,14 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .cromo-num{ position:absolute; top:5px; left:5px; z-index:3; min-width:15px; height:15px; padding:0 3px; border-radius:8px; background:rgba(10,11,16,.55); backdrop-filter:blur(1px); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:7.5px; font-weight:700; color:#fff; letter-spacing:.02em; }
 .cromo-plate{ margin-top:auto; width:100%; padding:0 4px 11px; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:700; color:var(--ink); letter-spacing:.01em; }
 .cromo-item.falta .cromo-plate{ color:var(--ink-soft); opacity:.7; }
-.cromo-item.tenido .cromo-corner{ position:absolute; top:0; right:0; z-index:3; width:13px; height:13px; background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.16) 50%); border-radius:0 10px 0 8px; }
+.cromo-item.tenido .cromo-corner{ position:absolute; top:0; right:0; z-index:3; width:13px; height:13px; background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.16) 50%); border-radius:0 0 0 8px; }
 .cromo-tooltip{ position:fixed; z-index:73; background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:8px 11px; font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); box-shadow:var(--shadow); max-width:190px; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .2s ease; }
 .cromo-tooltip.show{ opacity:1; }
 .cromo-zoom-perspective{ position:fixed; z-index:71; perspective:1400px; pointer-events:none; display:none; }
 .cromo-zoom-perspective.activo{ pointer-events:auto; }
 .cromo-zoom-card{ width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform .5s cubic-bezier(.2,.9,.3,1); cursor:pointer; }
 .cromo-zoom-card.flipped{ transform:rotateY(180deg); }
-.cromo-zoom-face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:16px; overflow:hidden; }
+.cromo-zoom-face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:0; overflow:hidden; }
 .cromo-zoom-front{ background:var(--panel); border:1px solid rgba(212,175,55,.55); box-shadow:0 22px 50px rgba(0,0,0,.55); display:flex; flex-direction:column; }
 .cromo-zoom-content{ opacity:0; transition:opacity .2s ease; transition-delay:0s; width:100%; height:100%; display:flex; flex-direction:column; }
 .cromo-zoom-perspective.landed .cromo-zoom-content{ opacity:1; transition-delay:.22s; }
@@ -843,8 +843,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .cromo-zoom-front .flag-banner .fade{ position:absolute; left:0; right:0; bottom:0; height:60%; background:linear-gradient(0deg, var(--panel) 0%, rgba(31,35,48,0) 100%); }
 .cromo-zoom-front .cerrar{ position:absolute; top:9px; right:9px; z-index:3; width:25px; height:25px; border-radius:50%; border:1px solid rgba(255,255,255,.25); background:rgba(10,11,16,.5); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; }
 .cromo-zoom-front .rareza-tag{ position:absolute; top:11px; left:11px; z-index:3; font-family:'Space Grotesk',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:.07em; color:#1a1408; background:var(--gold); padding:4px 8px; border-radius:20px; }
-.cromo-zoom-front .info{ flex:1; display:flex; flex-direction:column; align-items:center; padding:0 16px 14px; margin-top:-6px; overflow-y:auto; }
-.cromo-zoom-front .pais-nombre{ font-family:'PT Serif',Georgia,serif; font-size:18px; font-weight:700; text-align:center; color:var(--ink); }
+.cromo-zoom-front .info{ flex:1; display:flex; flex-direction:column; align-items:center; padding:16px 16px 14px; overflow-y:auto; }
+.cromo-zoom-front .pais-nombre{ font-family:'PT Serif',Georgia,serif; font-size:18px; font-weight:700; line-height:1.3; text-align:center; color:var(--ink); }
 .cromo-zoom-front .pais-sub{ font-family:'Space Grotesk',sans-serif; font-size:10px; color:var(--gold-dim); margin-top:2px; letter-spacing:.02em; text-align:center; }
 .cromo-zoom-front .stats-mini{ margin-top:auto; width:100%; display:flex; justify-content:space-around; border-top:1px solid var(--line); padding-top:11px; }
 .cromo-zoom-front .stats-mini div{ text-align:center; }
@@ -10981,7 +10981,7 @@ function mostrarTooltipCromo(cromo){
 // El escudo ocupa un cuadrado a todo el ancho de la carta (ver .flag-banner); AREA_INFO_CROMO es
 // el alto fijo que queda debajo para nombre, selección, datos rápidos y el "toca para ver
 // curiosidades" — así el escudo nunca se recorta ni deja huecos a los lados, sea cual sea w.
-const AREA_INFO_CROMO = 150;
+const AREA_INFO_CROMO = 168;
 function medidasDestinoCromo(){
   const w = Math.min(280, window.innerWidth * 0.72);
   const h = w + AREA_INFO_CROMO;
@@ -11005,7 +11005,7 @@ function abrirZoomCromo(cromo, p){
   zoomPerspective.style.top = _cromoZoomOrigenRect.top + 'px';
   zoomPerspective.style.width = _cromoZoomOrigenRect.width + 'px';
   zoomPerspective.style.height = _cromoZoomOrigenRect.height + 'px';
-  zoomPerspective.style.borderRadius = '10px';
+  zoomPerspective.style.borderRadius = '0px';
   zoomPerspective.classList.remove('landed');
   zoomCard.classList.remove('flipped');
   zoomPerspective.classList.add('activo');
@@ -11036,7 +11036,7 @@ function cerrarZoomCromo(){
   zoomPerspective.style.top = _cromoZoomOrigenRect.top + 'px';
   zoomPerspective.style.width = _cromoZoomOrigenRect.width + 'px';
   zoomPerspective.style.height = _cromoZoomOrigenRect.height + 'px';
-  zoomPerspective.style.borderRadius = '10px';
+  zoomPerspective.style.borderRadius = '0px';
   backdrop.classList.remove('show');
   setTimeout(()=>{
     zoomPerspective.classList.remove('activo');

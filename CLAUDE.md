@@ -590,6 +590,18 @@ aviso a pantalla completa ni de esquina tipo logro — es un descubrimiento más
   (reutilizando `BANDERAS_SVG`, vía `svgBanderaCuadrada`) frente a emoji de bandera — en Windows,
   sin fuente de emoji de banderas, esas caen a mostrar el código de país en texto ("ES", "BR"...),
   así que las SVG son necesarias, no solo estéticas.
+- **Esquinas de pico** (`border-radius:0`), tanto en `.cromo-item` (rejilla) como en
+  `.cromo-zoom-face` (carta ampliada) y el `zoomPerspective.style.borderRadius` inline que anima
+  el FLIT entre ambas (`abrirZoomCromo`/`cerrarZoomCromo`) — a petición expresa, porque son
+  cromos de verdad y no deben llevar esquinas redondeadas. El pequeño doblez decorativo de la
+  esquina superior derecha (`.cromo-corner`, solo en cromos conseguidos) ajustó también su radio
+  superior derecho a 0 para quedar a ras del borde ahora recto de la carta.
+- **Escudo cuadrado (`.flag-banner`) + texto**: el nombre del país (`.pais-nombre`) vive justo
+  debajo del escudo dentro de `.info`, que lleva `padding-top` (no `margin-top` negativo — un
+  negativo ahí llegó a solapar visualmente el nombre con el borde inferior del escudo y cortarle
+  la parte de arriba). `AREA_INFO_CROMO` (alto fijo reservado bajo el escudo cuadrado, ver
+  `medidasDestinoCromo`) se ajustó a la vez para que siga cabiendo todo (nombre, selección,
+  datos rápidos, "toca para ver curiosidades") sin desbordar.
 - **Cuidado con el nombre de clase `.cromo`**: ya existía de antes para el carné del jugador
   (`cromo(j)`, tarjeta apilada de ESTADO). La rejilla de países usaba también `.cromo` para cada
   celda y heredaba sin querer el padding/margin/box-shadow de esa clase (bug real, no solo
