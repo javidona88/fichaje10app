@@ -4057,7 +4057,7 @@ const CHANGELOG_JUEGO = [
   { version:'v1.4.8', titulo:'Personaliza los escudos del juego', cambios:[
     'Nueva pantalla "Personalizar escudos" (menú principal → "Personalizar escudos"): sube tu propia imagen para cualquier club, selección nacional o logo de liga. Se guarda solo en tu dispositivo — el juego no incluye ni reparte escudos oficiales, cada jugador aporta los suyos si quiere.',
     'Puedes subir un archivo o pegar directamente una URL, y exportar/importar toda tu configuración de una vez.',
-    'Corregido: la Supercopa de España podía tocarte un rival extranjero; ahora siempre es un club de LaLiga, como en la realidad.'
+    'Corregido: la Supercopa de España podía tocarte un rival extranjero; ahora siempre es un club de LaLiga. Además, ahora también juegas la Supercopa si acabaste subcampeón de LaLiga o perdiste la final de la Copa del Rey (antes solo contaba si habías ganado un título).'
   ]},
   { version:'v1.4.7', titulo:'Logros y cromos del mundo', cambios:[
     'Nuevo sistema de logros: 37 hitos de tu carrera (partidos, títulos, selección, vida personal, estilo de vida y alguna rareza), guardados de por vida en tu perfil, no en la partida. Accede desde el trofeo nuevo junto al engranaje de Ajustes. Los más raros se anuncian a pantalla completa; el resto, con un aviso discreto en la esquina.',
@@ -5434,13 +5434,18 @@ const TORNEOS_CONFIG = [
     }, probabilidad:1,
     efectosVictoria:{forma:10,popularidad:10,reputacion:6} },
   { id:'supercopa_espana', nombreCompeticion:'Supercopa de España', tipo:'club', tierMin:2, tierMax:4,
+    // Plazas reales: campeón Y subcampeón de LaLiga + los dos finalistas (ganador y perdedor) de
+    // la Copa del Rey. etapaActual.titulos cubre los títulos ganados; etapaActual.subcampeonatos
+    // (ver procesarFinTemporada) cubre el 2º puesto de LaLiga y la final de Copa perdida — entre
+    // los dos, las 4 plazas reales de la temporada anterior con este mismo club.
     condicion: j => {
       if(S.pasoIndex !== 2) return false;
       if(j.club.extranjero) return false;
       if(!j.trayectoria || !j.trayectoria.length) return false;
       const etapa = j.trayectoria[j.trayectoria.length-1];
       if(etapa.club !== j.club.nombre) return false;
-      return (etapa.titulos||[]).some(t => (t.nombre==='LaLiga' || t.nombre==='Copa del Rey') && t.temporada === S.temporada-1);
+      const clasificaPor = t => (t.nombre==='LaLiga' || t.nombre==='Copa del Rey') && t.temporada === S.temporada-1;
+      return (etapa.titulos||[]).some(clasificaPor) || (etapa.subcampeonatos||[]).some(clasificaPor);
     }, probabilidad:1,
     efectosVictoria:{forma:9,popularidad:8,reputacion:5} },
   { id:'seleccion_absoluta', nombreCompeticion:null, tipo:'seleccion',
@@ -6170,6 +6175,7 @@ function migrarJugadorGuardado(j){
     if(cmp.nivel === undefined || cmp.nivel > 4) cmp.nivel = Math.max(1, CATEGORIAS.indexOf(cmp.categoria) + 1);
   });
   refrescarApodosCompaneros(j);
+  (j.trayectoria||[]).forEach(etapa=>{ if(etapa.subcampeonatos === undefined) etapa.subcampeonatos = []; });
   if(j.rival){
     if(j.rival.compartiendoVestuario === undefined) j.rival.compartiendoVestuario = false;
     if(j.rival.temporadasCompartiendo === undefined) j.rival.temporadasCompartiendo = 0;
@@ -7069,6 +7075,17 @@ function procesarFinTemporada(j, ascensoPlayoff){
         etapaActual.titulos.push({ nombre: nombreTitulo, temporada: S.temporada });
       }
     });
+    // Subcampeonatos (LaLiga 2º puesto, final de Copa del Rey perdida) — no son títulos, así que
+    // van aparte de etapaActual.titulos (que solo debe llevar títulos de verdad, para no ensuciar
+    // los chips de trayectoria ni el recuento de trofeos). Sirven, de momento, solo para decidir
+    // quién juega la Supercopa de España la temporada siguiente (ver TORNEOS_CONFIG).
+    etapaActual.subcampeonatos = etapaActual.subcampeonatos || [];
+    if(!j.club.extranjero && j.club.categoria === 'LaLiga' && S.temporadaResumen.posicionFinal === 2){
+      etapaActual.subcampeonatos.push({ nombre:'LaLiga', temporada: S.temporada });
+    }
+    if(!j.club.extranjero && (S.temporadaResumen.fasesCompeticiones||[]).some(f => f.nombre === 'Copa del Rey' && f.fase === 'Final')){
+      etapaActual.subcampeonatos.push({ nombre:'Copa del Rey', temporada: S.temporada });
+    }
   }
   S.temporadaResumen.categoriaJugada = j.club.categoria;
   if(S.temporadaResumen.ascenso){
@@ -7207,7 +7224,7 @@ function abrirNuevaEtapa(j, nuevoClub, carinoInicial){
     pais: nuevoClub.extranjero ? nuevoClub.pais : "España", extranjero: !!nuevoClub.extranjero,
     colores: nuevoClub.colores,
     temporadaInicio: S.temporada, temporadaFin: S.temporada,
-    partidos:0, goles:0, asistencias:0, carino: carinoInicial!=null ? carinoInicial : 40, titulos:[]
+    partidos:0, goles:0, asistencias:0, carino: carinoInicial!=null ? carinoInicial : 40, titulos:[], subcampeonatos:[]
   });
 }
 // ---- Agente libre: temporada sin club ----

@@ -86,7 +86,9 @@ j = {
   historial:[], eventosVistos:[{id,temporada}],
   historialTemporadas:[{ ..., goles, asistencias, notaMedia, trofeosIndividuales, ... }],
   trayectoria:[{ club, categoria, pais, extranjero, colores, temporadaInicio, temporadaFin,
-                 partidos, goles, asistencias, carino, titulos:[{nombre,temporada}] }],
+                 partidos, goles, asistencias, carino, titulos:[{nombre,temporada}],
+                 subcampeonatos:[{nombre,temporada}] }],  // 2º de LaLiga o final de Copa perdida,
+                                                           // NO títulos — solo para la Supercopa
   carrera:{ partidos, goles, asistencias, ascensos, titulos, dineroGanado, valorMercadoMaximo },
   titulosSeleccion:[{nombre,temporada}], tuvoPrimeraConvocatoriaAbsoluta, tuvoPrimeraConvocatoriaSub21,
   legadosVistos:[temporadas],                              // hitos de legado ya mostrados
@@ -354,9 +356,20 @@ verdad rechazaste ofertas). `ABREVIATURA_OBJETIVO` da la versión corta.
 - **Club**: copas nacionales y europeas (`j.club.nivelEuropeo`). Semifinal → final. `supercopa_europa`
   (`sinSemifinal:true`, solo final) exige haber ganado Champions o Europa League la temporada
   anterior con el mismo club. `supercopa_espana` (4 equipos, semifinal + final, sin
-  `sinSemifinal`, así que sigue el flujo normal semifinal→final) exige LaLiga o Copa del Rey la
-  temporada anterior con el mismo club, en España. Ambas Supercopas quedan excluidas del suceso
-  `celebracion_titulo` (que solo dispara tras títulos "grandes") vía su `trigger.condicion`.
+  `sinSemifinal`, así que sigue el flujo normal semifinal→final) exige, con el mismo club, la
+  temporada anterior: haber ganado LaLiga o la Copa del Rey (`etapa.titulos`), **o** haber
+  quedado subcampeón de cualquiera de las dos (`etapa.subcampeonatos`, ver abajo) — las 4 plazas
+  reales (campeón + subcampeón de Liga, los 2 finalistas de Copa). Ambas Supercopas quedan
+  excluidas del suceso `celebracion_titulo` (que solo dispara tras títulos "grandes") vía su
+  `trigger.condicion`.
+  - **`etapa.subcampeonatos`** (array paralelo a `etapa.titulos`, mismo `{nombre,temporada}`,
+    inicializado en `abrirNuevaEtapa` y migrado en `migrarJugadorGuardado`): se rellena en
+    `procesarFinTemporada`, aparte de los títulos de verdad, para no ensuciar los chips de
+    trayectoria ni el recuento de trofeos con algo que NO es un título. Se le añade `'LaLiga'`
+    si `S.temporadaResumen.posicionFinal === 2` en LaLiga, y `'Copa del Rey'` si
+    `S.temporadaResumen.fasesCompeticiones` incluye `{nombre:'Copa del Rey', fase:'Final'}` (ya
+    calculado ahí mismo a partir de `S.faseCompeticiones`, que si jugaste la final de verdad ese
+    año guarda `'Campeón'` o `'Final'`). De momento solo lo consume `supercopa_espana`.
   **El rival de la Supercopa de España sale de un `if(cfg.id === 'supercopa_espana')` propio en
   `rivalClubTorneo`**, sorteado solo entre clubes de LaLiga (peso `prestigio³`, muy sesgado a los
   grandes) — antes de este arreglo compartía `tipo:'club'` con Champions/Europa/Conference y caía
