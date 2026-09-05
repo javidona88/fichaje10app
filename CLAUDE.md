@@ -357,6 +357,14 @@ verdad rechazaste ofertas). `ABREVIATURA_OBJETIVO` da la versión corta.
   `sinSemifinal`, así que sigue el flujo normal semifinal→final) exige LaLiga o Copa del Rey la
   temporada anterior con el mismo club, en España. Ambas Supercopas quedan excluidas del suceso
   `celebracion_titulo` (que solo dispara tras títulos "grandes") vía su `trigger.condicion`.
+  **El rival de la Supercopa de España sale de un `if(cfg.id === 'supercopa_espana')` propio en
+  `rivalClubTorneo`**, sorteado solo entre clubes de LaLiga (peso `prestigio³`, muy sesgado a los
+  grandes) — antes de este arreglo compartía `tipo:'club'` con Champions/Europa/Conference y caía
+  en la misma bolsa europea de `rivalClubTorneo`, así que podía tocar un club extranjero (bug
+  real, corregido). El juego no simula la clasificación completa de LaLiga ni el cuadro de Copa
+  de los demás equipos, así que no reproduce la regla exacta de "campeón + subcampeón de Liga +
+  2 finalistas de Copa, con la plaza vacante cayendo al siguiente mejor clasificado de Liga en
+  caso de solape" — el sorteo ponderado es la aproximación jugable a esa realidad.
 - **Selección**: `torneoDeVerano(S.temporada)` decide qué torneo de verano toca.
   `seleccion_absoluta` exige LaLiga + (trofeo individual la temporada anterior O reputación >=55);
   `seleccion_sub21` exige edad <=21, reputación 25-40, categoría >= Primera RFEF.

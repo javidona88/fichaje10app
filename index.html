@@ -4054,9 +4054,10 @@ const VERSION_JUEGO = 'v1.4.8';
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
-  { version:'v1.4.8', titulo:'Logros y cromos, en una sola pantalla', cambios:[
-    'Los cromos del mundo pasan a vivir dentro de la pantalla de Logros, como una segunda pestaña — al entrar (desde el trofeo de la topbar o desde Ajustes) siempre ves primero tus logros, y desde ahí cambias a "Cromos del mundo" con un toque.',
-    'Los logros y los cromos se reinician una vez: a partir de esta versión solo se consiguen jugando con una partida iniciada en la 1.4.8 o posterior — las partidas más antiguas ya en marcha no puntúan retroactivamente.'
+  { version:'v1.4.8', titulo:'Personaliza los escudos del juego', cambios:[
+    'Nueva pantalla "Personalizar escudos" (menú principal → "Personalizar escudos"): sube tu propia imagen para cualquier club, selección nacional o logo de liga. Se guarda solo en tu dispositivo — el juego no incluye ni reparte escudos oficiales, cada jugador aporta los suyos si quiere.',
+    'Puedes subir un archivo o pegar directamente una URL, y exportar/importar toda tu configuración de una vez.',
+    'Corregido: la Supercopa de España podía tocarte un rival extranjero; ahora siempre es un club de LaLiga, como en la realidad.'
   ]},
   { version:'v1.4.7', titulo:'Logros y cromos del mundo', cambios:[
     'Nuevo sistema de logros: 37 hitos de tu carrera (partidos, títulos, selección, vida personal, estilo de vida y alguna rareza), guardados de por vida en tu perfil, no en la partida. Accede desde el trofeo nuevo junto al engranaje de Ajustes. Los más raros se anuncian a pantalla completa; el resto, con un aviso discreto en la esquina.',
@@ -13707,6 +13708,25 @@ function golesPorTramoConBono(valor){
 }
 function rivalClubTorneo(cfg){
   const j = S.jugador;
+  if(cfg.id === 'supercopa_espana'){
+    // Competición 100% española (campeón y subcampeón de LaLiga + los dos finalistas de la Copa
+    // del Rey) — antes caía sin querer en la misma bolsa europea que Champions/Europa/Conference
+    // (los tres comparten tipo:'club') y podía tocar un equipo extranjero. El juego no simula la
+    // clasificación completa de LaLiga ni el cuadro de Copa de los demás clubes, así que el rival
+    // se sortea entre clubes de LaLiga con un peso muy sesgado a los grandes — los 4 puestos
+    // reales casi siempre recaen en los equipos punteros de la temporada.
+    const candidatos = CLUBES_POR_CATEGORIA["LaLiga"].filter(c => c.nombre !== j.club.nombre);
+    const pesoSupercopa = c => Math.pow(PRESTIGIO_CLUB[c.nombre] || 2, 3);
+    const candidatosConPeso = candidatos.map(c => ({ club:c, peso: pesoSupercopa(c) }));
+    const pesoTotal = candidatosConPeso.reduce((s,c)=>s+c.peso, 0);
+    let dadoSuper = Math.random() * pesoTotal;
+    let elegidoSuper = candidatosConPeso[candidatosConPeso.length-1].club;
+    for(const c of candidatosConPeso){
+      dadoSuper -= c.peso;
+      if(dadoSuper <= 0){ elegidoSuper = c.club; break; }
+    }
+    return { nombre: elegidoSuper.nombre, colores: elegidoSuper.colores, pais:'España' };
+  }
   if(cfg.tipo === 'copa_domestica'){
     // Peso POR CLUB (no por categoría entera) calibrado para que la categoría del rival en
     // semis/final de Copa del Rey se reparta como en la realidad de los últimos 50 años:
