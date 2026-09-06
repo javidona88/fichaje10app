@@ -113,11 +113,17 @@ body.sin-topbar{ padding-top: calc(24px + env(safe-area-inset-top,0px)); }
 .notif-wrap .notif-toast{ pointer-events:auto; }
 .notif-wrap:not(:empty){ padding-top:8px; }
 .notif-toast{
-  display:flex; align-items:center; gap:8px; max-width:360px; width:auto;
+  display:flex; align-items:center; gap:8px; max-width:392px; width:auto;
   background:var(--panel2); border:1.5px solid var(--gold); border-radius:10px; padding:9px 14px;
   font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:600; color:var(--ink);
   box-shadow:0 6px 16px rgba(0,0,0,0.4); animation:notifIn .25s ease;
 }
+/* Aviso combinado de subida de atributos (notificarSubidasAtributo): cada icono+texto es un
+   bloque "de una pieza" (.notif-attr) dentro de su propio contenedor con flex-wrap propio — si no
+   caben todos en una línea, saltan de línea completos, nunca partidos a media palabra, sin tocar
+   el layout (nowrap) del resto de notificaciones de una sola línea. */
+.notif-toast .notif-attrs{ display:inline-flex; flex-wrap:wrap; align-items:center; gap:4px 12px; }
+.notif-toast .notif-attr{ display:inline-flex; align-items:center; white-space:nowrap; }
 .notif-toast.objeto{ border-color:var(--gold); }
 .notif-toast.atributo{ border-color:var(--gold); }
 .notif-toast.riesgo{ border-color:var(--red); }
@@ -689,6 +695,10 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap;
 }
 .tienda-item button:disabled{ background:#3E4152; color:#787D8F; cursor:not-allowed; }
+.tienda-disponibles-aviso{ display:flex; align-items:center; font-family:'Space Grotesk',sans-serif; font-size:11.5px; font-weight:600; color:var(--gold); margin:-2px 0 10px; }
+.tienda-divisor{ margin-top:26px; padding-top:16px; border-top:1px solid var(--line); }
+.tienda-divisor-titulo{ font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; letter-spacing:.06em; color:var(--ink); }
+.tienda-divisor-sub{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); margin-top:2px; }
 .servicio-fila{ padding:12px 0; border-bottom:1px solid var(--line); }
 .servicio-fila:last-child{ border-bottom:none; }
 .servicio-cab{ display:flex; align-items:center; gap:9px; margin-bottom:9px; }
@@ -908,7 +918,7 @@ const ESTILOS_JUEGO = [
 const ATRIBUTOS_JUGADOR = ["fisico","velocidad","tiro","regate","pase","desmarque"];
 const ATRIBUTO_MAX = 20;
 const DIVISOR_PROGRESO = 8;
-const STATS_SIN_NUMERO_VISIBLE = ['forma','confianza','salud','reputacion','popularidad','felicidadPareja','vestuario'];
+const STATS_SIN_NUMERO_VISIBLE = ['forma','confianza','salud','reputacion','popularidad','felicidadPareja','vestuario','carinoAficion'];
 const NIVELES_SALUD = [
   { min:0, texto:'Baja grave', clase:'bad' }, { min:15, texto:'Tocado', clase:'bad' },
   { min:35, texto:'Molestias', clase:'warn' }, { min:55, texto:'Sano', clase:'ok' },
@@ -1079,6 +1089,13 @@ function clubesTerceraRFEFPorProvincia(provincia){
   if(!grupo) return CLUBES_POR_CATEGORIA["Tercera RFEF"];
   const nombres = new Set(grupo.clubes);
   return CLUBES_POR_CATEGORIA["Tercera RFEF"].filter(c => nombres.has(c.nombre));
+}
+// Busca en qué grupo territorial (I-XVIII) juega un club de Tercera RFEF, para poder mostrarlo
+// junto a la categoría (p. ej. "3ª RFEF VI"). Devuelve null si no se encuentra (no debería pasar
+// con clubes reales del juego, todos salen de TERCERA_RFEF_GRUPOS).
+function grupoTerceraRFEFDeClub(nombreClub){
+  const g = TERCERA_RFEF_GRUPOS.find(g => g.clubes.includes(nombreClub));
+  return g ? g.grupo : null;
 }
 // Clubes reales de la temporada 2026-27 (Segunda RFEF: Grupo 5; Primera RFEF: Grupos 1 y 2).
 const CLUBES_POR_CATEGORIA = {
@@ -1342,6 +1359,8 @@ const ICONOS_SVG = {
   psicologo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a5.4 5.4 0 00-5.4 5.4c0 2.3 1.3 3.6 1.8 4.5v2.4a1 1 0 001 1h5.2a1 1 0 001-1v-2.4c.5-.9 1.8-2.2 1.8-4.5A5.4 5.4 0 0012 3z"/><path d="M9.8 19.5h4.4"/></svg>',
   agente: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6a2 2 0 012-2h2a2 2 0 012 2v2"/><path d="M3 13.5h18"/></svg>',
   coche: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l1.2-3.6a2 2 0 011.9-1.4h11.8a2 2 0 011.9 1.4L21 16"/><path d="M8.5 11l.8-2h5.4l1.5 2"/><rect x="2.5" y="16" width="19" height="2.6" rx="1.2"/><circle cx="7" cy="19.8" r="1.4" fill="currentColor" stroke="none"/><circle cx="17" cy="19.8" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  moto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.3" cy="18" r="2.6"/><circle cx="18.2" cy="18" r="2.6"/><path d="M7.8 18h6.6l2-5.2h2.5"/><path d="M9.3 18l2-5.4h3.6l1.7-2.8h2.1"/><path d="M5.3 18l2.8-5.4"/></svg>',
+  comunicacion: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 011 1v9a1 1 0 01-1 1H9l-4 3v-3H4a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M12 14c-2.5-1.3-3.5-2.6-3.5-3.9a1.9 1.9 0 013.5-1.1 1.9 1.9 0 013.5 1.1c0 1.3-1 2.6-3.5 3.9z" fill="currentColor" stroke="none"/></svg>',
   vivienda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10v9a1 1 0 001 1h10a1 1 0 001-1v-9"/><rect x="10" y="14" width="4" height="6" fill="currentColor" stroke="none"/></svg>',
   vacaciones: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3"/><path d="M12 1.3v1.6M12 11v1.6M6.3 7h1.6M16.1 7h1.6M8 3l1.1 1.1M15 3l-1.1 1.1M8 11l1.1-1.1M15 11l-1.1-1.1"/><path d="M3.5 20c3-6.5 14-6.5 17 0"/></svg>',
   dinero: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 5.5c-1.3-1.3-3-2-4.9-2-4.1 0-7.4 3.4-7.4 7.5s3.3 7.5 7.4 7.5c1.9 0 3.6-.7 4.9-2"/><path d="M3 10h9M3 14h8"/></svg>',
@@ -1441,23 +1460,26 @@ const TIENDA_SERVICIOS = [
     { nivel:2, costeAnual:1500, efectoTemporada:{confianza:6}, desc:'Planificación de inversiones y algo más de tranquilidad.', ...porCategoria(1) },
     { nivel:3, costeAnual:11000, efectoTemporada:{confianza:10}, desc:'Gestión patrimonial completa: sociedades, imagen, inversiones. Ni un solo dolor de cabeza económico.', ...porCategoria(3) }
   ]},
-  { familia:'comunicacion', nombre:'Community Manager', icono:'agente', categoria:'Gestión y Entorno Profesional', niveles:[
+  { familia:'comunicacion', nombre:'Community Manager', icono:'comunicacion', categoria:'Gestión y Entorno Profesional', niveles:[
     { nivel:1, costeAnual:1800, efectoTemporada:{popularidad:8}, desc:'Manejo básico de redes sociales.', ...porPopularidad(20) },
     { nivel:2, costeAnual:4500, efectoTemporada:{popularidad:14}, desc:'Gestión activa de la imagen pública y notas de prensa.', ...porPopularidad(40) },
     { nivel:3, costeAnual:27000, efectoTemporada:{popularidad:22, reputacion:3}, desc:'Agencia de comunicación integral a tu servicio.', ...porPopularidad(65) }
   ]}
 ];
+// La confianza pesa mucho en las tiradas (evita el -2 de bono por debajo de 35), así que se deja
+// a propósito en poco por nivel — el efecto grande de comprar un coche/moto de gama alta es de
+// cara a la galería (popularidad), no un atajo para blindar tiradas.
 const TIENDA_COCHES = [
-  { nivel:1, nombre:'Utilitario compacto', coste:8000, efecto:{confianza:3}, desc:'Nada del otro mundo, pero es tuyo y te lleva a todas partes sin dar problemas.' },
-  { nivel:2, nombre:'Berlina de gama media', coste:35000, efecto:{confianza:5, popularidad:2}, desc:'Cómodo, con algo de estilo. Empiezas a sentir que las cosas te van bien de verdad.', ...porCategoria(1) },
-  { nivel:3, nombre:'Deportivo de lujo', coste:150000, efecto:{confianza:8, popularidad:6}, desc:'El tipo de coche con el que la gente se gira al verlo pasar por la calle.', ...porCategoria(3) },
-  { nivel:4, nombre:'Superdeportivo exclusivo', coste:600000, efecto:{confianza:12, popularidad:12}, desc:'Una pieza de coleccionista, de las que solo se ven en las revistas de motor. Solo hay unos pocos como el tuyo en el mundo.', ...porCategoria(4) }
+  { nivel:1, nombre:'Utilitario compacto', coste:8000, efecto:{confianza:1, popularidad:1}, desc:'Nada del otro mundo, pero es tuyo y te lleva a todas partes sin dar problemas.' },
+  { nivel:2, nombre:'Berlina de gama media', coste:35000, efecto:{confianza:2, popularidad:4}, desc:'Cómodo, con algo de estilo. Empiezas a sentir que las cosas te van bien de verdad.', ...porCategoria(1) },
+  { nivel:3, nombre:'Deportivo de lujo', coste:150000, efecto:{confianza:3, popularidad:8}, desc:'El tipo de coche con el que la gente se gira al verlo pasar por la calle.', ...porCategoria(3) },
+  { nivel:4, nombre:'Superdeportivo exclusivo', coste:600000, efecto:{confianza:4, popularidad:14}, desc:'Una pieza de coleccionista, de las que solo se ven en las revistas de motor. Solo hay unos pocos como el tuyo en el mundo.', ...porCategoria(4) }
 ];
 const TIENDA_MOTOS = [
-  { nivel:1, nombre:'Scooter urbana', coste:2500, efecto:{confianza:2}, desc:'Práctica para moverte por la ciudad sin depender de nadie. Nada llamativo, pero cumple.' },
-  { nivel:2, nombre:'Naked de gama media', coste:16000, efecto:{confianza:4, popularidad:2}, desc:'Empiezas a disfrutar de verdad de las salidas en moto los días libres.', ...porCategoria(1) },
-  { nivel:3, nombre:'Custom de alta gama', coste:65000, efecto:{confianza:7, popularidad:5}, desc:'Una moto con la que te paras a mirarla antes de arrancar. Se nota en cómo te miran también a ti.', ...porCategoria(3) },
-  { nivel:4, nombre:'Superbike de edición limitada', coste:260000, efecto:{confianza:11, popularidad:10}, desc:'Pocas unidades en el mundo, y una de ellas es tuya. Cada vez que sales con ella es un pequeño espectáculo.', ...porCategoria(4) }
+  { nivel:1, nombre:'Scooter urbana', coste:2500, efecto:{confianza:1, popularidad:1}, desc:'Práctica para moverte por la ciudad sin depender de nadie. Nada llamativo, pero cumple.' },
+  { nivel:2, nombre:'Naked de gama media', coste:16000, efecto:{confianza:2, popularidad:3}, desc:'Empiezas a disfrutar de verdad de las salidas en moto los días libres.', ...porCategoria(1) },
+  { nivel:3, nombre:'Custom de alta gama', coste:65000, efecto:{confianza:2, popularidad:6}, desc:'Una moto con la que te paras a mirarla antes de arrancar. Se nota en cómo te miran también a ti.', ...porCategoria(3) },
+  { nivel:4, nombre:'Superbike de edición limitada', coste:260000, efecto:{confianza:3, popularidad:11}, desc:'Pocas unidades en el mundo, y una de ellas es tuya. Cada vez que sales con ella es un pequeño espectáculo.', ...porCategoria(4) }
 ];
 
 /* ============ LOGROS (colección de por vida, independiente de la partida) ============
@@ -5137,7 +5159,7 @@ const PAISES_CROMO = [
     curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.'] }
 ];
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','escudosPersonalizados']);
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','escudosPersonalizados']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
 const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras','blackjack']);
@@ -5459,13 +5481,14 @@ const TORNEOS_CONFIG = [
       if(!torneo) return false;
       if(!S.rolTemporada || S.rolTemporada.corto === 'Suplente') return false;
       if(CATEGORIAS.indexOf(j.club.categoria) < 4) return false; // solo LaLiga; la absoluta no baja a Segunda
+      if(j.stats.forma < 30) return false; // por muy decisivo que fueras antes, así no te llevan a un torneo grande
       const ultimaTemp = (j.historialTemporadas||[])[j.historialTemporadas.length-1];
       const fueDecisivo = ultimaTemp && ultimaTemp.trofeosIndividuales > 0; // Pichichi o MVP la temporada anterior
       return fueDecisivo || j.stats.reputacion >= 55;
     }, probabilidad: j => {
       // OJO, mismo fallo que tuvo la Copa al principio: esto NO puede depender casi solo de
       // ti. España compite contra otras 23-31 selecciones por 4 puestos de semifinalista —
-      // tu situación personal (edad/decisivo/reputación/nota) decide como mucho si formas
+      // tu situación personal (edad/decisivo/reputación/nota/forma) decide como mucho si formas
       // parte de la selección que hace ese recorrido, no si España lo hace. Base fija de
       // selección "contendiente habitual, no favorita segura" (~1 de cada 4 grandes torneos),
       // matizada por un factor personal centrado en 1 (ni sube ni baja el caso normal).
@@ -5473,13 +5496,16 @@ const TORNEOS_CONFIG = [
       const ultimaTemp = (j.historialTemporadas||[])[j.historialTemporadas.length-1];
       const fueDecisivo = ultimaTemp && ultimaTemp.trofeosIndividuales > 0;
       const factorNota = multiplicadorPorNota(j.ultimaNotaTemporada != null ? j.ultimaNotaTemporada : 6.5);
+      // El seleccionador mira cómo llegas AHORA, no solo tu currículum: llegar tocado o sin
+      // ritmo pesa, y llegar en un gran momento de forma ayuda a ganarte la lista.
+      const factorForma = j.stats.forma >= 75 ? 1.2 : j.stats.forma >= 55 ? 1 : j.stats.forma >= 40 ? 0.6 : 0.3;
       let factorPersonal;
       if(fueDecisivo) factorPersonal = 1.8; // ser decisivo pesa mucho, pero no lo es todo
       else if(j.edad >= 34) factorPersonal = 0.5;
       else if(j.edad >= 32) factorPersonal = 0.7;
       else if(j.edad >= 30) factorPersonal = 0.9;
       else factorPersonal = 0.75 + Math.min(0.5, (j.stats.reputacion-55)/70);
-      return Math.max(0.04, Math.min(0.65, BASE_SELECCION_ABSOLUTA * factorPersonal * factorNota));
+      return Math.max(0.04, Math.min(0.65, BASE_SELECCION_ABSOLUTA * factorPersonal * factorNota * factorForma));
     },
     efectosVictoria:{forma:15,popularidad:25,reputacion:15,valorMercado:80000} },
   { id:'seleccion_sub21', nombreCompeticion:null, tipo:'seleccion_sub21', edadMax:21,
@@ -5490,16 +5516,18 @@ const TORNEOS_CONFIG = [
       if(!S.rolTemporada || S.rolTemporada.corto === 'Suplente') return false;
       if(CATEGORIAS.indexOf(j.club.categoria) < 2) return false;
       if(j.stats.reputacion >= 40) return false; // con ese perfil ya suena para la absoluta
+      if(j.stats.forma < 30) return false;
       return true;
     }, probabilidad: j => {
       // Misma corrección que en la absoluta: la Sub-21 española compite contra otras
       // muchas selecciones por 4 puestos de semifinalista, no depende casi solo de ti. Base
       // algo más alta que la absoluta (~0,30) porque España Sub-21 viene de una racha muy
-      // buena en los últimos torneos, matizada por reputación y tu nota real.
+      // buena en los últimos torneos, matizada por reputación, tu nota real y tu forma actual.
       const BASE_SELECCION_SUB21 = 0.30;
       const factorReputacion = 0.8 + Math.min(0.4, (j.stats.reputacion-25)/40);
       const factorNota = multiplicadorPorNota(j.ultimaNotaTemporada != null ? j.ultimaNotaTemporada : 6.5);
-      return Math.max(0.05, Math.min(0.55, BASE_SELECCION_SUB21 * factorReputacion * factorNota));
+      const factorForma = j.stats.forma >= 75 ? 1.2 : j.stats.forma >= 55 ? 1 : j.stats.forma >= 40 ? 0.6 : 0.3;
+      return Math.max(0.05, Math.min(0.55, BASE_SELECCION_SUB21 * factorReputacion * factorNota * factorForma));
     },
     efectosVictoria:{forma:10,popularidad:14,reputacion:9,valorMercado:35000} }
 ];
@@ -6301,9 +6329,13 @@ function aplicarEfectosServiciosPasivo(j){
       const esAtributoODerivado = ATRIBUTOS_JUGADOR.includes(clave) || clave==='mental' || clave==='tecnica';
       const porPaso = valorTemporada / porPasoDivisor;
       const valorAplicar = esAtributoODerivado ? porPaso * DIVISOR_PROGRESO : porPaso;
-      cambios.push(...aplicarEfectos(j, { [clave]: valorAplicar }));
+      // notificar:false — se aplica servicio a servicio (para no alterar el escalado de
+      // gananciaEscalada si dos servicios tocan la misma stat), pero el aviso de subida de
+      // atributo se manda una sola vez, combinado, al final de todo el lote.
+      cambios.push(...aplicarEfectos(j, { [clave]: valorAplicar }, { notificar:false }));
     });
   });
+  notificarSubidasAtributo(cambios);
   return cambios;
 }
 function costeAnualServicios(j){
@@ -6879,7 +6911,6 @@ function acumularProgresoAtributo(jugador, clave, valorCrudo, cambios){
       jugador.mentalidadProgreso -= 1; jugador.mentalidad += 1;
       cambios.push({ clave:'mental', tipo:'atributo', nuevoValor:jugador.mentalidad, subio:true });
       Sonido.subeNivel();
-      mostrarNotificacion(`${iconoInline('mental',15)}<b style="color:var(--gold);">${NICE_ATTR.mental} +1</b>`, 'atributo');
     }
     if(jugador.mentalidad >= ATRIBUTO_MAX) jugador.mentalidadProgreso = Math.min(jugador.mentalidadProgreso, 0);
     while(jugador.mentalidadProgreso <= -1 && jugador.mentalidad > 1){
@@ -6896,7 +6927,6 @@ function acumularProgresoAtributo(jugador, clave, valorCrudo, cambios){
     jugador.atributosProgreso[clave] -= 1; jugador.atributos[clave] += 1;
     cambios.push({ clave, tipo:'atributo', nuevoValor:jugador.atributos[clave], subio:true });
     Sonido.subeNivel();
-    mostrarNotificacion(`${iconoInline(clave,15)}<b style="color:var(--gold);">${NICE_ATTR[clave]||clave} +1</b>`, 'atributo');
   }
   if(jugador.atributos[clave] >= ATRIBUTO_MAX) jugador.atributosProgreso[clave] = Math.min(jugador.atributosProgreso[clave], 0);
   while(jugador.atributosProgreso[clave] <= -1 && jugador.atributos[clave] > 1){
@@ -6937,7 +6967,21 @@ function generarLesion(j){
   }
   return { dado, bonoFisico, total, ventanas, gravedad, semanas };
 }
-function aplicarEfectos(jugador, efectos){
+// Un único aviso, aunque suban varios atributos a la vez (antes cada subida disparaba su propio
+// toast por separado, y podían llegar a apilarse 2-3 seguidos por la misma decisión o el mismo
+// paso de temporada). Cuenta cuántas veces sube cada atributo dentro del mismo lote de cambios.
+function notificarSubidasAtributo(cambios){
+  const subidas = (cambios||[]).filter(c=>c.tipo==='atributo' && c.subio);
+  if(!subidas.length) return;
+  const porClave = {};
+  subidas.forEach(c=> porClave[c.clave] = (porClave[c.clave]||0)+1);
+  const partes = Object.keys(porClave).map(clave=>
+    `<span class="notif-attr">${iconoInline(clave,15)}<b style="color:var(--gold);">${NICE_ATTR[clave]||clave} +${porClave[clave]}</b></span>`
+  );
+  mostrarNotificacion(`<span class="notif-attrs">${partes.join('')}</span>`, 'atributo');
+}
+function aplicarEfectos(jugador, efectos, opts){
+  const notificar = !opts || opts.notificar !== false;
   const cambios = [];
   const RALENTIZACION_FAMA = 0.6; // reputación y popularidad suben más despacio en general, no solo cerca del tope
   Object.entries(efectos||{}).forEach(([k,v])=>{
@@ -6969,6 +7013,7 @@ function aplicarEfectos(jugador, efectos){
       acumularProgresoAtributo(jugador, k, v, cambios);
     }
   });
+  if(notificar) notificarSubidasAtributo(cambios);
   return cambios;
 }
 
@@ -7114,22 +7159,24 @@ function aplicarProgresoEntrenoPasivo(j){
   const prioridades = (j.prioridadesEntreno || []).filter(Boolean);
   const porPaso = PRESUPUESTO_TEMPORADA_P1 / SECUENCIA_TEMPORADA.length;
   const factorLesion = j.lesionSemanas > 0 ? 0 : 1; // lesionado, el entreno se detiene del todo
-  const cambios = [];
+  // Un único objeto de efectos (en vez de una llamada a aplicarEfectos por atributo) para que,
+  // si suben varios atributos en el mismo paso, salga un solo aviso combinado.
+  const efectosCombinados = {};
   prioridades.forEach((clave, idx)=>{
     const peso = PESOS_PRIORIDAD_ENTRENO[idx] || 0;
     if(peso <= 0) return;
     const valorCrudo = porPaso * peso * factorLesion * DIVISOR_PROGRESO;
-    cambios.push(...aplicarEfectos(j, { [clave]: valorCrudo }));
+    efectosCombinados[clave] = (efectosCombinados[clave]||0) + valorCrudo;
   });
   const noElegidos = ATRIBUTOS_JUGADOR.filter(a => !prioridades.includes(a));
   if(noElegidos.length){
     const presupuestoTrickle = porPaso * 0.10 * factorLesion;
     noElegidos.forEach(clave=>{
       const valorCrudo = (presupuestoTrickle / noElegidos.length) * DIVISOR_PROGRESO;
-      cambios.push(...aplicarEfectos(j, { [clave]: valorCrudo }));
+      efectosCombinados[clave] = (efectosCombinados[clave]||0) + valorCrudo;
     });
   }
-  return cambios;
+  return aplicarEfectos(j, efectosCombinados);
 }
 function avanzarPaso(j){
   pagarNomina(j);
@@ -7368,7 +7415,11 @@ function iniciarTemporadaJuego(j){
       S.torneoPerdidoPorLesion = { nombreCompeticion: torneoDeVerano(S.temporada) + (torneoVerano.tipo === 'seleccion_sub21' ? ' Sub-21' : ''), semanasRestantes: j.lesionSemanas };
       S.screen = 'veranoLesionado';
     } else if(torneoVerano){
-      iniciarTorneoEliminatorio(torneoVerano);
+      // No se entra directo al torneo: primero un aviso propio de convocatoria (con la lista
+      // hecha semanas antes del primer partido), y solo al continuar ahí arranca el torneo en
+      // sí (iniciarTorneoEliminatorio). Antes las dos cosas pasaban en el mismo instante.
+      S.torneoVeranoPendiente = torneoVerano;
+      S.screen = 'convocatoriaSeleccion';
     } else {
       avanzarPaso(j);
     }
@@ -12101,7 +12152,7 @@ SCREENS.ofertas = function(){
       if((S.ofertasActuales||[]).length > 0){
         const ganancia = gananciaEscalada(j.carinoAficion||0, 5, 100);
         j.carinoAficion = Math.min(100, (j.carinoAficion||0) + ganancia);
-        if(ganancia > 0) mostrarNotificacion(`${iconoInline('estrella',15)}Cariño de la afición <span style="color:var(--green);">↑ +${ganancia}</span>`, 'atributo');
+        if(ganancia > 0) mostrarNotificacion(`${iconoInline('estrella',15)}Cariño de la afición <span style="color:var(--green);">↑</span>`, 'atributo');
       }
       iniciarTemporadaJuego(j);
       render();
@@ -12855,8 +12906,21 @@ SCREENS.negociacionPatrocinio = function(){
   app.appendChild(c);
 };
 
+// Cuántos niveles de un servicio (o lista de servicios) están sin activar/mejorar y a tu alcance
+// ahora mismo (desbloqueados y que puedes pagar). Mismo criterio que contarComprasDisponibles,
+// pero reutilizable por categoría para el aviso y el resaltado dorado del acordeón.
+function serviciosDisponiblesEn(servicios, j){
+  return servicios.filter(s=>{
+    const nivelActual = j.suscripciones[s.familia] || 0;
+    return s.niveles.some(n => n.nivel > nivelActual && (!n.desbloqueo || n.desbloqueo(j)) && puedePagarServicio(j, s.familia, n.nivel));
+  }).length;
+}
 function renderizarServiciosProfesionales(j, contenedor){
   contenedor.appendChild(el('div','stat-section-titulo','SERVICIOS PROFESIONALES'));
+  const totalDisponibles = serviciosDisponiblesEn(TIENDA_SERVICIOS, j);
+  if(totalDisponibles > 0){
+    contenedor.appendChild(el('div','tienda-disponibles-aviso', `${iconoInline('estrella',13)}${totalDisponibles} ${totalDisponibles===1?'servicio disponible':'servicios disponibles'} para activar o mejorar`));
+  }
   const categorias = {};
   TIENDA_SERVICIOS.forEach(s=>{
     categorias[s.categoria] = categorias[s.categoria] || [];
@@ -12869,10 +12933,12 @@ function renderizarServiciosProfesionales(j, contenedor){
   }
   Object.entries(categorias).forEach(([nombreCategoria, servicios])=>{
     const abiertaCategoria = S.serviciosCategoriaAbierta === nombreCategoria;
-    const tieneActivo = servicios.some(s=>(j.suscripciones[s.familia]||0) > 0);
+    // El dorado ya no marca "tienes algo activo aquí" (confundía activo con pendiente); marca
+    // que hay algo NUEVO por activar o mejorar en la categoría, con el número al lado.
+    const disponiblesCategoria = serviciosDisponiblesEn(servicios, j);
     const tituloCategoria = document.createElement('button');
-    tituloCategoria.style.cssText = `display:flex;justify-content:space-between;align-items:center;width:100%;padding:9px 12px;margin:14px 0 ${abiertaCategoria?'8px':'0'};border-radius:9px;border:1px solid ${tieneActivo?'var(--gold)':'var(--line)'};background:${tieneActivo?'rgba(212,175,55,0.1)':'transparent'};color:var(--ink);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;`;
-    tituloCategoria.innerHTML = `<span>${nombreCategoria}</span><span style="color:var(--ink-soft);font-size:12px;text-transform:none;">${abiertaCategoria?'▾':'▸'}</span>`;
+    tituloCategoria.style.cssText = `display:flex;justify-content:space-between;align-items:center;width:100%;padding:9px 12px;margin:14px 0 ${abiertaCategoria?'8px':'0'};border-radius:9px;border:1px solid ${disponiblesCategoria?'var(--gold)':'var(--line)'};background:${disponiblesCategoria?'rgba(212,175,55,0.1)':'transparent'};color:var(--ink);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;`;
+    tituloCategoria.innerHTML = `<span>${nombreCategoria}${disponiblesCategoria?` <span style="color:var(--gold);">· ${disponiblesCategoria}</span>`:''}</span><span style="color:var(--ink-soft);font-size:12px;text-transform:none;">${abiertaCategoria?'▾':'▸'}</span>`;
     tituloCategoria.onclick = ()=>{ S.serviciosCategoriaAbierta = abiertaCategoria ? null : nombreCategoria; pintar(); };
     contenedor.appendChild(tituloCategoria);
     if(!abiertaCategoria) return;
@@ -12931,7 +12997,6 @@ function renderizarServiciosProfesionales(j, contenedor){
 }
 function renderizarCoches(j, contenedor){
   const tituloGaraje = el('div','stat-section-titulo','GARAJE · COCHE');
-  tituloGaraje.style.marginTop = '24px';
   contenedor.appendChild(tituloGaraje);
   const fila = el('div','servicio-fila');
   const cab = el('div','servicio-cab');
@@ -12939,7 +13004,7 @@ function renderizarCoches(j, contenedor){
   const efectoBaseCoche = TIENDA_COCHES[0].efecto || {};
   const mejoraTxtCoche = Object.keys(efectoBaseCoche).map(k => NICE_ATTR[k] || NICE_STAT[k] || k).join(' · ');
   const mejoraSpanCoche = mejoraTxtCoche ? ` <span class="servicio-mejora" style="font-weight:400;font-size:11px;color:var(--gold);white-space:nowrap;">↑ ${mejoraTxtCoche}</span>` : '';
-  cab.innerHTML = `${iconoInsignia('dinero',26)}<span class="servicio-nombre">Coche</span>${mejoraSpanCoche}${nombreActual?`<span class="servicio-activo-tag">${nombreActual.toUpperCase()}</span>`:''}`;
+  cab.innerHTML = `${iconoInsignia('coche',26)}<span class="servicio-nombre">Coche</span>${mejoraSpanCoche}${nombreActual?`<span class="servicio-activo-tag">${nombreActual.toUpperCase()}</span>`:''}`;
   fila.appendChild(cab);
   const niveles = el('div','servicio-niveles');
   TIENDA_COCHES.forEach(info=>{
@@ -12986,7 +13051,7 @@ function renderizarMotos(j, contenedor){
   const efectoBaseMoto = TIENDA_MOTOS[0].efecto || {};
   const mejoraTxtMoto = Object.keys(efectoBaseMoto).map(k => NICE_ATTR[k] || NICE_STAT[k] || k).join(' · ');
   const mejoraSpanMoto = mejoraTxtMoto ? ` <span class="servicio-mejora" style="font-weight:400;font-size:11px;color:var(--gold);white-space:nowrap;">↑ ${mejoraTxtMoto}</span>` : '';
-  cab.innerHTML = `${iconoInsignia('dinero',26)}<span class="servicio-nombre">Moto</span>${mejoraSpanMoto}${nombreActual?`<span class="servicio-activo-tag">${nombreActual.toUpperCase()}</span>`:''}`;
+  cab.innerHTML = `${iconoInsignia('moto',26)}<span class="servicio-nombre">Moto</span>${mejoraSpanMoto}${nombreActual?`<span class="servicio-activo-tag">${nombreActual.toUpperCase()}</span>`:''}`;
   fila.appendChild(cab);
   const niveles = el('div','servicio-niveles');
   TIENDA_MOTOS.forEach(info=>{
@@ -13027,6 +13092,12 @@ function renderizarMotos(j, contenedor){
 }
 function renderizarTienda(j, contenedor){
   renderizarServiciosProfesionales(j, contenedor);
+  // Separador fuerte entre Servicios (compromiso anual, se paga cada temporada) y Compras (gasto
+  // puntual de una vez) — antes solo había un margen mayor entre bloques y se confundían.
+  const divisor = el('div','tienda-divisor');
+  divisor.appendChild(el('div','tienda-divisor-titulo', 'COMPRAS'));
+  divisor.appendChild(el('div','tienda-divisor-sub', 'Un pago único, para siempre — no un compromiso anual como los servicios de arriba.'));
+  contenedor.appendChild(divisor);
   renderizarCoches(j, contenedor);
   renderizarMotos(j, contenedor);
 }
@@ -13616,11 +13687,14 @@ function graficaValorMercado(j){
 
 function categoriaCorta(club){
   if(club.extranjero) return club.liga;
-  return TIER_CATEGORIA[club.categoria];
+  const corta = TIER_CATEGORIA[club.categoria];
+  if(club.categoria !== 'Tercera RFEF') return corta;
+  const grupo = grupoTerceraRFEFDeClub(club.nombre);
+  return grupo ? `${corta} ${grupo}` : corta;
 }
 function nombreLigaConDivision(club){
   if(club.extranjero) return club.liga;
-  return `${club.categoria} (${DIVISION_NUMERICA[club.categoria] || ''})`;
+  return `${categoriaCorta(club)} (${DIVISION_NUMERICA[club.categoria] || ''})`;
 }
 
 SCREENS.playoffElim = function(){
@@ -14021,6 +14095,34 @@ SCREENS.veranoLesionado = function(){
   btn.onclick = ()=>{
     S.torneoPerdidoPorLesion = null;
     avanzarPaso(j);
+    render();
+  };
+  c.appendChild(btn);
+  app.appendChild(c);
+};
+// Paso previo al torneo de verano: la lista se hace pública semanas antes del primer partido, no
+// en el mismo instante en el que arranca la semifinal (ver iniciarTemporadaJuego). Aquí solo se
+// anuncia; iniciarTorneoEliminatorio (con el sorteo de rivales de verdad) no se llama hasta que el
+// jugador pulsa continuar.
+SCREENS.convocatoriaSeleccion = function(){
+  const j = S.jugador;
+  const torneoVerano = S.torneoVeranoPendiente;
+  const esSub21 = torneoVerano.tipo === 'seleccion_sub21';
+  const nombreTorneo = (torneoDeVerano(S.temporada) || 'Torneo internacional') + (esSub21 ? ' Sub-21' : '');
+  Sonido.exito();
+  topbar("Convocatoria");
+  const c = el('div','season-reveal');
+  const iconoBox = el('div','icon','');
+  iconoBox.innerHTML = escudoSeleccion('España', 48);
+  iconoBox.style.cssText = 'display:flex;justify-content:center;';
+  c.appendChild(iconoBox);
+  c.appendChild(el('div','lbl', esSub21 ? 'El seleccionador sub-21 te llama' : 'El seleccionador absoluto te llama'));
+  c.appendChild(el('div','num', nombreTorneo)).style.fontSize = '22px';
+  c.appendChild(el('div','sub', `Formas parte de la lista para ${articuloCompeticion(nombreTorneo)==='el'?'el':'la'} ${nombreTorneo} de este verano. Quedan semanas de concentración con el resto de la plantilla antes del primer partido — por ahora, disfruta de la noticia.`));
+  const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Llegar hasta el torneo →';
+  btn.onclick = ()=>{
+    S.torneoVeranoPendiente = null;
+    iniciarTorneoEliminatorio(torneoVerano);
     render();
   };
   c.appendChild(btn);

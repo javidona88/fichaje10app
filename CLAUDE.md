@@ -159,6 +159,19 @@ resultado NUNCA muestran el número crudo, solo una flecha. `CLAVES_STAT_INMEDIA
 `STATS_SIN_NUMERO_VISIBLE` deciden qué claves sí muestran cifra; `dinero` y `valorMercado`
 llevan sufijo € vía `formatearDelta()`. `valorAtributo(j,clave)`: `'tecnica'` = media de
 tiro/regate/pase, `'mental'` = `j.mentalidad`.
+- **Aviso combinado de subida de nivel**: `acumularProgresoAtributo` ya NO llama a
+  `mostrarNotificacion` en cada `+1` (antes, si dos o tres atributos subían en el mismo lote de
+  efectos, se apilaban 2-3 toasts seguidos). Ahora solo empuja a `cambios`; es
+  `notificarSubidasAtributo(cambios)` quien manda UN aviso combinado ("Tiro +1 · Regate +1"),
+  llamado al final de `aplicarEfectos` (por defecto; `aplicarEfectos(j, efectos, {notificar:false})`
+  lo desactiva para esa llamada) y explícitamente una vez al final de `aplicarProgresoEntrenoPasivo`
+  (que combina sus atributos en un único objeto de efectos antes de aplicar, ya que solo son
+  atributos, sin riesgo de alterar el escalado de `gananciaEscalada`) y de
+  `aplicarEfectosServiciosPasivo` (que sigue aplicando servicio a servicio con `notificar:false`
+  por si dos servicios tocan la misma stat, y notifica un único combinado al final del paso).
+  `.notif-toast` es más ancho (392px) y cada bloque icono+texto va en su propio `.notif-attr`
+  dentro de `.notif-attrs` para que, si no caben todos en una línea, salten de línea enteros
+  (nunca a media palabra).
 
 ### Estados apilados (Forma / Confianza / Salud / Reputación / Popularidad / Rol / Cariño)
 Mismo diseño de tarjeta apilada (`estadoItem()` dentro de `cromo()`).
@@ -169,7 +182,9 @@ Mismo diseño de tarjeta apilada (`estadoItem()` dentro de `cromo()`).
 - **Reputación / Popularidad / Rol / Cariño**: `estadoReputacion()`, `estadoPopularidad()`
   ("Ídolo"/"Superestrella" en el tramo alto — se renombró desde "Ídolo local"/"Estrella"),
   `S.rolTemporada.corto/clase`, `estadoCarino()` (+ barra segmentada de 10 bloques `.carino-seg`).
-  Objetivo de temporada como caja, texto corto vía `ABREVIATURA_OBJETIVO`.
+  Objetivo de temporada como caja, texto corto vía `ABREVIATURA_OBJETIVO`. `carinoAficion` está en
+  `STATS_SIN_NUMERO_VISIBLE` (como reputación/popularidad): sus chips y avisos ("Cariño de la
+  afición ↑") nunca muestran la cifra cruda, solo la flecha.
 - Mentalidad va en ATRIBUTOS DE JUGADOR, no en ESTADO (es entrenable y permanente).
 
 ### Lesiones y recuperación
@@ -380,10 +395,23 @@ verdad rechazaste ofertas). `ABREVIATURA_OBJETIVO` da la versión corta.
   caso de solape" — el sorteo ponderado es la aproximación jugable a esa realidad.
 - **Selección**: `torneoDeVerano(S.temporada)` decide qué torneo de verano toca.
   `seleccion_absoluta` exige LaLiga + (trofeo individual la temporada anterior O reputación >=55);
-  `seleccion_sub21` exige edad <=21, reputación 25-40, categoría >= Primera RFEF.
+  `seleccion_sub21` exige edad <=21, reputación 25-40, categoría >= Primera RFEF. Ambas exigen
+  además `j.stats.forma >= 30` en la propia `condicion` (por debajo de eso ni se plantea la
+  llamada, por muy decisivo o repuesto que fueras antes), y su `probabilidad` aplica un
+  `factorForma` (0.3-1.2 según tramo de forma) que hace mucho más probable la llamada si llegas en
+  buen momento y mucho menos si llegas tocado — antes la forma actual no pesaba nada, así que una
+  vez convocado casi nunca dejabas de repetir pese a rachas de forma mala.
   `TITULOS_SELECCION_NOMBRES = ['Eurocopa','Mundial','Eurocopa Sub-21','Mundial Sub-21']`.
   Ganar añade a `j.titulosSeleccion`. `SCREENS.primeraConvocatoria` la primera vez
   (`j.tuvoPrimeraConvocatoriaAbsoluta` / `...Sub21`).
+  - **Convocatoria con antelación**: antes, el sorteo de `torneoVerano` en `iniciarTemporadaJuego`
+    entraba directo en `iniciarTorneoEliminatorio` (rivales ya sorteados, semifinal ya lista) en el
+    mismo instante — el jugador se enteraba de la convocatoria y de la semifinal a la vez, sin
+    ningún hueco entre medias. Ahora, si toca torneo de verano, `continuarFlujoTemporada` guarda
+    el cfg en `S.torneoVeranoPendiente` y pasa primero por `SCREENS.convocatoriaSeleccion` (aviso
+    propio, "la lista se hace pública semanas antes del primer partido"); solo al pulsar
+    continuar ahí se llama a `iniciarTorneoEliminatorio` de verdad (sorteo de rivales incluido) y
+    arranca el torneo. `convocatoriaSeleccion` está en `PANTALLAS_SIN_TABBAR`.
 - Pantallas: `torneoSemifinal` → `torneoFinalIntro` → `torneoFinal` → `torneoFinalReveal`
   (y `torneoEliminado` / `playoffEliminado` si caes).
 - **Estadísticas de selección**: `acumularEstadisticasSeleccion(j, cfg, nombreCompeticion)` se
@@ -457,14 +485,34 @@ Técnico y Análisis, Salud Mental y Bienestar, Gestión y Entorno Profesional).
 - Los nombres van sin rol redundante ("Fisioterapeuta", "Analista de rendimiento", "Psicólogo
   deportivo", "Community Manager"). En la cabecera de cada servicio, junto al nombre, va un
   `↑ <atributos>` fino y dorado (de `niveles[0].efectoTemporada`); los botones de nivel solo
-  muestran "Nivel N" + coste, sin el atributo.
+  muestran "Nivel N" + coste, sin el atributo. Icono propio por familia en `ICONOS_SVG`
+  (`comunicacion` para Community Manager — antes reutilizaba `agente`, el mismo de la Agencia de
+  representación, colisión real corregida).
+- **Acordeón de categorías — el dorado marca "hay algo nuevo", no "ya tienes algo activo"**:
+  `renderizarServiciosProfesionales` calcula `serviciosDisponiblesEn(servicios, j)` (mismo
+  criterio que `contarComprasDisponibles`: nivel superior desbloqueado y pagable) por categoría;
+  el borde/fondo dorado y el contador junto al nombre ("· 3") salen si hay disponibles, YA NO si
+  hay algo activo (antes un servicio activo dejaba la categoría en dorado para siempre, aunque no
+  hubiera nada pendiente de mejorar — confundía "hecho" con "pendiente"). Encima del acordeón, un
+  aviso propio (`.tienda-disponibles-aviso`) resume el total de servicios disponibles para activar
+  o mejorar con `serviciosDisponiblesEn(TIENDA_SERVICIOS, j)`.
 - `patrocinio`: la ficha del patrocinio (marca, cantidad/temp., años) vive en `SCREENS.tabJugador`
   (caja `PATROCINIO`), no en Economía; en Economía solo queda la línea "· Patrocinio" del desglose
   de ingresos.
 - `representante` es `esPorcentaje:true` (comisión 3/6/10% del sueldo, no coste fijo). Crea
   `j.representante` vía `crearRepresentante` con `.agente` (nombre + genero + relacion).
   `AGENCIAS_REPRESENTACION` para el nombre de la agencia.
-- `TIENDA_COCHES` (`j.cocheActual` = índice), vivienda y vacaciones. Coche/vivienda `unico:true`.
+- **Servicios vs Compras**: separador visual fuerte (`.tienda-divisor`, con su propio título
+  "COMPRAS" y subtítulo aclarando que es un pago único, no un compromiso anual) entre
+  `renderizarServiciosProfesionales` y el bloque de `renderizarCoches`/`renderizarMotos` —
+  antes solo había un margen mayor entre bloques y se confundían con más servicios.
+- `TIENDA_COCHES` / `TIENDA_MOTOS` (`j.cocheActual`/`j.motoActual` = índice), `unico:true`. Su
+  efecto es un único empujón inmediato (no recurrente como los servicios) de
+  `{confianza, popularidad}`, deliberadamente poco de confianza (1-4, solo evita el -2 de bono por
+  debajo de 35) y bastante más de popularidad (1-14) — antes daban mucha confianza y poca/ninguna
+  popularidad, y confianza pesa directamente en las tiradas, así que un coche de lujo se acercaba
+  a un atajo mecánico; ahora el efecto grande es de cara a la galería.
+  Iconos propios `coche`/`moto` en `ICONOS_SVG` (antes ambos reutilizaban el icono de `dinero`).
 - Servicios repetibles pero no más de uno por temporada (`S.comprasEstaTemporada`, reset en
   `iniciarTemporadaJuego`). `SCREENS.gastos` se salta si no hay nada pagable.
 
@@ -629,6 +677,12 @@ aviso a pantalla completa ni de esquina tipo logro — es un descubrimiento más
   `clubesTerceraRFEFPorProvincia(j.provincia)` en vez del pool completo, así que las ofertas de
   debut son siempre de la región real elegida. `j.provincia` en el modelo del jugador (ver
   `nuevoJugador` y `migrarJugadorGuardado`, que rellena `''` en partidas viejas).
+  `grupoTerceraRFEFDeClub(nombreClub)` hace la búsqueda inversa (a qué grupo pertenece un club ya
+  fichado) para poder mostrar el grupo junto a la categoría (p. ej. "3ª RFEF VI") en
+  `categoriaCorta(club)` — que de paso usa `TIER_CATEGORIA` para la forma abreviada en vez del
+  nombre largo; `nombreLigaConDivision` (cabecera de `SCREENS.tabClub`) reutiliza `categoriaCorta`
+  por el mismo motivo (antes mostraba el nombre completo "Tercera RFEF" sin abreviar, a diferencia
+  de casi todo lo demás en el juego).
 - `escudoSVG(nombre, tamano, colores)`: escudo genérico con iniciales + colores — NUNCA el
   escudo oficial. `PATRON_ESCUDO_LALIGA` da forma (escudo/círculo) y patrón (rayas/mitades/
   diagonal/sólido) por club de LaLiga. Excepción: escudo especial del Novelda CF por nombre.
