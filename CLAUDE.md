@@ -798,21 +798,32 @@ no rompe nada si el script no ha cargado — bloqueadores de anuncios, sin red �
 `typeof umami !== 'undefined'` dentro de un `try/catch`). `trackEvento` manda el mismo evento
 también a Supabase (ver abajo) — es el único punto de entrada para analítica, nunca llamar a
 `umami.track` directamente. Disparados actualmente:
-- `nueva_partida` (`{estilo}`) al pulsar "Empezar carrera" en `SCREENS.crear`.
+- `nueva_partida` (`{estilo, so}`) al pulsar "Empezar carrera" en `SCREENS.crear`. `so` es el
+  sistema operativo (`detectarSO()`, por `navigator.userAgent`: Windows/macOS/Linux/Android/iOS/
+  Otro) — va dentro de `datos` (JSONB) y no como columna propia, para no tener que tocar el
+  esquema de Supabase solo por un desglose más en `stats.html`.
 - `retiro` (`{idCarrera, temporada, partidos, goles, asistencias, dineroGanado, titulos,
-  categoriaFinal, nombreJugador, pais, ascensos, valorMercadoMaximo, balonesDeOro, edadRetiro,
-  clubFinal, extranjero, titulosSeleccion, notaMediaCarrera}`) al pulsar "Colgar las botas" en
-  `SCREENS.retiro` (forzosa a los 42 o voluntaria, mismo punto); `notaMediaCarrera` es la media
-  de `j.historialTemporadas[].nota` de toda la carrera. Los campos van todos en `datos` (JSONB),
-  así que se puede ampliar el payload en cualquier momento sin tocar el esquema de Supabase —
-  pero solo alimenta partidas que se retiren DESPUÉS del cambio; no hay forma de rellenar ese
-  campo para carreras ya terminadas (esos datos solo vivían en el `localStorage` de cada
-  jugador y nunca se enviaron). `stats.html` ya usa varios de estos campos en cajas propias:
-  rankings de más títulos, mayor valor de mercado, más Balones de Oro, más títulos con la
-  selección, más ascensos y mejor nota media de carrera; desgloses por categoría de retiro,
-  país, club de retiro y versión jugada (`version_juego`, columna de la tabla, no de `datos`);
-  y una caja de cifras colectivas (suma de goles, asistencias, partidos, títulos y dinero de
-  todas las carreras, más cuántas acabaron en el extranjero).
+  categoriaFinal, nombreJugador, pais, provincia, ascensos, valorMercadoMaximo, balonesDeOro,
+  edadRetiro, clubFinal, extranjero, titulosSeleccion, notaMediaCarrera}`) al pulsar "Colgar las
+  botas" en `SCREENS.retiro` (forzosa a los 42 o voluntaria, mismo punto); `notaMediaCarrera` es
+  la media de `j.historialTemporadas[].nota` de toda la carrera. `categoriaFinal` es
+  `j.club.categoria`, EXCEPTO si el retiro es en el extranjero (`j.club.extranjero`): esos clubes
+  llevan `categoria:"LaLiga"` fijo internamente (equivalencia de nivel que usa el propio juego
+  para objetivos/ambición, no la liga real), así que ahí se usa `j.club.liga` en su lugar — si
+  no, cualquier retiro fuera de España se contaba como LaLiga en las estadísticas (bug real,
+  corregido). `pais` es siempre "España" (no hay selector de país de origen en la creación del
+  personaje, solo de provincia) — por eso `stats.html`/`SCREENS.rankings` NO tienen un desglose
+  por país, solo por `provincia` (esa sí se elige de verdad, y decide el club inicial de Tercera
+  RFEF). Los campos van todos en `datos` (JSONB), así que se puede ampliar el payload en
+  cualquier momento sin tocar el esquema de Supabase — pero solo alimenta partidas que se
+  retiren DESPUÉS del cambio; no hay forma de rellenar ese campo para carreras ya terminadas
+  (esos datos solo vivían en el `localStorage` de cada jugador y nunca se enviaron). `stats.html`
+  ya usa varios de estos campos en cajas propias: rankings de más títulos, mayor valor de
+  mercado, más Balones de Oro, más títulos con la selección, más ascensos y mejor nota media de
+  carrera; desgloses por categoría de retiro, provincia, club de retiro, dispositivo, sistema
+  operativo, zona horaria y versión jugada; y una caja de cifras colectivas (suma de goles,
+  asistencias, partidos, títulos y dinero de todas las carreras, más cuántas acabaron en el
+  extranjero).
   - **Retiros duplicados**: si cargas un slot de guardado anterior a un retiro ya enviado (p. ej.
     otro slot con la misma carrera más atrás en el tiempo) y vuelves a retirarte, el suceso
     `retiro` se dispara otra vez con el mismo `idCarrera`. `stats.html` (`deduplicarPorCarrera`)
@@ -855,18 +866,43 @@ Supabase directamente desde el navegador del que la abre.
   (`movil`/`tablet`/`escritorio`, por `navigator.userAgent`).
 - **`stats.html`**: pensado como panel de ADMINISTRACIÓN (para mí, no para los jugadores) — mismo
   tema oscuro y paleta que el juego (variables CSS duplicadas de `index.html`, no hay forma de
-  compartir CSS entre archivos sin build step). Contadores de partidas iniciadas / carreras
-  completadas / jugadores distintos, desglose por dispositivo, zona horaria y versión jugada
-  (`version_juego`), y rankings (goles, asistencias, dinero, títulos, valor de mercado, Balones
-  de Oro, títulos con la selección, ascensos, nota media) más desgloses por categoría/país/club
-  de retiro, leyendo los eventos `retiro` con `deduplicarPorCarrera` (ver más abajo). Sin "Carreras
-  más largas": se quitó porque el retiro forzoso a los 42 años hace que casi todas las carreras
-  largas empaten en el mismo techo de temporadas, así que no decía nada interesante. Cuenta filas
-  trayendo `select=id` y usando `.length` en vez de la cabecera `Content-Range` de PostgREST — esa
-  cabecera no es fiable en peticiones cross-origin salvo que el servidor la exponga explícitamente
-  vía CORS, y a esta escala (unos amigos jugando) traer las filas es insignificante en coste.
-  Accesible desde "← Volver al juego"; el juego NO enlaza a `stats.html` a propósito (es la parte
-  de admin) — la parte visible para los jugadores es `SCREENS.rankings`, ver abajo.
+  compartir CSS entre archivos sin build step). Organizado en 4 **pestañas** (`.tab-btn`/
+  `.tab-panel`, `inicializarTabs()`) dentro de una barra superior `.toolbar` que queda **fija**
+  (`position:sticky`) al hacer scroll, para poder navegar un panel largo sin perder de vista las
+  pestañas ni el selector de rango:
+  - **Resumen**: los 3 contadores (partidas iniciadas / carreras completadas / jugadores
+    distintos) + la caja "Fichaje 10, en cifras".
+  - **Actividad**: partidas iniciadas vs. carreras completadas a lo largo del tiempo, como
+    gráfico de barras hecho con `<div>`+CSS (sin librerías, ver más abajo), con un segundo
+    selector (`#granularidad`) Días/Semanas/Meses.
+  - **Desgloses**: las tarjetas de barras (`pintarBarras`) en una rejilla de **2 columnas**
+    (`.desglose-grid`, mismo patrón que `.tablas-grid` de Rankings), agrupadas bajo dos rótulos
+    de sección (`.seccion-titulo`): "Cómo juegan" (dispositivo, sistema operativo, zona horaria,
+    versión jugada) y "Cómo terminan las carreras" (categoría al retirarse, provincia, club).
+  - **Rankings**: las 9 tablas (goles, asistencias, dinero, títulos, valor de mercado, Balones
+    de Oro, títulos con la selección, ascensos, nota media), leyendo los eventos `retiro` con
+    `deduplicarPorCarrera`. Sin "Carreras más largas": se quitó porque el retiro forzoso a los 42
+    años hace que casi todas las carreras largas empaten en el mismo techo de temporadas, así
+    que no decía nada interesante.
+  - **Selector de rango de fechas** (`#rango-fecha`, 7/30/90 días o "Todo"): vive en la propia
+    `.toolbar`, así que se ve y aplica en cualquier pestaña. Todo se trae de Supabase UNA sola
+    vez al cargar (`cargarEstadisticas` → `datosCrudos = {partidas, sesiones, retiros}`) y cada
+    cambio de rango o de granularidad simplemente vuelve a filtrar y repintar en el cliente
+    (`recalcularTodo()`, por `created_at`) sin pedir nada más a la red — nunca re-consulta
+    Supabase por cambiar de rango.
+  - **Gráfico de actividad**: sin librerías externas, `<div>`s con altura en `%`/`px` calculada a
+    mano (`pintarActividad`, `clavePeriodo`/`etiquetaPeriodo`/`avanzarPeriodo`/
+    `generarRangoPeriodos`) — mismo criterio "todo autocontenido" que el resto del proyecto. Los
+    periodos sin actividad se rellenan a 0 para que el eje de tiempo sea continuo (si no, un día
+    sin partidas desaparecería del gráfico en vez de verse como un hueco).
+  - Cuenta filas trayendo `select=id` (o los campos que hagan falta) y usando `.length` en vez de
+    la cabecera `Content-Range` de PostgREST — esa cabecera no es fiable en peticiones
+    cross-origin salvo que el servidor la exponga explícitamente vía CORS, y a esta escala (unos
+    amigos jugando) traer las filas es insignificante en coste.
+  - Accesible desde "← Volver al juego"; el juego NO enlaza a `stats.html` a propósito (es la
+    parte de admin) — la parte visible para los jugadores es `SCREENS.rankings`, ver abajo (sin
+    pestañas, sin selector de rango ni SO/dispositivo/zona horaria — solo lo que le interesa a
+    un jugador).
 - **`SCREENS.rankings`** (dentro de `index.html`): versión "para jugadores" de los mismos
   rankings, sin nada de admin (sin dispositivo/zona horaria/jugadores distintos). Accesible desde
   Ajustes ("Ver los rankings de todos los jugadores", `S.pantallaAnteriorRankings` guarda de dónde

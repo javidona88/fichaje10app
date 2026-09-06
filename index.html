@@ -8716,6 +8716,17 @@ function detectarDispositivo(){
   if(/mobi|android|iphone/i.test(ua)) return 'movil';
   return 'escritorio';
 }
+// Solo para el desglose "Sistema operativo" de stats.html — se manda dentro de datos.so (columna
+// JSON libre) en vez de como columna propia, para no tener que tocar el esquema de Supabase.
+function detectarSO(){
+  const ua = navigator.userAgent || '';
+  if(/android/i.test(ua)) return 'Android';
+  if(/iphone|ipad|ipod/i.test(ua)) return 'iOS';
+  if(/windows/i.test(ua)) return 'Windows';
+  if(/mac os x|macintosh/i.test(ua)) return 'macOS';
+  if(/linux/i.test(ua)) return 'Linux';
+  return 'Otro';
+}
 function enviarEventoSupabase(nombre, datos){
   try{
     if(!SUPABASE_URL || SUPABASE_URL.startsWith('TU-')) return; // sin configurar todavia
@@ -11600,7 +11611,7 @@ SCREENS.crear = function(){
     ATRIBUTOS_JUGADOR.forEach(a=>{ extra[a] = estilo.atributos[a] - ATRIBUTOS_BASE[a]; });
     const nombreCompleto = `${state.nombrePila.trim()} ${state.apellido.trim()}`;
     S.jugador = nuevoJugador(nombreCompleto, state.pais, extra, null, state.localidad.trim(), state.provincia);
-    trackEvento('nueva_partida', { estilo: estilo.id });
+    trackEvento('nueva_partida', { estilo: estilo.id, so: detectarSO() });
     S.screen = 'personalizarGrupo';
     render();
   };

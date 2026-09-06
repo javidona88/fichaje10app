@@ -39,18 +39,23 @@ body{
 .top a{ color:var(--gold); text-decoration:none; font-size:13px; font-weight:600; }
 .top a:hover{ text-decoration:underline; }
 
-.tabs{
-  display:flex; gap:4px; margin:0 -16px 22px; padding:10px 16px 0; border-bottom:1px solid var(--line);
-  overflow-x:auto; position:sticky; top:0; z-index:5; background:var(--bg);
+.toolbar{
+  position:sticky; top:0; z-index:5; background:var(--bg);
+  margin:0 -16px 22px; padding:10px 16px 12px; border-bottom:1px solid var(--line);
 }
+.tabs{ display:flex; gap:4px; overflow-x:auto; }
 .tab-btn{
   background:none; border:none; color:var(--ink-soft); font-family:inherit; font-size:13.5px; font-weight:600;
-  padding:10px 16px; cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent;
+  padding:10px 16px 8px; cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent;
   display:inline-flex; align-items:center; gap:7px; transition:color .15s, border-color .15s;
 }
 .tab-btn:hover{ color:var(--ink); }
 .tab-btn.active{ color:var(--gold); border-bottom-color:var(--gold); }
 .tab-panel[hidden]{ display:none; }
+
+.rango-bar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px; }
+.rango-lbl{ font-size:12px; color:var(--ink-soft); font-weight:600; }
+.rango-bar .segmented{ margin-bottom:0; }
 
 .card{
   background:var(--panel); border:1px solid var(--line); border-radius:14px;
@@ -144,11 +149,22 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
   </div>
 
   <div id="contenido" hidden>
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="resumen">📊 Resumen</button>
-      <button class="tab-btn" data-tab="actividad">📈 Actividad</button>
-      <button class="tab-btn" data-tab="desgloses">🧩 Desgloses</button>
-      <button class="tab-btn" data-tab="rankings">🏆 Rankings</button>
+    <div class="toolbar">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="resumen">📊 Resumen</button>
+        <button class="tab-btn" data-tab="actividad">📈 Actividad</button>
+        <button class="tab-btn" data-tab="desgloses">🧩 Desgloses</button>
+        <button class="tab-btn" data-tab="rankings">🏆 Rankings</button>
+      </div>
+      <div class="rango-bar">
+        <span class="rango-lbl">Periodo</span>
+        <div class="segmented" id="rango-fecha">
+          <button data-dias="7">7 días</button>
+          <button data-dias="30">30 días</button>
+          <button data-dias="90">90 días</button>
+          <button data-dias="0" class="active">Todo</button>
+        </div>
+      </div>
     </div>
 
     <div class="tab-panel" id="panel-resumen">
@@ -194,6 +210,11 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
         <div class="card">
           <h2>Dispositivo</h2>
           <div id="barras-dispositivo"></div>
+        </div>
+
+        <div class="card">
+          <h2>Sistema operativo</h2>
+          <div id="barras-so"></div>
         </div>
 
         <div class="card">
@@ -443,17 +464,15 @@ function generarRangoPeriodos(claveMin, claveMax, gran){
   return out;
 }
 
-let datosActividad = null; // { partidas:[{created_at}], retiros:[{created_at}] }
 let granularidadActual = 'dia';
 
-function pintarActividad(){
+function pintarActividad(filasPartida, filasRetiro){
   const cont = document.getElementById('chart-actividad');
-  if(!datosActividad) return;
   const gran = granularidadActual;
   const contPartidas = {};
-  datosActividad.partidas.forEach(f=>{ const k = clavePeriodo(f.created_at, gran); contPartidas[k] = (contPartidas[k]||0)+1; });
+  filasPartida.forEach(f=>{ const k = clavePeriodo(f.created_at, gran); contPartidas[k] = (contPartidas[k]||0)+1; });
   const contRetiros = {};
-  datosActividad.retiros.forEach(f=>{ const k = clavePeriodo(f.created_at, gran); contRetiros[k] = (contRetiros[k]||0)+1; });
+  filasRetiro.forEach(f=>{ const k = clavePeriodo(f.created_at, gran); contRetiros[k] = (contRetiros[k]||0)+1; });
   const claves = [...new Set([...Object.keys(contPartidas), ...Object.keys(contRetiros)])].sort();
   if(!claves.length){ cont.innerHTML = '<div class="nota">Todavía no hay datos suficientes.</div>'; return; }
   const rango = generarRangoPeriodos(claves[0], claves[claves.length-1], gran);
@@ -475,17 +494,51 @@ function pintarActividad(){
   cont.appendChild(cols);
 }
 
+/* ---- Selector de rango de fechas: se pide todo UNA vez y se filtra en el cliente ---- */
+let datosCrudos = null; // { partidas, sesiones, retiros } — sin filtrar, tal cual llegan de Supabase
+let rangoDiasActual = 0; // 0 = todo el histórico
+
+function dentroDeRango(iso, dias){
+  if(!dias) return true;
+  return new Date(iso).getTime() >= Date.now() - dias*86400000;
+}
+
 async function cargarEstadisticas(){
-  // Dispositivo/zona horaria/versión se calculan sobre las filas de "nueva_partida" (una por
-  // carrera empezada de verdad, al pulsar "Empezar carrera"): así los tres suman exactamente lo
-  // mismo que "Partidas iniciadas", en vez de salir inflados por sesiones que solo generaron un
-  // logro/cromo suelto (guardado antiguo, prueba en otro navegador...) sin empezar una carrera.
-  const { datos: filasPartida } = await consultarSupabase('eventos?nombre=eq.nueva_partida&select=sesion_id,dispositivo,timezone,version_juego,created_at&limit=10000');
+  // Dispositivo/SO/zona horaria/versión se calculan sobre las filas de "nueva_partida" (una por
+  // carrera empezada de verdad, al pulsar "Empezar carrera"): así siempre coinciden con "Partidas
+  // iniciadas", en vez de salir inflados por sesiones que solo generaron un logro/cromo suelto
+  // (guardado antiguo, prueba en otro navegador...) sin empezar una carrera.
+  const { datos: filasPartida } = await consultarSupabase('eventos?nombre=eq.nueva_partida&select=sesion_id,dispositivo,timezone,version_juego,created_at,datos&limit=10000');
+  // "Jugadores distintos" es sobre TODOS los eventos (sesion_id única de ese navegador) — cifra
+  // distinta a propósito, no tiene por qué coincidir con partidas.
+  const { datos: filasSesion } = await consultarSupabase('eventos?select=sesion_id,created_at&limit=10000');
+  const { datos: filasRetiroCrudas } = await consultarSupabase('eventos?nombre=eq.retiro&select=datos,created_at&limit=2000');
+  const filasRetiro = deduplicarPorCarrera(filasRetiroCrudas);
+
+  datosCrudos = { partidas: filasPartida, sesiones: filasSesion, retiros: filasRetiro };
+  recalcularTodo();
+}
+
+// Vuelve a pintar TODO el panel (los cuatro apartados) a partir de datosCrudos, filtrado al
+// rango de fechas elegido arriba — sin volver a pedir nada a Supabase, todo en el cliente.
+function recalcularTodo(){
+  const dias = rangoDiasActual;
+  const filasPartida = datosCrudos.partidas.filter(f => dentroDeRango(f.created_at, dias));
+  const filasSesion = datosCrudos.sesiones.filter(f => dentroDeRango(f.created_at, dias));
+  const filasRetiro = datosCrudos.retiros.filter(f => dentroDeRango(f.created_at, dias));
+
   document.getElementById('t-partidas').textContent = filasPartida.length.toLocaleString('es-ES');
 
   const conteoDispositivo = {};
   filasPartida.forEach(f=>{ const d = f.dispositivo || 'desconocido'; conteoDispositivo[d] = (conteoDispositivo[d]||0)+1; });
   pintarBarras(document.getElementById('barras-dispositivo'), conteoDispositivo);
+
+  // El sistema operativo no es una columna propia de la tabla: viaja dentro de datos.so (ver
+  // detectarSO() en index.html) para no tener que tocar el esquema de Supabase. Los eventos de
+  // antes de añadir este campo no lo llevan y caen en "desconocido".
+  const conteoSO = {};
+  filasPartida.forEach(f=>{ const so = f.datos?.so || 'desconocido'; conteoSO[so] = (conteoSO[so]||0)+1; });
+  pintarBarras(document.getElementById('barras-so'), conteoSO);
 
   const conteoTimezone = {};
   filasPartida.forEach(f=>{ const z = (f.timezone || 'desconocida').replace(/_/g,' '); conteoTimezone[z] = (conteoTimezone[z]||0)+1; });
@@ -496,18 +549,12 @@ async function cargarEstadisticas(){
   filasPartida.forEach(f=>{ const v = f.version_juego || 'desconocida'; conteoVersion[v] = (conteoVersion[v]||0)+1; });
   pintarBarras(document.getElementById('barras-version'), conteoVersion);
 
-  // "Jugadores distintos" sigue siendo sobre TODOS los eventos (sesion_id única de por vida en
-  // ese navegador) — es una cifra distinta a propósito, no tiene por qué coincidir con partidas.
-  const { datos: filasSesion } = await consultarSupabase('eventos?select=sesion_id&limit=10000');
   const sesionesUnicas = new Set(filasSesion.map(f=>f.sesion_id)).size;
   document.getElementById('t-jugadores').textContent = sesionesUnicas.toLocaleString('es-ES');
 
-  const { datos: filasRetiroCrudas } = await consultarSupabase('eventos?nombre=eq.retiro&select=datos,created_at&limit=2000');
-  const filasRetiro = deduplicarPorCarrera(filasRetiroCrudas);
   document.getElementById('t-retiros').textContent = filasRetiro.length.toLocaleString('es-ES');
 
-  datosActividad = { partidas: filasPartida, retiros: filasRetiro };
-  pintarActividad();
+  pintarActividad(filasPartida, filasRetiro);
 
   const porGoles = [...filasRetiro].sort((a,b)=> (b.datos?.goles||0) - (a.datos?.goles||0));
   const porAsistencias = [...filasRetiro].sort((a,b)=> (b.datos?.asistencias||0) - (a.datos?.asistencias||0));
@@ -545,9 +592,9 @@ async function cargarEstadisticas(){
   const topClubes = Object.fromEntries(Object.entries(conteoClubFinal).sort((a,b)=>b[1]-a[1]).slice(0,10));
   pintarBarras(document.getElementById('barras-clubfinal'), topClubes);
 
-  // Cifras colectivas: suma de todas las carreras deduplicadas. dineroGanado/valorMercadoMaximo
-  // no tienen por qué estar en la misma moneda percibida por el jugador, pero sí son sumables
-  // sin problema (ambos en euros de la propia economía del juego).
+  // Cifras colectivas: suma de todas las carreras deduplicadas (dentro del rango elegido).
+  // dineroGanado/valorMercadoMaximo no tienen por qué estar en la misma moneda percibida por el
+  // jugador, pero sí son sumables sin problema (ambos en euros de la propia economía del juego).
   const sumar = clave => filasRetiro.reduce((acc,f)=> acc + (f.datos?.[clave]||0), 0);
   document.getElementById('c-goles').textContent = sumar('goles').toLocaleString('es-ES');
   document.getElementById('c-asistencias').textContent = sumar('asistencias').toLocaleString('es-ES');
@@ -572,7 +619,15 @@ function inicializarTabs(){
       document.querySelectorAll('#granularidad button').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       granularidadActual = btn.dataset.gran;
-      pintarActividad();
+      recalcularTodo();
+    });
+  });
+  document.querySelectorAll('#rango-fecha button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#rango-fecha button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      rangoDiasActual = parseInt(btn.dataset.dias, 10) || 0;
+      recalcularTodo();
     });
   });
 }
