@@ -10791,6 +10791,7 @@ SCREENS.rankings = function(){
   cDesglose.appendChild(crearEyebrow('Desgloses'));
   [
     ['Categoría al retirarse', 'categoriaFinal'],
+    ['Provincia del jugador', 'provincia'],
     ['Club en el que se retiró', 'clubFinal']
   ].forEach(([titulo, clave], idx)=>{
     if(idx > 0) cDesglose.appendChild(document.createElement('hr')).style.cssText = 'border:none;border-top:1px solid var(--line);margin:16px 0;';
@@ -15016,7 +15017,7 @@ SCREENS.retiro = function(){
     // que juega — para las estadísticas de "categoría al retirarse" hay que usar j.club.liga en
     // ese caso, si no, cualquier retiro en el extranjero se contaba como "LaLiga".
     const categoriaFinal = j.club.extranjero ? (j.club.liga || 'Extranjero') : j.club.categoria;
-    const datosRetiro = { idCarrera: j.idCarrera, temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais, ascensos: j.carrera.ascensos||0, valorMercadoMaximo: j.carrera.valorMercadoMaximo||0, balonesDeOro: j.carrera.balonesDeOro||0, edadRetiro: j.edad, clubFinal: j.club.nombre, extranjero: !!j.club.extranjero, titulosSeleccion: (j.titulosSeleccion||[]).length, notaMediaCarrera };
+    const datosRetiro = { idCarrera: j.idCarrera, temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais, provincia: j.provincia || null, ascensos: j.carrera.ascensos||0, valorMercadoMaximo: j.carrera.valorMercadoMaximo||0, balonesDeOro: j.carrera.balonesDeOro||0, edadRetiro: j.edad, clubFinal: j.club.nombre, extranjero: !!j.club.extranjero, titulosSeleccion: (j.titulosSeleccion||[]).length, notaMediaCarrera };
     trackEvento('retiro', datosRetiro);
     calcularPosicionesRanking(datosRetiro);
     S.retiroConfirmado = true;

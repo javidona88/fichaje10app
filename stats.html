@@ -136,6 +136,11 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
     </div>
 
     <div class="card">
+      <h2>Provincia del jugador</h2>
+      <div id="barras-provincia"></div>
+    </div>
+
+    <div class="card">
       <h2>Club en el que se retiró</h2>
       <div id="barras-clubfinal"></div>
     </div>
@@ -371,6 +376,13 @@ async function cargarEstadisticas(){
   const conteoCategoria = {};
   filasRetiro.forEach(f=>{ const c = f.datos?.categoriaFinal || 'desconocida'; conteoCategoria[c] = (conteoCategoria[c]||0)+1; });
   pintarBarras(document.getElementById('barras-categoria'), conteoCategoria);
+
+  // provincia sí se elige de verdad en la creación del personaje (a diferencia de "país", que
+  // siempre es España). Los retiros de antes de añadir este campo no lo llevan y caen en
+  // "desconocida".
+  const conteoProvincia = {};
+  filasRetiro.forEach(f=>{ const p = f.datos?.provincia || 'desconocida'; conteoProvincia[p] = (conteoProvincia[p]||0)+1; });
+  pintarBarras(document.getElementById('barras-provincia'), conteoProvincia);
 
   const conteoClubFinal = {};
   filasRetiro.forEach(f=>{ const c = f.datos?.clubFinal; if(c) conteoClubFinal[c] = (conteoClubFinal[c]||0)+1; });
