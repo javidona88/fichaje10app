@@ -39,11 +39,14 @@ body{
 .top a{ color:var(--gold); text-decoration:none; font-size:13px; font-weight:600; }
 .top a:hover{ text-decoration:underline; }
 
-.tabs{ display:flex; gap:4px; margin-bottom:22px; border-bottom:1px solid var(--line); overflow-x:auto; }
+.tabs{
+  display:flex; gap:4px; margin:0 -16px 22px; padding:10px 16px 0; border-bottom:1px solid var(--line);
+  overflow-x:auto; position:sticky; top:0; z-index:5; background:var(--bg);
+}
 .tab-btn{
   background:none; border:none; color:var(--ink-soft); font-family:inherit; font-size:13.5px; font-weight:600;
   padding:10px 16px; cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent;
-  transition:color .15s, border-color .15s;
+  display:inline-flex; align-items:center; gap:7px; transition:color .15s, border-color .15s;
 }
 .tab-btn:hover{ color:var(--ink); }
 .tab-btn.active{ color:var(--gold); border-bottom-color:var(--gold); }
@@ -104,8 +107,16 @@ tbody tr:last-child td{ border-bottom:none; }
 tbody td.num{ font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; }
 tbody td.rank{ color:var(--ink-soft); width:22px; }
 .id-corto{ display:block; font-family:monospace; font-size:10px; color:var(--ink-soft); margin-top:1px; letter-spacing:.02em; }
-.tablas-grid{ display:grid; grid-template-columns:1fr; gap:18px; }
-@media (min-width:680px){ .tablas-grid{ grid-template-columns:1fr 1fr; } }
+.tablas-grid, .desglose-grid{ display:grid; grid-template-columns:1fr; gap:18px; }
+@media (min-width:680px){ .tablas-grid, .desglose-grid{ grid-template-columns:1fr 1fr; } }
+.desglose-grid{ margin-bottom:26px; }
+.desglose-grid:last-child{ margin-bottom:0; }
+.tablas-grid .card, .desglose-grid .card{ margin-bottom:0; }
+.seccion-titulo{
+  font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-soft);
+  font-weight:700; margin:0 0 12px; display:flex; align-items:center; gap:8px;
+}
+.seccion-titulo::after{ content:''; flex:1; height:1px; background:var(--line); }
 
 .estado{ text-align:center; padding:60px 16px; color:var(--ink-soft); font-size:14px; line-height:1.6; }
 .estado b{ color:var(--ink); }
@@ -134,10 +145,10 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
 
   <div id="contenido" hidden>
     <div class="tabs">
-      <button class="tab-btn active" data-tab="resumen">Resumen</button>
-      <button class="tab-btn" data-tab="actividad">Actividad</button>
-      <button class="tab-btn" data-tab="desgloses">Desgloses</button>
-      <button class="tab-btn" data-tab="rankings">Rankings</button>
+      <button class="tab-btn active" data-tab="resumen">📊 Resumen</button>
+      <button class="tab-btn" data-tab="actividad">📈 Actividad</button>
+      <button class="tab-btn" data-tab="desgloses">🧩 Desgloses</button>
+      <button class="tab-btn" data-tab="rankings">🏆 Rankings</button>
     </div>
 
     <div class="tab-panel" id="panel-resumen">
@@ -178,35 +189,41 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
     </div>
 
     <div class="tab-panel" id="panel-desgloses" hidden>
-      <div class="card">
-        <h2>Dispositivo</h2>
-        <div id="barras-dispositivo"></div>
+      <div class="seccion-titulo">Cómo juegan</div>
+      <div class="desglose-grid">
+        <div class="card">
+          <h2>Dispositivo</h2>
+          <div id="barras-dispositivo"></div>
+        </div>
+
+        <div class="card">
+          <h2>Zona horaria</h2>
+          <div id="barras-timezone"></div>
+          <div class="nota">Aproximación de región a partir del huso horario del navegador — no es geolocalización real.</div>
+        </div>
+
+        <div class="card">
+          <h2>Versión jugada</h2>
+          <div id="barras-version"></div>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Zona horaria</h2>
-        <div id="barras-timezone"></div>
-        <div class="nota">Aproximación de región a partir del huso horario del navegador — no es geolocalización real.</div>
-      </div>
+      <div class="seccion-titulo">Cómo terminan las carreras</div>
+      <div class="desglose-grid">
+        <div class="card">
+          <h2>Categoría al retirarse</h2>
+          <div id="barras-categoria"></div>
+        </div>
 
-      <div class="card">
-        <h2>Categoría al retirarse</h2>
-        <div id="barras-categoria"></div>
-      </div>
+        <div class="card">
+          <h2>Provincia del jugador</h2>
+          <div id="barras-provincia"></div>
+        </div>
 
-      <div class="card">
-        <h2>Provincia del jugador</h2>
-        <div id="barras-provincia"></div>
-      </div>
-
-      <div class="card">
-        <h2>Club en el que se retiró</h2>
-        <div id="barras-clubfinal"></div>
-      </div>
-
-      <div class="card">
-        <h2>Versión jugada</h2>
-        <div id="barras-version"></div>
+        <div class="card">
+          <h2>Club en el que se retiró</h2>
+          <div id="barras-clubfinal"></div>
+        </div>
       </div>
     </div>
 
