@@ -265,14 +265,6 @@ async function consultarSupabase(pathQuery){
   return { datos: await res.json() };
 }
 
-// Cuenta filas trayendo solo el id: más lento que una cabecera Content-Range, pero no depende
-// de que el servidor la exponga en CORS (no siempre es fiable en peticiones cross-origin), y a
-// esta escala (unos amigos jugando) el coste es insignificante.
-async function contarEventos(nombre){
-  const { datos } = await consultarSupabase(`eventos?nombre=eq.${nombre}&select=id&limit=10000`);
-  return datos.length;
-}
-
 function pintarBarras(contenedor, conteos, totalMax){
   contenedor.innerHTML = '';
   const entradas = Object.entries(conteos).sort((a,b)=> b[1]-a[1]);
@@ -331,33 +323,31 @@ function deduplicarPorCarrera(filas){
 }
 
 async function cargarEstadisticas(){
-  const partidas = await contarEventos('nueva_partida');
-  document.getElementById('t-partidas').textContent = partidas.toLocaleString('es-ES');
-
-  // Dispositivo/zona horaria/versión iban antes contados por FILA DE EVENTO (select=dispositivo,
-  // etc. sobre toda la tabla `eventos`), pero cada partida dispara muchos eventos (nueva_partida,
-  // varios logros, cromos, retiro...) que llevan todos el mismo dispositivo/timezone/versión del
-  // navegador que los generó — así que esos recuentos salían muy por encima del número real de
-  // partidas o jugadores. Se cuenta una única vez por `sesion_id` (quedándose con su evento más
-  // antiguo), igual que ya se hacía para "Jugadores distintos".
-  const { datos: filasSesionBase } = await consultarSupabase('eventos?select=sesion_id,dispositivo,timezone,version_juego,created_at&order=created_at.asc&limit=10000');
-  const porSesion = new Map();
-  filasSesionBase.forEach(f=>{ if(!porSesion.has(f.sesion_id)) porSesion.set(f.sesion_id, f); });
-  const filasPorSesion = [...porSesion.values()];
-  document.getElementById('t-jugadores').textContent = filasPorSesion.length.toLocaleString('es-ES');
+  // Dispositivo/zona horaria/versión se calculan sobre las filas de "nueva_partida" (una por
+  // carrera empezada de verdad, al pulsar "Empezar carrera"): así los tres suman exactamente lo
+  // mismo que "Partidas iniciadas", en vez de salir inflados por sesiones que solo generaron un
+  // logro/cromo suelto (guardado antiguo, prueba en otro navegador...) sin empezar una carrera.
+  const { datos: filasPartida } = await consultarSupabase('eventos?nombre=eq.nueva_partida&select=sesion_id,dispositivo,timezone,version_juego&limit=10000');
+  document.getElementById('t-partidas').textContent = filasPartida.length.toLocaleString('es-ES');
 
   const conteoDispositivo = {};
-  filasPorSesion.forEach(f=>{ const d = f.dispositivo || 'desconocido'; conteoDispositivo[d] = (conteoDispositivo[d]||0)+1; });
+  filasPartida.forEach(f=>{ const d = f.dispositivo || 'desconocido'; conteoDispositivo[d] = (conteoDispositivo[d]||0)+1; });
   pintarBarras(document.getElementById('barras-dispositivo'), conteoDispositivo);
 
   const conteoTimezone = {};
-  filasPorSesion.forEach(f=>{ const z = (f.timezone || 'desconocida').replace(/_/g,' '); conteoTimezone[z] = (conteoTimezone[z]||0)+1; });
+  filasPartida.forEach(f=>{ const z = (f.timezone || 'desconocida').replace(/_/g,' '); conteoTimezone[z] = (conteoTimezone[z]||0)+1; });
   const topTimezones = Object.fromEntries(Object.entries(conteoTimezone).sort((a,b)=>b[1]-a[1]).slice(0,8));
   pintarBarras(document.getElementById('barras-timezone'), topTimezones);
 
   const conteoVersion = {};
-  filasPorSesion.forEach(f=>{ const v = f.version_juego || 'desconocida'; conteoVersion[v] = (conteoVersion[v]||0)+1; });
+  filasPartida.forEach(f=>{ const v = f.version_juego || 'desconocida'; conteoVersion[v] = (conteoVersion[v]||0)+1; });
   pintarBarras(document.getElementById('barras-version'), conteoVersion);
+
+  // "Jugadores distintos" sigue siendo sobre TODOS los eventos (sesion_id única de por vida en
+  // ese navegador) — es una cifra distinta a propósito, no tiene por qué coincidir con partidas.
+  const { datos: filasSesion } = await consultarSupabase('eventos?select=sesion_id&limit=10000');
+  const sesionesUnicas = new Set(filasSesion.map(f=>f.sesion_id)).size;
+  document.getElementById('t-jugadores').textContent = sesionesUnicas.toLocaleString('es-ES');
 
   const { datos: filasRetiroCrudas } = await consultarSupabase('eventos?nombre=eq.retiro&select=datos,created_at&limit=2000');
   const filasRetiro = deduplicarPorCarrera(filasRetiroCrudas);
