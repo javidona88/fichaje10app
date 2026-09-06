@@ -17,6 +17,7 @@
   --gold: #D4AF37;
   --gold-dim: #A9862B;
   --steel: #6E88A8;
+  --steel-dim: #3C5470;
   --red: #D9495C;
   --green: #4CAF6D;
   --line: rgba(255,255,255,0.11);
@@ -31,12 +32,22 @@ body{
   min-height:100vh;
   padding: 28px 16px 60px;
 }
-.wrap{ max-width: 780px; margin:0 auto; }
+.wrap{ max-width: 880px; margin:0 auto; }
 .top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; gap:10px; flex-wrap:wrap; }
 .top h1{ font-size:20px; font-weight:700; margin:0; letter-spacing:.01em; }
 .top .sub{ font-size:12px; color:var(--ink-soft); }
 .top a{ color:var(--gold); text-decoration:none; font-size:13px; font-weight:600; }
 .top a:hover{ text-decoration:underline; }
+
+.tabs{ display:flex; gap:4px; margin-bottom:22px; border-bottom:1px solid var(--line); overflow-x:auto; }
+.tab-btn{
+  background:none; border:none; color:var(--ink-soft); font-family:inherit; font-size:13.5px; font-weight:600;
+  padding:10px 16px; cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent;
+  transition:color .15s, border-color .15s;
+}
+.tab-btn:hover{ color:var(--ink); }
+.tab-btn.active{ color:var(--gold); border-bottom-color:var(--gold); }
+.tab-panel[hidden]{ display:none; }
 
 .card{
   background:var(--panel); border:1px solid var(--line); border-radius:14px;
@@ -60,6 +71,27 @@ body{
 .barra-track{ flex:1; height:14px; background:rgba(255,255,255,0.05); border-radius:7px; overflow:hidden; }
 .barra-fill{ height:100%; background:linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius:7px; min-width:2px; }
 .barra-val{ width:40px; text-align:right; flex-shrink:0; font-size:12.5px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; }
+
+.segmented{ display:inline-flex; background:var(--panel2); border-radius:10px; padding:3px; gap:2px; margin-bottom:18px; }
+.segmented button{
+  background:none; border:none; color:var(--ink-soft); font-family:inherit; font-size:12.5px; font-weight:600;
+  padding:7px 16px; border-radius:8px; cursor:pointer;
+}
+.segmented button.active{ background:var(--gold); color:#171717; }
+
+.chart-legend{ display:flex; gap:18px; margin-bottom:16px; font-size:12px; color:var(--ink-soft); }
+.chart-legend span{ display:inline-flex; align-items:center; gap:7px; }
+.chart-legend i{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+.chart-legend i.partidas{ background:linear-gradient(180deg, var(--gold), var(--gold-dim)); }
+.chart-legend i.retiros{ background:linear-gradient(180deg, var(--steel), var(--steel-dim)); }
+.chart-wrap{ overflow-x:auto; padding-bottom:4px; }
+.chart-cols{ display:flex; align-items:flex-end; gap:12px; height:190px; }
+.chart-col{ display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:7px; flex-shrink:0; height:100%; }
+.chart-bars{ display:flex; gap:3px; align-items:flex-end; height:150px; }
+.chart-bar{ width:12px; border-radius:3px 3px 0 0; min-height:2px; }
+.chart-bar.partidas{ background:linear-gradient(180deg, var(--gold), var(--gold-dim)); }
+.chart-bar.retiros{ background:linear-gradient(180deg, var(--steel), var(--steel-dim)); }
+.chart-lbl{ font-size:10px; color:var(--ink-soft); white-space:nowrap; }
 
 table{ width:100%; border-collapse:collapse; font-size:13px; }
 thead th{
@@ -101,118 +133,148 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
   </div>
 
   <div id="contenido" hidden>
-    <div class="tiles">
-      <div class="tile"><div class="num" id="t-partidas">—</div><div class="lbl">Partidas iniciadas</div></div>
-      <div class="tile"><div class="num" id="t-retiros">—</div><div class="lbl">Carreras completadas</div></div>
-      <div class="tile"><div class="num" id="t-jugadores">—</div><div class="lbl">Jugadores distintos</div></div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="resumen">Resumen</button>
+      <button class="tab-btn" data-tab="actividad">Actividad</button>
+      <button class="tab-btn" data-tab="desgloses">Desgloses</button>
+      <button class="tab-btn" data-tab="rankings">Rankings</button>
     </div>
 
-    <div class="card">
-      <h2>⚽ Fichaje 10, en cifras</h2>
-      <div class="tiles" style="margin-bottom:0;">
-        <div class="tile"><div class="num" id="c-goles">—</div><div class="lbl">Goles marcados entre todos</div></div>
-        <div class="tile"><div class="num" id="c-asistencias">—</div><div class="lbl">Asistencias repartidas</div></div>
-        <div class="tile"><div class="num" id="c-partidos">—</div><div class="lbl">Partidos disputados</div></div>
-        <div class="tile"><div class="num" id="c-titulos">—</div><div class="lbl">Títulos levantados</div></div>
-        <div class="tile"><div class="num" id="c-dinero">—</div><div class="lbl">Dinero generado</div></div>
-        <div class="tile"><div class="num" id="c-extranjero">—</div><div class="lbl">Carreras acabadas fuera de España</div></div>
+    <div class="tab-panel" id="panel-resumen">
+      <div class="tiles">
+        <div class="tile"><div class="num" id="t-partidas">—</div><div class="lbl">Partidas iniciadas</div></div>
+        <div class="tile"><div class="num" id="t-retiros">—</div><div class="lbl">Carreras completadas</div></div>
+        <div class="tile"><div class="num" id="t-jugadores">—</div><div class="lbl">Jugadores distintos</div></div>
+      </div>
+
+      <div class="card">
+        <h2>⚽ Fichaje 10, en cifras</h2>
+        <div class="tiles" style="margin-bottom:0;">
+          <div class="tile"><div class="num" id="c-goles">—</div><div class="lbl">Goles marcados entre todos</div></div>
+          <div class="tile"><div class="num" id="c-asistencias">—</div><div class="lbl">Asistencias repartidas</div></div>
+          <div class="tile"><div class="num" id="c-partidos">—</div><div class="lbl">Partidos disputados</div></div>
+          <div class="tile"><div class="num" id="c-titulos">—</div><div class="lbl">Títulos levantados</div></div>
+          <div class="tile"><div class="num" id="c-dinero">—</div><div class="lbl">Dinero generado</div></div>
+          <div class="tile"><div class="num" id="c-extranjero">—</div><div class="lbl">Carreras acabadas fuera de España</div></div>
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <h2>Dispositivo</h2>
-      <div id="barras-dispositivo"></div>
+    <div class="tab-panel" id="panel-actividad" hidden>
+      <div class="card">
+        <h2>Actividad en el tiempo</h2>
+        <div class="segmented" id="granularidad">
+          <button data-gran="dia" class="active">Días</button>
+          <button data-gran="semana">Semanas</button>
+          <button data-gran="mes">Meses</button>
+        </div>
+        <div class="chart-legend">
+          <span><i class="partidas"></i>Partidas iniciadas</span>
+          <span><i class="retiros"></i>Carreras completadas</span>
+        </div>
+        <div class="chart-wrap"><div id="chart-actividad"></div></div>
+        <div class="nota">Pasa el cursor por encima de cada columna para ver la fecha exacta y las cifras.</div>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>Zona horaria</h2>
-      <div id="barras-timezone"></div>
-      <div class="nota">Aproximación de región a partir del huso horario del navegador — no es geolocalización real.</div>
+    <div class="tab-panel" id="panel-desgloses" hidden>
+      <div class="card">
+        <h2>Dispositivo</h2>
+        <div id="barras-dispositivo"></div>
+      </div>
+
+      <div class="card">
+        <h2>Zona horaria</h2>
+        <div id="barras-timezone"></div>
+        <div class="nota">Aproximación de región a partir del huso horario del navegador — no es geolocalización real.</div>
+      </div>
+
+      <div class="card">
+        <h2>Categoría al retirarse</h2>
+        <div id="barras-categoria"></div>
+      </div>
+
+      <div class="card">
+        <h2>Provincia del jugador</h2>
+        <div id="barras-provincia"></div>
+      </div>
+
+      <div class="card">
+        <h2>Club en el que se retiró</h2>
+        <div id="barras-clubfinal"></div>
+      </div>
+
+      <div class="card">
+        <h2>Versión jugada</h2>
+        <div id="barras-version"></div>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>Categoría al retirarse</h2>
-      <div id="barras-categoria"></div>
-    </div>
-
-    <div class="card">
-      <h2>Provincia del jugador</h2>
-      <div id="barras-provincia"></div>
-    </div>
-
-    <div class="card">
-      <h2>Club en el que se retiró</h2>
-      <div id="barras-clubfinal"></div>
-    </div>
-
-    <div class="card">
-      <h2>Versión jugada</h2>
-      <div id="barras-version"></div>
-    </div>
-
-    <div class="tablas-grid">
-      <div class="card">
-        <h2>🥅 Máximos goleadores</h2>
-        <table>
-          <thead><tr><th></th><th>Jugador</th><th class="num">Goles</th></tr></thead>
-          <tbody id="tabla-goles"></tbody>
-        </table>
-      </div>
-      <div class="card">
-        <h2>🎯 Máximos asistentes</h2>
-        <table>
-          <thead><tr><th></th><th>Jugador</th><th class="num">Asist.</th></tr></thead>
-          <tbody id="tabla-asistencias"></tbody>
-        </table>
-      </div>
-      <div class="card">
-        <h2>💰 Mayor dinero generado</h2>
-        <table>
-          <thead><tr><th></th><th>Jugador</th><th class="num">Total</th></tr></thead>
-          <tbody id="tabla-dinero"></tbody>
-        </table>
-      </div>
-      <div class="card">
-        <h2>🏆 Más títulos ganados</h2>
-        <table>
-          <thead><tr><th></th><th>Jugador</th><th class="num">Títulos</th></tr></thead>
-          <tbody id="tabla-titulos"></tbody>
-        </table>
-      </div>
-      <div class="card">
-        <h2>📈 Mayor valor de mercado alcanzado</h2>
-        <table>
-          <thead><tr><th></th><th>Jugador</th><th class="num">Máximo</th></tr></thead>
-          <tbody id="tabla-valormercado"></tbody>
-        </table>
-      </div>
-      <div class="card">
-        <h2>🥇 Más Balones de Oro</h2>
-        <table>
-          <thead><tr><th></th><th>Jugador</th><th class="num">Balones</th></tr></thead>
-          <tbody id="tabla-balonesoro"></tbody>
-        </table>
-      </div>
-      <div class="card">
-        <h2>🎖️ Más títulos con la selección</h2>
-        <table>
-          <thead><tr><th></th><th>Jugador</th><th class="num">Títulos</th></tr></thead>
-          <tbody id="tabla-titulosseleccion"></tbody>
-        </table>
-      </div>
-      <div class="card">
-        <h2>⬆️ Más ascensos logrados</h2>
-        <table>
-          <thead><tr><th></th><th>Jugador</th><th class="num">Ascensos</th></tr></thead>
-          <tbody id="tabla-ascensos"></tbody>
-        </table>
-      </div>
-      <div class="card">
-        <h2>⭐ Mejor nota media de la carrera</h2>
-        <table>
-          <thead><tr><th></th><th>Jugador</th><th class="num">Nota media</th></tr></thead>
-          <tbody id="tabla-notamedia"></tbody>
-        </table>
+    <div class="tab-panel" id="panel-rankings" hidden>
+      <div class="tablas-grid">
+        <div class="card">
+          <h2>🥅 Máximos goleadores</h2>
+          <table>
+            <thead><tr><th></th><th>Jugador</th><th class="num">Goles</th></tr></thead>
+            <tbody id="tabla-goles"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>🎯 Máximos asistentes</h2>
+          <table>
+            <thead><tr><th></th><th>Jugador</th><th class="num">Asist.</th></tr></thead>
+            <tbody id="tabla-asistencias"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>💰 Mayor dinero generado</h2>
+          <table>
+            <thead><tr><th></th><th>Jugador</th><th class="num">Total</th></tr></thead>
+            <tbody id="tabla-dinero"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>🏆 Más títulos ganados</h2>
+          <table>
+            <thead><tr><th></th><th>Jugador</th><th class="num">Títulos</th></tr></thead>
+            <tbody id="tabla-titulos"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>📈 Mayor valor de mercado alcanzado</h2>
+          <table>
+            <thead><tr><th></th><th>Jugador</th><th class="num">Máximo</th></tr></thead>
+            <tbody id="tabla-valormercado"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>🥇 Más Balones de Oro</h2>
+          <table>
+            <thead><tr><th></th><th>Jugador</th><th class="num">Balones</th></tr></thead>
+            <tbody id="tabla-balonesoro"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>🎖️ Más títulos con la selección</h2>
+          <table>
+            <thead><tr><th></th><th>Jugador</th><th class="num">Títulos</th></tr></thead>
+            <tbody id="tabla-titulosseleccion"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>⬆️ Más ascensos logrados</h2>
+          <table>
+            <thead><tr><th></th><th>Jugador</th><th class="num">Ascensos</th></tr></thead>
+            <tbody id="tabla-ascensos"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>⭐ Mejor nota media de la carrera</h2>
+          <table>
+            <thead><tr><th></th><th>Jugador</th><th class="num">Nota media</th></tr></thead>
+            <tbody id="tabla-notamedia"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -322,12 +384,86 @@ function deduplicarPorCarrera(filas){
   return [...porId.values(), ...sinId];
 }
 
+/* ---- Pestaña "Actividad": partidas iniciadas / carreras completadas por día, semana o mes ---- */
+const MESES_CORTOS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function soloFecha(iso){ return iso.slice(0,10); } // 'YYYY-MM-DD'
+function inicioSemana(diaStr){
+  const d = new Date(diaStr+'T00:00:00Z');
+  const dow = (d.getUTCDay()+6)%7; // lunes=0 ... domingo=6
+  d.setUTCDate(d.getUTCDate()-dow);
+  return d.toISOString().slice(0,10);
+}
+function clavePeriodo(iso, gran){
+  const dia = soloFecha(iso);
+  if(gran==='semana') return inicioSemana(dia);
+  if(gran==='mes') return dia.slice(0,7); // 'YYYY-MM'
+  return dia;
+}
+function etiquetaPeriodo(clave, gran){
+  if(gran==='mes'){
+    const [y,m] = clave.split('-');
+    return `${MESES_CORTOS[parseInt(m,10)-1]} ${y}`;
+  }
+  const [,m,d] = clave.split('-');
+  return `${parseInt(d,10)} ${MESES_CORTOS[parseInt(m,10)-1]}`;
+}
+function avanzarPeriodo(clave, gran){
+  if(gran==='mes'){
+    let [y,m] = clave.split('-').map(Number);
+    m++; if(m>12){ m=1; y++; }
+    return `${y}-${String(m).padStart(2,'0')}`;
+  }
+  const d = new Date(clave+'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + (gran==='semana' ? 7 : 1));
+  return d.toISOString().slice(0,10);
+}
+// Rellena los periodos sin actividad con 0, para que el eje de tiempo sea continuo de verdad
+// (si no, un día sin ninguna partida simplemente desaparecería del gráfico).
+function generarRangoPeriodos(claveMin, claveMax, gran){
+  const out = [];
+  let cur = claveMin, guard = 0;
+  while(cur <= claveMax && guard < 400){ out.push(cur); cur = avanzarPeriodo(cur, gran); guard++; }
+  return out;
+}
+
+let datosActividad = null; // { partidas:[{created_at}], retiros:[{created_at}] }
+let granularidadActual = 'dia';
+
+function pintarActividad(){
+  const cont = document.getElementById('chart-actividad');
+  if(!datosActividad) return;
+  const gran = granularidadActual;
+  const contPartidas = {};
+  datosActividad.partidas.forEach(f=>{ const k = clavePeriodo(f.created_at, gran); contPartidas[k] = (contPartidas[k]||0)+1; });
+  const contRetiros = {};
+  datosActividad.retiros.forEach(f=>{ const k = clavePeriodo(f.created_at, gran); contRetiros[k] = (contRetiros[k]||0)+1; });
+  const claves = [...new Set([...Object.keys(contPartidas), ...Object.keys(contRetiros)])].sort();
+  if(!claves.length){ cont.innerHTML = '<div class="nota">Todavía no hay datos suficientes.</div>'; return; }
+  const rango = generarRangoPeriodos(claves[0], claves[claves.length-1], gran);
+  const max = Math.max(1, ...rango.map(k => Math.max(contPartidas[k]||0, contRetiros[k]||0)));
+  cont.innerHTML = '';
+  const cols = document.createElement('div'); cols.className = 'chart-cols';
+  rango.forEach(k=>{
+    const p = contPartidas[k]||0, r = contRetiros[k]||0;
+    const etiqueta = etiquetaPeriodo(k, gran);
+    const col = document.createElement('div'); col.className = 'chart-col';
+    col.title = `${etiqueta}: ${p} partida${p===1?'':'s'} iniciada${p===1?'':'s'}, ${r} carrera${r===1?'':'s'} completada${r===1?'':'s'}`;
+    col.innerHTML = `<div class="chart-bars">
+        <div class="chart-bar partidas" style="height:${Math.max(2, Math.round(p/max*150))}px"></div>
+        <div class="chart-bar retiros" style="height:${Math.max(2, Math.round(r/max*150))}px"></div>
+      </div>
+      <div class="chart-lbl">${etiqueta}</div>`;
+    cols.appendChild(col);
+  });
+  cont.appendChild(cols);
+}
+
 async function cargarEstadisticas(){
   // Dispositivo/zona horaria/versión se calculan sobre las filas de "nueva_partida" (una por
   // carrera empezada de verdad, al pulsar "Empezar carrera"): así los tres suman exactamente lo
   // mismo que "Partidas iniciadas", en vez de salir inflados por sesiones que solo generaron un
   // logro/cromo suelto (guardado antiguo, prueba en otro navegador...) sin empezar una carrera.
-  const { datos: filasPartida } = await consultarSupabase('eventos?nombre=eq.nueva_partida&select=sesion_id,dispositivo,timezone,version_juego&limit=10000');
+  const { datos: filasPartida } = await consultarSupabase('eventos?nombre=eq.nueva_partida&select=sesion_id,dispositivo,timezone,version_juego,created_at&limit=10000');
   document.getElementById('t-partidas').textContent = filasPartida.length.toLocaleString('es-ES');
 
   const conteoDispositivo = {};
@@ -352,6 +488,9 @@ async function cargarEstadisticas(){
   const { datos: filasRetiroCrudas } = await consultarSupabase('eventos?nombre=eq.retiro&select=datos,created_at&limit=2000');
   const filasRetiro = deduplicarPorCarrera(filasRetiroCrudas);
   document.getElementById('t-retiros').textContent = filasRetiro.length.toLocaleString('es-ES');
+
+  datosActividad = { partidas: filasPartida, retiros: filasRetiro };
+  pintarActividad();
 
   const porGoles = [...filasRetiro].sort((a,b)=> (b.datos?.goles||0) - (a.datos?.goles||0));
   const porAsistencias = [...filasRetiro].sort((a,b)=> (b.datos?.asistencias||0) - (a.datos?.asistencias||0));
@@ -402,12 +541,32 @@ async function cargarEstadisticas(){
   document.getElementById('c-extranjero').textContent = filasRetiro.length ? `${conExtranjero}/${filasRetiro.length}` : '—';
 }
 
+function inicializarTabs(){
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>{ p.hidden = true; });
+      btn.classList.add('active');
+      document.getElementById('panel-'+btn.dataset.tab).hidden = false;
+    });
+  });
+  document.querySelectorAll('#granularidad button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#granularidad button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      granularidadActual = btn.dataset.gran;
+      pintarActividad();
+    });
+  });
+}
+
 (async function(){
   if(!SUPABASE_URL || SUPABASE_URL.startsWith('TU-')){
     document.getElementById('estado-carga').hidden = true;
     document.getElementById('estado-sin-configurar').hidden = false;
     return;
   }
+  inicializarTabs();
   try{
     await cargarEstadisticas();
     document.getElementById('estado-carga').hidden = true;
