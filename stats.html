@@ -230,6 +230,12 @@ tbody td.rank{ color:var(--ink-soft); width:22px; }
 const SUPABASE_URL = 'wazcclajsfkbawstgglq.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_6jOk82eGHdXRMAu6t8oBWQ_1S9JD8VB';
 
+// Nombre + primer apellido nada más — el resto de apellidos que se hayan escrito en el campo
+// libre de creación de personaje no hace falta enseñarlos en un ranking público.
+function nombreCortoRanking(nombre){ return nombre ? nombre.trim().split(/\s+/).slice(0,2).join(' ') : nombre; }
+// nombreJugador viene de un campo de texto libre del jugador y se pinta con innerHTML — escapar.
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
 function formatearDinero(v){
   if(v == null) return '—';
   const abs = Math.abs(v);
@@ -294,7 +300,7 @@ function pintarTablaRanking(contenedor, filas, claveValor, formatear){
   filas.slice(0, 10).forEach((f, i)=>{
     const tr = document.createElement('tr');
     const valor = f.datos ? f.datos[claveValor] : undefined;
-    const nombre = (f.datos && f.datos.nombreJugador) || 'Jugador anónimo';
+    const nombre = escapeHtml(nombreCortoRanking(f.datos && f.datos.nombreJugador) || 'Jugador anónimo');
     const id = idCorto(f.datos);
     tr.innerHTML = `<td class="rank">${i+1}</td><td>${nombre}${id ? `<span class="id-corto">#${id}</span>` : ''}</td>
       <td class="num">${formatear ? formatear(valor) : (valor ?? '—')}</td>`;
@@ -328,20 +334,30 @@ async function cargarEstadisticas(){
   const partidas = await contarEventos('nueva_partida');
   document.getElementById('t-partidas').textContent = partidas.toLocaleString('es-ES');
 
-  const { datos: filasSesion } = await consultarSupabase('eventos?select=sesion_id&limit=10000');
-  const sesionesUnicas = new Set(filasSesion.map(f=>f.sesion_id)).size;
-  document.getElementById('t-jugadores').textContent = sesionesUnicas.toLocaleString('es-ES');
+  // Dispositivo/zona horaria/versión iban antes contados por FILA DE EVENTO (select=dispositivo,
+  // etc. sobre toda la tabla `eventos`), pero cada partida dispara muchos eventos (nueva_partida,
+  // varios logros, cromos, retiro...) que llevan todos el mismo dispositivo/timezone/versión del
+  // navegador que los generó — así que esos recuentos salían muy por encima del número real de
+  // partidas o jugadores. Se cuenta una única vez por `sesion_id` (quedándose con su evento más
+  // antiguo), igual que ya se hacía para "Jugadores distintos".
+  const { datos: filasSesionBase } = await consultarSupabase('eventos?select=sesion_id,dispositivo,timezone,version_juego,created_at&order=created_at.asc&limit=10000');
+  const porSesion = new Map();
+  filasSesionBase.forEach(f=>{ if(!porSesion.has(f.sesion_id)) porSesion.set(f.sesion_id, f); });
+  const filasPorSesion = [...porSesion.values()];
+  document.getElementById('t-jugadores').textContent = filasPorSesion.length.toLocaleString('es-ES');
 
-  const { datos: filasDispositivo } = await consultarSupabase('eventos?select=dispositivo&limit=10000');
   const conteoDispositivo = {};
-  filasDispositivo.forEach(f=>{ const d = f.dispositivo || 'desconocido'; conteoDispositivo[d] = (conteoDispositivo[d]||0)+1; });
+  filasPorSesion.forEach(f=>{ const d = f.dispositivo || 'desconocido'; conteoDispositivo[d] = (conteoDispositivo[d]||0)+1; });
   pintarBarras(document.getElementById('barras-dispositivo'), conteoDispositivo);
 
-  const { datos: filasTimezone } = await consultarSupabase('eventos?select=timezone&limit=10000');
   const conteoTimezone = {};
-  filasTimezone.forEach(f=>{ const z = (f.timezone || 'desconocida').replace(/_/g,' '); conteoTimezone[z] = (conteoTimezone[z]||0)+1; });
+  filasPorSesion.forEach(f=>{ const z = (f.timezone || 'desconocida').replace(/_/g,' '); conteoTimezone[z] = (conteoTimezone[z]||0)+1; });
   const topTimezones = Object.fromEntries(Object.entries(conteoTimezone).sort((a,b)=>b[1]-a[1]).slice(0,8));
   pintarBarras(document.getElementById('barras-timezone'), topTimezones);
+
+  const conteoVersion = {};
+  filasPorSesion.forEach(f=>{ const v = f.version_juego || 'desconocida'; conteoVersion[v] = (conteoVersion[v]||0)+1; });
+  pintarBarras(document.getElementById('barras-version'), conteoVersion);
 
   const { datos: filasRetiroCrudas } = await consultarSupabase('eventos?nombre=eq.retiro&select=datos,created_at&limit=2000');
   const filasRetiro = deduplicarPorCarrera(filasRetiroCrudas);
@@ -391,11 +407,6 @@ async function cargarEstadisticas(){
   document.getElementById('c-dinero').textContent = formatearDinero(sumar('dineroGanado'));
   const conExtranjero = filasRetiro.filter(f => f.datos?.extranjero === true).length;
   document.getElementById('c-extranjero').textContent = filasRetiro.length ? `${conExtranjero}/${filasRetiro.length}` : '—';
-
-  const { datos: filasVersion } = await consultarSupabase('eventos?select=version_juego&limit=10000');
-  const conteoVersion = {};
-  filasVersion.forEach(f=>{ const v = f.version_juego || 'desconocida'; conteoVersion[v] = (conteoVersion[v]||0)+1; });
-  pintarBarras(document.getElementById('barras-version'), conteoVersion);
 }
 
 (async function(){
