@@ -5630,6 +5630,7 @@ function iniciarMundialNuevo(cfg){
   const j = S.jugador;
   S.mundial = {
     grupo: sortearGrupoMundial(), sorteoRevelados: 0, sorteoPausado: false,
+    tuALaIzquierda: null,
     prensaPregunta: null, prensaRespuesta: null,
     calendarioGrupo: null, jornada: 0, resultadosGrupo: [],
     fase: null, pasosElim: [],
@@ -15052,16 +15053,28 @@ function finalizarEstadisticasMundial(j){
 // Bloque compartido por fase de grupos y eliminatorias: cabecera VS, elección táctica (con las
 // mismas probabilidades/mods/objetos que cualquier otra tirada del juego) y, tras tirar, el
 // marcador. opts: {eyebrowTxt, rival, dificultad, opciones, textoContinuar, textoContinuarEmpate, onResultado}
+// Voltea "12-3" a "3-12" — el marcador se calcula y guarda siempre en formato "España-rival"
+// (lo usan tal cual el resumen del camino y la tabla de grupos), pero en el marcador GRANDE del
+// propio partido tiene que leerse en el mismo orden en que se ven los escudos en pantalla.
+function marcadorEnPantalla(marcador, tuALaIzquierda){
+  if(tuALaIzquierda !== false) return marcador;
+  const partes = marcador.split('-');
+  return partes.length === 2 ? `${partes[1]}-${partes[0]}` : marcador;
+}
 function pintarPartidoMundial(opts){
   const j = S.jugador;
   const m = S.mundial;
+  // Un lado distinto cada partido, como en la vida real — se fija una sola vez por partido (no en
+  // cada repintado) y la pantalla de penaltis, si llega, hereda el mismo lado hasta resolverse.
+  if(m.tuALaIzquierda == null) m.tuALaIzquierda = Math.random() < 0.5;
   const c = el('div','card');
   c.appendChild(crearEyebrow(opts.eyebrowTxt));
   const row = document.createElement('div');
   row.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:18px;margin:28px 0 22px;';
-  row.appendChild(filaEquipoMundial({n:'España'}));
-  row.appendChild(el('div','vs-mundial','VS'));
-  row.appendChild(filaEquipoMundial(opts.rival));
+  const filaEspana = filaEquipoMundial({n:'España'});
+  const filaRival = filaEquipoMundial(opts.rival);
+  if(m.tuALaIzquierda){ row.appendChild(filaEspana); row.appendChild(el('div','vs-mundial','VS')); row.appendChild(filaRival); }
+  else { row.appendChild(filaRival); row.appendChild(el('div','vs-mundial','VS')); row.appendChild(filaEspana); }
   c.appendChild(row);
 
   if(m._tirando){
@@ -15123,7 +15136,7 @@ function pintarPartidoMundial(opts){
     const colorRes = r.resultado==='victoria' ? 'var(--green)' : r.resultado==='derrota' ? 'var(--red)' : 'var(--steel)';
     const marcador = document.createElement('div');
     marcador.style.cssText = 'text-align:center;margin:14px 0;';
-    marcador.innerHTML = `<div style="font-family:'PT Serif',Georgia,serif;font-size:44px;color:${colorRes};line-height:1;">${r.marcador}</div><div style="font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-dim);font-weight:700;margin-top:6px;">${r.resultado==='victoria'?'Victoria':r.resultado==='empate'?'Empate':'Derrota'}</div>`;
+    marcador.innerHTML = `<div style="font-family:'PT Serif',Georgia,serif;font-size:44px;color:${colorRes};line-height:1;">${marcadorEnPantalla(r.marcador, m.tuALaIzquierda)}</div><div style="font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-dim);font-weight:700;margin-top:6px;">${r.resultado==='victoria'?'Victoria':r.resultado==='empate'?'Empate':'Derrota'}</div>`;
     c.appendChild(marcador);
     const textoBtn = (r.resultado==='empate' && opts.textoContinuarEmpate) ? opts.textoContinuarEmpate : (opts.textoContinuar || 'Continuar →');
     const btn = el('button','btn-main', textoBtn);
@@ -15307,6 +15320,7 @@ SCREENS.mundialGrupo = function(){
     onResultado: (r)=>{
       m.resultadosGrupo.push({ rival, ...r });
       m.jornada++;
+      m.tuALaIzquierda = null; // el próximo partido (siguiente jornada) sortea de nuevo su lado
       if(m.jornada >= 3) S.screen = 'mundialGrupoTabla';
       render();
     }
@@ -15361,7 +15375,7 @@ function resolverEliminatoriaMundial(faseInfo, idx, rival, resultado, penaltis, 
   const j = S.jugador;
   const m = S.mundial;
   m.pasosElim.push({ fase:faseInfo.id, nombre:faseInfo.nombre, rival, resultado, penaltis, marcador });
-  m.rivalElimActual = null; m.penaltisCtx = null; m.monedaGirando = false; m.monedaGanador = null; m.monedaCaraActual = null;
+  m.rivalElimActual = null; m.penaltisCtx = null; m.monedaGirando = false; m.monedaGanador = null; m.monedaCaraActual = null; m.tuALaIzquierda = null;
   if(faseInfo.id === 'semis' && resultado === 'derrota'){
     // No a casa todavía: los dos semifinalistas caídos juegan el 3er puesto, como en un Mundial real.
     m.fase = FASE_TERCER_PUESTO_MUNDIAL.id;
@@ -15434,12 +15448,13 @@ SCREENS.mundialPenaltis = function(){
   topbar('Mundial · Penaltis');
   const c = el('div','card');
   c.appendChild(crearEyebrow(`Eliminatoria · ${faseInfo.nombre}`));
-  c.appendChild(el('h2',null,`Empate ${marcador} — se decide en los penaltis`));
+  c.appendChild(el('h2',null,`Empate ${marcadorEnPantalla(marcador, m.tuALaIzquierda)} — se decide en los penaltis`));
   const row = document.createElement('div');
   row.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:18px;margin:28px 0 22px;';
-  row.appendChild(filaEquipoMundial({n:'España'}));
-  row.appendChild(el('div','vs-mundial','VS'));
-  row.appendChild(filaEquipoMundial(rival));
+  const filaEspana = filaEquipoMundial({n:'España'});
+  const filaRival = filaEquipoMundial(rival);
+  if(m.tuALaIzquierda !== false){ row.appendChild(filaEspana); row.appendChild(el('div','vs-mundial','VS')); row.appendChild(filaRival); }
+  else { row.appendChild(filaRival); row.appendChild(el('div','vs-mundial','VS')); row.appendChild(filaEspana); }
   c.appendChild(row);
 
   const wrap = el('div','moneda-wrap');
