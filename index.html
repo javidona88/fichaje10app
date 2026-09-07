@@ -851,7 +851,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    ser el fondo de toda la carta (oscurecida, recortada sin perder su proporción, como una foto
    de fondo) y el escudo va encima, centrado, sin caja ni recorte propio. */
 .cromo-flagbox.con-escudo{ position:absolute; inset:0; width:100%; height:100%; margin:0; border-radius:0; box-shadow:none; overflow:hidden; display:flex; align-items:center; justify-content:center; padding-bottom:24%; }
-.cromo-flagbox.con-escudo .cromo-bandera-fondo{ position:absolute; inset:0; width:100%; height:100%; display:block; filter:brightness(.4) saturate(.85); }
+.cromo-flagbox.con-escudo .cromo-bandera-fondo{ position:absolute; inset:-6%; width:112%; height:112%; display:block; filter:brightness(.3) saturate(.75) blur(3px); }
 .cromo-flagbox.con-escudo .cromo-escudo-encima{ position:relative; z-index:1; width:60%; height:auto; max-height:52%; object-fit:contain; background:none; filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)); }
 .cromo-item.falta .cromo-flagbox.con-escudo{ filter:grayscale(1) brightness(.55); opacity:.55; }
 .cromo-num{ position:absolute; top:5px; left:5px; z-index:3; min-width:15px; height:15px; padding:0 3px; border-radius:8px; background:rgba(10,11,16,.55); backdrop-filter:blur(1px); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:7.5px; font-weight:700; color:#fff; letter-spacing:.02em; }
@@ -884,26 +884,30 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .cromo-zoom-front .flag-banner.con-escudo .cromo-escudo-encima{ position:relative; z-index:1; width:58%; height:auto; max-height:62%; object-fit:contain; background:none; filter:drop-shadow(0 6px 14px rgba(0,0,0,.65)); }
 .cromo-zoom-front .cerrar{ position:absolute; top:9px; right:9px; z-index:3; width:25px; height:25px; border-radius:50%; border:1px solid rgba(255,255,255,.25); background:rgba(10,11,16,.5); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; }
 .cromo-zoom-front .rareza-tag{ position:absolute; top:11px; left:11px; z-index:3; font-family:'Space Grotesk',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:.07em; color:#1a1408; background:var(--gold); padding:4px 8px; border-radius:20px; }
-.cromo-zoom-front .info{ flex:1; display:flex; flex-direction:column; align-items:center; padding:16px 16px 14px; overflow-y:auto; }
-.cromo-zoom-front .pais-nombre{ font-family:'PT Serif',Georgia,serif; font-size:18px; font-weight:700; line-height:1.3; text-align:center; color:var(--ink); }
-.cromo-zoom-front .pais-sub{ font-family:'Space Grotesk',sans-serif; font-size:10px; color:var(--gold-dim); margin-top:2px; letter-spacing:.02em; text-align:center; }
-.cromo-zoom-front .stats-mini{ margin-top:auto; width:100%; display:flex; justify-content:space-around; border-top:1px solid var(--line); padding-top:11px; }
+.cromo-zoom-front .info{ flex:1; display:flex; flex-direction:column; align-items:center; padding:18px 18px 16px; overflow-y:auto; }
+.cromo-zoom-front .pais-nombre{ font-family:'PT Serif',Georgia,serif; font-size:22px; font-weight:700; line-height:1.25; text-align:center; color:var(--ink); }
+.cromo-zoom-front .pais-sub{ font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--gold-dim); margin-top:3px; letter-spacing:.02em; text-align:center; }
+.cromo-zoom-front .stats-mini{ margin-top:auto; width:100%; display:flex; justify-content:space-around; border-top:1px solid var(--line); padding-top:13px; }
 .cromo-zoom-front .stats-mini div{ text-align:center; }
-.cromo-zoom-front .stats-mini .v{ font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; color:var(--ink); }
-.cromo-zoom-front .stats-mini .l{ font-family:'Space Grotesk',sans-serif; font-size:8px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
-.cromo-zoom-front .toca{ font-family:'Space Grotesk',sans-serif; font-size:9.5px; color:var(--ink-soft); margin-top:9px; }
-.cromo-zoom-back{ background:var(--panel2); border:1px solid var(--line); box-shadow:0 22px 50px rgba(0,0,0,.55); transform:rotateY(180deg); padding:18px; display:flex; flex-direction:column; }
-.cromo-zoom-back .cab{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.cromo-zoom-back .cab .izq{ display:flex; align-items:center; gap:8px; }
-.cromo-zoom-back .cab .mini-bandera{ width:22px; height:16px; border-radius:2px; overflow:hidden; flex-shrink:0; box-shadow:0 0 0 1px rgba(255,255,255,.15); }
+.cromo-zoom-front .stats-mini .v{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:700; color:var(--ink); }
+.cromo-zoom-front .stats-mini .l{ font-family:'Space Grotesk',sans-serif; font-size:9px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
+/* Insignia destacada (en vez del texto discreto de antes) para que quede claro que se puede
+   tocar la carta para ver las curiosidades del reverso — pulso sutil para llamar la atención
+   sin resultar molesto. */
+.cromo-zoom-front .toca{ font-family:'Space Grotesk',sans-serif; font-size:11.5px; font-weight:700; color:var(--gold); margin-top:14px; display:flex; align-items:center; gap:6px; padding:7px 14px; border-radius:20px; border:1px solid rgba(212,175,55,.5); background:rgba(212,175,55,.1); animation:cromotocapulso 2.4s ease-in-out infinite; }
+@keyframes cromotocapulso{ 0%,100%{ box-shadow:0 0 0 0 rgba(212,175,55,.28); } 50%{ box-shadow:0 0 0 7px rgba(212,175,55,0); } }
+.cromo-zoom-back{ background:var(--panel2); border:1px solid var(--line); box-shadow:0 22px 50px rgba(0,0,0,.55); transform:rotateY(180deg); padding:20px; display:flex; flex-direction:column; }
+.cromo-zoom-back .cab{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.cromo-zoom-back .cab .izq{ display:flex; align-items:center; gap:9px; }
+.cromo-zoom-back .cab .mini-bandera{ width:25px; height:18px; border-radius:2px; overflow:hidden; flex-shrink:0; box-shadow:0 0 0 1px rgba(255,255,255,.15); }
 .cromo-zoom-back .cab .mini-bandera svg, .cromo-zoom-back .cab .mini-bandera img{ width:100%; height:100%; display:block; object-fit:cover; }
-.cromo-zoom-back .cab b{ font-family:'Space Grotesk',sans-serif; font-size:13px; color:var(--ink); }
-.cromo-zoom-back .cerrar{ width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; flex-shrink:0; }
-.cromo-zoom-back .curio-tit{ font-family:'Space Grotesk',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.08em; color:var(--gold-dim); text-transform:uppercase; margin-bottom:8px; }
-.cromo-zoom-back ul{ margin:0; padding-left:15px; display:flex; flex-direction:column; gap:8px; flex:1; overflow-y:auto; }
-.cromo-zoom-back li{ font-family:'Space Grotesk',sans-serif; font-size:11px; line-height:1.5; color:var(--ink); }
+.cromo-zoom-back .cab b{ font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--ink); }
+.cromo-zoom-back .cerrar{ width:26px; height:26px; border-radius:50%; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; flex-shrink:0; }
+.cromo-zoom-back .curio-tit{ font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--gold-dim); text-transform:uppercase; margin-bottom:10px; }
+.cromo-zoom-back ul{ margin:0; padding-left:17px; display:flex; flex-direction:column; gap:11px; flex:1; overflow-y:auto; }
+.cromo-zoom-back li{ font-family:'Space Grotesk',sans-serif; font-size:13px; line-height:1.55; color:var(--ink); }
 .cromo-zoom-back li b{ color:var(--gold); }
-.cromo-zoom-back .volver{ font-family:'Space Grotesk',sans-serif; font-size:9.5px; color:var(--ink-soft); text-align:center; margin-top:10px; }
+.cromo-zoom-back .volver{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); text-align:center; margin-top:12px; }
 </style>
 </head>
 <body>
@@ -1677,7 +1681,8 @@ function desbloquearCromo(pais){
   guardados[pais] = { fecha: new Date().toISOString(), temporada: S.temporada };
   guardarCromosGuardados(guardados);
   trackEvento('cromo', { pais });
-  mostrarNotificacion(`🌍 Nuevo cromo: <b>${pais}</b>`, 'atributo');
+  S.avisosPendientes = S.avisosPendientes || [];
+  S.avisosPendientes.push({ tipo:'cromo', id: pais });
 }
 function hayLogrosSinVer(){
   return Object.values(cargarLogrosGuardados()).some(v=>!v.visto);
@@ -1703,21 +1708,29 @@ function comprobarLogros(j){
     if(!cumple) return;
     guardados[l.id] = { fecha: new Date().toISOString(), temporada: S.temporada };
     cambios = true;
-    S.logrosPendientesAviso = S.logrosPendientesAviso || [];
-    S.logrosPendientesAviso.push(l.id);
+    S.avisosPendientes = S.avisosPendientes || [];
+    S.avisosPendientes.push({ tipo:'logro', id: l.id });
     trackEvento('logro', { id: l.id });
   });
   if(cambios) guardarLogrosGuardados(guardados);
 }
-// Cola de avisos: como puede desbloquearse más de un logro a la vez (p. ej. al retirarte),
-// se muestran de uno en uno. El aviso vive en #logro-aviso-root, fuera de #app, para no
-// desaparecer si pintar() repinta la pantalla mientras el aviso sigue visible.
+// Cola de avisos: como puede desbloquearse más de un logro o cromo a la vez (p. ej. al fichar
+// por un club extranjero justo tras cumplir un hito), se muestran de uno en uno. El aviso vive
+// en #logro-aviso-root, fuera de #app, para no desaparecer si pintar() repinta la pantalla
+// mientras el aviso sigue visible.
 function procesarAvisosLogros(){
   const root = document.getElementById('logro-aviso-root');
   if(root.children.length) return;
-  if(!(S.logrosPendientesAviso && S.logrosPendientesAviso.length)) return;
-  const id = S.logrosPendientesAviso.shift();
-  const l = LOGROS.find(x=>x.id===id);
+  if(!(S.avisosPendientes && S.avisosPendientes.length)) return;
+  const aviso = S.avisosPendientes.shift();
+  if(aviso.tipo === 'cromo'){
+    const c = PAISES_CROMO.find(p=>p.pais===aviso.id);
+    if(!c){ procesarAvisosLogros(); return; }
+    Sonido.subeNivel();
+    mostrarCromoEsquina(c);
+    return;
+  }
+  const l = LOGROS.find(x=>x.id===aviso.id);
   if(!l){ procesarAvisosLogros(); return; }
   Sonido.subeNivel();
   if(l.pesoRareza < UMBRAL_LOGRO_PANTALLA_COMPLETA) mostrarLogroPantallaCompleta(l);
@@ -1752,6 +1765,26 @@ function mostrarLogroEsquina(l){
         <div class="logro-toast-eyebrow">Logro desbloqueado</div>
         <div class="logro-toast-nombre">${l.nombre}</div>
         <div class="logro-toast-desc">${l.desc}</div>
+      </div>
+      <div class="logro-toast-bar"></div>
+    </div>`;
+  root.appendChild(toast);
+  toast.querySelector('.logro-toast-card').onclick = cerrarAvisoLogro;
+  requestAnimationFrame(()=>{
+    toast.classList.add('show');
+    toast.querySelector('.logro-toast-bar').classList.add('anim');
+  });
+  setTimeout(cerrarAvisoLogro, 4300);
+}
+function mostrarCromoEsquina(c){
+  const root = document.getElementById('logro-aviso-root');
+  const toast = el('div','logro-toast');
+  toast.innerHTML = `<div class="logro-toast-card">
+      <div class="logro-toast-ico">🌍</div>
+      <div>
+        <div class="logro-toast-eyebrow">Nuevo cromo</div>
+        <div class="logro-toast-nombre">${c.pais}</div>
+        <div class="logro-toast-desc">Ya lo tienes en tu colección del mundo.</div>
       </div>
       <div class="logro-toast-bar"></div>
     </div>`;
@@ -3737,7 +3770,8 @@ const BANCO_EVENTOS = [
     id:"comparacion_prensa_estrella", cooldown:6,
     trigger:{ edadMin:20, probabilidad:0.13, condicion: j => j.stats.reputacion >= 30 && j.stats.reputacion < 75 && (j.carrera.balonesDeOro||0) === 0 },
     texto: j => {
-      const estrella = CANDIDATOS_BALON_ORO[Math.floor(Math.random()*CANDIDATOS_BALON_ORO.length)];
+      const pool = ESTRELLAS_POR_ESTILO[j.estiloId] || CANDIDATOS_BALON_ORO;
+      const estrella = pool[Math.floor(Math.random()*pool.length)];
       S._estrellaComparada = estrella;
       const fuentes = [
         `Un tertuliano de El Chiringuito de Jugones lanza la comparación en directo: "por estilo de juego, a mí me recuerda a ${estrella}"`,
@@ -5157,59 +5191,59 @@ const BANDERAS_SVG = {
    en BANDERAS_SVG — al añadir un país nuevo allí, añadir también su ficha aquí. */
 const PAISES_CROMO = [
   { pais:'Alemania', sel:'Die Mannschaft', s1:['4','Mundiales'], s2:['1954','Milagro de Berna'],
-    curiosidades:['Ha ganado <b>4 Mundiales</b> (1954, 1974, 1990 y 2014).','El "Milagro de Berna" de 1954 fue su primer título, tumbando a la gran favorita Hungría en la final.','La Bundesliga es célebre por la regla del "50+1", que mantiene el control de los clubes en manos de los socios.'] },
+    curiosidades:['Ha ganado <b>4 Mundiales</b> (1954, 1974, 1990 y 2014).','El "Milagro de Berna" de 1954 fue su primer título, tumbando a la gran favorita Hungría en la final.','La Bundesliga es célebre por la regla del "50+1", que mantiene el control de los clubes en manos de los socios.','El Bayern de Múnich es, junto al Real Madrid, uno de los clubes con más Champions League de la historia (6 títulos).','Miroslav Klose es el máximo goleador histórico de todos los Mundiales, con 16 goles.'] },
   { pais:'Arabia Saudí', sel:'Los Halcones Verdes', s1:['2034','Sede Mundial'], s2:['2022','Sorpresa a Argentina'],
-    curiosidades:['Dio una de las sorpresas del Mundial de <b>Qatar 2022</b> al ganar a Argentina en la fase de grupos.','En los últimos años, la Saudi Pro League ha fichado a estrellas mundiales como Cristiano Ronaldo o Neymar.','Será la sede del Mundial de <b>2034</b>.'] },
+    curiosidades:['Dio una de las sorpresas del Mundial de <b>Qatar 2022</b> al ganar a Argentina en la fase de grupos.','En los últimos años, la Saudi Pro League ha fichado a estrellas mundiales como Cristiano Ronaldo o Neymar.','Será la sede del Mundial de <b>2034</b>.','El Al-Hilal es uno de los clubes más laureados de Asia, con varios títulos de la Champions asiática.','El fútbol es, con diferencia, el deporte más popular del país, por delante de cualquier otro.'] },
   { pais:'Argentina', sel:'La Albiceleste', s1:['3','Mundiales'], s2:['2022','Último título'],
-    curiosidades:['Maradona firmó el "Gol del Siglo" en el Mundial de <b>1986</b>.','Messi levantó por fin el Mundial en <b>Qatar 2022</b>.','Es, junto a Uruguay, la selección con más Copas América de la historia.'] },
+    curiosidades:['Maradona firmó el "Gol del Siglo" en el Mundial de <b>1986</b>.','Messi levantó por fin el Mundial en <b>Qatar 2022</b>.','Es, junto a Uruguay, la selección con más Copas América de la historia.','River Plate y Boca Juniors protagonizan el Superclásico, uno de los derbis más apasionados del mundo.','Alfredo Di Stéfano nació y se formó futbolísticamente en Argentina antes de triunfar en España.'] },
   { pais:'Austria', sel:'El Wunderteam', s1:['1934','4º en el Mundial'], s2:['Salzburgo','Dominador reciente'],
-    curiosidades:['El "Wunderteam" de los años 30 fue una de las mejores selecciones de su época, cuarta en el Mundial de <b>1934</b>.','El Red Bull Salzburgo domina la liga austriaca en los últimos años.','Viena acogió la final de la primera Eurocopa de la historia, en 2008 compartida con Suiza.'] },
+    curiosidades:['El "Wunderteam" de los años 30 fue una de las mejores selecciones de su época, cuarta en el Mundial de <b>1934</b>.','El Red Bull Salzburgo domina la liga austriaca en los últimos años.','Viena acogió la final de la primera Eurocopa de la historia, en 2008 compartida con Suiza.','David Alaba se formó en las categorías inferiores del Bayern de Múnich tras salir de Austria siendo adolescente.','Comparte idioma con Alemania y Suiza, aunque su selección tiene una identidad futbolística propia.'] },
   { pais:'Bélgica', sel:'Los Diablos Rojos', s1:['2018','3º en el Mundial'], s2:['1º','Ranking FIFA'],
-    curiosidades:['Su "generación dorada" (De Bruyne, Hazard, Lukaku) llegó a ser <b>número 1</b> del ranking FIFA.','Quedó <b>tercera</b> en el Mundial de 2018, su mejor resultado histórico.','El sistema de cantera belga es una referencia para el resto de Europa.'] },
+    curiosidades:['Su "generación dorada" (De Bruyne, Hazard, Lukaku) llegó a ser <b>número 1</b> del ranking FIFA.','Quedó <b>tercera</b> en el Mundial de 2018, su mejor resultado histórico.','El sistema de cantera belga es una referencia para el resto de Europa.','Kevin De Bruyne está considerado uno de los mejores centrocampistas de su generación por su visión de pase.','La Jupiler Pro League belga es célebre por producir talentos jóvenes que después triunfan en las grandes ligas.'] },
   { pais:'Brasil', sel:'Selección Canarinha', s1:['5','Mundiales'], s2:['1950','Maracanazo'],
-    curiosidades:['Es la <b>única selección</b> que ha jugado todos los Mundiales desde 1930.','Pelé marcó su primer gol mundialista con <b>17 años</b>, en 1958.','El Maracaná de Río llegó a reunir a <b>casi 200.000</b> espectadores en la final de 1950.'] },
+    curiosidades:['Es la <b>única selección</b> que ha jugado todos los Mundiales desde 1930.','Pelé marcó su primer gol mundialista con <b>17 años</b>, en 1958.','El Maracaná de Río llegó a reunir a <b>casi 200.000</b> espectadores en la final de 1950.','Ronaldo Nazário fue Balón de Oro en dos ocasiones (1997 y 2002) antes de cumplir los 26 años.','El Brasileirão reúne a clubes históricos como Flamengo, Palmeiras, Santos o Corinthians.'] },
   { pais:'Chile', sel:'La Roja', s1:['2015','Primera Copa América'], s2:['2016','Bicampeón'],
-    curiosidades:['Ganó su primera Copa América como local en <b>2015</b>, y la revalidó en 2016 (edición del Centenario).','Arturo Vidal y Alexis Sánchez fueron las grandes figuras de esa generación.','Pese a su nivel individual, nunca ha pasado de octavos en un Mundial.'] },
+    curiosidades:['Ganó su primera Copa América como local en <b>2015</b>, y la revalidó en 2016 (edición del Centenario).','Arturo Vidal y Alexis Sánchez fueron las grandes figuras de esa generación.','Pese a su nivel individual, nunca ha pasado de octavos en un Mundial.','Claudio Bravo fue una pieza clave bajo palos durante toda la generación dorada de la Roja.','El Colo-Colo es el club con más títulos de liga en la historia del fútbol chileno.'] },
   { pais:'Corea del Sur', sel:'Guerreros Taeguk', s1:['2002','Semifinal Mundial'], s2:['Son','Estrella actual'],
-    curiosidades:['Fue semifinalista del Mundial <b>2002</b>, que coorganizó con Japón — su mejor resultado histórico.','Fue la primera selección asiática en llegar tan lejos en un Mundial.','Son Heung-min, su gran estrella actual, ha brillado durante años en la Premier League.'] },
+    curiosidades:['Fue semifinalista del Mundial <b>2002</b>, que coorganizó con Japón — su mejor resultado histórico.','Fue la primera selección asiática en llegar tan lejos en un Mundial.','Son Heung-min, su gran estrella actual, ha brillado durante años en la Premier League.','La K League es la liga profesional más antigua de Asia, fundada en 1983.','Park Ji-sung fue el primer surcoreano en ganar la Champions League, con el Manchester United en 2008.'] },
   { pais:'Croacia', sel:'Vatreni', s1:['2018','Subcampeona Mundial'], s2:['Modrić','Balón de Oro 2018'],
-    curiosidades:['Fue <b>subcampeona</b> del Mundial 2018 siendo un país de apenas 4 millones de habitantes.','Luka Modrić ganó el Balón de Oro ese mismo año, rompiendo la racha de Messi y Ronaldo.','También acabó <b>tercera</b> en el Mundial de 2022.'] },
+    curiosidades:['Fue <b>subcampeona</b> del Mundial 2018 siendo un país de apenas 4 millones de habitantes.','Luka Modrić ganó el Balón de Oro ese mismo año, rompiendo la racha de Messi y Ronaldo.','También acabó <b>tercera</b> en el Mundial de 2022.','Davor Šuker fue el máximo goleador del Mundial de 1998, el mismo torneo en que Croacia acabó tercera en su debut mundialista.','Es una de las selecciones con más densidad de futbolistas de élite por habitante del mundo.'] },
   { pais:'Dinamarca', sel:'Los Dinamitas', s1:['1992','Campeona de Europa'], s2:['Sorpresa','Ni clasificada estaba'],
-    curiosidades:['Ganó la Eurocopa <b>1992</b> sin ni siquiera haberse clasificado originalmente: entró por la exclusión de Yugoslavia.','El "cuento de hadas danés" está considerado una de las mayores sorpresas de la historia del fútbol europeo.'] },
+    curiosidades:['Ganó la Eurocopa <b>1992</b> sin ni siquiera haberse clasificado originalmente: entró por la exclusión de Yugoslavia.','El "cuento de hadas danés" está considerado una de las mayores sorpresas de la historia del fútbol europeo.','El FC Copenhague y el Brøndby protagonizan el derbi más importante del fútbol danés.','Christian Eriksen se recuperó de un paro cardíaco sufrido en pleno partido de la Eurocopa 2020 para volver a jugar al máximo nivel poco después.'] },
   { pais:'Escocia', sel:'La Tartan Army', s1:['1872','Primer internacional'], s2:['0','Pasar de grupos en un Mundial'],
-    curiosidades:['Disputó junto a Inglaterra el <b>primer partido internacional</b> de la historia, en 1872.','Pese a esa tradición, nunca ha superado la fase de grupos en un Mundial.'] },
+    curiosidades:['Disputó junto a Inglaterra el <b>primer partido internacional</b> de la historia, en 1872.','Pese a esa tradición, nunca ha superado la fase de grupos en un Mundial.','El derbi de Glasgow entre el Celtic y el Rangers es uno de los más intensos y históricos del mundo.','Hampden Park, en Glasgow, es el estadio de la selección escocesa y uno de los recintos futbolísticos más antiguos aún en uso.'] },
   { pais:'España', sel:'La Roja', s1:['2010','Mundial'], s2:['3','Eurocopas'],
-    curiosidades:['Ganó su único Mundial en <b>2010</b>, en Sudáfrica, con un gol de Iniesta en la prórroga de la final.','El <b>Real Madrid</b> es el club con más Champions League de la historia (15 títulos).','El tiki-taka de la selección campeona hizo escuela en todo el mundo.'] },
+    curiosidades:['Ganó su único Mundial en <b>2010</b>, en Sudáfrica, con un gol de Iniesta en la prórroga de la final.','El <b>Real Madrid</b> es el club con más Champions League de la historia (15 títulos).','El tiki-taka de la selección campeona hizo escuela en todo el mundo.','El Barça y el Real Madrid protagonizan El Clásico, uno de los partidos más seguidos del planeta.','Andrés Iniesta marcó el gol que dio a España su único Mundial, en el minuto 116 de la final de 2010.'] },
   { pais:'Estados Unidos', sel:'Las Barras y Estrellas', s1:['2026','Sede Mundial'], s2:['MLS','En crecimiento'],
-    curiosidades:['Coorganizará el Mundial de <b>2026</b> junto a México y Canadá.','La MLS ha crecido mucho en las últimas décadas, atrayendo a grandes estrellas veteranas europeas.','Su selección femenina es históricamente mucho más laureada que la masculina.'] },
+    curiosidades:['Coorganizará el Mundial de <b>2026</b> junto a México y Canadá.','La MLS ha crecido mucho en las últimas décadas, atrayendo a grandes estrellas veteranas europeas.','Su selección femenina es históricamente mucho más laureada que la masculina.','El Mundial de 2026 será el primero de la historia disputado por tres países anfitriones a la vez.','La liga femenina estadounidense (NWSL) es una de las más competitivas y profesionalizadas del mundo.'] },
   { pais:'Francia', sel:'Les Bleus', s1:['2','Mundiales'], s2:['Mbappé','19 años en 2018'],
-    curiosidades:['Ha ganado <b>2 Mundiales</b>: 1998 como anfitriona y 2018 en Rusia.','Kylian Mbappé se convirtió en estrella mundial en el Mundial de 2018 con solo <b>19 años</b>.','Zinedine Zidane es una de sus grandes leyendas históricas.'] },
+    curiosidades:['Ha ganado <b>2 Mundiales</b>: 1998 como anfitriona y 2018 en Rusia.','Kylian Mbappé se convirtió en estrella mundial en el Mundial de 2018 con solo <b>19 años</b>.','Zinedine Zidane es una de sus grandes leyendas históricas.','El PSG, gracias a las grandes inversiones recibidas, se ha convertido en una superpotencia del fútbol europeo en las últimas dos décadas.','Just Fontaine sigue siendo el máximo goleador en una sola edición de un Mundial: 13 goles en 1958.'] },
   { pais:'Grecia', sel:'Το Πειρατικό', s1:['2004','Campeona de Europa'], s2:['Sorpresa','Ganó de local a Portugal'],
-    curiosidades:['Ganó la Eurocopa <b>2004</b>, una de las mayores sorpresas de la historia del fútbol.','En la final venció a Portugal, la selección anfitriona del torneo.'] },
+    curiosidades:['Ganó la Eurocopa <b>2004</b>, una de las mayores sorpresas de la historia del fútbol.','En la final venció a Portugal, la selección anfitriona del torneo.','El Olympiacos, el Panathinaikos y el AEK protagonizan una de las rivalidades más intensas del fútbol europeo.','Otto Rehhagel, el técnico alemán que llevó a Grecia a ganar la Eurocopa 2004, se convirtió en un héroe nacional.'] },
   { pais:'Inglaterra', sel:'Cuna del fútbol', s1:['1863','Fundación'], s2:['1966','Mundial'],
-    curiosidades:['La Football Association, la primera del mundo, se fundó en <b>1863</b>.','En 1888 nació la Football League, la primera liga profesional de la historia.','Ganó su único Mundial en <b>1966</b>, como anfitriona, en Wembley.'] },
+    curiosidades:['La Football Association, la primera del mundo, se fundó en <b>1863</b>.','En 1888 nació la Football League, la primera liga profesional de la historia.','Ganó su único Mundial en <b>1966</b>, como anfitriona, en Wembley.','La Premier League es la liga más seguida y con más ingresos por televisión del mundo.','Wembley, su estadio nacional, ha acogido finales de Champions League y de la Eurocopa femenina.'] },
   { pais:'Italia', sel:'Gli Azzurri', s1:['4','Mundiales'], s2:['2021','Eurocopa'],
-    curiosidades:['Ha ganado <b>4 Mundiales</b> (1934, 1938, 1982 y 2006).','Ganó la Eurocopa 2020 (disputada en 2021) tras años sin grandes títulos.','Su fútbol está históricamente asociado al "catenaccio", un sistema defensivo muy sólido.'] },
+    curiosidades:['Ha ganado <b>4 Mundiales</b> (1934, 1938, 1982 y 2006).','Ganó la Eurocopa 2020 (disputada en 2021) tras años sin grandes títulos.','Su fútbol está históricamente asociado al "catenaccio", un sistema defensivo muy sólido.','La Juventus es el club con más ligas (Scudetti) ganadas en la historia del fútbol italiano.','Ganó el Mundial de 2006 tras superar a Francia en la tanda de penaltis de la final, en la que Zidane fue expulsado por su famoso cabezazo a Materazzi.'] },
   { pais:'Japón', sel:'Samurai Blue', s1:['1993','J-League'], s2:['7','Mundiales seguidos'],
-    curiosidades:['La J-League, su liga profesional, se fundó en <b>1993</b>.','El manga "Oliver y Benji" inspiró a toda una generación de futbolistas japoneses reales.','Ha eliminado a varias potencias europeas en fases de grupos de Mundiales recientes.'] },
+    curiosidades:['La J-League, su liga profesional, se fundó en <b>1993</b>.','El manga "Oliver y Benji" inspiró a toda una generación de futbolistas japoneses reales.','Ha eliminado a varias potencias europeas en fases de grupos de Mundiales recientes.','Hidetoshi Nakata fue uno de los primeros futbolistas japoneses en triunfar en Europa, jugando en la Serie A italiana.','La selección femenina japonesa ganó el Mundial de 2011, la primera asiática en lograrlo.'] },
   { pais:'México', sel:'El Tri', s1:['2026','3ª vez como sede'], s2:['1970 y 1986','Mundiales ya organizados'],
-    curiosidades:['Ha sido sede de dos Mundiales (1970 y 1986) y volverá a serlo en <b>2026</b>.','Es una potencia habitual de la Concacaf, aunque nunca ha pasado de octavos jugando un Mundial fuera de casa.'] },
+    curiosidades:['Ha sido sede de dos Mundiales (1970 y 1986) y volverá a serlo en <b>2026</b>.','Es una potencia habitual de la Concacaf, aunque nunca ha pasado de octavos jugando un Mundial fuera de casa.','El Estadio Azteca será el primer estadio en acoger partidos de tres Mundiales distintos (1970, 1986 y 2026).','El Clásico entre América y Chivas de Guadalajara es el derbi más seguido del fútbol mexicano.'] },
   { pais:'Países Bajos', sel:'La Naranja Mecánica', s1:['3','Finales de Mundial'], s2:['0','Ganados'],
-    curiosidades:['Johan Cruyff popularizó el "fútbol total" con el Ajax y la selección de los años 70.','Ha llegado a <b>3 finales</b> de Mundial (1974, 1978 y 2010) sin ganar ninguna.','La "Cruyff turn", el regate que lleva su nombre, nació en el Mundial de 1974.'] },
+    curiosidades:['Johan Cruyff popularizó el "fútbol total" con el Ajax y la selección de los años 70.','Ha llegado a <b>3 finales</b> de Mundial (1974, 1978 y 2010) sin ganar ninguna.','La "Cruyff turn", el regate que lleva su nombre, nació en el Mundial de 1974.','El Ajax de Ámsterdam ganó tres Copas de Europa seguidas (1971-1973) con aquel fútbol total que marcó época.','Dennis Bergkamp era conocido por su miedo a volar, lo que le hizo perderse varios desplazamientos con el Arsenal y la selección.'] },
   { pais:'Polonia', sel:'Biało-czerwoni', s1:['1974 y 1982','3º en Mundiales'], s2:['Lewandowski','Máximo goleador reciente'],
-    curiosidades:['Robert Lewandowski es uno de los máximos goleadores de la historia del fútbol europeo.','La selección polaca quedó <b>tercera</b> en los Mundiales de 1974 y 1982, sus mejores resultados históricos.'] },
+    curiosidades:['Robert Lewandowski es uno de los máximos goleadores de la historia del fútbol europeo.','La selección polaca quedó <b>tercera</b> en los Mundiales de 1974 y 1982, sus mejores resultados históricos.','Zbigniew Boniek fue una de las grandes estrellas europeas de los años 80, brillando en la Juventus.','El fútbol polaco vive con pasión el derbi entre el Legia de Varsovia y el Wisła de Cracovia.'] },
   { pais:'Portugal', sel:'A Seleção', s1:['2016','Eurocopa'], s2:['Ronaldo','Máx. goleador histórico'],
-    curiosidades:['Ganó su primera gran competición internacional en la Eurocopa <b>2016</b>.','Cristiano Ronaldo, su gran estrella histórica, es el máximo goleador histórico del fútbol de selecciones.','Benfica, Porto y Sporting dominan históricamente su liga.'] },
+    curiosidades:['Ganó su primera gran competición internacional en la Eurocopa <b>2016</b>.','Cristiano Ronaldo, su gran estrella histórica, es el máximo goleador histórico del fútbol de selecciones.','Benfica, Porto y Sporting dominan históricamente su liga.','Eusébio fue el máximo goleador del Mundial de 1966, donde Portugal acabó tercera en su primera participación.','El Oporto, dirigido por un jovencísimo José Mourinho, ganó la Champions League en 2004 de forma sorprendente.'] },
   { pais:'República Checa', sel:'Národní tým', s1:['1996','Subcampeona de Europa'], s2:['1934 y 1962','Finales con Checoslovaquia'],
-    curiosidades:['Fue subcampeona de la Eurocopa <b>1996</b> como selección checa, tras la disolución de Checoslovaquia.','Como Checoslovaquia, fue subcampeona del Mundial en 1934 y 1962.'] },
+    curiosidades:['Fue subcampeona de la Eurocopa <b>1996</b> como selección checa, tras la disolución de Checoslovaquia.','Como Checoslovaquia, fue subcampeona del Mundial en 1934 y 1962.','Antonín Panenka dio nombre al famoso penalti "a lo Panenka" tras marcarlo en la final de la Eurocopa de 1976 con Checoslovaquia.','Petr Čech, con su característico casco protector, fue durante años uno de los mejores porteros del mundo.'] },
   { pais:'Suiza', sel:'La Nati', s1:['Zúrich','Sede FIFA'], s2:['Nyon','Sede UEFA'],
-    curiosidades:['Acoge las sedes de la <b>FIFA</b> (Zúrich) y la <b>UEFA</b> (Nyon), aunque nunca ha ganado un gran título.','Suele destacar por su disciplina táctica, y ha eliminado a potencias como Francia en fases finales de Eurocopas.'] },
+    curiosidades:['Acoge las sedes de la <b>FIFA</b> (Zúrich) y la <b>UEFA</b> (Nyon), aunque nunca ha ganado un gran título.','Suele destacar por su disciplina táctica, y ha eliminado a potencias como Francia en fases finales de Eurocopas.','El Basilea y el Young Boys son los clubes que más han dominado la liga suiza en los últimos años.','Xherdan Shaqiri y Granit Xhaka encabezaron una generación que llevó a Suiza a octavos de varios grandes torneos.'] },
   { pais:'Turquía', sel:'Ay-Yıldızlılar', s1:['2002','3º en el Mundial'], s2:['Estambul','Derbis pasionales'],
-    curiosidades:['Sorprendió al quedar <b>tercera</b> en el Mundial 2002, su mejor resultado histórico.','El fútbol turco tiene una de las aficiones más pasionales de Europa, especialmente en los derbis de Estambul.'] },
+    curiosidades:['Sorprendió al quedar <b>tercera</b> en el Mundial 2002, su mejor resultado histórico.','El fútbol turco tiene una de las aficiones más pasionales de Europa, especialmente en los derbis de Estambul.','El Galatasaray fue el primer equipo turco en ganar un título europeo, la Copa de la UEFA del año 2000.','El ambiente de los estadios turcos, sobre todo en Estambul, está considerado de los más intensos del mundo.'] },
   { pais:'Ucrania', sel:'Збірна України', s1:['2006','Semifinal Mundial'], s2:['Shevchenko','Balón de Oro 2004'],
-    curiosidades:['Fue semifinalista del Mundial <b>2006</b>, en su primera participación como país independiente.','Andriy Shevchenko, su gran estrella histórica, ganó el Balón de Oro en 2004.'] },
+    curiosidades:['Fue semifinalista del Mundial <b>2006</b>, en su primera participación como país independiente.','Andriy Shevchenko, su gran estrella histórica, ganó el Balón de Oro en 2004.','El Dinamo de Kiev, dirigido por Valeriy Lobanovskyi, fue una potencia europea en los años 70 y 80.','Shevchenko fue protagonista de la histórica final de Champions de 2005 (Liverpool-Milan), donde falló el penalti decisivo en la tanda.'] },
   { pais:'Uruguay', sel:'La Celeste', s1:['1930 y 1950','Mundiales ganados'], s2:['Maracanazo','1950 ante Brasil'],
-    curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.'] }
+    curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.','El Estadio Centenario de Montevideo, sede de la primera final de un Mundial en 1930, fue declarado Monumento Histórico por la FIFA.','Peñarol y Nacional protagonizan el Clásico uruguayo, uno de los derbis más antiguos de Sudamérica.'] }
 ];
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
 const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','escudosPersonalizados','mundialCampeones','mundialEliminado']);
@@ -5735,6 +5769,15 @@ const FACTOR_LIGA_PAIS = {
 }; // cualquier otro país (ligas menores de UEFA no listadas arriba) cae al 0.25 por defecto
 
 const CANDIDATOS_BALON_ORO = ["Kylian Mbappé","Erling Haaland","Vinícius Júnior","Jude Bellingham","Lamine Yamal","Rodri"];
+
+// Jugadores (actuales e históricos) con los que la prensa te compara según tu estilo de juego
+// elegido en creación (ESTILOS_JUEGO) — ver evento comparacion_prensa_estrella.
+const ESTRELLAS_POR_ESTILO = {
+  killer: ["Erling Haaland","Robert Lewandowski","Gerd Müller","Ronaldo Nazário","Filippo Inzaghi","Karim Benzema","Ruud van Nistelrooy"],
+  extremo: ["Kylian Mbappé","Vinícius Júnior","Arjen Robben","Cristiano Ronaldo","George Best","Garrincha","Stanley Matthews"],
+  referencia: ["Zlatan Ibrahimović","Didier Drogba","Alan Shearer","Romelu Lukaku","Peter Crouch","Olivier Giroud"],
+  enganche: ["Lionel Messi","Ronaldinho","Dennis Bergkamp","Roberto Baggio","Zinedine Zidane","Johan Cruyff"]
+};
 
 const SUBTEXTOS_NUEVA_TEMPORADA = [
   d => `${d.nombre} vuelve a la competición con ${d.edad} años, defendiendo los colores ${articuloClub(d.club)==='la'?'de la':'del'} ${d.club}, cuyo objetivo esta temporada es ${d.objetivo}.`,
@@ -6375,6 +6418,17 @@ function migrarJugadorGuardado(j){
   if(j.enParo === undefined) j.enParo = false;
   if(j.provincia === undefined) j.provincia = '';
   if(j.idCarrera === undefined) j.idCarrera = generarIdCarrera();
+  // Partidas de antes de guardar el estilo de juego elegido en creación: se infiere el más
+  // parecido comparando el perfil de atributos actual contra el de cada ESTILOS_JUEGO (el que
+  // tenga la correlación más alta con tus atributos de verdad, no un valor al azar).
+  if(j.estiloId === undefined || j.estiloId === null){
+    let mejorEstilo = null, mejorPuntuacion = -Infinity;
+    ESTILOS_JUEGO.forEach(estilo=>{
+      const puntuacion = ATRIBUTOS_JUGADOR.reduce((s,a)=> s + (j.atributos[a]||0) * estilo.atributos[a], 0);
+      if(puntuacion > mejorPuntuacion){ mejorPuntuacion = puntuacion; mejorEstilo = estilo.id; }
+    });
+    j.estiloId = mejorEstilo;
+  }
   // Partida guardada antes de que existiera este campo: por definición es anterior a la versión
   // que restringe logros/cromos (VERSION_MINIMA_LOGROS_CROMOS), así que se queda fuera de ambos.
   if(j.versionCreacion === undefined) j.versionCreacion = 'v1.4.7';
@@ -6424,7 +6478,7 @@ function borrarPartidaGuardada(slot){
 function generarIdCarrera(){
   try{ return crypto.randomUUID(); }catch(e){ return 'carrera-' + Date.now() + '-' + Math.random().toString(36).slice(2); }
 }
-function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia){
+function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia,estiloId){
   const atributos = {};
   const atributosProgreso = {};
   ATRIBUTOS_JUGADOR.forEach(a=>{ atributos[a] = ATRIBUTOS_BASE[a] + (extra[a]||0); atributosProgreso[a] = 0; });
@@ -6434,6 +6488,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia){
     idCarrera: generarIdCarrera(),
     versionCreacion: VERSION_JUEGO,
     hitosLogro:{},
+    estiloId: estiloId || null,
     nombre, pais, posicion: POSICION_FIJA, edad:16,
     localidad: (localidad||'').trim() || 'tu ciudad',
     provincia: provincia || '',
@@ -11309,10 +11364,15 @@ function mostrarTooltipCromo(cromo){
 // El escudo ocupa un cuadrado a todo el ancho de la carta (ver .flag-banner); AREA_INFO_CROMO es
 // el alto fijo que queda debajo para nombre, selección, datos rápidos y el "toca para ver
 // curiosidades" — así el escudo nunca se recorta ni deja huecos a los lados, sea cual sea w.
-const AREA_INFO_CROMO = 168;
+const AREA_INFO_CROMO = 186;
+// Ocupa el máximo posible de pantalla sin desbordar: parte de un ancho generoso (hasta 360px o
+// el 88% del viewport) y, si con ese ancho el alto total (escudo cuadrado + AREA_INFO_CROMO) no
+// entra en el 84% del alto disponible, se recalcula el ancho a partir del alto máximo en su lugar.
 function medidasDestinoCromo(){
-  const w = Math.min(280, window.innerWidth * 0.72);
-  const h = w + AREA_INFO_CROMO;
+  let w = Math.min(360, window.innerWidth * 0.88);
+  let h = w + AREA_INFO_CROMO;
+  const maxH = window.innerHeight * 0.84;
+  if(h > maxH){ h = maxH; w = h - AREA_INFO_CROMO; }
   return { width:w, height:h, left:(window.innerWidth-w)/2, top:(window.innerHeight-h)/2 };
 }
 function abrirZoomCromo(cromo, p){
@@ -12006,7 +12066,7 @@ SCREENS.crear = function(){
     const extra = { mental: estilo.mental - ATRIBUTOS_BASE.mental };
     ATRIBUTOS_JUGADOR.forEach(a=>{ extra[a] = estilo.atributos[a] - ATRIBUTOS_BASE[a]; });
     const nombreCompleto = `${state.nombrePila.trim()} ${state.apellido.trim()}`;
-    S.jugador = nuevoJugador(nombreCompleto, state.pais, extra, null, state.localidad.trim(), state.provincia);
+    S.jugador = nuevoJugador(nombreCompleto, state.pais, extra, null, state.localidad.trim(), state.provincia, estilo.id);
     trackEvento('nueva_partida', { estilo: estilo.id, so: detectarSO() });
     S.screen = 'personalizarGrupo';
     render();
