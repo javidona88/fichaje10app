@@ -847,9 +847,16 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .cromo-flagbox{ width:60%; aspect-ratio:1/1; border-radius:6px; overflow:hidden; margin-top:18%; box-shadow:0 3px 9px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08); flex-shrink:0; }
 .cromo-flagbox svg, .cromo-flagbox img{ width:100%; height:100%; display:block; object-fit:cover; }
 .cromo-item.falta .cromo-flagbox{ filter:grayscale(1) brightness(.4); opacity:.5; }
+/* Con escudo personalizado: nada de "cuadrado" alrededor del logo — la bandera del país pasa a
+   ser el fondo de toda la carta (oscurecida, recortada sin perder su proporción, como una foto
+   de fondo) y el escudo va encima, centrado, sin caja ni recorte propio. */
+.cromo-flagbox.con-escudo{ position:absolute; inset:0; width:100%; height:100%; margin:0; border-radius:0; box-shadow:none; overflow:hidden; display:flex; align-items:center; justify-content:center; padding-bottom:24%; }
+.cromo-flagbox.con-escudo .cromo-bandera-fondo{ position:absolute; inset:0; width:100%; height:100%; display:block; filter:brightness(.4) saturate(.85); }
+.cromo-flagbox.con-escudo .cromo-escudo-encima{ position:relative; z-index:1; width:60%; height:auto; max-height:52%; object-fit:contain; background:none; filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)); }
+.cromo-item.falta .cromo-flagbox.con-escudo{ filter:grayscale(1) brightness(.55); opacity:.55; }
 .cromo-num{ position:absolute; top:5px; left:5px; z-index:3; min-width:15px; height:15px; padding:0 3px; border-radius:8px; background:rgba(10,11,16,.55); backdrop-filter:blur(1px); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:7.5px; font-weight:700; color:#fff; letter-spacing:.02em; }
-.cromo-plate{ margin-top:auto; width:100%; padding:0 4px 11px; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:700; color:var(--ink); letter-spacing:.01em; }
-.cromo-item.falta .cromo-plate{ color:var(--ink-soft); opacity:.7; }
+.cromo-plate{ position:relative; z-index:2; margin-top:auto; width:100%; padding:14px 4px 11px; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:700; color:#fff; letter-spacing:.01em; background:linear-gradient(0deg, rgba(10,11,16,.82) 0%, rgba(10,11,16,.4) 75%, transparent 100%); }
+.cromo-item.falta .cromo-plate{ color:var(--ink-soft); opacity:.7; background:none; }
 .cromo-item.tenido .cromo-corner{ position:absolute; top:0; right:0; z-index:3; width:13px; height:13px; background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.16) 50%); border-radius:0 0 0 8px; }
 .cromo-tooltip{ position:fixed; z-index:73; background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:8px 11px; font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); box-shadow:var(--shadow); max-width:190px; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .2s ease; }
 .cromo-tooltip.show{ opacity:1; }
@@ -870,6 +877,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .cromo-zoom-front .flag-banner img{ width:100%; height:100%; display:block; object-fit:contain; background:var(--panel); }
 .cromo-zoom-front .flag-banner .gloss{ position:absolute; inset:0; background:linear-gradient(115deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 72%, rgba(255,255,255,.08) 100%); }
 .cromo-zoom-front .flag-banner .fade{ position:absolute; left:0; right:0; bottom:0; height:60%; background:linear-gradient(0deg, var(--panel) 0%, rgba(31,35,48,0) 100%); }
+/* Con escudo personalizado: misma idea que en la rejilla — bandera de fondo oscurecida, escudo
+   centrado encima sin caja ni recorte propio. */
+.cromo-zoom-front .flag-banner.con-escudo{ overflow:hidden; display:flex; align-items:center; justify-content:center; }
+.cromo-zoom-front .flag-banner.con-escudo .cromo-bandera-fondo{ position:absolute; inset:0; width:100%; height:100%; display:block; filter:brightness(.4) saturate(.85); }
+.cromo-zoom-front .flag-banner.con-escudo .cromo-escudo-encima{ position:relative; z-index:1; width:58%; height:auto; max-height:62%; object-fit:contain; background:none; filter:drop-shadow(0 6px 14px rgba(0,0,0,.65)); }
 .cromo-zoom-front .cerrar{ position:absolute; top:9px; right:9px; z-index:3; width:25px; height:25px; border-radius:50%; border:1px solid rgba(255,255,255,.25); background:rgba(10,11,16,.5); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; }
 .cromo-zoom-front .rareza-tag{ position:absolute; top:11px; left:11px; z-index:3; font-family:'Space Grotesk',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:.07em; color:#1a1408; background:var(--gold); padding:4px 8px; border-radius:20px; }
 .cromo-zoom-front .info{ flex:1; display:flex; flex-direction:column; align-items:center; padding:16px 16px 14px; overflow-y:auto; }
@@ -884,7 +896,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .cromo-zoom-back .cab{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
 .cromo-zoom-back .cab .izq{ display:flex; align-items:center; gap:8px; }
 .cromo-zoom-back .cab .mini-bandera{ width:22px; height:16px; border-radius:2px; overflow:hidden; flex-shrink:0; box-shadow:0 0 0 1px rgba(255,255,255,.15); }
-.cromo-zoom-back .cab .mini-bandera svg{ width:100%; height:100%; display:block; }
+.cromo-zoom-back .cab .mini-bandera svg, .cromo-zoom-back .cab .mini-bandera img{ width:100%; height:100%; display:block; object-fit:cover; }
 .cromo-zoom-back .cab b{ font-family:'Space Grotesk',sans-serif; font-size:13px; color:var(--ink); }
 .cromo-zoom-back .cerrar{ width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; flex-shrink:0; }
 .cromo-zoom-back .curio-tit{ font-family:'Space Grotesk',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.08em; color:var(--gold-dim); text-transform:uppercase; margin-bottom:8px; }
@@ -1556,7 +1568,7 @@ const LOGROS = [
     cond:j=> (j.trayectoria||[]).some(e=>esClubGrande(e.club)) },
   { id:'ultima_etapa', cat:'carrera', nombre:'Última gran etapa', desc:'Firma el gran contrato de fin de carrera.', icono:'💰', pesoRareza:10,
     cond:j=> (j.trayectoria||[]).some(e=>PAISES_ULTIMA_ETAPA.includes(e.pais)) },
-  { id:'llegar_arriba', cat:'carrera', nombre:'Desde abajo', desc:'Llega a jugar en LaLiga.', icono:'🔝', pesoRareza:30,
+  { id:'llegar_arriba', cat:'carrera', nombre:'Desde abajo', desc:'Llega a jugar en 1ª división.', icono:'🔝', pesoRareza:30,
     cond:j=> (j.trayectoria||[]).some(e=>e.categoria==='LaLiga') || j.club.categoria==='LaLiga' },
 
   // ---- Títulos ----
@@ -2786,6 +2798,7 @@ const BANCO_EVENTOS = [
         resultado: j => {
           j.amigoNoFutbol = { nombre:S._amigoNoFutbolCandidato.nombre, apodo:S._amigoNoFutbolCandidato.apodo, profesion:S._amigoNoFutbolCandidato.profesion, genero:S._amigoNoFutbolCandidato.genero, relacion:65 };
           const pron = j.amigoNoFutbol.genero==='f' ? 'ella' : 'él';
+          if(j.club.extranjero) return `Cuadráis una videollamada larga, a pesar de la diferencia horaria. No es lo mismo que veros en persona, pero es como si no hubiera pasado el tiempo. ${j.amigoNoFutbol.apodo} sigue siendo ${j.amigoNoFutbol.profesion}, con una vida completamente distinta a la tuya, y eso es precisamente lo que más te gusta de ${pron}.`;
           return `Quedáis, y es como si no hubiera pasado el tiempo. ${j.amigoNoFutbol.apodo} sigue siendo ${j.amigoNoFutbol.profesion}, con una vida completamente distinta a la tuya, y eso es precisamente lo que más te gusta de ${pron}.`;
         },
         efectos:{mental:6,confianza:3} },
@@ -2800,6 +2813,7 @@ const BANCO_EVENTOS = [
     texto: j => {
       const pron = j.amigoNoFutbol.genero==='f' ? 'ella' : 'él';
       const etiqueta = j.amigoNoFutbol.genero==='f' ? 'tu amiga' : 'tu amigo';
+      if(j.club.extranjero) return `Haces una videollamada con ${etiqueta} ${j.amigoNoFutbol.apodo} — desde que estás fuera, es lo más parecido que tenéis a quedar — y en medio de la conversación te cuenta un problema del día a día — una factura, un jefe complicado, algo que a ti ya te queda muy lejos, pero que a ${pron} le ocupa la cabeza entera.`;
       return `Quedas con ${etiqueta} ${j.amigoNoFutbol.apodo}, y en medio de la conversación te cuenta un problema del día a día — una factura, un jefe complicado, algo que a ti ya te queda muy lejos, pero que a ${pron} le ocupa la cabeza entera.`;
     },
     opciones:[
@@ -2819,7 +2833,11 @@ const BANCO_EVENTOS = [
     texto: j => `Tu ${j.amigoNoFutbol.genero==="f"?"amiga":"amigo"} ${j.amigoNoFutbol.nombre} te invita a algo completamente normal — una mudanza, un cumpleaños, nada que salga en ninguna portada — y te deja claro que le haría ilusión de verdad que fueras, sin ningún photocall de por medio.`,
     opciones:[
       { texto:"Ir sin avisar a nadie, como uno más",
-        resultado: j => { j.amigoNoFutbol.relacion = Math.min(100, j.amigoNoFutbol.relacion+15); return `Apareces sin escolta ni ruido, y durante unas horas vuelves a ser, sin más, quien eras antes de todo esto. ${j.amigoNoFutbol.apodo} no deja de sonreír en toda la tarde.`; },
+        resultado: j => {
+          j.amigoNoFutbol.relacion = Math.min(100, j.amigoNoFutbol.relacion+15);
+          if(j.club.extranjero) return `Coges un vuelo relámpago sin decírselo a nadie, apareces sin escolta ni ruido, y durante unas horas vuelves a ser, sin más, quien eras antes de todo esto. ${j.amigoNoFutbol.apodo} no se lo puede creer al verte entrar por la puerta.`;
+          return `Apareces sin escolta ni ruido, y durante unas horas vuelves a ser, sin más, quien eras antes de todo esto. ${j.amigoNoFutbol.apodo} no deja de sonreír en toda la tarde.`;
+        },
         efectos:{mental:8,popularidad:-1} },
       { texto:"Mandar algo bonito, aunque no puedas ir en persona",
         resultado: j => `No puedes escaparte, pero te aseguras de que llegue algo especial de tu parte. ${j.amigoNoFutbol.apodo} lo agradece, aunque nota tu ausencia.`,
@@ -2924,6 +2942,7 @@ const BANCO_EVENTOS = [
       const base = S._padreMadreCandidato;
       const etiqueta = base.genero==='f' ? 'madre' : 'padre';
       const pron = base.genero==='f' ? 'ella' : 'él';
+      if(base.apoya && j.lesionSemanas > 0) return `Tu ${etiqueta}, ${base.apodo}, nunca ha dudado de esto ni un solo segundo — ni siquiera ahora que te toca parar por la lesión. "Esto es solo un bache, vas a llegar donde te propongas", te repite estos días.`;
       if(base.apoya) return `Tu ${etiqueta}, ${base.apodo}, nunca ha dudado de esto ni un solo segundo. "Vas a llegar donde te propongas", te repite cada vez que sales de casa hacia el entreno.`;
       if(j.lesionSemanas > 0) return `Tu ${etiqueta}, ${base.apodo}, aunque te quiere con locura, nunca se ha fiado de esto del fútbol. Ahora que estás lesionado te lo dice sin rodeos: "¿Ves? Esto es justo lo que me preocupaba. ¿Y si no te recuperas bien? ¿Y si al final no sale?".`;
       return `Tu ${etiqueta}, ${base.apodo}, aunque te quiere con locura, no termina de fiarse de esto del fútbol. "¿Y si te lesionas? ¿Y si no sale?", te pregunta, más ${base.genero==='f'?'preocupada':'preocupado'} que ${base.genero==='f'?'orgullosa':'orgulloso'}.`;
@@ -3214,7 +3233,7 @@ const BANCO_EVENTOS = [
     ]
   },
   {
-    id:"cruce_campo_adrian", cooldown:5,
+    id:"cruce_campo_adrian", cooldown:5, soloSiSano:true,
     trigger:{ probabilidad:0.13, condicion: j => {
       if(!j.rival.trayectoriaIniciada || !j.rival.club || j.rival.club === j.club.nombre) return false;
       if(j.club.extranjero || !j.rival.categoria) return false;
@@ -6212,7 +6231,7 @@ function escudoSVG(nombre, tamano, colores){
   const primero = primerEquipoDeFilial(nombre);
   if(primero) return escudoSVG(primero, tamano, coloresClubDelJuego(primero) || colores);
   const custom = escudoPersonalizado('clubes', nombre);
-  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" style="border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 0 0 1px rgba(255,255,255,0.18);">`;
+  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" style="object-fit:contain;flex-shrink:0;">`;
   if(nombre === 'Real Madrid CF') return escudoRealMadrid(tamano);
   if(nombre === 'Atlético de Madrid') return escudoAtletico(tamano);
   if(nombre === 'FC Barcelona') return escudoBarcelona(tamano);
@@ -7873,11 +7892,42 @@ function quitarFondoBlanco(ctx, ancho, alto){
   }
   ctx.putImageData(datos, 0, 0);
 }
+// Recorta el canvas al rectángulo real de contenido no transparente (con un pequeño margen de
+// aire) y lo reescala para volver a ocupar todo el lienzo — así una imagen con mucho margen
+// vacío alrededor del escudo real (típico tras quitarFondoBlanco) no se queda pequeña dentro de
+// su caja cuadrada; se ajusta automáticamente para ocuparla sin perder su propia escala/proporción.
+function recortarAlContenido(canvas, ctx, tam){
+  const datos = ctx.getImageData(0, 0, tam, tam);
+  const px = datos.data;
+  const UMBRAL_ALPHA = 10;
+  let minX=tam, minY=tam, maxX=-1, maxY=-1;
+  for(let y=0; y<tam; y++){
+    for(let x=0; x<tam; x++){
+      if(px[(y*tam+x)*4+3] > UMBRAL_ALPHA){
+        if(x<minX) minX=x; if(x>maxX) maxX=x;
+        if(y<minY) minY=y; if(y>maxY) maxY=y;
+      }
+    }
+  }
+  if(maxX < minX) return; // imagen completamente transparente: nada que recortar
+  const anchoContenido = maxX-minX+1, altoContenido = maxY-minY+1;
+  const ladoContenido = Math.max(anchoContenido, altoContenido);
+  if(ladoContenido >= tam*0.94) return; // ya ocupa casi todo el cuadrado, no compensa tocarlo
+  const MARGEN = 1.12; // ~12% de aire alrededor del contenido real, no pegado del todo al borde
+  const lado = Math.min(tam, ladoContenido * MARGEN);
+  const cx = minX + anchoContenido/2, cy = minY + altoContenido/2;
+  const temp = document.createElement('canvas');
+  temp.width = tam; temp.height = tam;
+  temp.getContext('2d').drawImage(canvas, 0, 0);
+  ctx.clearRect(0, 0, tam, tam);
+  ctx.drawImage(temp, cx - lado/2, cy - lado/2, lado, lado, 0, 0, tam, tam);
+}
 // Lee el archivo elegido, lo recorta a cuadrado (mismo criterio "cover" que el resto de escudos),
-// lo reduce a un tamaño de icono (así cientos de escudos personalizados no agotan el
-// localStorage) y le quita el fondo blanco si lo tuviera.
+// le quita el fondo blanco si lo tuviera y recorta el aire sobrante alrededor del contenido real
+// antes de guardarlo a un tamaño que se vea nítido incluso ampliado (p. ej. al hacer zoom en un
+// cromo), sin que cientos de escudos personalizados agoten el localStorage.
 function redimensionarImagenEscudo(file){
-  const TAM = 160;
+  const TAM = 320;
   return new Promise((resolve, reject)=>{
     const reader = new FileReader();
     reader.onerror = ()=> reject(new Error('No se pudo leer el archivo'));
@@ -7892,6 +7942,7 @@ function redimensionarImagenEscudo(file){
         const w = img.width * escala, h = img.height * escala;
         ctx.drawImage(img, (TAM - w) / 2, (TAM - h) / 2, w, h);
         quitarFondoBlanco(ctx, TAM);
+        recortarAlContenido(canvas, ctx, TAM);
         resolve(canvas.toDataURL('image/png'));
       };
       img.src = reader.result;
@@ -7899,13 +7950,13 @@ function redimensionarImagenEscudo(file){
     reader.readAsDataURL(file);
   });
 }
-// Misma limpieza para una URL externa (recorte + quitar fondo blanco), aprovechando que ya se va
-// a mostrar con <img> de todas formas. Si el servidor de esa imagen no permite CORS, leer los
-// píxeles del canvas falla (canvas "contaminado") y esta función rechaza la promesa — quien la
-// llama debe entonces guardar la URL tal cual, sin procesar (se sigue viendo, pero sin quitar el
-// fondo ni funcionar sin conexión).
+// Misma limpieza para una URL externa (recorte + quitar fondo blanco + recorte de aire sobrante),
+// aprovechando que ya se va a mostrar con <img> de todas formas. Si el servidor de esa URL no
+// permite CORS, leer los píxeles del canvas falla (canvas "contaminado") y esta función rechaza
+// la promesa — quien la llama debe entonces guardar la URL tal cual, sin procesar (se sigue
+// viendo, pero sin quitar el fondo ni funcionar sin conexión).
 function procesarUrlParaEscudo(url){
-  const TAM = 160;
+  const TAM = 320;
   return new Promise((resolve, reject)=>{
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -7919,6 +7970,7 @@ function procesarUrlParaEscudo(url){
         const w = img.width * escala, h = img.height * escala;
         ctx.drawImage(img, (TAM - w) / 2, (TAM - h) / 2, w, h);
         quitarFondoBlanco(ctx, TAM);
+        recortarAlContenido(canvas, ctx, TAM);
         resolve(canvas.toDataURL('image/png'));
       }catch(e){ reject(e); }
     };
@@ -8055,7 +8107,7 @@ function banderaPais(pais, tamano){
 function escudoSeleccion(pais, tamano){
   tamano = tamano || 14;
   const custom = escudoPersonalizado('selecciones', pais);
-  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${pais}" style="border-radius:50%;object-fit:cover;vertical-align:middle;box-shadow:0 0 0 1px rgba(255,255,255,0.18);flex-shrink:0;">`;
+  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${pais}" style="object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
   return banderaPais(pais, tamano);
 }
 // Calendario real de grandes torneos: Eurocopa y Mundial se alternan cada 2 años (2028 Eurocopa, 2030
@@ -11079,6 +11131,19 @@ function svgBanderaCuadrada(pais){
   if(!patron) return '';
   return `<svg viewBox="0 0 40 40">${patron}</svg>`;
 }
+// Sin escudo personalizado: la bandera del país es el único visual del cromo, como siempre. Con
+// escudo personalizado: la bandera pasa a ser un fondo oscurecido a toda la caja (preserveAspectRatio
+// "slice" = mismo recorte que object-fit:cover, pero funciona de verdad en SVG en línea) y el
+// escudo va centrado encima, sin caja ni recorte propio — el llamante añade la clase 'con-escudo'
+// al contenedor cuando tieneEscudoPersonalizadoCromo(pais) es true, para activar ese estilo.
+function tieneEscudoPersonalizadoCromo(pais){ return !!escudoPersonalizado('selecciones', pais); }
+function contenidoVisualCromo(pais){
+  const custom = escudoPersonalizado('selecciones', pais);
+  if(!custom) return svgBanderaCuadrada(pais);
+  const patron = BANDERAS_SVG[pais];
+  const fondo = patron ? `<svg viewBox="0 0 40 40" preserveAspectRatio="xMidYMid slice" class="cromo-bandera-fondo">${patron}</svg>` : '';
+  return `${fondo}<img src="${custom}" alt="${pais}" class="cromo-escudo-encima">`;
+}
 let _cromoZoomOrigenRect = null;
 
 // Pantalla única "Colección": logros y cromos del mundo comparten pantalla, con una pestaña
@@ -11178,7 +11243,7 @@ function pintarVistaCromos(c){
     const cromo = el('div', 'cromo-item '+(tenido?'tenido':'falta'));
     if(tenido) cromo.appendChild(el('div','cromo-corner'));
     cromo.appendChild(el('div','cromo-num', num));
-    cromo.appendChild(el('div','cromo-flagbox', svgBanderaCuadrada(p.pais)));
+    cromo.appendChild(el('div','cromo-flagbox'+(tieneEscudoPersonalizadoCromo(p.pais)?' con-escudo':''), contenidoVisualCromo(p.pais)));
     cromo.appendChild(el('div','cromo-plate', p.pais));
     cromo.onclick = ()=>{
       if(!tenido){
@@ -11254,7 +11319,9 @@ function abrirZoomCromo(cromo, p){
   const zoomPerspective = document.getElementById('cromo-zoom-perspective');
   const zoomCard = document.getElementById('cromo-zoom-card');
   const backdrop = document.getElementById('cromo-backdrop');
-  document.getElementById('cromo-flag-banner').innerHTML = svgBanderaCuadrada(p.pais) + '<div class="gloss"></div><div class="fade"></div>';
+  const flagBanner = document.getElementById('cromo-flag-banner');
+  flagBanner.className = 'flag-banner' + (tieneEscudoPersonalizadoCromo(p.pais) ? ' con-escudo' : '');
+  flagBanner.innerHTML = contenidoVisualCromo(p.pais) + '<div class="gloss"></div><div class="fade"></div>';
   document.getElementById('cromo-z-nombre').textContent = p.pais;
   document.getElementById('cromo-z-nombre2').textContent = p.pais;
   document.getElementById('cromo-z-sel').textContent = p.sel;
@@ -12123,7 +12190,7 @@ SCREENS.elegirClub = function(){
     const izda = document.createElement('span');
     izda.className = 'oferta-club';
     izda.style.cssText = 'display:inline-flex;align-items:center;gap:8px;';
-    izda.innerHTML = `${escudoSVG(oferta.nombre,22,oferta.colores)} <span>${oferta.nombre}${primerEquipoDeFilial(oferta.nombre) ? `<div style="font-size:10px;color:var(--ink-soft);font-weight:400;">Filial del ${primerEquipoDeFilial(oferta.nombre)}</div>` : ''}</span>`;
+    izda.innerHTML = `${escudoSVG(oferta.nombre,30,oferta.colores)} <span>${oferta.nombre}${primerEquipoDeFilial(oferta.nombre) ? `<div style="font-size:10px;color:var(--ink-soft);font-weight:400;">Filial del ${primerEquipoDeFilial(oferta.nombre)}</div>` : ''}</span>`;
     const dcha = document.createElement('span');
     dcha.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--ink-soft);white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;";
     dcha.innerHTML = `${TIER_CATEGORIA['Tercera RFEF']} ${banderaPais('España',15)}`;
@@ -12399,7 +12466,7 @@ SCREENS.ofertas = function(){
       const izda = document.createElement('span');
       izda.className = 'oferta-club';
       izda.style.cssText = 'display:inline-flex;align-items:center;gap:8px;';
-      izda.innerHTML = `${escudoSVG(of.nombre,22,of.colores)} <span>${of.nombre}${of.ascenso ? ' <span style="color:var(--green);font-weight:400;">↑</span>' : ''}${primerEquipoDeFilial(of.nombre) ? `<div style="font-size:10px;color:var(--ink-soft);font-weight:400;">Filial del ${primerEquipoDeFilial(of.nombre)}</div>` : ''}</span>`;
+      izda.innerHTML = `${escudoSVG(of.nombre,30,of.colores)} <span>${of.nombre}${of.ascenso ? ' <span style="color:var(--green);font-weight:400;">↑</span>' : ''}${primerEquipoDeFilial(of.nombre) ? `<div style="font-size:10px;color:var(--ink-soft);font-weight:400;">Filial del ${primerEquipoDeFilial(of.nombre)}</div>` : ''}</span>`;
       const etiquetaCategoria = of.extranjero ? of.liga : (TIER_CATEGORIA[of.categoria] || of.categoria);
       const bandera = of.extranjero ? banderaPais(of.pais,15) : banderaPais('España',15);
       const dcha = document.createElement('span');
