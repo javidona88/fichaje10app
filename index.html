@@ -8599,7 +8599,13 @@ function generarOfertas(j){
     if(nombresUsados.has(nombre)) continue;
     if(esRivalDirecto(j.club.nombre, nombre) && Math.random() < 0.93) continue; // el rival directo casi nunca te tantea
     nombresUsados.add(nombre);
-    const ascenso = idxObjetivo > idxActual;
+    // Subir de división ya cuenta como ascenso por sí solo; si te quedas en la misma división
+    // (lo único posible, además, si tu club actual es extranjero — categoria:"LaLiga" fijo por
+    // convención, así que idxObjetivo nunca podría superar a idxActual y la flecha no salía
+    // nunca en ofertas españolas jugando fuera, aunque te ofrecieran el Real Madrid), se mira
+    // el prestigio del club nuevo frente al actual — mismo criterio que ya usan las ofertas del
+    // extranjero (ascensoExt más abajo), para no comparar categorías de países distintos.
+    const ascenso = idxObjetivo > idxActual || (PRESTIGIO_CLUB[nombre]||2) > (PRESTIGIO_CLUB[j.club.nombre]||2);
     const duracion = calcularDuracionContrato(j);
     const objetivoReal = elegirObjetivo({ club: { nombre, categoria, ambicionNivel: ambicionInicial(nombre) } });
     ofertas.push({
@@ -9132,6 +9138,15 @@ function pintar(){
     S.screen = S.jugador ? 'tabJugador' : 'menu';
     S.pantallaBase = undefined;
   }
+  // Red de seguridad: una pantalla del Mundial recordada como pantallaBase (p. ej. para que
+  // "Volver" desde Ajustes/Logros vuelva al partido en curso) deja de tener sentido si el
+  // torneo ya terminó mientras tanto (S.mundial se pone a null en mundialCampeones/
+  // mundialEliminado) — sin este check, SCREENS[S.screen]() reventaba leyendo S.mundial.algo
+  // sobre null y la pantalla se quedaba en blanco.
+  if(S.screen.indexOf('mundial') === 0 && !S.mundial){
+    S.screen = S.jugador ? 'tabJugador' : 'menu';
+    S.pantallaBase = undefined;
+  }
   const esGastosObligatorio = S.screen === 'gastos' && !S.pantallaAnteriorGastos;
   const excluirDePantallaBase = PANTALLAS_TAB.has(S.screen) && !esGastosObligatorio;
   const bloqueadaParaPantallaBase = PANTALLAS_SIN_TABBAR.has(S.screen) && !PANTALLAS_MUNDIAL_JUEGO.has(S.screen);
@@ -9139,7 +9154,19 @@ function pintar(){
     S.pantallaBase = S.screen;
   }
   if(S.jugador) comprobarLogros(S.jugador);
-  SCREENS[S.screen]();
+  // Red de seguridad general: si aun así el render de la pantalla falla (cualquier excepción
+  // inesperada), no se deja la partida en una pantalla en blanco — se recupera a un sitio seguro
+  // en vez de dejar el juego "trabado" sin ningún botón con el que seguir.
+  try{
+    SCREENS[S.screen]();
+  }catch(e){
+    console.error('Error al pintar la pantalla "' + S.screen + '":', e);
+    app.innerHTML = '';
+    document.getElementById('topbar-root').innerHTML = '';
+    S.screen = S.jugador ? 'tabJugador' : 'menu';
+    S.pantallaBase = undefined;
+    SCREENS[S.screen]();
+  }
   pintarTabbar();
   procesarAvisosLogros();
   document.getElementById('panel-entreno-root').innerHTML = '';
