@@ -682,10 +682,34 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .mundial-sorteo-mini svg, .mundial-sorteo-mini img{ display:block; max-width:100%; max-height:100%; }
 .mundial-sorteo-nombre{ flex:1; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; color:var(--ink); }
 .mundial-sorteo-bombo{ font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
+/* ---- Bombos del Mundial (previa del sorteo) ---- */
+.bombo-lbl{ font-family:'Space Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:14px 0 4px; }
+.bombo-lbl:first-child{ margin-top:0; }
+.bombo-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.bombo-pais{ display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; border-radius:9px; background:var(--bg2); border:1px solid var(--line); }
+.bombo-pais.tuyo{ border-color:var(--gold); background:rgba(212,175,55,.1); }
+.bombo-pais .mini{ width:30px; height:30px; display:flex; align-items:center; justify-content:center; }
+.bombo-pais .mini svg, .bombo-pais .mini img{ display:block; max-width:100%; max-height:100%; }
+.bombo-pais .nombre{ font-size:9px; text-align:center; line-height:1.2; color:var(--ink-soft); }
+/* ---- Moneda de los penaltis ---- */
+.moneda-wrap{ display:flex; justify-content:center; margin:20px 0 8px; perspective:400px; }
+.moneda{ width:80px; height:80px; border-radius:50%; flex-shrink:0; background:radial-gradient(circle at 32% 28%, #F7DE8C, #C9A227 55%, #8C6B18 100%); box-shadow:0 8px 18px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.35), inset 0 -3px 6px rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center; }
+.moneda-cara{ width:56%; height:56%; border-radius:50%; overflow:hidden; box-shadow:inset 0 0 0 2px rgba(0,0,0,.3), 0 1px 3px rgba(0,0,0,.35); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.moneda-cara svg, .moneda-cara img{ width:100%; height:100%; display:block; object-fit:cover; }
+.moneda-cara.moneda-split{ position:relative; }
+.moneda-cara.moneda-split .mitad{ position:absolute; top:0; height:100%; width:50%; overflow:hidden; }
+.moneda-cara.moneda-split .mitad.izq{ left:0; }
+.moneda-cara.moneda-split .mitad.der{ right:0; }
+.moneda-cara.moneda-split .mitad svg, .moneda-cara.moneda-split .mitad img{ position:absolute; top:0; height:100%; width:200%; display:block; }
+.moneda-cara.moneda-split .mitad.izq svg, .moneda-cara.moneda-split .mitad.izq img{ left:0; }
+.moneda-cara.moneda-split .mitad.der svg, .moneda-cara.moneda-split .mitad.der img{ right:0; }
+.moneda.girando{ animation:girarmoneda .9s cubic-bezier(.3,.1,.3,1); }
+@keyframes girarmoneda{ from{ transform:rotateY(0deg) scale(1); } 50%{ transform:rotateY(720deg) scale(1.12); } to{ transform:rotateY(1440deg) scale(1); } }
+.moneda-resultado{ text-align:center; font-family:'PT Serif',Georgia,serif; font-size:24px; color:var(--gold); margin:6px 0 4px; letter-spacing:.05em; }
 
 /* ---- entrenamiento (checkpoints) ---- */
 .lore-box{
-  background: rgba(110,136,168,0.1); border-left:4px solid var(--steel); border-radius:8px; padding:14px 16px; margin-bottom:18px;
+  background: rgba(110,136,168,0.1); border-radius:8px; padding:14px 16px; margin-bottom:18px;
   font-family:'Space Grotesk',sans-serif; font-size:14.5px; line-height:1.55; color:var(--ink);
 }
 .train-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; }
@@ -840,7 +864,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* .cromo-item (no ".cromo": esa clase ya la usa el carné del jugador, cromo() más arriba) */
 .cromo-item{ aspect-ratio:3/4.1; border-radius:0; position:relative; overflow:hidden; cursor:pointer; transition:transform .15s ease; background:linear-gradient(165deg,#262b3c,#1b1e2a); display:flex; flex-direction:column; align-items:center; }
 .cromo-item:active{ transform:scale(.94); }
-.cromo-item.tenido{ border:1px solid rgba(212,175,55,.55); box-shadow:0 5px 12px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.03); }
+.cromo-item.tenido{ border:2px solid rgba(212,175,55,.6); box-shadow:0 5px 12px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.03); }
 .cromo-item.falta{ border:1.5px dashed var(--line); }
 .cromo-item.falta.shake{ animation:cromoshake .4s; }
 @keyframes cromoshake{ 20%{ transform:translateX(-4px); } 40%{ transform:translateX(4px); } 60%{ transform:translateX(-3px); } 80%{ transform:translateX(3px); } 100%{ transform:translateX(0); } }
@@ -857,7 +881,6 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .cromo-num{ position:absolute; top:5px; left:5px; z-index:3; min-width:15px; height:15px; padding:0 3px; border-radius:8px; background:rgba(10,11,16,.55); backdrop-filter:blur(1px); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:7.5px; font-weight:700; color:#fff; letter-spacing:.02em; }
 .cromo-plate{ position:relative; z-index:2; margin-top:auto; width:100%; padding:14px 4px 11px; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:700; color:#fff; letter-spacing:.01em; background:linear-gradient(0deg, rgba(10,11,16,.82) 0%, rgba(10,11,16,.4) 75%, transparent 100%); }
 .cromo-item.falta .cromo-plate{ color:var(--ink-soft); opacity:.7; background:none; }
-.cromo-item.tenido .cromo-corner{ position:absolute; top:0; right:0; z-index:3; width:13px; height:13px; background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.16) 50%); border-radius:0 0 0 8px; }
 .cromo-tooltip{ position:fixed; z-index:73; background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:8px 11px; font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); box-shadow:var(--shadow); max-width:190px; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .2s ease; }
 .cromo-tooltip.show{ opacity:1; }
 .cromo-zoom-perspective{ position:fixed; z-index:71; perspective:1400px; pointer-events:none; display:none; }
@@ -5245,7 +5268,12 @@ const PAISES_CROMO = [
     curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.','El Estadio Centenario de Montevideo, sede de la primera final de un Mundial en 1930, fue declarado Monumento Histórico por la FIFA.','Peñarol y Nacional protagonizan el Clásico uruguayo, uno de los derbis más antiguos de Sudamérica.'] }
 ];
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','escudosPersonalizados','mundialCampeones','mundialEliminado']);
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','escudosPersonalizados',
+  // Todo el Mundial es una secuencia sin cortes: mientras dura, no tiene sentido poder escaparse
+  // al menú, a la tienda o al plan de entreno — como en las demás secuencias "de un tirón" de
+  // esta misma lista (rueda de prensa, reveals de título...). Se reactiva solo al terminar
+  // (victoria final o eliminación), cuando S.mundial se pone a null y vuelve la pantalla base.
+  'mundialIntro','mundialBombos','mundialSorteo','mundialPrensa','mundialGrupo','mundialGrupoTabla','mundialElim','mundialPenaltis','mundialCampeones','mundialEliminado']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
 const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras','blackjack']);
@@ -5515,23 +5543,16 @@ function iniciarMundialNuevo(cfg){
   const j = S.jugador;
   S.mundial = {
     grupo: sortearGrupoMundial(), sorteoRevelados: 0,
+    prensaPregunta: null, prensaRespuesta: null,
     calendarioGrupo: null, jornada: 0, resultadosGrupo: [],
     fase: null, pasosElim: [],
-    rivalElimActual: null, penaltisCtx: null, monedaGirando: false, monedaGanador: null,
+    rivalElimActual: null, penaltisCtx: null, monedaGirando: false, monedaGanador: null, monedaCaraActual: null,
     eliminado: null, campeon: false,
     _tirando: false, _tiradaResultado: null, _resultadoPartido: null,
     efectosVictoria: cfg.efectosVictoria
   };
   j.historial.push({ temporada:S.temporada, evento:'torneo_'+cfg.id });
-  const claveConvocatoria = 'tuvoPrimeraConvocatoriaAbsoluta';
-  if(!j[claveConvocatoria]){
-    j[claveConvocatoria] = true;
-    S.torneoActual = { tipo:'seleccion', nombreCompeticion:'Mundial' }; // solo para el texto de SCREENS.primeraConvocatoria
-    S.screen = 'primeraConvocatoria';
-    S._trasPrimeraConvocatoriaMundial = true;
-    return;
-  }
-  S.screen = 'mundialSorteo';
+  S.screen = 'mundialIntro';
 }
 
 const TEXTOS_SEMIFINAL_CLUB = [
@@ -7664,7 +7685,19 @@ function iniciarTemporadaJuego(j){
       // hecha semanas antes del primer partido), y solo al continuar ahí arranca el torneo en
       // sí (iniciarTorneoEliminatorio). Antes las dos cosas pasaban en el mismo instante.
       S.torneoVeranoPendiente = torneoVerano;
-      S.screen = 'convocatoriaSeleccion';
+      // Si es tu primera convocatoria de siempre a este combinado, ese momento histórico va
+      // ANTES del aviso de "estás en la lista para este torneo concreto" — cronológicamente
+      // primero te llaman a la selección, y solo después te enteras de para qué torneo es
+      // (antes salía al revés: el aviso genérico del torneo, y justo detrás, sin que tuviera
+      // sentido, "primera convocatoria con la absoluta").
+      const claveConvocatoria = torneoVerano.tipo === 'seleccion_sub21' ? 'tuvoPrimeraConvocatoriaSub21' : 'tuvoPrimeraConvocatoriaAbsoluta';
+      if(!j[claveConvocatoria]){
+        j[claveConvocatoria] = true;
+        S.torneoActual = { tipo: torneoVerano.tipo };
+        S.screen = 'primeraConvocatoria';
+      } else {
+        S.screen = 'convocatoriaSeleccion';
+      }
     } else {
       avanzarPaso(j);
     }
@@ -11295,7 +11328,6 @@ function pintarVistaCromos(c){
     const num = String(i+1).padStart(2,'0');
     const tenido = tieneCromo(p.pais);
     const cromo = el('div', 'cromo-item '+(tenido?'tenido':'falta'));
-    if(tenido) cromo.appendChild(el('div','cromo-corner'));
     cromo.appendChild(el('div','cromo-num', num));
     cromo.appendChild(el('div','cromo-flagbox'+(tieneEscudoPersonalizadoCromo(p.pais)?' con-escudo':''), contenidoVisualCromo(p.pais)));
     cromo.appendChild(el('div','cromo-plate', p.pais));
@@ -14370,12 +14402,6 @@ function iniciarTorneoEliminatorio(cfg){
   };
   j.historial.push({ temporada:S.temporada, evento:'torneo_'+cfg.id });
   if(esSeleccion) acumularEstadisticasSeleccion(j, cfg, nombreCompeticion);
-  const claveConvocatoria = esSeleccion ? (cfg.tipo === 'seleccion_sub21' ? 'tuvoPrimeraConvocatoriaSub21' : 'tuvoPrimeraConvocatoriaAbsoluta') : null;
-  if(esSeleccion && !j[claveConvocatoria]){
-    j[claveConvocatoria] = true;
-    S.screen = 'primeraConvocatoria';
-    return;
-  }
   S.screen = cfg.sinSemifinal ? 'torneoFinalIntro' : 'torneoSemifinal';
 }
 
@@ -14577,13 +14603,8 @@ SCREENS.primeraConvocatoria = function(){
   aplicarEfectos(j, esSub21 ? {popularidad:8,reputacion:4,mental:4} : {popularidad:15,reputacion:8,mental:5});
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Vivir este momento →';
   btn.onclick = ()=>{
-    if(S._trasPrimeraConvocatoriaMundial){
-      S._trasPrimeraConvocatoriaMundial = false;
-      S.torneoActual = null;
-      S.screen = 'mundialSorteo';
-    } else {
-      S.screen = cfg.sinSemifinal ? 'torneoFinalIntro' : 'torneoSemifinal';
-    }
+    S.torneoActual = null;
+    S.screen = 'convocatoriaSeleccion';
     render();
   };
   c.appendChild(btn);
@@ -15027,13 +15048,59 @@ function pintarPartidoMundial(opts){
   }
 }
 
+SCREENS.mundialIntro = function(){
+  const j = S.jugador;
+  const anio = temporadaAAnoUnico(S.temporada);
+  Sonido.trofeo();
+  topbar('Mundial ' + anio);
+  const c = el('div','season-reveal campeon');
+  const iconoBox = el('div','icon','');
+  iconoBox.innerHTML = escudoSeleccion('España', 56);
+  iconoBox.style.cssText = 'display:flex;justify-content:center;';
+  c.appendChild(iconoBox);
+  c.appendChild(el('div','lbl','Verano de fútbol'));
+  const numEl = c.appendChild(el('div','num', `Empieza el Mundial ${anio}`));
+  numEl.style.fontSize = '26px';
+  c.appendChild(el('div','sub', `Después de una temporada exigente con ${j.club.sinEquipo ? 'tu carrera' : j.club.nombre}, te incorporas a la concentración de España. Quedan semanas de trabajo antes del sorteo de grupos — el torneo que puede marcar tu carrera está a punto de empezar.`));
+  const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Ver el sorteo de bombos →';
+  btn.onclick = ()=>{ S.screen = 'mundialBombos'; render(); };
+  c.appendChild(btn);
+  app.appendChild(c);
+};
+
+SCREENS.mundialBombos = function(){
+  topbar('Bombos del Mundial');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Previa del sorteo'));
+  c.appendChild(el('h2',null,'Así quedan los bombos'));
+  c.appendChild(el('div','lore-box','España entra en el Bombo 1 junto a las mejores selecciones del ranking. En unos minutos, la FIFA sorteará un rival de cada bombo para completar tu grupo.'));
+  for(let p=1; p<=4; p++){
+    c.appendChild(el('div','bombo-lbl', `Bombo ${p}`));
+    const grid = el('div','bombo-grid');
+    const paisesDelBombo = p===1 ? ['España', ...PAISES_MUNDIAL_POR_POTE[1]] : PAISES_MUNDIAL_POR_POTE[p];
+    paisesDelBombo.forEach(nombre=>{
+      const item = el('div','bombo-pais'+(nombre==='España'?' tuyo':''));
+      const mini = el('div','mini','');
+      mini.innerHTML = escudoSeleccion(nombre, 30);
+      item.appendChild(mini);
+      item.appendChild(el('div','nombre', nombre));
+      grid.appendChild(item);
+    });
+    c.appendChild(grid);
+  }
+  const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Realizar el sorteo →';
+  btn.onclick = ()=>{ S.screen = 'mundialSorteo'; render(); };
+  c.appendChild(btn);
+  app.appendChild(c);
+};
+
 SCREENS.mundialSorteo = function(){
   const m = S.mundial;
   topbar('Sorteo del Mundial');
   const c = el('div','card');
   c.appendChild(crearEyebrow('Fase de grupos'));
   c.appendChild(el('h2',null,'El sorteo decide tu grupo'));
-  c.appendChild(el('div','lore-box','España conoce a sus rivales de la fase de grupos, uno de cada bombo — como en un Mundial real.'));
+  c.appendChild(el('div','lore-box','España conoce a sus rivales de la fase de grupos, uno de cada bombo.'));
 
   const lista = el('div','mundial-sorteo-lista');
   const filas = [];
@@ -15077,10 +15144,52 @@ SCREENS.mundialSorteo = function(){
       pintar();
     }, 900);
   } else {
-    const btn = el('button','btn-main','Ver el grupo →');
-    btn.onclick = ()=>{ S.screen='mundialGrupo'; render(); };
+    const btn = el('button','btn-main','Continuar a la rueda de prensa →');
+    btn.onclick = ()=>{ S.screen='mundialPrensa'; render(); };
     zonaBoton.appendChild(btn);
   }
+};
+
+// Pregunta de prensa generada a partir de tu grupo real (nunca fija) — igual que se pidió en la
+// demo. Se guarda en S.mundial (m.prensaPregunta/prensaRespuesta) como dato plano, nunca como
+// función, porque guardarPartida() serializa S entero con JSON.stringify.
+function preguntaPrensaMundial(m){
+  const rivales = m.grupo.slice(1);
+  const nombres = rivales.map(r=>r.n);
+  const lista = `${nombres[0]}, ${nombres[1]} y ${nombres[2]}`;
+  const nivelMedio = rivales.reduce((s,r)=>s+r.pot,0)/rivales.length;
+  const calificativo = nivelMedio <= 2 ? 'un grupo exigente de verdad' : nivelMedio <= 3 ? 'un grupo parejo' : 'un grupo asequible sobre el papel';
+  return {
+    texto: `"Os ha tocado ${calificativo}, con ${lista} por delante. ¿Cómo lo afrontáis?"`,
+    opciones: [
+      { texto:`"Respetamos a ${lista}, pero vamos a por el primer puesto."`, tono:'Los titulares de mañana hablan de ambición — la afición lo agradece.' },
+      { texto:`"Grupo a grupo. Primero pensamos en ${nombres[0]}, sin mirar más allá."`, tono:'Un mensaje prudente que calma la presión antes del debut.' },
+      { texto:'"Este equipo puede llegar muy lejos en este Mundial."', tono:'Frase que llenará portadas — si luego no se cumple, pesará.' }
+    ]
+  };
+}
+SCREENS.mundialPrensa = function(){
+  const m = S.mundial;
+  if(!m.prensaPregunta) m.prensaPregunta = preguntaPrensaMundial(m);
+  const pregunta = m.prensaPregunta;
+  topbar('Rueda de prensa');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Antes del debut'));
+  c.appendChild(el('h2',null,'Un periodista te pregunta'));
+  c.appendChild(el('div','lore-box', pregunta.texto));
+  if(m.prensaRespuesta == null){
+    pregunta.opciones.forEach((op,i)=>{
+      const b = el('button','opt', op.texto);
+      b.onclick = ()=>{ m.prensaRespuesta = i; pintar(); };
+      c.appendChild(b);
+    });
+  } else {
+    c.appendChild(el('div','lore-box', pregunta.opciones[m.prensaRespuesta].tono));
+    const btn = el('button','btn-main','Empieza el Mundial →');
+    btn.onclick = ()=>{ S.screen = 'mundialGrupo'; render(); };
+    c.appendChild(btn);
+  }
+  app.appendChild(c);
 };
 
 SCREENS.mundialGrupo = function(){
@@ -15155,7 +15264,7 @@ function resolverEliminatoriaMundial(faseInfo, idx, rival, resultado, penaltis, 
   const j = S.jugador;
   const m = S.mundial;
   m.pasosElim.push({ fase:faseInfo.id, nombre:faseInfo.nombre, rival, resultado, penaltis, marcador });
-  m.rivalElimActual = null; m.penaltisCtx = null; m.monedaGirando = false; m.monedaGanador = null;
+  m.rivalElimActual = null; m.penaltisCtx = null; m.monedaGirando = false; m.monedaGanador = null; m.monedaCaraActual = null;
   if(faseInfo.id === 'semis' && resultado === 'derrota'){
     // No a casa todavía: los dos semifinalistas caídos juegan el 3er puesto, como en un Mundial real.
     m.fase = FASE_TERCER_PUESTO_MUNDIAL.id;
@@ -15236,18 +15345,38 @@ SCREENS.mundialPenaltis = function(){
   row.appendChild(filaEquipoMundial(rival));
   c.appendChild(row);
 
+  const wrap = el('div','moneda-wrap');
+  const moneda = el('div','moneda'+(m.monedaGirando?' girando':''));
+  if(m.monedaGanador){
+    moneda.innerHTML = `<div class="moneda-cara">${escudoSeleccion(m.monedaGanador,44)}</div>`;
+  } else if(m.monedaGirando){
+    moneda.innerHTML = `<div class="moneda-cara">${escudoSeleccion(m.monedaCaraActual || rival.n, 44)}</div>`;
+  } else {
+    // Antes de lanzar: la moneda muestra mitad y mitad, un país en cada lado — nadie tiene ventaja.
+    moneda.innerHTML = `<div class="moneda-cara moneda-split"><div class="mitad izq">${escudoSeleccion('España',44)}</div><div class="mitad der">${escudoSeleccion(rival.n,44)}</div></div>`;
+  }
+  wrap.appendChild(moneda);
+  c.appendChild(wrap);
+
   if(!m.monedaGanador){
     c.appendChild(el('div','lore-box', m.monedaGirando ? 'La moneda gira en el aire…' : `Nada separa a los dos equipos. Cara España, cruz ${rival.n} — gana quien salga.`));
     const btn = el('button','btn-main', m.monedaGirando ? 'Lanzando…' : 'Lanzar la moneda →');
     btn.disabled = !!m.monedaGirando;
     btn.onclick = ()=>{
       m.monedaGirando = true;
+      Sonido.tick();
       pintar();
       let ticks = 0;
-      const iv = setInterval(()=>{ Sonido.tick(); ticks++; }, 90);
+      const iv = setInterval(()=>{
+        m.monedaCaraActual = ticks%2===0 ? rival.n : 'España';
+        ticks++;
+        Sonido.tick();
+        pintar();
+      }, 90);
       setTimeout(()=>{
         clearInterval(iv);
         m.monedaGirando = false;
+        m.monedaCaraActual = null;
         m.monedaGanador = Math.random()<0.5 ? 'España' : rival.n;
         const gana = m.monedaGanador === 'España';
         (gana ? Sonido.exito : Sonido.fallo)();
@@ -15257,6 +15386,7 @@ SCREENS.mundialPenaltis = function(){
     c.appendChild(btn);
   } else {
     const gana = m.monedaGanador === 'España';
+    c.appendChild(el('div','moneda-resultado', `Sale ${m.monedaGanador}`));
     c.appendChild(el('div','lore-box', gana ? 'España se lleva la tanda de penaltis.' : `${rival.n} se lleva la tanda de penaltis.`));
     const btn = el('button','btn-main','Continuar →');
     btn.onclick = ()=>{ resolverEliminatoriaMundial(faseInfo, idx, rival, gana?'victoria':'derrota', true, marcador); };
