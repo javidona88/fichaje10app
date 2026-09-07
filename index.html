@@ -665,7 +665,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .oferta-card .btn-main{ margin-top:0; padding:10px; font-size:14px; }
 
 /* ---- Mundial nuevo (sorteo, camino hasta aquí, VS) ---- */
-.vs-mundial{ font-family:'PT Serif',Georgia,serif; font-style:italic; font-size:15px; color:var(--ink-soft); }
+.vs-mundial{ font-family:'PT Serif',Georgia,serif; font-style:italic; font-size:17px; color:var(--ink-soft); }
 .bracket-paso{ display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--line); font-size:12.5px; }
 .bracket-paso:last-child{ border-bottom:none; }
 .bracket-paso .fase{ font-weight:700; color:var(--ink); }
@@ -5629,7 +5629,7 @@ function tirarMundial(dificultad){
 function iniciarMundialNuevo(cfg){
   const j = S.jugador;
   S.mundial = {
-    grupo: sortearGrupoMundial(), sorteoRevelados: 0,
+    grupo: sortearGrupoMundial(), sorteoRevelados: 0, sorteoPausado: false,
     prensaPregunta: null, prensaRespuesta: null,
     calendarioGrupo: null, jornada: 0, resultadosGrupo: [],
     fase: null, pasosElim: [],
@@ -15005,8 +15005,8 @@ const ORDINAL_GRUPO_MUNDIAL = {1:'1ª de grupo', 2:'2ª de grupo', 3:'3ª de gru
 
 function filaEquipoMundial(pais){
   const div = document.createElement('div');
-  div.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:6px;width:84px;';
-  div.innerHTML = `${banderaPais(pais.n,34)}<span style="font-family:'Space Grotesk',sans-serif;font-size:11.5px;color:var(--ink-soft);text-align:center;line-height:1.2;">${pais.n}</span>`;
+  div.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px;width:104px;';
+  div.innerHTML = `${banderaPais(pais.n,52)}<span style="font-family:'Space Grotesk',sans-serif;font-size:11.5px;color:var(--ink-soft);text-align:center;line-height:1.2;">${pais.n}</span>`;
   return div;
 }
 
@@ -15058,7 +15058,7 @@ function pintarPartidoMundial(opts){
   const c = el('div','card');
   c.appendChild(crearEyebrow(opts.eyebrowTxt));
   const row = document.createElement('div');
-  row.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:16px;margin:14px 0 18px;';
+  row.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:18px;margin:28px 0 22px;';
   row.appendChild(filaEquipoMundial({n:'España'}));
   row.appendChild(el('div','vs-mundial','VS'));
   row.appendChild(filaEquipoMundial(opts.rival));
@@ -15143,10 +15143,9 @@ SCREENS.mundialIntro = function(){
   topbar('Mundial ' + anio);
   const c = el('div','season-reveal campeon');
   const iconoBox = el('div','icon','');
-  iconoBox.innerHTML = banderaPais('España', 56);
-  iconoBox.style.cssText = 'display:flex;justify-content:center;';
+  iconoBox.innerHTML = iconoInsignia('trofeo', 76);
+  iconoBox.style.cssText = 'display:flex;justify-content:center;margin-bottom:14px;';
   c.appendChild(iconoBox);
-  c.appendChild(el('div','lbl','Verano de fútbol'));
   const numEl = c.appendChild(el('div','num', `Empieza el Mundial ${anio}`));
   numEl.style.fontSize = '26px';
   c.appendChild(el('div','sub', `Después de una temporada exigente con ${j.club.sinEquipo ? 'tu carrera' : j.club.nombre}, te incorporas a la concentración de España. Quedan semanas de trabajo antes del sorteo de grupos — el torneo que puede marcar tu carrera está a punto de empezar.`));
@@ -15215,7 +15214,7 @@ SCREENS.mundialSorteo = function(){
   c.appendChild(zonaBoton);
   app.appendChild(c);
 
-  if(m.sorteoRevelados < 3){
+  if(m.sorteoRevelados < 3 && !m.sorteoPausado){
     const poteActual = m.sorteoRevelados + 2;
     const candidatosPote = PAISES_MUNDIAL_POR_POTE[poteActual];
     const idxFila = m.sorteoRevelados + 1;
@@ -15229,9 +15228,17 @@ SCREENS.mundialSorteo = function(){
       clearInterval(cicloId);
       m.sorteoRevelados++;
       Sonido.click();
-      pintar();
+      // Pequeña pausa con el país ya revelado antes de que arranque el bombo siguiente, en vez
+      // de encadenar los 3 sorteos sin ningún respiro entre medias.
+      if(m.sorteoRevelados < 3){
+        m.sorteoPausado = true;
+        pintar();
+        setTimeout(()=>{ m.sorteoPausado = false; pintar(); }, 650);
+      } else {
+        pintar();
+      }
     }, 900);
-  } else {
+  } else if(m.sorteoRevelados >= 3){
     const btn = el('button','btn-main','Continuar a la rueda de prensa →');
     btn.onclick = ()=>{ S.screen='mundialPrensa'; render(); };
     zonaBoton.appendChild(btn);
@@ -15323,9 +15330,11 @@ SCREENS.mundialGrupoTabla = function(){
     tabla.appendChild(fila);
   });
   c.appendChild(tabla);
-  c.appendChild(el('div','lore-box', clasificas
+  const cajaResultado = el('div','lore-box', clasificas
     ? 'España pasa a los dieciseisavos de final. El Mundial de verdad empieza ahora.'
-    : 'España se queda fuera del Mundial en la fase de grupos. Un golpe duro, y una vuelta a casa mucho antes de lo soñado.'));
+    : 'España se queda fuera del Mundial en la fase de grupos. Un golpe duro, y una vuelta a casa mucho antes de lo soñado.');
+  cajaResultado.style.marginTop = '16px';
+  c.appendChild(cajaResultado);
   const btn = el('button','btn-main', clasificas ? 'Ir a dieciseisavos →' : 'Continuar →');
   btn.onclick = ()=>{
     if(clasificas){
@@ -15427,7 +15436,7 @@ SCREENS.mundialPenaltis = function(){
   c.appendChild(crearEyebrow(`Eliminatoria · ${faseInfo.nombre}`));
   c.appendChild(el('h2',null,`Empate ${marcador} — se decide en los penaltis`));
   const row = document.createElement('div');
-  row.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:16px;margin:14px 0 18px;';
+  row.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:18px;margin:28px 0 22px;';
   row.appendChild(filaEquipoMundial({n:'España'}));
   row.appendChild(el('div','vs-mundial','VS'));
   row.appendChild(filaEquipoMundial(rival));
