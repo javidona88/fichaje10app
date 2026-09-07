@@ -5450,6 +5450,15 @@ function resultadoPartidoMundial(r){
   if(r.total >= r.dificultad-2) return 'empate';
   return 'derrota';
 }
+// Tirada de un partido del Mundial: 1d20 puro contra Dificultad, sin bono de ningún tipo — tal
+// cual se probó y se pidió mantener en la demo. La Dificultad ya viene adecuada a mano por
+// bombo/fase (DIFICULTAD_MUNDIAL), así que no hace falta sumarle nada más al dado.
+function tirarMundial(dificultad){
+  const dado = 1 + Math.floor(Math.random()*20);
+  const r = { dado, total:dado, dificultad, natural1: dado===1, natural20: dado===20 };
+  r.resultado = resultadoPartidoMundial(r);
+  return r;
+}
 function iniciarMundialNuevo(cfg){
   const j = S.jugador;
   S.mundial = {
@@ -5458,7 +5467,7 @@ function iniciarMundialNuevo(cfg){
     fase: null, pasosElim: [],
     rivalElimActual: null, penaltisCtx: null, monedaGirando: false, monedaGanador: null,
     eliminado: null, campeon: false,
-    _tirando: false, _tiradaActual: null, _tiradaResultado: null, _resultadoPartido: null,
+    _tirando: false, _tiradaResultado: null, _resultadoPartido: null,
     efectosVictoria: cfg.efectosVictoria
   };
   j.historial.push({ temporada:S.temporada, evento:'torneo_'+cfg.id });
@@ -14809,7 +14818,7 @@ function pintarPartidoMundial(opts){
     dado.appendChild(die);
     const suma = el('div','dice-suma','');
     dado.appendChild(suma);
-    dado.appendChild(el('div','dice-caption', `1d20 + ${NICE_ATTR[m._tiradaActual.atributo]}`));
+    dado.appendChild(el('div','dice-caption', `1d20 contra Dificultad ${opts.dificultad}`));
     c.appendChild(dado);
     app.appendChild(c);
     let ticks = 0;
@@ -14827,7 +14836,6 @@ function pintarPartidoMundial(opts){
         setTimeout(()=>{
           if(r.natural1){ suma.textContent = '1 NATURAL'; suma.classList.add('natural1'); }
           else if(r.natural20){ suma.textContent = '20 NATURAL'; suma.classList.add('natural20'); }
-          else suma.textContent = `${r.dado} + ${r.bono} = ${r.total}`;
           suma.classList.add('show');
         }, 350);
         setTimeout(()=>{
@@ -14842,18 +14850,16 @@ function pintarPartidoMundial(opts){
   }
 
   if(!m._resultadoPartido){
-    // Sin elección táctica ni objetos por ahora: un único roll con Tiro, como la final de
-    // club/torneo de siempre (SCREENS.torneoFinal) — simplificado a petición expresa.
+    // Sin elección táctica ni objetos ni bono de atributo: 1d20 puro contra Dificultad, tal cual
+    // se probó en la demo — la Dificultad ya está adecuada a mano por bombo/fase (ver
+    // DIFICULTAD_MUNDIAL), sin necesidad de sumarle nada más al dado.
     const btn = el('button','btn-main','Jugar el partido →');
     btn.onclick = ()=>{
-      const tirada = { atributo:'tiro', dificultadBase:opts.dificultad };
-      const r = tirar(j, tirada);
-      r.resultado = resultadoPartidoMundial(r);
+      const r = tirarMundial(opts.dificultad);
       r.marcador = marcadorMundial(r);
       j.stats.confianza = Math.max(0, Math.min(100, j.stats.confianza + (r.resultado==='derrota' ? -3 : 3)));
       if(r.natural1) j.rachaGafada = true;
       m._tirando = true;
-      m._tiradaActual = tirada;
       m._tiradaResultado = r;
       pintar();
     };
@@ -14869,7 +14875,7 @@ function pintarPartidoMundial(opts){
     const textoBtn = (r.resultado==='empate' && opts.textoContinuarEmpate) ? opts.textoContinuarEmpate : (opts.textoContinuar || 'Continuar →');
     const btn = el('button','btn-main', textoBtn);
     btn.onclick = ()=>{
-      m._resultadoPartido = null; m._tiradaActual = null; m._tiradaResultado = null;
+      m._resultadoPartido = null; m._tiradaResultado = null;
       opts.onResultado(r);
     };
     c.appendChild(btn);
