@@ -5450,15 +5450,6 @@ function resultadoPartidoMundial(r){
   if(r.total >= r.dificultad-2) return 'empate';
   return 'derrota';
 }
-// Dos opciones de enfoque táctico por partido, con distinto atributo — mismo patrón que las
-// finales de club/selección (Tiro=potencia vs Mentalidad=sangre fría), para que encaje con el
-// resto de tiradas del juego en vez de un roll genérico sin elección.
-function opcionesPartidoMundial(dificultad){
-  return [
-    { texto:'Buscar el gol pronto y llevar la iniciativa', atributo:'tiro', dificultadBase:dificultad },
-    { texto:'Jugar con la cabeza fría y esperar el momento', atributo:'mental', dificultadBase:dificultad }
-  ];
-}
 function iniciarMundialNuevo(cfg){
   const j = S.jugador;
   S.mundial = {
@@ -14851,30 +14842,22 @@ function pintarPartidoMundial(opts){
   }
 
   if(!m._resultadoPartido){
-    opts.opciones.forEach(op=>{
-      const b = el('div','opt');
-      b.appendChild(document.createTextNode(op.texto));
-      const tirada = { atributo:op.atributo, dificultadBase:opts.dificultad };
-      const p = probabilidadExito(j, tirada);
-      const tag = el('span','tag');
-      tag.appendChild(el('span','tag-pill', `🎲 Dificultad ${p.dificultad}`));
-      tag.appendChild(el('span','tag-pill', `${NICE_ATTR[op.atributo]} +${p.bonoAtributo}`));
-      p.mods.forEach(mm=> tag.appendChild(el('span','tag-pill', mm)));
-      tag.appendChild(el('span','tag-pill pct', etiquetaProbabilidad(p.pct)));
-      b.appendChild(tag);
-      b.onclick = ()=>{
-        const r = tirar(j, tirada);
-        r.resultado = resultadoPartidoMundial(r);
-        r.marcador = marcadorMundial(r);
-        j.stats.confianza = Math.max(0, Math.min(100, j.stats.confianza + (r.resultado==='derrota' ? -3 : 3)));
-        if(r.natural1) j.rachaGafada = true;
-        m._tirando = true;
-        m._tiradaActual = tirada;
-        m._tiradaResultado = r;
-        pintar();
-      };
-      c.appendChild(b);
-    });
+    // Sin elección táctica ni objetos por ahora: un único roll con Tiro, como la final de
+    // club/torneo de siempre (SCREENS.torneoFinal) — simplificado a petición expresa.
+    const btn = el('button','btn-main','Jugar el partido →');
+    btn.onclick = ()=>{
+      const tirada = { atributo:'tiro', dificultadBase:opts.dificultad };
+      const r = tirar(j, tirada);
+      r.resultado = resultadoPartidoMundial(r);
+      r.marcador = marcadorMundial(r);
+      j.stats.confianza = Math.max(0, Math.min(100, j.stats.confianza + (r.resultado==='derrota' ? -3 : 3)));
+      if(r.natural1) j.rachaGafada = true;
+      m._tirando = true;
+      m._tiradaActual = tirada;
+      m._tiradaResultado = r;
+      pintar();
+    };
+    c.appendChild(btn);
     app.appendChild(c);
   } else {
     const r = m._resultadoPartido;
@@ -14966,7 +14949,7 @@ SCREENS.mundialGrupo = function(){
   topbar('Mundial · Fase de grupos');
   pintarPartidoMundial({
     eyebrowTxt: `Fase de grupos · Jornada ${m.jornada+1} de 3`,
-    rival, dificultad, opciones: opcionesPartidoMundial(dificultad),
+    rival, dificultad,
     onResultado: (r)=>{
       m.resultadosGrupo.push({ rival, ...r });
       m.jornada++;
@@ -15072,7 +15055,7 @@ SCREENS.mundialElim = function(){
   topbar('Mundial · ' + faseInfo.nombre);
   pintarPartidoMundial({
     eyebrowTxt: `Eliminatoria · ${faseInfo.nombre}`,
-    rival: m.rivalElimActual, dificultad, opciones: opcionesPartidoMundial(dificultad),
+    rival: m.rivalElimActual, dificultad,
     textoContinuar: 'Continuar →', textoContinuarEmpate: 'Ir a los penaltis →',
     onResultado: (r)=>{
       if(r.resultado === 'empate'){
