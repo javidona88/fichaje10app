@@ -7821,6 +7821,34 @@ function todosLosClubesDelJuego(){
   asegurarMapaColoresClubes();
   return [..._mapaColoresClubes.keys()].filter(n=> !primerEquipoDeFilial(n)).sort((a,b)=> a.localeCompare(b,'es'));
 }
+// Mismos clubes que todosLosClubesDelJuego(), pero agrupados en dos niveles — país y división —
+// para la vista categorizada del personalizador de escudos. España sale primero (de LaLiga hacia
+// abajo, orden real del escalafón); el resto de países, alfabético, con sus ligas reales de
+// CLUBES_EXTRANJERO. Nunca a mano: sale de las mismas CLUBES_POR_CATEGORIA/CLUBES_EXTRANJERO que
+// usa el resto del juego, así no se puede desincronizar si se añaden clubes o países nuevos.
+function clubesAgrupadosDelJuego(){
+  const grupos = [];
+  [...CATEGORIAS].reverse().forEach(cat=>{
+    const nombres = (CLUBES_POR_CATEGORIA[cat]||[]).map(c=>c.nombre).filter(n=> !primerEquipoDeFilial(n)).sort((a,b)=> a.localeCompare(b,'es'));
+    if(nombres.length) grupos.push({ pais:'España', division:cat, clubes:nombres });
+  });
+  const porPais = new Map();
+  CLUBES_EXTRANJERO.forEach(c=>{
+    if(primerEquipoDeFilial(c.nombre)) return;
+    if(!porPais.has(c.pais)) porPais.set(c.pais, new Map());
+    const porLiga = porPais.get(c.pais);
+    const liga = c.liga || 'Otros clubes';
+    if(!porLiga.has(liga)) porLiga.set(liga, []);
+    porLiga.get(liga).push(c.nombre);
+  });
+  [...porPais.keys()].sort((a,b)=> a.localeCompare(b,'es')).forEach(pais=>{
+    const porLiga = porPais.get(pais);
+    [...porLiga.keys()].sort((a,b)=> a.localeCompare(b,'es')).forEach(liga=>{
+      grupos.push({ pais, division:liga, clubes: porLiga.get(liga).sort((a,b)=> a.localeCompare(b,'es')) });
+    });
+  });
+  return grupos;
+}
 function todosLosPaisesDelJuego(){
   return Object.keys(BANDERAS_SVG).sort((a,b)=> a.localeCompare(b,'es'));
 }
@@ -11293,78 +11321,132 @@ SCREENS.escudosPersonalizados = function(){
   function resizeDelTipo(tipo, file){ return tipo === 'ligas' ? redimensionarImagenLiga(file) : redimensionarImagenEscudo(file); }
   function procesarUrlDelTipo(tipo, url){ return tipo === 'ligas' ? procesarUrlParaLiga(url) : procesarUrlParaEscudo(url); }
 
+  // Fila de un solo club/selección/liga (miniatura + nombre + Cambiar/URL/Quitar). Compartida
+  // entre la lista plana (selecciones/ligas) y la vista agrupada de clubes por país/división —
+  // `actualizar` es lo que repinta tras cada cambio, distinto según quién la use.
+  function crearFilaEscudo(tipo, nombre, actualizar){
+    const tieneCustom = !!escudoPersonalizado(tipo, nombre);
+    const fila = el('div','fila-escudo');
+    const miniatura = el('div','miniatura');
+    const html = miniaturaDelTipo(tipo, nombre);
+    if(html) miniatura.innerHTML = html; else miniatura.classList.add('vacia');
+    fila.appendChild(miniatura);
+    fila.appendChild(el('div','nombre', nombre));
+    const acciones = el('div','acciones');
+    const btnCambiar = document.createElement('button');
+    btnCambiar.className = 'cambiar';
+    btnCambiar.textContent = tieneCustom ? 'Cambiar' : 'Subir';
+    btnCambiar.onclick = ()=>{
+      inputArchivo.onchange = async ()=>{
+        const file = inputArchivo.files && inputArchivo.files[0];
+        inputArchivo.value = '';
+        if(!file) return;
+        try{
+          const dataUrl = await resizeDelTipo(tipo, file);
+          const ok = fijarEscudoPersonalizado(tipo, nombre, dataUrl);
+          if(!ok){ mostrarAvisoEscudos('No hay espacio para guardar más imágenes personalizadas. Quita alguna e inténtalo de nuevo.'); return; }
+          actualizar();
+        }catch(e){
+          mostrarAvisoEscudos('No se ha podido usar esa imagen.');
+        }
+      };
+      inputArchivo.click();
+    };
+    acciones.appendChild(btnCambiar);
+    const btnUrl = document.createElement('button');
+    btnUrl.className = 'url';
+    btnUrl.textContent = 'URL';
+    btnUrl.onclick = ()=>{
+      const actual = escudoPersonalizado(tipo, nombre);
+      const valor = prompt(`Pega la URL de la imagen para "${nombre}":`, actual && !actual.startsWith('data:') ? actual : '');
+      if(valor === null) return;
+      const url = valor.trim();
+      if(!url) return;
+      if(!/^https?:\/\//i.test(url)){ mostrarAvisoEscudos('Tiene que ser una URL que empiece por http:// o https://'); return; }
+      const guardarYActualizar = (valorFinal)=>{
+        const ok = fijarEscudoPersonalizado(tipo, nombre, valorFinal);
+        if(!ok){ mostrarAvisoEscudos('No se ha podido guardar.'); return; }
+        actualizar();
+      };
+      // Se intenta recortar (o ajustar, si es una liga) y quitar el fondo blanco, igual que al
+      // subir un archivo; si el servidor de esa URL no permite leer la imagen (CORS), se
+      // guarda tal cual, sin procesar.
+      procesarUrlDelTipo(tipo, url).then(guardarYActualizar).catch(()=> guardarYActualizar(url));
+    };
+    acciones.appendChild(btnUrl);
+    if(tieneCustom){
+      const btnQuitar = document.createElement('button');
+      btnQuitar.className = 'quitar';
+      btnQuitar.textContent = 'Quitar';
+      btnQuitar.onclick = ()=>{ quitarEscudoPersonalizado(tipo, nombre); actualizar(); };
+      acciones.appendChild(btnQuitar);
+    }
+    fila.appendChild(acciones);
+    return fila;
+  }
+
+  // Los clubes se ven categorizados por país y división (acordeón, un grupo abierto a la vez,
+  // como en Servicios profesionales/Ruleta) para no enfrentar de golpe una lista plana de más de
+  // 500 clubes; cada grupo muestra cuántos de sus escudos ya están personalizados. Selecciones y
+  // ligas siguen en lista plana: una selección ya ES un país, y una liga no tiene subdivisión.
+  function pintarClubesAgrupados(){
+    const tipo = 'clubes';
+    const grupos = clubesAgrupadosDelJuego();
+    const q = (S.escudosBusqueda||'').trim().toLowerCase();
+    const buscando = !!q;
+    const gruposFiltrados = (buscando
+      ? grupos.map(g=> ({ pais:g.pais, division:g.division, clubes: g.clubes.filter(n=> n.toLowerCase().includes(q)) }))
+      : grupos
+    ).filter(g=> g.clubes.length);
+    // Algunos clubes (p. ej. los que suben/bajan entre Primera y Segunda RFEF) aparecen a
+    // propósito en más de un grupo — el total y los personalizados de la cabecera cuentan
+    // nombres únicos (mismo criterio que todosLosClubesDelJuego(), que ya usa el resto del
+    // juego), aunque ese club se vea repetido, una vez por división, dentro del acordeón.
+    const unicos = todosDelTipo(tipo);
+    const totalClubes = unicos.length;
+    const totalPersonalizados = unicos.filter(n=> !!escudoPersonalizado(tipo,n)).length;
+    const visiblesUnicos = new Set(gruposFiltrados.flatMap(g=> g.clubes));
+    const totalVisibles = visiblesUnicos.size;
+    contador.textContent = `${totalVisibles} de ${totalClubes} ${ETIQUETAS_TIPO_ESCUDO.clubes.plural} · ${totalPersonalizados} ${totalPersonalizados===1?'personalizado':'personalizados'}`;
+    lista.innerHTML = '';
+    if(!gruposFiltrados.length){
+      lista.appendChild(el('div','escudos-vacio', 'Nada con ese nombre.'));
+      return;
+    }
+    if(S.escudosGrupoAbierto === undefined){
+      const conCustom = grupos.find(g=> g.clubes.some(n=> !!escudoPersonalizado(tipo,n)));
+      const porDefecto = conCustom || grupos[0];
+      S.escudosGrupoAbierto = `${porDefecto.pais}|${porDefecto.division}`;
+    }
+    gruposFiltrados.forEach(g=>{
+      const clave = `${g.pais}|${g.division}`;
+      const personalizadosGrupo = g.clubes.filter(n=> !!escudoPersonalizado(tipo,n)).length;
+      const abierto = buscando || S.escudosGrupoAbierto === clave;
+      const titulo = document.createElement(buscando ? 'div' : 'button');
+      titulo.style.cssText = `display:flex;justify-content:space-between;align-items:center;width:100%;padding:9px 12px;margin:12px 0 ${abierto?'6px':'0'};border-radius:9px;border:1px solid ${personalizadosGrupo?'var(--gold-dim)':'var(--line)'};background:${personalizadosGrupo?'rgba(212,175,55,0.08)':'transparent'};color:var(--ink);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:left;${buscando?'':'cursor:pointer;'}`;
+      titulo.innerHTML = `<span>${g.pais} · ${g.division} <span style="color:${personalizadosGrupo?'var(--gold)':'var(--ink-soft)'};font-weight:${personalizadosGrupo?700:400};text-transform:none;">· ${personalizadosGrupo}/${g.clubes.length}</span></span>${buscando?'':`<span style="color:var(--ink-soft);font-size:12px;text-transform:none;">${abierto?'▾':'▸'}</span>`}`;
+      if(!buscando) titulo.onclick = ()=>{ S.escudosGrupoAbierto = (S.escudosGrupoAbierto===clave) ? null : clave; pintarFilas(); };
+      lista.appendChild(titulo);
+      if(!abierto) return;
+      g.clubes.forEach(nombre=> lista.appendChild(crearFilaEscudo(tipo, nombre, pintarFilas)));
+    });
+  }
+
   function pintarFilas(){
     const tipo = S.escudosVista;
+    if(tipo === 'clubes'){ pintarClubesAgrupados(); return; }
     const etiquetas = ETIQUETAS_TIPO_ESCUDO[tipo];
     const todos = todosDelTipo(tipo);
     const q = (S.escudosBusqueda||'').trim().toLowerCase();
     const filtrados = q ? todos.filter(n=> n.toLowerCase().includes(q)) : todos;
-    contador.textContent = `${filtrados.length} de ${todos.length} ${filtrados.length===1 ? etiquetas.singular : etiquetas.plural}`;
+    const personalizados = todos.filter(n=> !!escudoPersonalizado(tipo, n)).length;
+    contador.textContent = `${filtrados.length} de ${todos.length} ${filtrados.length===1 ? etiquetas.singular : etiquetas.plural} · ${personalizados} ${personalizados===1?'personalizado':'personalizados'}`;
     lista.innerHTML = '';
     if(!filtrados.length){
       lista.appendChild(el('div','escudos-vacio', 'Nada con ese nombre.'));
       return;
     }
-    filtrados.forEach(nombre=>{
-      const tieneCustom = !!escudoPersonalizado(tipo, nombre);
-      const fila = el('div','fila-escudo');
-      const miniatura = el('div','miniatura');
-      const html = miniaturaDelTipo(tipo, nombre);
-      if(html) miniatura.innerHTML = html; else miniatura.classList.add('vacia');
-      fila.appendChild(miniatura);
-      fila.appendChild(el('div','nombre', nombre));
-      const acciones = el('div','acciones');
-      const btnCambiar = document.createElement('button');
-      btnCambiar.className = 'cambiar';
-      btnCambiar.textContent = tieneCustom ? 'Cambiar' : 'Subir';
-      btnCambiar.onclick = ()=>{
-        inputArchivo.onchange = async ()=>{
-          const file = inputArchivo.files && inputArchivo.files[0];
-          inputArchivo.value = '';
-          if(!file) return;
-          try{
-            const dataUrl = await resizeDelTipo(tipo, file);
-            const ok = fijarEscudoPersonalizado(tipo, nombre, dataUrl);
-            if(!ok){ mostrarAvisoEscudos('No hay espacio para guardar más imágenes personalizadas. Quita alguna e inténtalo de nuevo.'); return; }
-            pintarFilas();
-          }catch(e){
-            mostrarAvisoEscudos('No se ha podido usar esa imagen.');
-          }
-        };
-        inputArchivo.click();
-      };
-      acciones.appendChild(btnCambiar);
-      const btnUrl = document.createElement('button');
-      btnUrl.className = 'url';
-      btnUrl.textContent = 'URL';
-      btnUrl.onclick = ()=>{
-        const actual = escudoPersonalizado(tipo, nombre);
-        const valor = prompt(`Pega la URL de la imagen para "${nombre}":`, actual && !actual.startsWith('data:') ? actual : '');
-        if(valor === null) return;
-        const url = valor.trim();
-        if(!url) return;
-        if(!/^https?:\/\//i.test(url)){ mostrarAvisoEscudos('Tiene que ser una URL que empiece por http:// o https://'); return; }
-        const guardarYActualizar = (valorFinal)=>{
-          const ok = fijarEscudoPersonalizado(tipo, nombre, valorFinal);
-          if(!ok){ mostrarAvisoEscudos('No se ha podido guardar.'); return; }
-          pintarFilas();
-        };
-        // Se intenta recortar (o ajustar, si es una liga) y quitar el fondo blanco, igual que al
-        // subir un archivo; si el servidor de esa URL no permite leer la imagen (CORS), se
-        // guarda tal cual, sin procesar.
-        procesarUrlDelTipo(tipo, url).then(guardarYActualizar).catch(()=> guardarYActualizar(url));
-      };
-      acciones.appendChild(btnUrl);
-      if(tieneCustom){
-        const btnQuitar = document.createElement('button');
-        btnQuitar.className = 'quitar';
-        btnQuitar.textContent = 'Quitar';
-        btnQuitar.onclick = ()=>{ quitarEscudoPersonalizado(tipo, nombre); pintarFilas(); };
-        acciones.appendChild(btnQuitar);
-      }
-      fila.appendChild(acciones);
-      lista.appendChild(fila);
-    });
+    filtrados.forEach(nombre=> lista.appendChild(crearFilaEscudo(tipo, nombre, pintarFilas)));
   }
   pintarFilas();
 
