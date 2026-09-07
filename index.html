@@ -11278,6 +11278,37 @@ SCREENS.escudosPersonalizados = function(){
   filaIO.appendChild(inputImportar);
   c.appendChild(filaIO);
 
+  // Mod Escudos 2026/2027: lote ya preparado que viene con el propio juego (mod-escudos-2026-2027.json,
+  // fuera de index.html porque son ~2,8 MB de imágenes — no tiene sentido cargarlo con cada visita,
+  // solo cuando alguien pulsa el botón). Mismo importarEscudosPersonalizados() que "Importar desde
+  // archivo": fusiona con lo que ya hubiera, no borra nada.
+  const filaMod = el('div','escudos-io');
+  filaMod.style.marginTop = '-6px';
+  const btnMod = document.createElement('button');
+  btnMod.textContent = 'Cargar Mod Escudos 2026/2027';
+  btnMod.onclick = async ()=>{
+    if(!confirm('Se van a aplicar los escudos del "Mod Escudos 2026/2027" (clubes, selecciones y ligas ya preparados). Se fusiona con lo que ya tengas personalizado, sin borrar nada. ¿Continuar?')) return;
+    btnMod.disabled = true;
+    const textoOriginal = btnMod.textContent;
+    btnMod.textContent = 'Cargando…';
+    try{
+      const resp = await fetch('mod-escudos-2026-2027.json');
+      if(!resp.ok) throw new Error('http');
+      const datos = await resp.json();
+      const resultado = importarEscudosPersonalizados(datos);
+      if(!resultado.ok){ mostrarAvisoEscudos(resultado.error); return; }
+      mostrarAvisoEscudos(`Mod cargado: ${resultado.clubes} clubes, ${resultado.selecciones} selecciones y ${resultado.ligas} ligas.`, true);
+      pintarFilas();
+    }catch(e){
+      mostrarAvisoEscudos('No se ha podido cargar el mod. Comprueba tu conexión e inténtalo de nuevo.');
+    }finally{
+      btnMod.disabled = false;
+      btnMod.textContent = textoOriginal;
+    }
+  };
+  filaMod.appendChild(btnMod);
+  c.appendChild(filaMod);
+
   if(S.escudosVista === undefined) S.escudosVista = 'clubes';
   const ETIQUETAS_TIPO_ESCUDO = { clubes:{ tab:'Clubes', singular:'club', plural:'clubes' }, selecciones:{ tab:'Selecciones', singular:'selección', plural:'selecciones' }, ligas:{ tab:'Ligas', singular:'liga', plural:'ligas' } };
   const tabs = el('div','coleccion-tabs');
