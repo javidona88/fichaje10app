@@ -5227,13 +5227,22 @@ const BANDERAS_SVG = {
   "Australia": '<rect width="40" height="40" fill="#00008B"/><circle cx="28" cy="10" r="1.8" fill="#FFFFFF"/><circle cx="34" cy="17" r="1.8" fill="#FFFFFF"/><circle cx="31" cy="26" r="1.8" fill="#FFFFFF"/><circle cx="23" cy="21" r="1.8" fill="#FFFFFF"/><circle cx="27" cy="30" r="1.3" fill="#FFFFFF"/>',
   "Costa de Marfil": '<rect width="14" height="40" x="0" fill="#F77F00"/><rect width="12" height="40" x="14" fill="#FFFFFF"/><rect width="14" height="40" x="26" fill="#009E60"/>',
   "Bolivia": '<rect width="40" height="13.3" y="0" fill="#D52B1E"/><rect width="40" height="13.3" y="13.3" fill="#F9E300"/><rect width="40" height="13.4" y="26.6" fill="#007934"/>',
-  "Noruega": '<rect width="40" height="40" fill="#EF2B2D"/><rect x="0" y="16" width="40" height="8" fill="#FFFFFF"/><rect x="12" y="0" width="8" height="40" fill="#FFFFFF"/><rect x="0" y="18" width="40" height="4" fill="#002868"/><rect x="14" y="0" width="4" height="40" fill="#002868"/>'
+  "Noruega": '<rect width="40" height="40" fill="#EF2B2D"/><rect x="0" y="16" width="40" height="8" fill="#FFFFFF"/><rect x="12" y="0" width="8" height="40" fill="#FFFFFF"/><rect x="0" y="18" width="40" height="4" fill="#002868"/><rect x="14" y="0" width="4" height="40" fill="#002868"/>',
+  "Costa Rica": '<rect width="40" height="40" fill="#FFFFFF"/><rect width="40" height="8" y="0" fill="#002B7F"/><rect width="40" height="8" y="8" fill="#FFFFFF"/><rect width="40" height="8" y="16" fill="#CE1126"/><rect width="40" height="8" y="24" fill="#FFFFFF"/><rect width="40" height="8" y="32" fill="#002B7F"/>',
+  "Ecuador": '<rect width="40" height="20" y="0" fill="#FFD100"/><rect width="40" height="10" y="20" fill="#034EA2"/><rect width="40" height="10" y="30" fill="#ED1C24"/><circle cx="20" cy="20" r="4" fill="#FFFFFF" stroke="#034EA2" stroke-width="0.6"/>',
+  "Egipto": '<rect width="40" height="13.3" y="0" fill="#CE1126"/><rect width="40" height="13.3" y="13.3" fill="#FFFFFF"/><rect width="40" height="13.4" y="26.6" fill="#000000"/><circle cx="20" cy="20" r="4" fill="#C09300"/>',
+  "Ghana": '<rect width="40" height="13.3" y="0" fill="#CE1126"/><rect width="40" height="13.3" y="13.3" fill="#FCD116"/><rect width="40" height="13.4" y="26.6" fill="#006B3F"/><polygon points="20,16 21.2,19.5 25,19.7 22,21.8 23,25.5 20,23.3 17,25.5 18,21.8 15,19.7 18.8,19.5" fill="#000000"/>',
+  "Irán": '<rect width="40" height="13.3" y="0" fill="#239F40"/><rect width="40" height="13.3" y="13.3" fill="#FFFFFF"/><rect width="40" height="13.4" y="26.6" fill="#DA0000"/>',
+  "Jamaica": '<rect width="40" height="40" fill="#FED100"/><polygon points="0,0 20,20 0,40" fill="#000000"/><polygon points="40,0 20,20 40,40" fill="#000000"/><polygon points="0,0 40,0 20,20" fill="#009B3A"/><polygon points="0,40 40,40 20,20" fill="#009B3A"/>',
+  "Qatar": '<rect width="40" height="40" fill="#8A1538"/><rect width="10" height="40" x="0" fill="#FFFFFF"/><polygon points="10,0 14,2 10,4 14,6 10,8 14,10 10,12 14,14 10,16 14,18 10,20 14,22 10,24 14,26 10,28 14,30 10,32 14,34 10,36 14,38 10,40" fill="#8A1538"/>',
+  "Rumanía": '<rect width="13.3" height="40" x="0" fill="#002B7F"/><rect width="13.4" height="40" x="13.3" fill="#FCD116"/><rect width="13.3" height="40" x="26.6" fill="#CE1126"/>',
+  "Túnez": '<rect width="40" height="40" fill="#E70013"/><circle cx="20" cy="20" r="9" fill="#FFFFFF"/><polygon points="20,14 21.8,18.5 26.5,18.8 22.8,21.8 24,26.3 20,23.6 16,26.3 17.2,21.8 13.5,18.8 18.2,18.5" fill="#E70013"/>'
 };
 /* ============ Cromos del mundo: ficha de cada país con curiosidades de fútbol reales ============
    Colección de por vida (localStorage, no de la partida) — se desbloquea un país la primera vez
    que fichas por un club de allí; España viene desbloqueada desde el principio, por ser siempre
    el país de origen del jugador. Orden alfabético fijo, mezclando conseguidos y por conseguir,
-   igual que en la pantalla de logros. Los 39 países son exactamente los mismos que tienen bandera
+   igual que en la pantalla de logros. Los 48 países son exactamente los mismos que tienen bandera
    en BANDERAS_SVG — al añadir un país nuevo allí, añadir también su ficha aquí. */
 const PAISES_CROMO = [
   { pais:'Alemania', sel:'Die Mannschaft', s1:['4','Mundiales'], s2:['1954','Milagro de Berna'],
@@ -5262,10 +5271,16 @@ const PAISES_CROMO = [
     curiosidades:['Fue semifinalista del Mundial <b>2002</b>, que coorganizó con Japón — su mejor resultado histórico.','Fue la primera selección asiática en llegar tan lejos en un Mundial.','Son Heung-min, su gran estrella actual, ha brillado durante años en la Premier League.','La K League es la liga profesional más antigua de Asia, fundada en 1983.','Park Ji-sung fue el primer surcoreano en ganar la Champions League, con el Manchester United en 2008.'] },
   { pais:'Costa de Marfil', sel:'Los Elefantes', s1:['2024','Campeón de África'], s2:['Didier Drogba','Estrella histórica'],
     curiosidades:['Ganó la Copa Africana de Naciones como anfitriona en <b>2024</b>, tras remontar una eliminación que parecía sentenciada en la fase de grupos.','Didier Drogba, su gran estrella histórica, fue clave en la generación que llevó al país a tres Mundiales seguidos (2006, 2010 y 2014).'] },
+  { pais:'Costa Rica', sel:'La Sele', s1:['2014','Cuartos de final'], s2:['Keylor Navas','Estrella histórica'],
+    curiosidades:['Fue una de las grandes sorpresas del Mundial de <b>Brasil 2014</b>, llegando a cuartos de final tras eliminar a Uruguay e Italia en un grupo durísimo.','Keylor Navas, su portero histórico, ha ganado varias Champions League con el Real Madrid.'] },
   { pais:'Croacia', sel:'Vatreni', s1:['2018','Subcampeona Mundial'], s2:['Modrić','Balón de Oro 2018'],
     curiosidades:['Fue <b>subcampeona</b> del Mundial 2018 siendo un país de apenas 4 millones de habitantes.','Luka Modrić ganó el Balón de Oro ese mismo año, rompiendo la racha de Messi y Ronaldo.','También acabó <b>tercera</b> en el Mundial de 2022.','Davor Šuker fue el máximo goleador del Mundial de 1998, el mismo torneo en que Croacia acabó tercera en su debut mundialista.','Es una de las selecciones con más densidad de futbolistas de élite por habitante del mundo.'] },
   { pais:'Dinamarca', sel:'Los Dinamitas', s1:['1992','Campeona de Europa'], s2:['Sorpresa','Ni clasificada estaba'],
     curiosidades:['Ganó la Eurocopa <b>1992</b> sin ni siquiera haberse clasificado originalmente: entró por la exclusión de Yugoslavia.','El "cuento de hadas danés" está considerado una de las mayores sorpresas de la historia del fútbol europeo.','El FC Copenhague y el Brøndby protagonizan el derbi más importante del fútbol danés.','Christian Eriksen se recuperó de un paro cardíaco sufrido en pleno partido de la Eurocopa 2020 para volver a jugar al máximo nivel poco después.'] },
+  { pais:'Ecuador', sel:'La Tri', s1:['2006','Octavos de final'], s2:['Enner Valencia','Estrella actual'],
+    curiosidades:['Llegó a octavos de final en el Mundial de <b>2006</b>, su mejor resultado histórico.','Enner Valencia es su máximo goleador en fases finales de Mundiales recientes.'] },
+  { pais:'Egipto', sel:'Los Faraones', s1:['7','Copas de África'], s2:['Mohamed Salah','Estrella actual'],
+    curiosidades:['Es la selección con más Copas Africanas de Naciones de la historia, con <b>7 títulos</b>.','Mohamed Salah, su gran estrella actual, es uno de los mejores extremos del mundo en el Liverpool.'] },
   { pais:'Escocia', sel:'La Tartan Army', s1:['1872','Primer internacional'], s2:['0','Pasar de grupos en un Mundial'],
     curiosidades:['Disputó junto a Inglaterra el <b>primer partido internacional</b> de la historia, en 1872.','Pese a esa tradición, nunca ha superado la fase de grupos en un Mundial.','El derbi de Glasgow entre el Celtic y el Rangers es uno de los más intensos y históricos del mundo.','Hampden Park, en Glasgow, es el estadio de la selección escocesa y uno de los recintos futbolísticos más antiguos aún en uso.'] },
   { pais:'España', sel:'La Roja', s1:['2010','Mundial'], s2:['3','Eurocopas'],
@@ -5276,12 +5291,18 @@ const PAISES_CROMO = [
     curiosidades:['Ha ganado <b>2 Mundiales</b>: 1998 como anfitriona y 2018 en Rusia.','Kylian Mbappé se convirtió en estrella mundial en el Mundial de 2018 con solo <b>19 años</b>.','Zinedine Zidane es una de sus grandes leyendas históricas.','El PSG, gracias a las grandes inversiones recibidas, se ha convertido en una superpotencia del fútbol europeo en las últimas dos décadas.','Just Fontaine sigue siendo el máximo goleador en una sola edición de un Mundial: 13 goles en 1958.'] },
   { pais:'Gales', sel:'El Dragón Rojo', s1:['2016','Semifinal Eurocopa'], s2:['Gareth Bale','Estrella histórica'],
     curiosidades:['Llegó a semifinales de la Eurocopa <b>2016</b>, su mejor resultado en un gran torneo.','Gareth Bale es, con diferencia, su futbolista más laureado, con varias Champions League en el Real Madrid.','Volvió a jugar un Mundial en 2022 tras 64 años de ausencia.'] },
+  { pais:'Ghana', sel:'Las Estrellas Negras', s1:['2010','Cuartos de final'], s2:['4','Copas de África'],
+    curiosidades:['Llegó a cuartos de final en el Mundial de <b>2010</b>, cayendo en una tanda de penaltis ante Uruguay tras la polémica mano de Luis Suárez en la última jugada.','Ha ganado 4 Copas Africanas de Naciones.'] },
   { pais:'Grecia', sel:'Το Πειρατικό', s1:['2004','Campeona de Europa'], s2:['Sorpresa','Ganó de local a Portugal'],
     curiosidades:['Ganó la Eurocopa <b>2004</b>, una de las mayores sorpresas de la historia del fútbol.','En la final venció a Portugal, la selección anfitriona del torneo.','El Olympiacos, el Panathinaikos y el AEK protagonizan una de las rivalidades más intensas del fútbol europeo.','Otto Rehhagel, el técnico alemán que llevó a Grecia a ganar la Eurocopa 2004, se convirtió en un héroe nacional.'] },
   { pais:'Inglaterra', sel:'Cuna del fútbol', s1:['1863','Fundación'], s2:['1966','Mundial'],
     curiosidades:['La Football Association, la primera del mundo, se fundó en <b>1863</b>.','En 1888 nació la Football League, la primera liga profesional de la historia.','Ganó su único Mundial en <b>1966</b>, como anfitriona, en Wembley.','La Premier League es la liga más seguida y con más ingresos por televisión del mundo.','Wembley, su estadio nacional, ha acogido finales de Champions League y de la Eurocopa femenina.'] },
+  { pais:'Irán', sel:'Team Melli', s1:['109','Goles de Ali Daei'], s2:['4','Mundiales seguidos'],
+    curiosidades:['Ali Daei fue durante años el máximo goleador histórico del fútbol de selecciones, con 109 goles.','Se ha clasificado para varios Mundiales seguidos representando a la confederación asiática.'] },
   { pais:'Italia', sel:'Gli Azzurri', s1:['4','Mundiales'], s2:['2021','Eurocopa'],
     curiosidades:['Ha ganado <b>4 Mundiales</b> (1934, 1938, 1982 y 2006).','Ganó la Eurocopa 2020 (disputada en 2021) tras años sin grandes títulos.','Su fútbol está históricamente asociado al "catenaccio", un sistema defensivo muy sólido.','La Juventus es el club con más ligas (Scudetti) ganadas en la historia del fútbol italiano.','Ganó el Mundial de 2006 tras superar a Francia en la tanda de penaltis de la final, en la que Zidane fue expulsado por su famoso cabezazo a Materazzi.'] },
+  { pais:'Jamaica', sel:'Los Reggae Boyz', s1:['1998','1er Mundial'], s2:['Concacaf','Confederación'],
+    curiosidades:['Fue el primer país caribeño de habla inglesa en clasificarse para un Mundial, en <b>Francia 1998</b>.','Su selección femenina también se ha clasificado para un Mundial, un hito histórico para el Caribe.'] },
   { pais:'Japón', sel:'Samurai Blue', s1:['1993','J-League'], s2:['7','Mundiales seguidos'],
     curiosidades:['La J-League, su liga profesional, se fundó en <b>1993</b>.','El manga "Oliver y Benji" inspiró a toda una generación de futbolistas japoneses reales.','Ha eliminado a varias potencias europeas en fases de grupos de Mundiales recientes.','Hidetoshi Nakata fue uno de los primeros futbolistas japoneses en triunfar en Europa, jugando en la Serie A italiana.','La selección femenina japonesa ganó el Mundial de 2011, la primera asiática en lograrlo.'] },
   { pais:'Marruecos', sel:'Los Leones del Atlas', s1:['2022','Semifinal Mundial'], s2:['Histórico','1ª africana en semis'],
@@ -5300,14 +5321,20 @@ const PAISES_CROMO = [
     curiosidades:['Robert Lewandowski es uno de los máximos goleadores de la historia del fútbol europeo.','La selección polaca quedó <b>tercera</b> en los Mundiales de 1974 y 1982, sus mejores resultados históricos.','Zbigniew Boniek fue una de las grandes estrellas europeas de los años 80, brillando en la Juventus.','El fútbol polaco vive con pasión el derbi entre el Legia de Varsovia y el Wisła de Cracovia.'] },
   { pais:'Portugal', sel:'A Seleção', s1:['2016','Eurocopa'], s2:['Ronaldo','Máx. goleador histórico'],
     curiosidades:['Ganó su primera gran competición internacional en la Eurocopa <b>2016</b>.','Cristiano Ronaldo, su gran estrella histórica, es el máximo goleador histórico del fútbol de selecciones.','Benfica, Porto y Sporting dominan históricamente su liga.','Eusébio fue el máximo goleador del Mundial de 1966, donde Portugal acabó tercera en su primera participación.','El Oporto, dirigido por un jovencísimo José Mourinho, ganó la Champions League en 2004 de forma sorprendente.'] },
+  { pais:'Qatar', sel:'Los Annabi', s1:['2022','Sede Mundial'], s2:['2019','Campeón de Asia'],
+    curiosidades:['Fue la sede del Mundial de <b>Qatar 2022</b>, el primero disputado en Oriente Medio.','Ganó la Copa de Asia en 2019 sin encajar un solo gol en toda la fase final.'] },
   { pais:'República Checa', sel:'Národní tým', s1:['1996','Subcampeona de Europa'], s2:['1934 y 1962','Finales con Checoslovaquia'],
     curiosidades:['Fue subcampeona de la Eurocopa <b>1996</b> como selección checa, tras la disolución de Checoslovaquia.','Como Checoslovaquia, fue subcampeona del Mundial en 1934 y 1962.','Antonín Panenka dio nombre al famoso penalti "a lo Panenka" tras marcarlo en la final de la Eurocopa de 1976 con Checoslovaquia.','Petr Čech, con su característico casco protector, fue durante años uno de los mejores porteros del mundo.'] },
+  { pais:'Rumanía', sel:'Tricolorii', s1:['1994','Cuartos de final'], s2:['Gheorghe Hagi','Estrella histórica'],
+    curiosidades:['Llegó a cuartos de final en el Mundial de <b>1994</b>, su mejor resultado histórico.','Gheorghe Hagi, apodado "el Maradona de los Cárpatos", es su gran leyenda futbolística.'] },
   { pais:'Senegal', sel:'Los Leones de la Teranga', s1:['2021','Campeón de África'], s2:['Sadio Mané','Estrella histórica'],
     curiosidades:['Ganó su primera Copa Africana de Naciones en <b>2021</b>, con Sadio Mané anotando el penalti decisivo en la final.','Fue el primer equipo africano en ganar a la vigente campeona del mundo, Francia, en un Mundial (2002).'] },
   { pais:'Serbia', sel:'Las Águilas Blancas', s1:['2013 y 2015','Mundial Sub-20'], s2:['Vlahović','Estrella actual'],
     curiosidades:['Su selección sub-20 ha ganado el Mundial de esa categoría dos veces (2013 y 2015).','Dušan Vlahović, su gran referencia actual, se formó como uno de los delanteros más prometedores de Europa.'] },
   { pais:'Suiza', sel:'La Nati', s1:['Zúrich','Sede FIFA'], s2:['Nyon','Sede UEFA'],
     curiosidades:['Acoge las sedes de la <b>FIFA</b> (Zúrich) y la <b>UEFA</b> (Nyon), aunque nunca ha ganado un gran título.','Suele destacar por su disciplina táctica, y ha eliminado a potencias como Francia en fases finales de Eurocopas.','El Basilea y el Young Boys son los clubes que más han dominado la liga suiza en los últimos años.','Xherdan Shaqiri y Granit Xhaka encabezaron una generación que llevó a Suiza a octavos de varios grandes torneos.'] },
+  { pais:'Túnez', sel:'Las Águilas de Cartago', s1:['1978','1ª victoria africana'], s2:['5','Mundiales disputados'],
+    curiosidades:['En <b>1978</b> se convirtió en la primera selección africana en ganar un partido de un Mundial, venciendo a México.','Ha disputado varios Mundiales representando al norte de África.'] },
   { pais:'Turquía', sel:'Ay-Yıldızlılar', s1:['2002','3º en el Mundial'], s2:['Estambul','Derbis pasionales'],
     curiosidades:['Sorprendió al quedar <b>tercera</b> en el Mundial 2002, su mejor resultado histórico.','El fútbol turco tiene una de las aficiones más pasionales de Europa, especialmente en los derbis de Estambul.','El Galatasaray fue el primer equipo turco en ganar un título europeo, la Copa de la UEFA del año 2000.','El ambiente de los estadios turcos, sobre todo en Estambul, está considerado de los más intensos del mundo.'] },
   { pais:'Ucrania', sel:'Збірна України', s1:['2006','Semifinal Mundial'], s2:['Shevchenko','Balón de Oro 2004'],
@@ -5495,11 +5522,14 @@ function elegirRivalesSeleccion(pool){
    específico del Mundial real, no tiene sentido replicarlo para un torneo ficticio.
    Estado completo en S.mundial — todo dato plano (nunca funciones), porque guardarPartida()
    serializa TODO S con JSON.stringify y una función ahí se perdería en silencio al recargar. */
+// 12 selecciones por bombo (más España, siempre fija en el Bombo 1) = 48 en total, como en el
+// Mundial real de 2026. El bombo 1 son las 11 más fuertes (junto a España); el resto reparte el
+// resto de confederaciones sin buscar exactitud oficial de ranking, solo variedad real por edición.
 const PAISES_MUNDIAL_POR_POTE = {
-  1: ["Francia","Alemania","Inglaterra","Brasil","Argentina"],
-  2: ["Italia","Portugal","Países Bajos","Bélgica","Uruguay","Croacia","Marruecos","Colombia"],
-  3: ["México","Turquía","Escocia","Suiza","Grecia","Estados Unidos","Japón","Corea del Sur","Polonia","Austria","Senegal","Serbia","Nigeria","Noruega","Costa de Marfil"],
-  4: ["Dinamarca","Ucrania","Chile","República Checa","Arabia Saudí","Gales","Canadá","Perú","Australia","Bolivia"]
+  1: ["Francia","Alemania","Inglaterra","Brasil","Argentina","Portugal","Países Bajos","Bélgica","Italia","Uruguay","Croacia"],
+  2: ["Marruecos","Colombia","México","Estados Unidos","Japón","Corea del Sur","Suiza","Austria","Senegal","Serbia","Nigeria","Noruega"],
+  3: ["Turquía","Escocia","Grecia","Polonia","Costa de Marfil","Dinamarca","Ucrania","Chile","República Checa","Gales","Canadá","Perú"],
+  4: ["Arabia Saudí","Australia","Bolivia","Costa Rica","Ecuador","Egipto","Ghana","Irán","Jamaica","Qatar","Rumanía","Túnez"]
 };
 // Dificultad directa por pote del rival y fase del torneo — sin sumar un bono aparte al dado.
 // Cada partido es "1d20 + bono de atributo contra Dificultad X", con X ya fijado a mano según lo
