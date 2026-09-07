@@ -4076,11 +4076,15 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.4.9';
+const VERSION_JUEGO = 'v1.5';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.5', titulo:'Escudos organizados por país y división', cambios:[
+    'La pantalla "Personalizar escudos" organiza ahora los clubes en un desplegable por país y, en España, por división, en vez de una lista plana de más de 500 nombres — cada grupo dice cuántos escudos tienes ya personalizados, y el contador general lo muestra también en selecciones y ligas.',
+    'Nuevo botón "Cargar Mod Escudos 2026/2027": aplica de golpe un lote de escudos ya preparado (137 clubes, 27 selecciones y 23 ligas) sin subirlos uno a uno.'
+  ]},
   { version:'v1.4.9', titulo:'Rival correcto en la Supercopa de España', cambios:[
     'Corregido: la Supercopa de España podía tocarte un rival extranjero; ahora siempre es un club de LaLiga. Además, ahora también juegas la Supercopa si acabaste subcampeón de LaLiga o perdiste la final de la Copa del Rey (antes solo contaba si habías ganado un título).'
   ]},
