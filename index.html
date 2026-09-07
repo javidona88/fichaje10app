@@ -375,14 +375,16 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 }
 .opt:hover{ border-color:var(--gold); background:#20242F; }
 .opt .tag{ display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+/* Ocupa todo el alto de la opción (no un círculo pequeño centrado) para que sea fácil de acertar
+   al tocar en pantallas táctiles — el padding-right de 40px de .opt ya le reserva justo su hueco. */
 .opt-token-icono{
-  position:absolute; top:50%; right:10px; width:26px; height:26px; border-radius:50%;
+  position:absolute; top:1px; right:1px; bottom:1px; width:38px; border-radius:0 9px 9px 0;
   display:flex; align-items:center; justify-content:center; background:rgba(212,175,55,0.16);
-  border:1px solid var(--gold-dim); color:var(--gold); cursor:pointer; transform:translateY(-50%);
+  border-left:1px solid var(--gold-dim); color:var(--gold); cursor:pointer;
 }
 .opt-token-icono:hover{ background:rgba(212,175,55,0.3); }
-.opt-token-icono svg{ width:14px; height:14px; }
-.opt-token-icono.vestuario{ background:rgba(110,136,168,0.16); border-color:var(--steel); color:var(--steel); }
+.opt-token-icono svg{ width:17px; height:17px; }
+.opt-token-icono.vestuario{ background:rgba(110,136,168,0.16); border-left-color:var(--steel); color:var(--steel); }
 .opt-token-icono.vestuario:hover{ background:rgba(110,136,168,0.3); }
 .club-eleccion{ display:flex; align-items:center; gap:12px; }
 .estilo-card.sel{ border-color:var(--gold); background:#20242F; }
@@ -1570,6 +1572,17 @@ function titulosPorTemporada(j){
     mapa[t.temporada] = mapa[t.temporada] || new Set();
     mapa[t.temporada].add(t.nombre);
   }));
+  // Títulos de esta temporada ya levantados (el reveal de campeón ya se vio en pantalla) pero
+  // aún sin "banco" en la trayectoria — eso solo pasa al final de temporada, en
+  // procesarFinTemporada. Sin esto, comprobarLogros (que corre en cada pintar(), incluido el de
+  // la propia pantalla de campeones) no veía el título hasta bastantes pantallas después del
+  // momento real en que se gana, y logros como "doblete"/"triplete" o "primer título" tardaban
+  // de más en saltar.
+  (S.titulosTemporadaActual||[]).forEach(nombre=>{
+    if(TITULOS_SELECCION_NOMBRES.includes(nombre)) return; // esos van a titulosSeleccion, no a trayectoria
+    mapa[S.temporada] = mapa[S.temporada] || new Set();
+    mapa[S.temporada].add(nombre);
+  });
   return mapa;
 }
 const LOGROS = [
@@ -1582,7 +1595,7 @@ const LOGROS = [
     cond:j=> j.carrera.partidos >= 300 },
   { id:'toda_vida', cat:'carrera', nombre:'Toda una vida', desc:'Alcanza los 500 partidos jugados.', icono:'👑', pesoRareza:6,
     cond:j=> j.carrera.partidos >= 500 },
-  { id:'pichichi', cat:'carrera', nombre:'Pichichi', desc:'Gana el trofeo Pichichi.', icono:'🥅', pesoRareza:12,
+  { id:'pichichi', cat:'carrera', nombre:'Máximo goleador', desc:'Gana el trofeo de máximo goleador de tu liga (el Pichichi, en España).', icono:'🥅', pesoRareza:12,
     cond:j=> (j.carrera.pichichis||0) > 0 },
   { id:'bota_oro', cat:'carrera', nombre:'Bota de Oro', desc:'Gana la Bota de Oro europea.', icono:'👢', pesoRareza:5,
     cond:j=> (j.carrera.botasOro||0) > 0 },
@@ -1599,15 +1612,15 @@ const LOGROS = [
 
   // ---- Títulos ----
   { id:'primer_titulo', cat:'titulos', nombre:'Primer título', desc:'Levanta tu primer trofeo, del nivel que sea.', icono:'🏆', pesoRareza:55,
-    cond:j=> (j.carrera.titulos||0) > 0 },
+    cond:j=> (j.carrera.titulos||0) > 0 || Object.values(titulosPorTemporada(j)).some(s=>s.size>0) },
   { id:'campeon_europa', cat:'titulos', nombre:'Campeón de Europa', desc:'Gana la Champions League.', icono:'🏆', pesoRareza:8,
-    cond:j=> (j.trayectoria||[]).some(e=>(e.titulos||[]).some(t=>t.nombre==='Champions League')) },
+    cond:j=> (j.trayectoria||[]).some(e=>(e.titulos||[]).some(t=>t.nombre==='Champions League')) || (S.titulosTemporadaActual||[]).includes('Champions League') },
   { id:'doblete', cat:'titulos', nombre:'Doblete', desc:'Gana dos títulos distintos la misma temporada.', icono:'🏆', pesoRareza:20,
     cond:j=> Object.values(titulosPorTemporada(j)).some(s=>s.size>=2) },
   { id:'triplete', cat:'titulos', nombre:'Triplete', desc:'Gana tres títulos distintos la misma temporada.', icono:'🏆', pesoRareza:6,
     cond:j=> Object.values(titulosPorTemporada(j)).some(s=>s.size>=3) },
   { id:'supercampeon', cat:'titulos', nombre:'Supercampeón', desc:'Gana una Supercopa, de España o de Europa.', icono:'🏆', pesoRareza:12,
-    cond:j=> (j.trayectoria||[]).some(e=>(e.titulos||[]).some(t=>t.nombre.includes('Supercopa'))) },
+    cond:j=> (j.trayectoria||[]).some(e=>(e.titulos||[]).some(t=>t.nombre.includes('Supercopa'))) || (S.titulosTemporadaActual||[]).some(n=>n.includes('Supercopa')) },
   { id:'balon_oro', cat:'titulos', nombre:'Balón de Oro', desc:'Gana el Balón de Oro al mejor jugador del mundo.', icono:'🥇', pesoRareza:5,
     cond:j=> (j.carrera.balonesDeOro||0) > 0 },
   { id:'leyenda_balon', cat:'titulos', nombre:'Leyenda del balón', desc:'Gana 2 o más Balones de Oro.', icono:'🥇', pesoRareza:1,
@@ -1617,9 +1630,9 @@ const LOGROS = [
   { id:'primera_convocatoria', cat:'seleccion', nombre:'La llamada', desc:'Tu primera convocatoria con la selección.', icono:'🎽', pesoRareza:25,
     cond:j=> !!(j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21) },
   { id:'euro_seleccion', cat:'seleccion', nombre:'Campeón de Europa con la Roja', desc:'Gana la Eurocopa con la selección.', icono:'🌍', pesoRareza:6,
-    cond:j=> (j.titulosSeleccion||[]).some(t=>t.nombre==='Eurocopa') },
+    cond:j=> (j.titulosSeleccion||[]).some(t=>t.nombre==='Eurocopa') || (S.titulosTemporadaActual||[]).includes('Eurocopa') },
   { id:'mundial', cat:'seleccion', nombre:'Campeón del Mundo', desc:'Gana el Mundial con la selección.', icono:'🌍', pesoRareza:5,
-    cond:j=> (j.titulosSeleccion||[]).some(t=>t.nombre==='Mundial') },
+    cond:j=> (j.titulosSeleccion||[]).some(t=>t.nombre==='Mundial') || (S.titulosTemporadaActual||[]).includes('Mundial') },
 
   // ---- Vida, más allá del fútbol ----
   { id:'boda', cat:'vida', nombre:'Contigo hasta la meta', desc:'Te casas con tu pareja.', icono:'💍', pesoRareza:40,
@@ -5859,6 +5872,26 @@ const TORNEOS_CONFIG = [
 ];
 
 const PAISES_UEFA = ["Alemania","Bélgica","España","Francia","Inglaterra","Italia","Países Bajos","Portugal","Turquía","Escocia","Croacia","Suiza","Grecia","Polonia","Austria","Dinamarca","Ucrania","República Checa"];
+// La Bota de Oro es un premio realmente paneuropeo, así que solo tiene sentido para las ligas de
+// PAISES_UEFA; el resto de países tiene su propio máximo goleador doméstico (ver
+// NOMBRE_MAXIMO_GOLEADOR_POR_LIGA), pero no opta a la Bota de Oro europea.
+function jugadorEnLigaUEFA(j){
+  return !j.club.extranjero || PAISES_UEFA.includes(j.club.pais);
+}
+// "Pichichi" es una etiqueta puramente española (Trofeo Pichichi, LaLiga) — cada país llama a su
+// propio máximo goleador de una forma distinta. Se usan los nombres reales donde hay uno amplia y
+// establemente conocido; el resto cae en el genérico "Máximo goleador" antes que inventarse un
+// apodo que no es real.
+const NOMBRE_MAXIMO_GOLEADOR_POR_LIGA = {
+  "Premier League": "Golden Boot", "Scottish Premiership": "Golden Boot",
+  "Serie A": "Capocannoniere", "Bundesliga": "Torschützenkönig", "Ligue 1": "Meilleur Buteur",
+  "Süper Lig": "Gol Kralı", "Brasileirão": "Artilheiro", "Liga MX": "Bota de Oro",
+  "MLS": "MLS Golden Boot"
+};
+function nombreMaximoGoleador(j){
+  if(!j.club.extranjero) return 'Pichichi';
+  return NOMBRE_MAXIMO_GOLEADOR_POR_LIGA[j.club.liga] || 'Máximo goleador';
+}
 // PRESTIGIO_CLUB es una escala RELATIVA dentro de cada país (un 3 en Croacia no es lo mismo
 // que un 3 en España, y un 3 en Uruguay no es lo mismo que un 3 en Brasil): un club de una
 // liga dominante llega mucho más lejos en su competición continental que el mejor de una liga
@@ -7010,8 +7043,9 @@ function calcularResumenTemporada(j, ascensoPlayoff){
     j.stats.popularidad = Math.min(99, j.stats.popularidad + 12);
     j.carrera.trofeosIndividuales = (j.carrera.trofeosIndividuales||0) + 1;
   }
-  // Bota de Oro: no basta con ser Pichichi, hace falta ser de los máximos goleadores de toda Europa
-  const probBotaOro = pichichi && goles >= 28 ? Math.min(0.5, (goles-25)/20) : 0;
+  // Bota de Oro: no basta con ser Pichichi, hace falta ser de los máximos goleadores de toda
+  // Europa — un premio realmente paneuropeo, así que solo optan a él las ligas UEFA.
+  const probBotaOro = jugadorEnLigaUEFA(j) && pichichi && goles >= 28 ? Math.min(0.5, (goles-25)/20) : 0;
   const botaOro = Math.random() < probBotaOro;
   if(botaOro){
     j.stats.reputacion = Math.min(99, j.stats.reputacion + 10);
@@ -12650,6 +12684,7 @@ SCREENS.ruedaPrensaResultado = function(){
 SCREENS.ofertas = function(){
   const j = S.jugador;
   if(j.edad >= 42){ S.screen = 'retiro'; return SCREENS.retiro(); }
+  let respondiendo = false; // evita que un doble toque dispare dos veces "Negociar"/"Seguir" (260ms de transición)
   topbar("Mercado de fichajes");
   const c = el('div','card');
   c.appendChild(crearEyebrow('Pretemporada'));
@@ -12700,6 +12735,8 @@ SCREENS.ofertas = function(){
       card.appendChild(lista);
       const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Negociar fichaje';
       btn.onclick = ()=>{
+        if(respondiendo) return;
+        respondiendo = true;
         const nuevoClub = of.extranjero
           ? { nombre: of.nombre, categoria: "LaLiga", extranjero: true, pais: of.pais, liga: of.liga, colores: of.colores, ambicionNivel: ambicionInicial(of.nombre), ...(of.grande ? { grande:true } : {}) }
           : { nombre: of.nombre, categoria: of.categoria, colores: of.colores, ambicionNivel: ambicionInicial(of.nombre) };
@@ -12715,14 +12752,20 @@ SCREENS.ofertas = function(){
   const seguir = document.createElement('button'); seguir.className='btn-secondary';
   if(j.club && j.club.sinEquipo){
     seguir.textContent = 'Seguir otro año sin equipo';
-    seguir.onclick = ()=>{ entrarEnParo(j); S.screen = 'temporadaSinClub'; render(); };
+    seguir.onclick = ()=>{
+      if(respondiendo) return;
+      respondiendo = true;
+      entrarEnParo(j); S.screen = 'temporadaSinClub'; render();
+    };
   } else {
     seguir.textContent = `Seguir en ${articuloClub(j.club.nombre)} ${j.club.nombre}`;
     seguir.onclick = ()=>{
+      if(respondiendo) return;
+      respondiendo = true;
       if((S.ofertasActuales||[]).length > 0){
         const ganancia = gananciaEscalada(j.carinoAficion||0, 5, 100);
         j.carinoAficion = Math.min(100, (j.carinoAficion||0) + ganancia);
-        if(ganancia > 0) mostrarNotificacion(`${iconoInline('estrella',15)}Cariño de la afición <span style="color:var(--green);">↑</span>`, 'atributo');
+        if(ganancia > 0) mostrarNotificacion(`${iconoInline('estrella',15)}Cariño de la afición ↑`, 'atributo');
       }
       iniciarTemporadaJuego(j);
       render();
@@ -15752,7 +15795,7 @@ SCREENS.finTemporada = function(){
 
   // Sección 3: títulos individuales, en vertical
   const filasIndividual = [];
-  if(r.pichichi) filasIndividual.push([`${iconoInline('trofeo',13)}Pichichi`, iconoInline('check',13), true]);
+  if(r.pichichi) filasIndividual.push([`${iconoInline('trofeo',13)}${nombreMaximoGoleador(j)}`, iconoInline('check',13), true]);
   if(r.botaOro) filasIndividual.push([`${iconoInline('trofeo',13)}Bota de Oro`, iconoInline('check',13), true]);
   if(r.mvp) filasIndividual.push([`${iconoInline('estrella',13)}Mejor jugador de la liga (MVP)`, iconoInline('check',13), true]);
   if(r.balonDeOroPuesto) filasIndividual.push([`${iconoInline('estrella',13)}Balón de Oro`, r.balonDeOroPuesto===1 ? '🥇 1º' : (r.balonDeOroPuesto===2 ? '🥈 2º' : '🥉 3º'), true, r.balonDeOroPuesto===1]);
