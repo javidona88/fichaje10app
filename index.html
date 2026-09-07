@@ -5731,6 +5731,13 @@ const SUBTEXTOS_NUEVA_TEMPORADA = [
 
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 function capitalizarNombre(nombre){ return nombre.split(' ').map(p=> p ? cap(p.toLowerCase()) : p).join(' '); }
+// Nombre + primer apellido nada más, para los rankings compartidos entre jugadores: no hace
+// falta enseñar el segundo apellido de nadie ahí, y así da igual cuántas palabras se escribieran
+// en el campo "Apellido" al crear el personaje.
+function nombreCortoRanking(nombre){ return nombre ? nombre.trim().split(/\s+/).slice(0,2).join(' ') : nombre; }
+// Los nombres de rankings vienen de un campo de texto libre que cualquiera puede rellenar con lo
+// que quiera (incluido HTML) y se pintan con innerHTML — hay que escaparlos antes.
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function textoCambioStat(clave, delta){
   if(!STATS_SIN_NUMERO_VISIBLE.includes(clave)) return formatearDelta(clave, delta);
   const flecha = delta>=0 ? '↑' : '↓';
@@ -8953,6 +8960,17 @@ function detectarDispositivo(){
   if(/mobi|android|iphone/i.test(ua)) return 'movil';
   return 'escritorio';
 }
+// Solo para el desglose "Sistema operativo" de stats.html — se manda dentro de datos.so (columna
+// JSON libre) en vez de como columna propia, para no tener que tocar el esquema de Supabase.
+function detectarSO(){
+  const ua = navigator.userAgent || '';
+  if(/android/i.test(ua)) return 'Android';
+  if(/iphone|ipad|ipod/i.test(ua)) return 'iOS';
+  if(/windows/i.test(ua)) return 'Windows';
+  if(/mac os x|macintosh/i.test(ua)) return 'macOS';
+  if(/linux/i.test(ua)) return 'Linux';
+  return 'Otro';
+}
 function enviarEventoSupabase(nombre, datos){
   try{
     if(!SUPABASE_URL || SUPABASE_URL.startsWith('TU-')) return; // sin configurar todavia
@@ -9043,8 +9061,9 @@ function pintarTablaRankingJuego(contenedor, filas, def, idPropio){
     row.appendChild(el('div','rk-table-rank', i+1));
     const esPropia = !!idPropio && f.datos.idCarrera === idPropio;
     const idc = f.datos.idCarrera ? f.datos.idCarrera.slice(0,8) : null;
+    const nombre = escapeHtml(nombreCortoRanking(f.datos.nombreJugador) || 'Jugador anónimo');
     const nombreWrap = el('div','rk-table-nombre',
-      `<div class="n${esPropia?' tu-fila':''}">${(f.datos.nombreJugador||'Jugador anónimo')}${esPropia?' · tú':''}</div>${idc?`<div class="id">#${idc}</div>`:''}`);
+      `<div class="n${esPropia?' tu-fila':''}">${nombre}${esPropia?' · tú':''}</div>${idc?`<div class="id">#${idc}</div>`:''}`);
     row.appendChild(nombreWrap);
     row.appendChild(el('div','rk-table-val', formatearValorRanking(def, f.datos[def.clave])));
     contenedor.appendChild(row);
@@ -11027,7 +11046,7 @@ SCREENS.rankings = function(){
   cDesglose.appendChild(crearEyebrow('Desgloses'));
   [
     ['Categoría al retirarse', 'categoriaFinal'],
-    ['País de la carrera', 'pais'],
+    ['Provincia del jugador', 'provincia'],
     ['Club en el que se retiró', 'clubFinal']
   ].forEach(([titulo, clave], idx)=>{
     if(idx > 0) cDesglose.appendChild(document.createElement('hr')).style.cssText = 'border:none;border-top:1px solid var(--line);margin:16px 0;';
@@ -11921,7 +11940,7 @@ SCREENS.crear = function(){
     ATRIBUTOS_JUGADOR.forEach(a=>{ extra[a] = estilo.atributos[a] - ATRIBUTOS_BASE[a]; });
     const nombreCompleto = `${state.nombrePila.trim()} ${state.apellido.trim()}`;
     S.jugador = nuevoJugador(nombreCompleto, state.pais, extra, null, state.localidad.trim(), state.provincia);
-    trackEvento('nueva_partida', { estilo: estilo.id });
+    trackEvento('nueva_partida', { estilo: estilo.id, so: detectarSO() });
     S.screen = 'personalizarGrupo';
     render();
   };
@@ -15827,7 +15846,12 @@ SCREENS.retiro = function(){
   retirar.onclick = ()=>{
     const historial = j.historialTemporadas||[];
     const notaMediaCarrera = historial.length ? Math.round((historial.reduce((s,h)=>s+(h.nota||0),0) / historial.length) * 10) / 10 : null;
-    const datosRetiro = { idCarrera: j.idCarrera, temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal: j.club.categoria, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais, ascensos: j.carrera.ascensos||0, valorMercadoMaximo: j.carrera.valorMercadoMaximo||0, balonesDeOro: j.carrera.balonesDeOro||0, edadRetiro: j.edad, clubFinal: j.club.nombre, extranjero: !!j.club.extranjero, titulosSeleccion: (j.titulosSeleccion||[]).length, notaMediaCarrera };
+    // j.club.categoria de un club extranjero es siempre "LaLiga" internamente (equivalencia de
+    // nivel que usa el propio juego para objetivos/ambición, ver CLAUDE.md), no la liga real en la
+    // que juega — para las estadísticas de "categoría al retirarse" hay que usar j.club.liga en
+    // ese caso, si no, cualquier retiro en el extranjero se contaba como "LaLiga".
+    const categoriaFinal = j.club.extranjero ? (j.club.liga || 'Extranjero') : j.club.categoria;
+    const datosRetiro = { idCarrera: j.idCarrera, temporada: S.temporada, partidos: j.carrera.partidos, goles: j.carrera.goles, asistencias: j.carrera.asistencias, dineroGanado: j.carrera.dineroGanado, titulos: j.carrera.titulos, categoriaFinal, nombreJugador: capitalizarNombre(j.nombre), pais: j.pais, provincia: j.provincia || null, ascensos: j.carrera.ascensos||0, valorMercadoMaximo: j.carrera.valorMercadoMaximo||0, balonesDeOro: j.carrera.balonesDeOro||0, edadRetiro: j.edad, clubFinal: j.club.nombre, extranjero: !!j.club.extranjero, titulosSeleccion: (j.titulosSeleccion||[]).length, notaMediaCarrera };
     trackEvento('retiro', datosRetiro);
     calcularPosicionesRanking(datosRetiro);
     S.retiroConfirmado = true;
