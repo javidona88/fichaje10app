@@ -664,6 +664,25 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .oferta-lista li .v{ color:var(--ink); font-weight:600; text-align:right; }
 .oferta-card .btn-main{ margin-top:0; padding:10px; font-size:14px; }
 
+/* ---- Mundial nuevo (sorteo, camino hasta aquí, VS) ---- */
+.vs-mundial{ font-family:'PT Serif',Georgia,serif; font-style:italic; font-size:15px; color:var(--ink-soft); }
+.bracket-paso{ display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--line); font-size:12.5px; }
+.bracket-paso:last-child{ border-bottom:none; }
+.bracket-paso .fase{ font-weight:700; color:var(--ink); }
+.bracket-paso .resultado{ font-family:'Space Grotesk',sans-serif; font-weight:700; }
+.bracket-paso.victoria .resultado{ color:var(--green); }
+.bracket-paso.derrota .resultado{ color:var(--red); }
+.bracket-paso.empate .resultado{ color:var(--steel); }
+.mundial-sorteo-lista{ margin:16px 0; }
+.mundial-sorteo-fila{ display:flex; align-items:center; gap:10px; padding:9px 2px; border-bottom:1px solid var(--line); opacity:0.55; }
+.mundial-sorteo-fila:last-child{ border-bottom:none; }
+.mundial-sorteo-fila.revelado{ opacity:1; }
+.mundial-sorteo-fila.fijo .mundial-sorteo-nombre{ color:var(--gold); }
+.mundial-sorteo-mini{ width:26px; height:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.mundial-sorteo-mini svg, .mundial-sorteo-mini img{ display:block; max-width:100%; max-height:100%; }
+.mundial-sorteo-nombre{ flex:1; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; color:var(--ink); }
+.mundial-sorteo-bombo{ font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
+
 /* ---- entrenamiento (checkpoints) ---- */
 .lore-box{
   background: rgba(110,136,168,0.1); border-left:4px solid var(--steel); border-radius:8px; padding:14px 16px; margin-bottom:18px;
@@ -4081,7 +4100,8 @@ const VERSION_JUEGO = 'v1.5';
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
-  { version:'v1.5', titulo:'Mod Escudos 2026/2027 y lote de ajustes', cambios:[
+  { version:'v1.5', titulo:'Mundial nuevo: grupos, eliminatorias y penaltis de verdad', cambios:[
+    'El Mundial (no la Eurocopa, que sigue igual) se juega ahora con el formato real: sorteo de grupo con bombos, 3 partidos de fase de grupos, y eliminatoria completa (dieciseisavos, octavos, cuartos, semifinal, partido por el 3er puesto y final), con tanda de penaltis si hay empate en una eliminatoria. Sustituye a la vieja semifinal-y-final directa.',
     'Nuevo botón "Cargar Mod Escudos 2026/2027": aplica de golpe un lote de escudos ya preparado (137 clubes, 27 selecciones y 23 ligas) sin subirlos uno a uno.',
     'Si varios atributos suben a la vez, ahora se ve en un único aviso combinado y más ancho, en vez de en dos o tres avisos seguidos.',
     'El cariño de la afición ya no muestra el número exacto al cambiar, solo si sube o baja (como reputación o popularidad).',
@@ -5173,7 +5193,7 @@ const PAISES_CROMO = [
     curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.'] }
 ];
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','escudosPersonalizados']);
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','escudosPersonalizados','mundialCampeones','mundialEliminado']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
 const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras','blackjack']);
@@ -5329,6 +5349,137 @@ function elegirRivalesSeleccion(pool){
   const semi = elegir();
   const final = elegir();
   return [semi, final];
+}
+
+/* ============ Mundial nuevo (formato real 2026: fase de grupos + eliminatoria completa) ============
+   Sustituye la vieja abstracción semifinal→final SOLO para el Mundial absoluto (torneoDeVerano
+   === 'Mundial' y cfg.id === 'seleccion_absoluta') — ver iniciarTorneoEliminatorio. La Eurocopa y
+   las categorías Sub-21 siguen con el sistema de siempre: el formato de grupos + bombos es
+   específico del Mundial real, no tiene sentido replicarlo para un torneo ficticio.
+   Estado completo en S.mundial — todo dato plano (nunca funciones), porque guardarPartida()
+   serializa TODO S con JSON.stringify y una función ahí se perdería en silencio al recargar. */
+const PAISES_MUNDIAL_POR_POTE = {
+  1: ["Francia","Alemania","Inglaterra","Brasil","Argentina"],
+  2: ["Italia","Portugal","Países Bajos","Bélgica","Uruguay","Croacia"],
+  3: ["México","Turquía","Escocia","Suiza","Grecia","Estados Unidos","Japón","Corea del Sur","Polonia","Austria"],
+  4: ["Dinamarca","Ucrania","Chile","República Checa","Arabia Saudí"]
+};
+// Dificultad directa por pote del rival y fase del torneo — sin sumar un bono aparte al dado.
+// Cada partido es "1d20 + bono de atributo contra Dificultad X", con X ya fijado a mano según lo
+// exigente que es ese cruce concreto, en vez de una fórmula que acaba dando números artificiosos.
+const DIFICULTAD_MUNDIAL = {
+  grupo:         {1:10, 2:8,  3:6,  4:4},
+  dieciseisavos: {1:9,  2:8,  3:7,  4:6},
+  octavos:       {1:11, 2:10, 3:9,  4:7},
+  cuartos:       {1:12, 2:11, 3:10, 4:8},
+  semis:         {1:14, 2:13, 3:11, 4:9},
+  final:         {1:16, 2:15, 3:13, 4:11},
+  tercerPuesto:  {1:11, 2:10, 3:8,  4:6}
+};
+const FASES_MUNDIAL = [
+  { id:'dieciseisavos', nombre:'Dieciseisavos de final' },
+  { id:'octavos', nombre:'Octavos de final' },
+  { id:'cuartos', nombre:'Cuartos de final' },
+  { id:'semis', nombre:'Semifinal' },
+  { id:'final', nombre:'Final' }
+];
+const FASE_TERCER_PUESTO_MUNDIAL = { id:'tercerPuesto', nombre:'Partido por el 3er puesto' };
+function buscarFaseMundial(id){
+  if(id === FASE_TERCER_PUESTO_MUNDIAL.id) return { info: FASE_TERCER_PUESTO_MUNDIAL, idx: 2 };
+  const idx = FASES_MUNDIAL.findIndex(f=>f.id===id);
+  return { info: FASES_MUNDIAL[idx], idx };
+}
+function poteDePaisMundial(nombre){
+  for(const pote of [1,2,3,4]){ if(PAISES_MUNDIAL_POR_POTE[pote].includes(nombre)) return pote; }
+  return 4;
+}
+// Sorteo de grupo: España (pote 1) + un rival real de cada uno de los potes 2/3/4, como en un
+// Mundial de verdad. Distinto cada edición para variar de una carrera a otra.
+function sortearGrupoMundial(){
+  const elegirDePote = pote => {
+    const pool = PAISES_MUNDIAL_POR_POTE[pote];
+    return pool[Math.floor(Math.random()*pool.length)];
+  };
+  return [
+    { n:'España', pot:1 },
+    { n:elegirDePote(2), pot:2 },
+    { n:elegirDePote(3), pot:3 },
+    { n:elegirDePote(4), pot:4 }
+  ];
+}
+// Rival de una ronda eliminatoria: sorteo ponderado que favorece cada vez más a los potes bajos
+// (equipos fuertes) según se avanza de ronda — en dieciseisavos casi cualquiera, en la final casi
+// siempre un pote 1/2. candidatos ya viene filtrado sin los países usados en esta misma edición.
+function elegirRivalEliminatorioMundial(candidatos, idxRonda){
+  const pesos = candidatos.map(p => 1/Math.pow(p.pot, idxRonda*0.6));
+  const pesoTotal = pesos.reduce((a,b)=>a+b, 0);
+  let dado = Math.random()*pesoTotal;
+  for(let i=0;i<candidatos.length;i++){
+    dado -= pesos[i];
+    if(dado <= 0) return candidatos[i];
+  }
+  return candidatos[candidatos.length-1];
+}
+// El marcador refleja lo ajustada que fue la tirada real: un margen amplio sobre la dificultad da
+// goleada, uno mínimo da un resultado corto; nunca una cifra fija por defecto.
+function marcadorMundial(r){
+  if(r.resultado === 'empate'){
+    const opciones = [0,0,1,1,1,2];
+    const g = opciones[Math.floor(Math.random()*opciones.length)];
+    return `${g}-${g}`;
+  }
+  const margen = (r.natural20 || r.natural1) ? (3 + Math.floor(Math.random()*12)) : Math.abs(r.total - r.dificultad);
+  let golesGanador;
+  if(margen >= 10) golesGanador = 4 + Math.floor(Math.random()*3);
+  else if(margen >= 6) golesGanador = 3 + Math.floor(Math.random()*2);
+  else if(margen >= 4) golesGanador = 1 + Math.floor(Math.random()*3);
+  else golesGanador = 1 + Math.floor(Math.random()*2);
+  const probPorteriaACero = Math.min(0.85, 0.2 + margen*0.045);
+  let golesPerdedor;
+  if(Math.random() < probPorteriaACero) golesPerdedor = 0;
+  else golesPerdedor = Math.max(0, Math.min(golesGanador - 1, 1 + Math.floor(Math.random()*2)));
+  return r.resultado==='victoria' ? `${golesGanador}-${golesPerdedor}` : `${golesPerdedor}-${golesGanador}`;
+}
+// Clasifica el resultado real de tirar() en victoria/empate/derrota — tirar() solo da éxito/fallo
+// binario, así que aquí se lee el margen (total vs dificultad) para permitir el empate, necesario
+// en la fase de grupos (puntos) y para poder ir a los penaltis en eliminatorias.
+function resultadoPartidoMundial(r){
+  if(r.natural1) return 'derrota';
+  if(r.natural20) return 'victoria';
+  if(r.total >= r.dificultad+3) return 'victoria';
+  if(r.total >= r.dificultad-2) return 'empate';
+  return 'derrota';
+}
+// Dos opciones de enfoque táctico por partido, con distinto atributo — mismo patrón que las
+// finales de club/selección (Tiro=potencia vs Mentalidad=sangre fría), para que encaje con el
+// resto de tiradas del juego en vez de un roll genérico sin elección.
+function opcionesPartidoMundial(dificultad){
+  return [
+    { texto:'Buscar el gol pronto y llevar la iniciativa', atributo:'tiro', dificultadBase:dificultad },
+    { texto:'Jugar con la cabeza fría y esperar el momento', atributo:'mental', dificultadBase:dificultad }
+  ];
+}
+function iniciarMundialNuevo(cfg){
+  const j = S.jugador;
+  S.mundial = {
+    grupo: sortearGrupoMundial(), sorteoRevelados: 0,
+    calendarioGrupo: null, jornada: 0, resultadosGrupo: [],
+    fase: null, pasosElim: [],
+    rivalElimActual: null, penaltisCtx: null, monedaGirando: false, monedaGanador: null,
+    eliminado: null, campeon: false,
+    _tirando: false, _tiradaActual: null, _tiradaResultado: null, _resultadoPartido: null,
+    efectosVictoria: cfg.efectosVictoria
+  };
+  j.historial.push({ temporada:S.temporada, evento:'torneo_'+cfg.id });
+  const claveConvocatoria = 'tuvoPrimeraConvocatoriaAbsoluta';
+  if(!j[claveConvocatoria]){
+    j[claveConvocatoria] = true;
+    S.torneoActual = { tipo:'seleccion', nombreCompeticion:'Mundial' }; // solo para el texto de SCREENS.primeraConvocatoria
+    S.screen = 'primeraConvocatoria';
+    S._trasPrimeraConvocatoriaMundial = true;
+    return;
+  }
+  S.screen = 'mundialSorteo';
 }
 
 const TEXTOS_SEMIFINAL_CLUB = [
@@ -14035,6 +14186,12 @@ function acumularEstadisticasSeleccion(j, cfg, nombreCompeticion){
 }
 function iniciarTorneoEliminatorio(cfg){
   const j = S.jugador;
+  // El Mundial absoluto (no Eurocopa, no Sub-21) usa el sistema nuevo de 48 selecciones —
+  // fase de grupos + eliminatoria completa — en vez de la vieja abstracción semifinal→final.
+  if(cfg.id === 'seleccion_absoluta' && torneoDeVerano(S.temporada) === 'Mundial'){
+    iniciarMundialNuevo(cfg);
+    return;
+  }
   const esSeleccion = cfg.tipo === 'seleccion' || cfg.tipo === 'seleccion_sub21';
   let rivalSemi, rivalFinal, nombreCompeticion;
   if(esSeleccion){
@@ -14276,7 +14433,13 @@ SCREENS.primeraConvocatoria = function(){
   aplicarEfectos(j, esSub21 ? {popularidad:8,reputacion:4,mental:4} : {popularidad:15,reputacion:8,mental:5});
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Vivir este momento →';
   btn.onclick = ()=>{
-    S.screen = cfg.sinSemifinal ? 'torneoFinalIntro' : 'torneoSemifinal';
+    if(S._trasPrimeraConvocatoriaMundial){
+      S._trasPrimeraConvocatoriaMundial = false;
+      S.torneoActual = null;
+      S.screen = 'mundialSorteo';
+    } else {
+      S.screen = cfg.sinSemifinal ? 'torneoFinalIntro' : 'torneoSemifinal';
+    }
     render();
   };
   c.appendChild(btn);
@@ -14579,6 +14742,448 @@ SCREENS.torneoFinalReveal = function(){
   setTimeout(()=> extras.classList.add('show'), 2200);
   setTimeout(()=> subBox.classList.add('show'), 2700);
   setTimeout(()=> btn.classList.add('show'), 3300);
+};
+
+/* ============ Mundial nuevo — pantallas ============
+   Sorteo de grupo → 3 partidos de grupo → tabla → eliminatoria (dieciseisavos...final, con
+   partido por el 3er puesto tras perder semis) → penaltis si hay empate en eliminatoria →
+   pantalla final (campeones/eliminados). Ver iniciarMundialNuevo/resolverEliminatoriaMundial. */
+const ORDINAL_GRUPO_MUNDIAL = {1:'1ª de grupo', 2:'2ª de grupo', 3:'3ª de grupo', 4:'4ª de grupo'};
+
+function filaEquipoMundial(pais){
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:6px;width:84px;';
+  div.innerHTML = `${escudoSeleccion(pais.n,34)}<span style="font-family:'Space Grotesk',sans-serif;font-size:11.5px;color:var(--ink-soft);text-align:center;line-height:1.2;">${pais.n}</span>`;
+  return div;
+}
+
+// Recorrido completo hasta ahora (grupos + eliminatorias) — se muestra tanto durante el torneo
+// como en la pantalla final, para que el camino recorrido siga visible hasta el último momento.
+function crearResumenCaminoMundial(){
+  const m = S.mundial;
+  if(!m || (!m.pasosElim.length && !m.resultadosGrupo.length)) return null;
+  const resumen = el('div','card');
+  resumen.appendChild(crearEyebrow('Camino hasta aquí'));
+  m.resultadosGrupo.forEach(r=>{
+    const paso = el('div','bracket-paso '+r.resultado);
+    paso.appendChild(el('span','fase','Fase de grupos'));
+    paso.appendChild(el('span','resultado', `${r.marcador} vs ${r.rival.n}`));
+    resumen.appendChild(paso);
+  });
+  m.pasosElim.forEach(p=>{
+    const paso = el('div','bracket-paso '+p.resultado);
+    paso.appendChild(el('span','fase', p.nombre));
+    paso.appendChild(el('span','resultado', `${p.marcador} vs ${p.rival.n}${p.penaltis?' (penaltis)':''}`));
+    resumen.appendChild(paso);
+  });
+  return resumen;
+}
+
+// El juego solo "ve" a la selección en los partidos del Mundial que realmente se juegan (a
+// diferencia del viejo sistema, que fabricaba de golpe 5-7 partidos al empezar el torneo): al
+// terminar (eliminación o título) se acumulan partidos/goles/asistencias reales según cuántos
+// partidos se han jugado de verdad, con la misma tasa por atributos de siempre.
+function finalizarEstadisticasMundial(j){
+  const m = S.mundial;
+  const partidos = m.resultadosGrupo.length + m.pasosElim.length;
+  const tasaGol = Math.min(0.6, 0.12 + (j.atributos.tiro/ATRIBUTO_MAX)*0.34 + (j.atributos.desmarque/ATRIBUTO_MAX)*0.12);
+  const goles = Math.max(0, Math.round(partidos * tasaGol * (0.65 + Math.random()*0.7)));
+  const asistencias = Math.max(0, Math.round(partidos * (0.06 + (j.atributos.pase/ATRIBUTO_MAX)*0.16) * (0.6 + Math.random()*0.8)));
+  j.carrera.partidosSeleccion = (j.carrera.partidosSeleccion||0) + partidos;
+  j.carrera.golesSeleccion = (j.carrera.golesSeleccion||0) + goles;
+  j.carrera.asistenciasSeleccion = (j.carrera.asistenciasSeleccion||0) + asistencias;
+  j.historialSeleccion = j.historialSeleccion || [];
+  j.historialSeleccion.push({ temporada: S.temporada, torneo: 'Mundial', sub21:false, partidos, goles, asistencias });
+}
+
+// Bloque compartido por fase de grupos y eliminatorias: cabecera VS, elección táctica (con las
+// mismas probabilidades/mods/objetos que cualquier otra tirada del juego) y, tras tirar, el
+// marcador. opts: {eyebrowTxt, rival, dificultad, opciones, textoContinuar, textoContinuarEmpate, onResultado}
+function pintarPartidoMundial(opts){
+  const j = S.jugador;
+  const m = S.mundial;
+  const c = el('div','card');
+  c.appendChild(crearEyebrow(opts.eyebrowTxt));
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:16px;margin:14px 0 18px;';
+  row.appendChild(filaEquipoMundial({n:'España'}));
+  row.appendChild(el('div','vs-mundial','VS'));
+  row.appendChild(filaEquipoMundial(opts.rival));
+  c.appendChild(row);
+
+  if(m._tirando){
+    const dado = el('div','dice-scene');
+    dado.appendChild(el('div','dice-need', `Necesitas un total de <b>${opts.dificultad}</b> o más`));
+    const die = el('div','die','?');
+    dado.appendChild(die);
+    const suma = el('div','dice-suma','');
+    dado.appendChild(suma);
+    dado.appendChild(el('div','dice-caption', `1d20 + ${NICE_ATTR[m._tiradaActual.atributo]}`));
+    c.appendChild(dado);
+    app.appendChild(c);
+    let ticks = 0;
+    const iv = setInterval(()=>{
+      ticks++;
+      die.textContent = 1 + Math.floor(Math.random()*20);
+      Sonido.tick();
+      if(ticks >= 14){
+        clearInterval(iv);
+        const r = m._tiradaResultado;
+        die.textContent = r.natural20 ? '20' : (r.natural1 ? '1' : r.dado);
+        if(r.natural20) die.classList.add('natural');
+        if(r.natural1) die.classList.add('maldeojo');
+        Sonido.tick();
+        setTimeout(()=>{
+          if(r.natural1){ suma.textContent = '1 NATURAL'; suma.classList.add('natural1'); }
+          else if(r.natural20){ suma.textContent = '20 NATURAL'; suma.classList.add('natural20'); }
+          else suma.textContent = `${r.dado} + ${r.bono} = ${r.total}`;
+          suma.classList.add('show');
+        }, 350);
+        setTimeout(()=>{
+          m._tirando = false;
+          m._resultadoPartido = r;
+          (r.resultado==='victoria' ? Sonido.exito : r.resultado==='derrota' ? Sonido.fallo : Sonido.click)();
+          pintar();
+        }, 1050);
+      }
+    }, 70);
+    return;
+  }
+
+  if(!m._resultadoPartido){
+    opts.opciones.forEach(op=>{
+      const b = el('div','opt');
+      b.appendChild(document.createTextNode(op.texto));
+      const tirada = { atributo:op.atributo, dificultadBase:opts.dificultad };
+      const p = probabilidadExito(j, tirada);
+      const tag = el('span','tag');
+      tag.appendChild(el('span','tag-pill', `🎲 Dificultad ${p.dificultad}`));
+      tag.appendChild(el('span','tag-pill', `${NICE_ATTR[op.atributo]} +${p.bonoAtributo}`));
+      p.mods.forEach(mm=> tag.appendChild(el('span','tag-pill', mm)));
+      tag.appendChild(el('span','tag-pill pct', etiquetaProbabilidad(p.pct)));
+      b.appendChild(tag);
+      b.onclick = ()=>{
+        const r = tirar(j, tirada);
+        r.resultado = resultadoPartidoMundial(r);
+        r.marcador = marcadorMundial(r);
+        j.stats.confianza = Math.max(0, Math.min(100, j.stats.confianza + (r.resultado==='derrota' ? -3 : 3)));
+        if(r.natural1) j.rachaGafada = true;
+        m._tirando = true;
+        m._tiradaActual = tirada;
+        m._tiradaResultado = r;
+        pintar();
+      };
+      c.appendChild(b);
+    });
+    app.appendChild(c);
+  } else {
+    const r = m._resultadoPartido;
+    const colorRes = r.resultado==='victoria' ? 'var(--green)' : r.resultado==='derrota' ? 'var(--red)' : 'var(--steel)';
+    const marcador = document.createElement('div');
+    marcador.style.cssText = 'text-align:center;margin:14px 0;';
+    marcador.innerHTML = `<div style="font-family:'PT Serif',Georgia,serif;font-size:44px;color:${colorRes};line-height:1;">${r.marcador}</div><div style="font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-dim);font-weight:700;margin-top:6px;">${r.resultado==='victoria'?'Victoria':r.resultado==='empate'?'Empate':'Derrota'}</div>`;
+    c.appendChild(marcador);
+    const textoBtn = (r.resultado==='empate' && opts.textoContinuarEmpate) ? opts.textoContinuarEmpate : (opts.textoContinuar || 'Continuar →');
+    const btn = el('button','btn-main', textoBtn);
+    btn.onclick = ()=>{
+      m._resultadoPartido = null; m._tiradaActual = null; m._tiradaResultado = null;
+      opts.onResultado(r);
+    };
+    c.appendChild(btn);
+    app.appendChild(c);
+  }
+}
+
+SCREENS.mundialSorteo = function(){
+  const m = S.mundial;
+  topbar('Sorteo del Mundial');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Fase de grupos'));
+  c.appendChild(el('h2',null,'El sorteo decide tu grupo'));
+  c.appendChild(el('div','lore-box','España conoce a sus rivales de la fase de grupos, uno de cada bombo — como en un Mundial real.'));
+
+  const lista = el('div','mundial-sorteo-lista');
+  const filas = [];
+  m.grupo.forEach((pais, idx)=>{
+    const fila = el('div','mundial-sorteo-fila');
+    const mini = el('div','mundial-sorteo-mini');
+    const nombreEl = el('span','mundial-sorteo-nombre');
+    fila.appendChild(mini); fila.appendChild(nombreEl); fila.appendChild(el('span','mundial-sorteo-bombo', `Bombo ${idx+1}`));
+    lista.appendChild(fila);
+    filas.push({fila, mini, nombreEl});
+  });
+  c.appendChild(lista);
+
+  function pintarFila(idx, nombre, revelado){
+    const {fila, mini, nombreEl} = filas[idx];
+    mini.innerHTML = escudoSeleccion(nombre, 28);
+    nombreEl.textContent = revelado ? nombre : '···';
+    fila.classList.toggle('revelado', revelado);
+    if(idx===0) fila.classList.add('fijo');
+  }
+  m.grupo.forEach((pais, idx)=> pintarFila(idx, (idx===0 || idx<=m.sorteoRevelados) ? pais.n : PAISES_MUNDIAL_POR_POTE[idx+1][0], idx===0 || idx<=m.sorteoRevelados));
+
+  const zonaBoton = document.createElement('div');
+  c.appendChild(zonaBoton);
+  app.appendChild(c);
+
+  if(m.sorteoRevelados < 3){
+    const poteActual = m.sorteoRevelados + 2;
+    const candidatosPote = PAISES_MUNDIAL_POR_POTE[poteActual];
+    const idxFila = m.sorteoRevelados + 1;
+    let ticks = 0;
+    const cicloId = setInterval(()=>{
+      pintarFila(idxFila, candidatosPote[Math.floor(Math.random()*candidatosPote.length)], false);
+      Sonido.tick();
+      ticks++;
+    }, 110);
+    setTimeout(()=>{
+      clearInterval(cicloId);
+      m.sorteoRevelados++;
+      Sonido.click();
+      pintar();
+    }, 900);
+  } else {
+    const btn = el('button','btn-main','Ver el grupo →');
+    btn.onclick = ()=>{ S.screen='mundialGrupo'; render(); };
+    zonaBoton.appendChild(btn);
+  }
+};
+
+SCREENS.mundialGrupo = function(){
+  const m = S.mundial;
+  // Red de seguridad: no debería llegarse aquí con la fase de grupos ya completa (onResultado
+  // actualiza S.screen a tiempo), pero si ocurriera, redirige de verdad en vez de solo pintar
+  // otra pantalla dejando S.screen desincronizado (rompería pantallaBase y la tabbar).
+  if(m.jornada >= 3){ S.screen = 'mundialGrupoTabla'; SCREENS.mundialGrupoTabla(); return; }
+  if(!m.calendarioGrupo){
+    const arr = m.grupo.slice(1);
+    for(let i=arr.length-1;i>0;i--){ const jx=Math.floor(Math.random()*(i+1)); [arr[i],arr[jx]]=[arr[jx],arr[i]]; }
+    m.calendarioGrupo = arr;
+  }
+  const rival = m.calendarioGrupo[m.jornada];
+  const dificultad = DIFICULTAD_MUNDIAL.grupo[rival.pot];
+  topbar('Mundial · Fase de grupos');
+  pintarPartidoMundial({
+    eyebrowTxt: `Fase de grupos · Jornada ${m.jornada+1} de 3`,
+    rival, dificultad, opciones: opcionesPartidoMundial(dificultad),
+    onResultado: (r)=>{
+      m.resultadosGrupo.push({ rival, ...r });
+      m.jornada++;
+      if(m.jornada >= 3) S.screen = 'mundialGrupoTabla';
+      render();
+    }
+  });
+};
+
+SCREENS.mundialGrupoTabla = function(){
+  const j = S.jugador;
+  const m = S.mundial;
+  const puntos = m.resultadosGrupo.reduce((acc,r)=> acc + (r.resultado==='victoria'?3:r.resultado==='empate'?1:0), 0);
+  const posicion = puntos>=7 ? 1 : puntos>=4 ? 2 : puntos>=1 ? 3 : 4;
+  const clasificas = posicion <= 2;
+  topbar('Mundial · Fase de grupos');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Fin de la fase de grupos'));
+  c.appendChild(el('h2',null, `${ORDINAL_GRUPO_MUNDIAL[posicion]} · ${puntos} puntos`));
+  const tabla = el('div','historial-temporadas');
+  m.resultadosGrupo.forEach(r=>{
+    const fila = el('div','historial-fila');
+    fila.innerHTML = `<span class="temp">${escudoSeleccion(r.rival.n,18)} ${r.rival.n}</span><div class="historial-fila-stats"><span class="dato">${r.marcador}</span><span class="dato${r.resultado==='victoria'?' oro':''}">${r.resultado==='victoria'?'V':r.resultado==='empate'?'E':'D'}</span></div>`;
+    tabla.appendChild(fila);
+  });
+  c.appendChild(tabla);
+  c.appendChild(el('div','lore-box', clasificas
+    ? 'España pasa a los dieciseisavos de final. El Mundial de verdad empieza ahora.'
+    : 'España se queda fuera del Mundial en la fase de grupos. Un golpe duro, y una vuelta a casa mucho antes de lo soñado.'));
+  const btn = el('button','btn-main', clasificas ? 'Ir a dieciseisavos →' : 'Continuar →');
+  btn.onclick = ()=>{
+    if(clasificas){
+      m.fase = 'dieciseisavos';
+      S.screen = 'mundialElim';
+      render();
+    } else {
+      aplicarEfectos(j, {forma:-6});
+      S.faseCompeticiones = S.faseCompeticiones || {};
+      S.faseCompeticiones['Mundial'] = 'Fase de grupos';
+      finalizarEstadisticasMundial(j);
+      m.eliminado = { fase:'Fase de grupos', penaltis:false };
+      S.screen = 'mundialEliminado';
+      render();
+    }
+  };
+  c.appendChild(btn);
+  app.appendChild(c);
+  const resumen = crearResumenCaminoMundial();
+  if(resumen) app.insertBefore(resumen, app.firstChild.nextSibling);
+};
+
+function resolverEliminatoriaMundial(faseInfo, idx, rival, resultado, penaltis, marcador){
+  const j = S.jugador;
+  const m = S.mundial;
+  m.pasosElim.push({ fase:faseInfo.id, nombre:faseInfo.nombre, rival, resultado, penaltis, marcador });
+  m.rivalElimActual = null; m.penaltisCtx = null; m.monedaGirando = false; m.monedaGanador = null;
+  if(faseInfo.id === 'semis' && resultado === 'derrota'){
+    // No a casa todavía: los dos semifinalistas caídos juegan el 3er puesto, como en un Mundial real.
+    m.fase = FASE_TERCER_PUESTO_MUNDIAL.id;
+    S.screen = 'mundialElim';
+  } else if(faseInfo.id === FASE_TERCER_PUESTO_MUNDIAL.id){
+    const gano = resultado === 'victoria';
+    aplicarEfectos(j, gano ? {forma:4,reputacion:2,popularidad:5} : {forma:-6});
+    S.faseCompeticiones = S.faseCompeticiones || {};
+    S.faseCompeticiones['Mundial'] = gano ? 'Tercer puesto' : 'Cuarto puesto';
+    finalizarEstadisticasMundial(j);
+    m.eliminado = { fase: gano ? 'Tercer puesto' : 'Cuarto puesto', penaltis, esPuesto:true, gano };
+    S.screen = 'mundialEliminado';
+  } else if(resultado === 'derrota'){
+    const esFinal = faseInfo.id === 'final';
+    aplicarEfectos(j, esFinal ? {forma:-4,reputacion:2} : {forma:-6});
+    S.faseCompeticiones = S.faseCompeticiones || {};
+    S.faseCompeticiones['Mundial'] = esFinal ? 'Final' : faseInfo.nombre;
+    finalizarEstadisticasMundial(j);
+    m.eliminado = { fase:faseInfo.nombre, penaltis, esFinal };
+    S.screen = 'mundialEliminado';
+  } else if(faseInfo.id === 'final'){
+    aplicarEfectos(j, m.efectosVictoria);
+    S.titulosTemporadaActual = S.titulosTemporadaActual || [];
+    S.titulosTemporadaActual.push('Mundial');
+    S.ultimoEventoFueTitulo = true;
+    S.faseCompeticiones = S.faseCompeticiones || {};
+    S.faseCompeticiones['Mundial'] = 'Campeón';
+    finalizarEstadisticasMundial(j);
+    m.campeon = true;
+    S.screen = 'mundialCampeones';
+  } else {
+    m.fase = FASES_MUNDIAL[idx+1].id;
+    S.screen = 'mundialElim';
+  }
+  render();
+}
+
+SCREENS.mundialElim = function(){
+  const m = S.mundial;
+  const { info: faseInfo, idx } = buscarFaseMundial(m.fase);
+  const usados = new Set(['España', ...m.grupo.slice(1).map(p=>p.n), ...m.pasosElim.map(p=>p.rival.n)]);
+  if(!m.rivalElimActual){
+    const candidatos = [1,2,3,4].flatMap(p=> PAISES_MUNDIAL_POR_POTE[p].filter(n=>!usados.has(n)).map(n=>({n,pot:p})));
+    m.rivalElimActual = elegirRivalEliminatorioMundial(candidatos, idx);
+  }
+  const dificultad = DIFICULTAD_MUNDIAL[faseInfo.id][m.rivalElimActual.pot];
+  topbar('Mundial · ' + faseInfo.nombre);
+  pintarPartidoMundial({
+    eyebrowTxt: `Eliminatoria · ${faseInfo.nombre}`,
+    rival: m.rivalElimActual, dificultad, opciones: opcionesPartidoMundial(dificultad),
+    textoContinuar: 'Continuar →', textoContinuarEmpate: 'Ir a los penaltis →',
+    onResultado: (r)=>{
+      if(r.resultado === 'empate'){
+        m.penaltisCtx = { faseId: faseInfo.id, idx, rival: m.rivalElimActual, marcador: r.marcador };
+        S.screen = 'mundialPenaltis';
+        render();
+        return;
+      }
+      resolverEliminatoriaMundial(faseInfo, idx, m.rivalElimActual, r.resultado, false, r.marcador);
+    }
+  });
+  const resumen = crearResumenCaminoMundial();
+  if(resumen) app.insertBefore(resumen, app.firstChild.nextSibling);
+};
+
+SCREENS.mundialPenaltis = function(){
+  const m = S.mundial;
+  const { faseId, idx, rival, marcador } = m.penaltisCtx;
+  const { info: faseInfo } = buscarFaseMundial(faseId);
+  topbar('Mundial · Penaltis');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow(`Eliminatoria · ${faseInfo.nombre}`));
+  c.appendChild(el('h2',null,`Empate ${marcador} — se decide en los penaltis`));
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:16px;margin:14px 0 18px;';
+  row.appendChild(filaEquipoMundial({n:'España'}));
+  row.appendChild(el('div','vs-mundial','VS'));
+  row.appendChild(filaEquipoMundial(rival));
+  c.appendChild(row);
+
+  if(!m.monedaGanador){
+    c.appendChild(el('div','lore-box', m.monedaGirando ? 'La moneda gira en el aire…' : `Nada separa a los dos equipos. Cara España, cruz ${rival.n} — gana quien salga.`));
+    const btn = el('button','btn-main', m.monedaGirando ? 'Lanzando…' : 'Lanzar la moneda →');
+    btn.disabled = !!m.monedaGirando;
+    btn.onclick = ()=>{
+      m.monedaGirando = true;
+      pintar();
+      let ticks = 0;
+      const iv = setInterval(()=>{ Sonido.tick(); ticks++; }, 90);
+      setTimeout(()=>{
+        clearInterval(iv);
+        m.monedaGirando = false;
+        m.monedaGanador = Math.random()<0.5 ? 'España' : rival.n;
+        const gana = m.monedaGanador === 'España';
+        (gana ? Sonido.exito : Sonido.fallo)();
+        pintar();
+      }, 1000);
+    };
+    c.appendChild(btn);
+  } else {
+    const gana = m.monedaGanador === 'España';
+    c.appendChild(el('div','lore-box', gana ? 'España se lleva la tanda de penaltis.' : `${rival.n} se lleva la tanda de penaltis.`));
+    const btn = el('button','btn-main','Continuar →');
+    btn.onclick = ()=>{ resolverEliminatoriaMundial(faseInfo, idx, rival, gana?'victoria':'derrota', true, marcador); };
+    c.appendChild(btn);
+  }
+  app.appendChild(c);
+};
+
+SCREENS.mundialEliminado = function(){
+  const info = S.mundial.eliminado;
+  const esPuesto = !!info.esPuesto;
+  const esFinal = !!info.esFinal;
+  topbar('Mundial');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Mundial'));
+  let titulo, texto;
+  if(esPuesto){
+    titulo = info.fase;
+    texto = info.gano
+      ? `${info.penaltis ? 'En la tanda de penaltis, ' : ''}España certifica el tercer puesto del Mundial. No es el título, pero cierra el torneo en el podio.`
+      : 'España se queda a las puertas del podio: cuarto puesto en el Mundial. Una campaña notable, aunque el sabor final sea agridulce.';
+  } else if(esFinal){
+    titulo = 'Subcampeones del Mundial';
+    texto = info.penaltis
+      ? 'La final se decide en la tanda de penaltis, el peor final posible. Os quedáis a un paso del título.'
+      : 'España pierde la final. Llegar tan lejos ya es un torneo histórico, pero el título se queda a un paso.';
+  } else if(info.fase === 'Fase de grupos'){
+    titulo = 'Eliminados en la fase de grupos';
+    texto = 'El Mundial termina antes de empezar de verdad. Una decepción para toda la afición, y para ti también.';
+  } else {
+    titulo = `Eliminados en ${info.fase}`;
+    texto = info.penaltis
+      ? 'Se decide en la tanda de penaltis, el peor final posible. El sueño mundialista tendrá que esperar cuatro años más.'
+      : 'El Mundial termina aquí. Vuelves a tu club con la sensación agridulce de haber vivido algo grande.';
+  }
+  c.appendChild(el('h2',null,titulo));
+  c.appendChild(el('div','event-text',texto));
+  const btn = el('button','btn-main','Continuar →');
+  btn.onclick = ()=>{ const j = S.jugador; S.mundial = null; continuarTrasPasoTorneo(j); render(); };
+  c.appendChild(btn);
+  app.appendChild(c);
+  const resumen = crearResumenCaminoMundial();
+  if(resumen) app.appendChild(resumen);
+};
+
+SCREENS.mundialCampeones = function(){
+  const j = S.jugador;
+  Sonido.trofeo();
+  topbar('Mundial');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Campeones del Mundo'));
+  c.appendChild(el('h2',null,'¡España, campeona del Mundo!'));
+  c.appendChild(el('div','event-text', `${j.nombre} se corona campeón del Mundo con España. El himno suena una vez más, esta vez como campeones del mundo, y millones de personas lo celebran en las calles en este mismo instante. Tu nombre queda unido para siempre a esta plantilla — el mejor momento posible de tu carrera.`));
+  const btn = el('button','btn-main','Continuar →');
+  btn.onclick = ()=>{ S.mundial = null; continuarTrasPasoTorneo(j); render(); };
+  c.appendChild(btn);
+  app.appendChild(c);
+  const resumen = crearResumenCaminoMundial();
+  if(resumen) app.appendChild(resumen);
+  setTimeout(()=> Sonido.aficionCelebra(), 400);
 };
 
 SCREENS.playoffFinal = function(){
