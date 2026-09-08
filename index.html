@@ -8127,16 +8127,16 @@ function nombreCopaNacional(pais){
    banderaPais) es un dato geográfico aparte y nunca se personaliza; son cosas distintas aunque
    compartan el mismo nombre de país. */
 function cargarEscudosPersonalizados(){
-  const vacio = { clubes:{}, selecciones:{}, ligas:{} };
+  const vacio = { clubes:{}, selecciones:{}, ligas:{}, titulos:{} };
   try{
     const datos = JSON.parse(localStorage.getItem('fichaje10_escudos_custom_v1')) || {};
     // Migración: la clave se llamaba "paises" antes de separar bandera de selección.
     if(datos.paises && !datos.selecciones){
-      const normalizado = { clubes: datos.clubes||{}, selecciones: datos.paises, ligas: datos.ligas||{} };
+      const normalizado = { clubes: datos.clubes||{}, selecciones: datos.paises, ligas: datos.ligas||{}, titulos: datos.titulos||{} };
       guardarEscudosPersonalizados(normalizado);
       return normalizado;
     }
-    return { clubes: datos.clubes||{}, selecciones: datos.selecciones||{}, ligas: datos.ligas||{} };
+    return { clubes: datos.clubes||{}, selecciones: datos.selecciones||{}, ligas: datos.ligas||{}, titulos: datos.titulos||{} };
   }catch(e){ return vacio; }
 }
 function guardarEscudosPersonalizados(mapa){
@@ -8158,9 +8158,9 @@ function quitarEscudoPersonalizado(tipo, nombre){
   guardarEscudosPersonalizados(mapa);
 }
 function quitarTodosLosEscudosPersonalizados(){
-  guardarEscudosPersonalizados({ clubes:{}, selecciones:{}, ligas:{} });
+  guardarEscudosPersonalizados({ clubes:{}, selecciones:{}, ligas:{}, titulos:{} });
 }
-const CAMPOS_ESCUDOS_PERSONALIZADOS = ['clubes', 'selecciones', 'ligas'];
+const CAMPOS_ESCUDOS_PERSONALIZADOS = ['clubes', 'selecciones', 'ligas', 'titulos'];
 // Exportar/importar en bloque: el valor de cada clave puede ser tanto un data: URI (subido como
 // archivo) como una URL http(s) normal (pegada directamente) — da igual, ambos casos se guardan
 // como el mismo string y <img src="..."> los pinta exactamente igual, sin distinción en el resto
@@ -8193,14 +8193,14 @@ function importarEscudosPersonalizados(objeto){
   };
   let nuevos;
   try{
-    nuevos = { clubes: limpiar('clubes'), selecciones: { ...limpiar('paises'), ...limpiar('selecciones') }, ligas: limpiar('ligas') };
+    nuevos = { clubes: limpiar('clubes'), selecciones: { ...limpiar('paises'), ...limpiar('selecciones') }, ligas: limpiar('ligas'), titulos: limpiar('titulos') };
   }catch(e){ return { ok:false, error:'El archivo no tiene el formato esperado.' }; }
   const actual = cargarEscudosPersonalizados();
   const combinado = {};
   CAMPOS_ESCUDOS_PERSONALIZADOS.forEach(campo=>{ combinado[campo] = { ...actual[campo], ...nuevos[campo] }; });
   const ok = guardarEscudosPersonalizados(combinado);
   if(!ok) return { ok:false, error:'No hay espacio suficiente para importar todo el archivo.' };
-  return { ok:true, clubes: Object.keys(nuevos.clubes).length, selecciones: Object.keys(nuevos.selecciones).length, ligas: Object.keys(nuevos.ligas).length };
+  return { ok:true, clubes: Object.keys(nuevos.clubes).length, selecciones: Object.keys(nuevos.selecciones).length, ligas: Object.keys(nuevos.ligas).length, titulos: Object.keys(nuevos.titulos).length };
 }
 // Muchas imágenes "recortadas" que la gente encuentra sueltas por internet no llevan
 // transparencia de verdad: lo que parece fondo transparente en el visor es en realidad blanco
@@ -8452,6 +8452,18 @@ function escudoSeleccion(pais, tamano){
   const custom = escudoPersonalizado('selecciones', pais);
   if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${pais}" style="object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
   return banderaPais(pais, tamano);
+}
+// Títulos con imagen propia opcional (pantallas de "Campeón") — mismos 6 nombres que aparecen en
+// las pantallas de campeón/título del club y el Balón de Oro. Sin imagen personalizada, cae en
+// logoCompeticion() si existe una entrada ahí, o si no en el trofeo genérico del juego.
+const TITULOS_PERSONALIZABLES = ['LaLiga', 'Copa del Rey', 'Champions League', 'Supercopa de España', 'Supercopa de Europa', 'Balón de Oro'];
+function logoTitulo(nombre, tamano){
+  tamano = tamano || 44;
+  const custom = escudoPersonalizado('titulos', nombre);
+  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" style="object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
+  const logoComp = logoCompeticion(nombre, tamano);
+  if(logoComp) return logoComp;
+  return iconoInline('trofeo', tamano);
 }
 // Calendario real de grandes torneos: Eurocopa y Mundial se alternan cada 2 años (2028 Eurocopa, 2030
 // Mundial, 2032 Eurocopa...). El Mundial de 2026 ya habría pasado antes de empezar la carrera (temporada 1).
@@ -11855,7 +11867,7 @@ SCREENS.escudosPersonalizados = function(){
 
   c.appendChild(crearEyebrow('Mod local · opcional'));
   c.appendChild(el('h2',null,'Personalizar escudos'));
-  const intro = el('div', null, 'Sustituye el escudo generado de un club, el de una selección nacional o el logo de una liga, por una imagen tuya. Se guarda solo en este dispositivo — el juego no incluye ni reparte escudos oficiales. (La bandera geográfica de un país no se toca: esta pantalla es solo para el escudo de la selección que compite, no para la bandera en sí.)');
+  const intro = el('div', null, 'Sustituye el escudo generado de un club, el de una selección nacional, el logo de una liga o el trofeo de un título, por una imagen tuya. Se guarda solo en este dispositivo — el juego no incluye ni reparte escudos ni trofeos oficiales. (La bandera geográfica de un país no se toca: esta pantalla es solo para el escudo de la selección que compite, no para la bandera en sí.)');
   intro.style.cssText = 'font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:16px;';
   c.appendChild(intro);
 
@@ -11891,7 +11903,7 @@ SCREENS.escudosPersonalizados = function(){
       const texto = await file.text();
       const resultado = importarEscudosPersonalizados(JSON.parse(texto));
       if(!resultado.ok){ mostrarAvisoEscudos(resultado.error); return; }
-      mostrarAvisoEscudos(`Importados ${resultado.clubes} clubes, ${resultado.selecciones} selecciones y ${resultado.ligas} ligas.`, true);
+      mostrarAvisoEscudos(`Importados ${resultado.clubes} clubes, ${resultado.selecciones} selecciones, ${resultado.ligas} ligas y ${resultado.titulos} títulos.`, true);
       pintarFilas();
     }catch(e){
       mostrarAvisoEscudos('El archivo no es un JSON válido.');
@@ -11933,7 +11945,7 @@ SCREENS.escudosPersonalizados = function(){
   c.appendChild(filaMod);
 
   if(S.escudosVista === undefined) S.escudosVista = 'clubes';
-  const ETIQUETAS_TIPO_ESCUDO = { clubes:{ tab:'Clubes', singular:'club', plural:'clubes' }, selecciones:{ tab:'Selecciones', singular:'selección', plural:'selecciones' }, ligas:{ tab:'Ligas', singular:'liga', plural:'ligas' } };
+  const ETIQUETAS_TIPO_ESCUDO = { clubes:{ tab:'Clubes', singular:'club', plural:'clubes' }, selecciones:{ tab:'Selecciones', singular:'selección', plural:'selecciones' }, ligas:{ tab:'Ligas', singular:'liga', plural:'ligas' }, titulos:{ tab:'Títulos', singular:'título', plural:'títulos' } };
   const tabs = el('div','coleccion-tabs');
   Object.entries(ETIQUETAS_TIPO_ESCUDO).forEach(([id,{tab}])=>{
     const btn = el('div', 'ctab'+(S.escudosVista===id?' activo':''), tab);
@@ -11965,11 +11977,13 @@ SCREENS.escudosPersonalizados = function(){
   function todosDelTipo(tipo){
     if(tipo === 'clubes') return todosLosClubesDelJuego();
     if(tipo === 'selecciones') return todosLosPaisesDelJuego();
+    if(tipo === 'titulos') return TITULOS_PERSONALIZABLES;
     return todasLasLigasDelJuego();
   }
   function miniaturaDelTipo(tipo, nombre){
     if(tipo === 'clubes') return escudoSVG(nombre, 34, coloresClubDelJuego(nombre));
     if(tipo === 'selecciones') return escudoSeleccion(nombre, 34);
+    if(tipo === 'titulos') return logoTitulo(nombre, 34);
     return logoLiga(nombre, 30); // sin generado de reserva: puede volver vacío, ver CSS .miniatura
   }
   function resizeDelTipo(tipo, file){ return tipo === 'ligas' ? redimensionarImagenLiga(file) : redimensionarImagenEscudo(file); }
@@ -12105,7 +12119,7 @@ SCREENS.escudosPersonalizados = function(){
   pintarFilas();
 
   const guardados = cargarEscudosPersonalizados();
-  const hayAlguno = Object.keys(guardados.clubes||{}).length || Object.keys(guardados.selecciones||{}).length || Object.keys(guardados.ligas||{}).length;
+  const hayAlguno = Object.keys(guardados.clubes||{}).length || Object.keys(guardados.selecciones||{}).length || Object.keys(guardados.ligas||{}).length || Object.keys(guardados.titulos||{}).length;
   if(hayAlguno){
     const btnReset = document.createElement('button');
     btnReset.className = 'btn-secondary';
@@ -15132,7 +15146,7 @@ SCREENS.torneoFinalReveal = function(){
   const iconoBox = document.createElement('div');
   if(res.gana){
     iconoBox.className = 'icon';
-    iconoBox.innerHTML = iconoInline('trofeo', 44);
+    iconoBox.innerHTML = logoTitulo(cfg.nombreCompeticion, 44);
     iconoBox.style.display = 'flex'; iconoBox.style.justifyContent = 'center'; iconoBox.style.color = 'var(--gold)';
   } else {
     iconoBox.className = 'icon';
@@ -16007,21 +16021,12 @@ SCREENS.tituloReveal = function(){
   Sonido.trofeo();
   topbar("Título conseguido");
   const c = el('div','season-reveal campeon');
-  const logo = logoCompeticion(S.tituloGanado, 44);
-  if(logo){
-    const iconoBox = el('div','icon','');
-    iconoBox.innerHTML = logo;
-    iconoBox.style.display = 'flex';
-    iconoBox.style.justifyContent = 'center';
-    c.appendChild(iconoBox);
-  } else {
-    const iconoBox = el('div','icon','');
-    iconoBox.innerHTML = iconoInline('trofeo', 44);
-    iconoBox.style.display = 'flex';
-    iconoBox.style.justifyContent = 'center';
-    iconoBox.style.color = 'var(--gold)';
-    c.appendChild(iconoBox);
-  }
+  const iconoBox = el('div','icon','');
+  iconoBox.innerHTML = logoTitulo(S.tituloGanado, 44);
+  iconoBox.style.display = 'flex';
+  iconoBox.style.justifyContent = 'center';
+  iconoBox.style.color = 'var(--gold)';
+  c.appendChild(iconoBox);
   c.appendChild(el('div','lbl', S.esPrimerTitulo ? '¡Tu primer título!' : 'Título conseguido'));
   c.appendChild(el('div','num', S.tituloGanado));
   const esTituloSeleccion = TITULOS_SELECCION_NOMBRES.includes(S.tituloGanado);
@@ -16045,14 +16050,14 @@ SCREENS.campeonReveal = function(){
   Sonido.trofeo();
   topbar("Campeón");
   const c = el('div','season-reveal campeon');
+  const r = S.temporadaResumen;
+  const nombreLigaCampeon = j.club.extranjero ? j.club.liga : ((r.categoriaJugada||j.club.categoria) === "LaLiga" ? "LaLiga" : TIER_CATEGORIA[r.categoriaJugada||j.club.categoria]);
   const iconoBox = el('div','icon','');
-  iconoBox.innerHTML = iconoInline('trofeo', 44);
+  iconoBox.innerHTML = logoTitulo(nombreLigaCampeon, 44);
   iconoBox.style.display = 'flex';
   iconoBox.style.justifyContent = 'center';
   iconoBox.style.color = 'var(--gold)';
   c.appendChild(iconoBox);
-  const r = S.temporadaResumen;
-  const nombreLigaCampeon = j.club.extranjero ? j.club.liga : ((r.categoriaJugada||j.club.categoria) === "LaLiga" ? "LaLiga" : TIER_CATEGORIA[r.categoriaJugada||j.club.categoria]);
   c.appendChild(el('div','lbl', `Campeón de ${nombreLigaCampeon}`));
   const tituloClub = c.appendChild(el('div','num', j.club.nombre));
   tituloClub.style.fontSize = '34px';
@@ -16133,7 +16138,7 @@ SCREENS.balonDeOroReveal = function(){
   });
 
   const trofeoBox = el('div','balon-oro-trofeo');
-  trofeoBox.innerHTML = iconoInline('trofeo', 56);
+  trofeoBox.innerHTML = logoTitulo('Balón de Oro', 56);
   trofeoBox.style.color = 'var(--gold)';
   c.appendChild(trofeoBox);
 
