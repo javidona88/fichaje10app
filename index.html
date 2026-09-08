@@ -4433,11 +4433,25 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.5.1';
+const VERSION_JUEGO = 'v1.5.2';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.5.2', titulo:'Eurocopa, retos de verdad y más eventos conectados', cambios:[
+    'Nueva Eurocopa con el mismo sistema de torneo de verdad que el Mundial: 24 selecciones en 4 bombos, fase de grupos, clasifican los 2 primeros de cada grupo más los mejores terceros, y eliminatoria directa (octavos a final) sin partido por el tercer puesto.',
+    'El reto de casino de un amigo/a ya no se resuelve con un dado, como casi todo lo demás: hay que jugar de verdad varias manos en la ruleta o la tragaperras para superarlo, con premio si sales del casino ganando.',
+    'Un compañero de vestuario puede retarte a marcar cierta cantidad de goles en la temporada; si lo consigues, rindes algo mejor de cara a gol la temporada siguiente.',
+    'Ser capitán del equipo da ahora una ventaja real en los penaltis decisivos: mejor suerte en la moneda del Mundial y la Eurocopa, y menos dificultad en los penaltis de las finales de Copa.',
+    'Nuevos eventos que aprovechan lo que ya tienes contratado o comprado: el Community Manager pesa en los sucesos virales de redes, el Asesor fiscal puede salvarte de perder todos los servicios si caes en números rojos, la Agencia de representación mejora de verdad las ofertas de sueldo según su comisión, y un pique con el coche o la moto a la salida de entreno.',
+    'Personalizar escudos: nueva pestaña para el logo de las marcas patrocinadoras, además de la de trofeos de título (LaLiga, Copa del Rey, Champions, ambas Supercopas, Balón de Oro); corregido que un logo blanco subido en cualquier pestaña pudiera desaparecer del todo al procesarlo. El botón "Cargar Mod Escudos 2026/2027" se ve ahora como tarjeta destacada.',
+    'Corregido un bug real de bastante calado: ascender jugando cedido en el filial era matemáticamente imposible en casi todos los casos, porque las cuentas de la temporada seguían la categoría del primer equipo. Ahora el filial tiene su propio recorrido de ascenso, independiente del primer equipo.',
+    'La relación de pareja ya no acababa en crisis solo con el paso del tiempo, sin que pasara nada malo; ahora se estabiliza igual que la forma o la confianza. Nuevo evento para cuidarla de forma proactiva, no solo reaccionar cuando ya va mal.',
+    'Retocados los nombres de los 37 logros para que tengan más ingenio y no delaten tan directamente la condición para conseguirlos.',
+    '10 nuevas órdenes tácticas del entrenador (ahora también con tiro y mentalidad) y 4 familias nuevas de eventos suyos: un experimento posicional fuera de tu rol habitual, una orden compartida con un compañero de cantera, un vídeo-análisis del rival antes del partido, y un aviso de banquillo cuya consecuencia se resuelve unos pasos después.',
+    'Retoques visuales: tipografía condensada tipo marcador en las cifras puras de los resúmenes, esquina recta con doblez en las tarjetas de oferta de contrato, dorado metálico en el dado de las tiradas, e iconos propios en los últimos sitios que aún usaban emoji de dado/trofeo/medalla.',
+    'Varios detalles menores: la notificación de cariño de la afición ya no lleva flecha verde, los botones de Golpe de Inspiración/Palabras del vestuario son más fáciles de tocar, los logros de títulos se conceden en el momento de ganarlos (no al final de temporada), la Bota de Oro solo puede ganarse en una liga de un país UEFA, y el trofeo de máximo goleador usa el nombre real de cada país cuando existe (Golden Boot, Capocannoniere, Torschützenkönig...).'
+  ]},
   { version:'v1.5.1', titulo:'El Mundial, completo: bombos, rueda de prensa y moneda de penaltis', cambios:[
     'Nueva pantalla "Empieza el Mundial" y sorteo de bombos completo (los 4 bombos con todas las selecciones, la tuya destacada) antes del sorteo de tu grupo.',
     'Nueva rueda de prensa tras el sorteo, con una pregunta que menciona a tus rivales de grupo reales, antes de arrancar la fase de grupos.',
