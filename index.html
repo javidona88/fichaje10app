@@ -14437,9 +14437,21 @@ function renderizarServiciosProfesionales(j, contenedor){
     // que hay algo NUEVO por activar o mejorar en la categoría, con el número al lado.
     const disponiblesCategoria = serviciosDisponiblesEn(servicios, j);
     const tituloCategoria = document.createElement('button');
+    tituloCategoria.dataset.categoriaAcordeon = nombreCategoria;
     tituloCategoria.style.cssText = `display:flex;justify-content:space-between;align-items:center;width:100%;padding:9px 12px;margin:14px 0 ${abiertaCategoria?'8px':'0'};border-radius:9px;border:1px solid ${disponiblesCategoria?'var(--gold)':'var(--line)'};background:${disponiblesCategoria?'rgba(212,175,55,0.1)':'transparent'};color:var(--ink);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;`;
     tituloCategoria.innerHTML = `<span>${nombreCategoria}${disponiblesCategoria?` <span style="color:var(--gold);">· ${disponiblesCategoria}</span>`:''}</span><span style="color:var(--ink-soft);font-size:12px;text-transform:none;">${abiertaCategoria?'▾':'▸'}</span>`;
-    tituloCategoria.onclick = ()=>{ S.serviciosCategoriaAbierta = abiertaCategoria ? null : nombreCategoria; pintar(); };
+    tituloCategoria.onclick = ()=>{
+      // pintar() conserva el scroll EN PÍXELES al repintar la misma pantalla, pero al plegar una
+      // categoría y desplegar otra la altura del contenido cambia por encima del punto donde
+      // estabas — conservar el mismo scrollY te dejaba mirando un trozo distinto de la lista, más
+      // abajo de donde tocaste. Se ancla la propia cabecera pulsada a la misma altura de pantalla
+      // que tenía antes de repintar, en vez de conservar el scroll en bruto.
+      const antes = tituloCategoria.getBoundingClientRect().top;
+      S.serviciosCategoriaAbierta = abiertaCategoria ? null : nombreCategoria;
+      pintar();
+      const cabeceraNueva = document.querySelector(`[data-categoria-acordeon="${CSS.escape(nombreCategoria)}"]`);
+      if(cabeceraNueva) window.scrollBy(0, cabeceraNueva.getBoundingClientRect().top - antes);
+    };
     contenedor.appendChild(tituloCategoria);
     if(!abiertaCategoria) return;
     servicios.forEach(servicio=>{
