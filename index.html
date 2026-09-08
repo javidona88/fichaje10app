@@ -21,7 +21,7 @@
 <script defer src="https://cloud.umami.is/script.js" data-website-id="6e7ce3b3-ac14-47d3-be2a-c06ea52fd502"></script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=PT+Serif:wght@700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=PT+Serif:wght@700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root{
   --bg: #14161F;
@@ -499,11 +499,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .press-body{ padding:0 20px 22px; }
 .press-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px; }
 .press-stat{ background:rgba(255,255,255,0.04); border:1px solid var(--line); border-radius:8px; padding:10px; text-align:center; }
-.press-stat .num{ font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; color:var(--gold); }
+.press-stat .num{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:27px; color:var(--gold); }
 .press-stat .lbl{ font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.05em; margin-top:2px; font-family:'Space Grotesk',sans-serif; }
 .press-stats-hero{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px; }
 .press-stat-hero{ background:linear-gradient(180deg, rgba(212,175,55,0.14), rgba(212,175,55,0.03)); border:1px solid rgba(212,175,55,0.34); border-radius:10px; padding:15px 6px; text-align:center; }
-.press-stat-hero .num{ font-family:'Space Grotesk',sans-serif; font-size:31px; font-weight:700; color:var(--gold); line-height:1; }
+.press-stat-hero .num{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:38px; color:var(--gold); line-height:1; }
 .press-stat-hero .lbl{ font-size:9.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.07em; margin-top:6px; font-family:'Space Grotesk',sans-serif; }
 .press-stat-group{ margin-top:16px; }
 .press-stat-group .grp-tit{ font-family:'Space Grotesk',sans-serif; font-size:10px; text-transform:uppercase; letter-spacing:.11em; color:var(--gold-dim); margin-bottom:7px; display:flex; align-items:center; }
@@ -557,7 +557,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 }
 .reveal-stats-row.show{ opacity:1; transform:translateY(0); }
 .reveal-stat-box{ flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:10px 4px; text-align:center; }
-.reveal-stat-box .num{ font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; color:var(--ink); line-height:1; }
+.reveal-stat-box .num{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:27px; color:var(--ink); line-height:1; }
 .reveal-stat-box .lbl{ font-family:'Space Grotesk',sans-serif; font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin-top:4px; }
 .reveal-section-title{
   font-family:'Space Grotesk',sans-serif; font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
@@ -613,8 +613,17 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
   transition: transform .12s ease;
 }
-.die.settled{ background: var(--gold); color:#191507; border-color:var(--gold); }
-.die.natural{ background:#EAC94F; box-shadow:0 0 22px rgba(212,175,55,.55); }
+/* Dorado metálico (mismo degradado que el aviso de logro) en vez de plano: es el momento de
+   más repetición de todo el juego, así que es donde más se nota si el oro parece de verdad. */
+.die.settled{
+  background:radial-gradient(circle at 35% 30%, #F5DE87, var(--gold) 58%, #8C6B18 100%);
+  color:#191507; border-color:var(--gold);
+  box-shadow:0 8px 18px rgba(0,0,0,0.4), inset 0 -3px 5px rgba(0,0,0,.2), inset 0 2px 3px rgba(255,255,255,.35);
+}
+.die.natural{
+  background:radial-gradient(circle at 35% 30%, #FCEBAE, #EAC94F 55%, #A9862B 100%);
+  box-shadow:0 0 22px rgba(212,175,55,.55), inset 0 -3px 5px rgba(0,0,0,.2), inset 0 2px 3px rgba(255,255,255,.4);
+}
 .die.maldeojo{ background:#5A1F2B; box-shadow:0 0 22px rgba(217,73,92,.55); color:#fff; }
 .dice-need{ margin-bottom:14px; font-family:'Space Grotesk',sans-serif; font-size:14px; color:var(--ink-soft); text-align:center; }
 .dice-need b{ color:var(--gold); font-size:17px; font-family:'Space Grotesk',sans-serif; font-weight:700; }
@@ -634,8 +643,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* ---- reveal a pantalla completa (temporada / ascenso / campeón) ---- */
 .season-reveal{ text-align:center; padding-top:8px; }
 .season-reveal .lbl{ font-family:'Space Grotesk',sans-serif; letter-spacing:.25em; text-transform:uppercase; font-size:12px; color:var(--ink-soft); margin-bottom:10px; }
-.season-reveal .num{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:68px; color:var(--gold); line-height:1; }
-.season-reveal .num.small{ font-size:28px; text-transform:uppercase; letter-spacing:.03em; }
+.season-reveal .num{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:80px; color:var(--gold); line-height:1; }
+.season-reveal .num.small{ font-size:30px; text-transform:uppercase; letter-spacing:.03em; font-family:'Space Grotesk',sans-serif; font-weight:700; }
 .season-reveal .objetivo{ margin-top:10px; font-family:'Space Grotesk',sans-serif; font-size:11.5px; color:var(--ink-soft); }
 .season-reveal .objetivo b{ color:var(--gold); font-weight:700; }
 .season-reveal.campeon .num{ color:var(--gold); }
@@ -648,8 +657,15 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .clasificacion-sub{ font-size:14px; color:var(--ink-soft); margin-bottom:18px; }
 
 /* ---- ofertas ---- */
+/* Esquina recta + doblez: es un papel (una oferta de contrato), no un panel de menú — el redondeado
+   se reserva para lo que de verdad se toca (los botones dentro de la propia tarjeta). */
 .oferta-card{
-  border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:10px; background:var(--bg2);
+  border:1px solid var(--line); border-left:2px solid var(--gold-dim); border-radius:0;
+  padding:14px; margin-bottom:10px; background:var(--bg2); position:relative;
+}
+.oferta-card::after{
+  content:''; position:absolute; top:0; right:0; width:0; height:0;
+  border-style:solid; border-width:0 12px 12px 0; border-color:transparent var(--panel) transparent transparent;
 }
 .oferta-card.elite{
   border-color:rgba(212,175,55,0.55);
@@ -828,6 +844,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .logro-fila{ display:flex; gap:12px; padding:12px 2px; border-bottom:1px solid var(--line); }
 .logro-fila:last-child{ border-bottom:none; }
 .logro-ico{ width:42px; height:42px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:19px; }
+.logro-ico svg{ width:20px; height:20px; }
 .logro-fila.conseguido .logro-ico{ background:linear-gradient(160deg,rgba(212,175,55,.22),rgba(212,175,55,.06)); border:1px solid rgba(212,175,55,.45); color:var(--gold); }
 .logro-fila.bloqueado .logro-ico{ background:var(--bg2); border:1px solid var(--line); color:var(--ink-soft); }
 .logro-txt{ flex:1; min-width:0; }
@@ -841,7 +858,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .logro-overlay{ position:fixed; inset:0; z-index:71; display:flex; align-items:center; justify-content:center; pointer-events:none; }
 .logro-overlay-card{ width:min(320px,86vw); background:var(--panel); border:1px solid rgba(212,175,55,.5); border-radius:20px; padding:32px 24px 24px; text-align:center; box-shadow:0 24px 60px rgba(0,0,0,.6); transform:scale(.85) translateY(14px); opacity:0; transition:transform .35s cubic-bezier(.2,1.4,.4,1), opacity .3s ease; pointer-events:auto; }
 .logro-overlay.show .logro-overlay-card{ transform:scale(1) translateY(0); opacity:1; }
-.logro-overlay-badge{ width:76px; height:76px; margin:0 auto 14px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#F5DE87,var(--gold) 60%,var(--gold-dim)); display:flex; align-items:center; justify-content:center; font-size:32px; box-shadow:0 0 0 6px rgba(212,175,55,.14), 0 10px 28px rgba(212,175,55,.35); }
+.logro-overlay-badge{ width:76px; height:76px; margin:0 auto 14px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#F5DE87,var(--gold) 60%,var(--gold-dim)); display:flex; align-items:center; justify-content:center; font-size:32px; color:#1a1408; box-shadow:0 0 0 6px rgba(212,175,55,.14), 0 10px 28px rgba(212,175,55,.35); }
+.logro-overlay-badge svg{ width:36px; height:36px; }
 .logro-overlay-eyebrow{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.12em; color:var(--gold); text-transform:uppercase; }
 .logro-overlay-nombre{ font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; margin:8px 0 6px; color:var(--ink); }
 .logro-overlay-desc{ font-family:'Space Grotesk',sans-serif; font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:20px; }
@@ -850,7 +868,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .logro-toast{ position:fixed; top:16px; right:16px; width:min(300px,calc(100% - 32px)); z-index:72; transform:translateX(130%); transition:transform .4s cubic-bezier(.16,1,.3,1); }
 .logro-toast.show{ transform:translateX(0); }
 .logro-toast-card{ position:relative; overflow:hidden; background:var(--panel); border:1px solid rgba(212,175,55,.5); border-radius:13px; padding:12px; display:flex; gap:11px; align-items:center; box-shadow:0 14px 34px rgba(0,0,0,.5); cursor:pointer; }
-.logro-toast-ico{ width:40px; height:40px; border-radius:50%; flex-shrink:0; background:radial-gradient(circle at 35% 30%,#F5DE87,var(--gold) 60%,var(--gold-dim)); display:flex; align-items:center; justify-content:center; font-size:18px; }
+.logro-toast-ico{ width:40px; height:40px; border-radius:50%; flex-shrink:0; background:radial-gradient(circle at 35% 30%,#F5DE87,var(--gold) 60%,var(--gold-dim)); display:flex; align-items:center; justify-content:center; font-size:18px; color:#1a1408; }
+.logro-toast-ico svg{ width:19px; height:19px; }
 .logro-toast-eyebrow{ font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; color:var(--gold); text-transform:uppercase; }
 .logro-toast-nombre{ font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; margin-top:1px; color:var(--ink); }
 .logro-toast-desc{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); margin-top:1px; }
@@ -1425,6 +1444,8 @@ const ICONOS_SVG = {
   dinero: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 5.5c-1.3-1.3-3-2-4.9-2-4.1 0-7.4 3.4-7.4 7.5s3.3 7.5 7.4 7.5c1.9 0 3.6-.7 4.9-2"/><path d="M3 10h9M3 14h8"/></svg>',
   calendario: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17"/><path d="M8 3v3.6M16 3v3.6"/><circle cx="8" cy="14" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r="1.1" fill="currentColor" stroke="none"/><circle cx="8" cy="17.3" r="1.1" fill="currentColor" stroke="none"/></svg>',
   trofeo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v4c0 3.3-2 5.8-4.5 6.4v2.6h2.3v2H9.2v-2h2.3v-2.6C9 12.8 7 10.3 7 7V3z"/><path d="M7 4.3H4.3c0 2.4 1.1 4 2.6 4.6"/><path d="M17 4.3h2.7c0 2.4-1.1 4-2.6 4.6"/><path d="M8.5 18h7"/></svg>',
+  dado: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9z"/><circle cx="12" cy="11" r="1.3" fill="currentColor" stroke="none"/></svg>',
+  medalla: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3 10.6 9M15.5 3 13.4 9"/><circle cx="12" cy="14.5" r="6"/><path d="M12 11.6l1.2 2.4 2.6.4-1.9 1.8.4 2.6-2.3-1.2-2.3 1.2.4-2.6-1.9-1.8 2.6-.4z" fill="currentColor" stroke="none"/></svg>',
   estrella: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.5l2.8 6 6.6.6-5 4.4 1.5 6.5L12 16.8 6.1 20l1.5-6.5-5-4.4 6.6-.6z"/></svg>',
   objetivo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.2"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
@@ -1611,19 +1632,19 @@ const LOGROS = [
     cond:j=> (j.trayectoria||[]).some(e=>e.categoria==='LaLiga') || j.club.categoria==='LaLiga' },
 
   // ---- Títulos ----
-  { id:'primer_titulo', cat:'titulos', nombre:'Primer título', desc:'Levanta tu primer trofeo, del nivel que sea.', icono:'🏆', pesoRareza:55,
+  { id:'primer_titulo', cat:'titulos', nombre:'Primer título', desc:'Levanta tu primer trofeo, del nivel que sea.', icono:ICONOS_SVG.trofeo, pesoRareza:55,
     cond:j=> (j.carrera.titulos||0) > 0 || Object.values(titulosPorTemporada(j)).some(s=>s.size>0) },
-  { id:'campeon_europa', cat:'titulos', nombre:'Campeón de Europa', desc:'Gana la Champions League.', icono:'🏆', pesoRareza:8,
+  { id:'campeon_europa', cat:'titulos', nombre:'Campeón de Europa', desc:'Gana la Champions League.', icono:ICONOS_SVG.trofeo, pesoRareza:8,
     cond:j=> (j.trayectoria||[]).some(e=>(e.titulos||[]).some(t=>t.nombre==='Champions League')) || (S.titulosTemporadaActual||[]).includes('Champions League') },
-  { id:'doblete', cat:'titulos', nombre:'Doblete', desc:'Gana dos títulos distintos la misma temporada.', icono:'🏆', pesoRareza:20,
+  { id:'doblete', cat:'titulos', nombre:'Doblete', desc:'Gana dos títulos distintos la misma temporada.', icono:ICONOS_SVG.trofeo, pesoRareza:20,
     cond:j=> Object.values(titulosPorTemporada(j)).some(s=>s.size>=2) },
-  { id:'triplete', cat:'titulos', nombre:'Triplete', desc:'Gana tres títulos distintos la misma temporada.', icono:'🏆', pesoRareza:6,
+  { id:'triplete', cat:'titulos', nombre:'Triplete', desc:'Gana tres títulos distintos la misma temporada.', icono:ICONOS_SVG.trofeo, pesoRareza:6,
     cond:j=> Object.values(titulosPorTemporada(j)).some(s=>s.size>=3) },
-  { id:'supercampeon', cat:'titulos', nombre:'Supercampeón', desc:'Gana una Supercopa, de España o de Europa.', icono:'🏆', pesoRareza:12,
+  { id:'supercampeon', cat:'titulos', nombre:'Supercampeón', desc:'Gana una Supercopa, de España o de Europa.', icono:ICONOS_SVG.trofeo, pesoRareza:12,
     cond:j=> (j.trayectoria||[]).some(e=>(e.titulos||[]).some(t=>t.nombre.includes('Supercopa'))) || (S.titulosTemporadaActual||[]).some(n=>n.includes('Supercopa')) },
-  { id:'balon_oro', cat:'titulos', nombre:'Balón de Oro', desc:'Gana el Balón de Oro al mejor jugador del mundo.', icono:'🥇', pesoRareza:5,
+  { id:'balon_oro', cat:'titulos', nombre:'Balón de Oro', desc:'Gana el Balón de Oro al mejor jugador del mundo.', icono:ICONOS_SVG.medalla, pesoRareza:5,
     cond:j=> (j.carrera.balonesDeOro||0) > 0 },
-  { id:'leyenda_balon', cat:'titulos', nombre:'Leyenda del balón', desc:'Gana 2 o más Balones de Oro.', icono:'🥇', pesoRareza:1,
+  { id:'leyenda_balon', cat:'titulos', nombre:'Leyenda del balón', desc:'Gana 2 o más Balones de Oro.', icono:ICONOS_SVG.medalla, pesoRareza:1,
     cond:j=> (j.carrera.balonesDeOro||0) >= 2 },
 
   // ---- Selección ----
@@ -1661,7 +1682,7 @@ const LOGROS = [
     cond:j=> (j.stats.dinero||0) >= 5000000 },
 
   // ---- Rarezas ----
-  { id:'sancion_amano', cat:'rarezas', nombre:'El Cabesa te tendió una trampa', desc:'Sobrevive a una sanción por amaño de partido.', icono:'🎲', pesoRareza:8,
+  { id:'sancion_amano', cat:'rarezas', nombre:'El Cabesa te tendió una trampa', desc:'Sobrevive a una sanción por amaño de partido.', icono:ICONOS_SVG.dado, pesoRareza:8,
     cond:j=> j.sancionActiva === true },
   { id:'numeros_rojos', cat:'rarezas', nombre:'Números rojos', desc:'Te quedas sin blanca alguna vez.', icono:'📉', pesoRareza:35,
     cond:j=> !!(j.hitosLogro && j.hitosLogro.numerosRojos) },
@@ -12373,7 +12394,7 @@ SCREENS.prologoPrueba = function(){
     b.appendChild(document.createTextNode(op.texto));
     const p = probabilidadExito(j, op.tirada);
     const tag = el('span','tag');
-    tag.appendChild(el('span','tag-pill', `🎲 Dificultad ${p.dificultad}`));
+    tag.appendChild(el('span','tag-pill', `${iconoInline('dado',13)}Dificultad ${p.dificultad}`));
     tag.appendChild(el('span','tag-pill', `${NICE_ATTR[op.tirada.atributo]} +${p.bono}`));
     tag.appendChild(el('span','tag-pill pct', etiquetaProbabilidad(p.pct)));
     b.appendChild(tag);
@@ -13834,7 +13855,7 @@ SCREENS.evento = function(){
     if(op.tirada){
       const p = probabilidadExito(j, op.tirada);
       const tag = el('span','tag');
-      tag.appendChild(el('span','tag-pill', `🎲 Dificultad ${p.dificultad}`));
+      tag.appendChild(el('span','tag-pill', `${iconoInline('dado',13)}Dificultad ${p.dificultad}`));
       tag.appendChild(el('span','tag-pill', `${NICE_ATTR[op.tirada.atributo]} +${p.bonoAtributo}`));
       p.mods.forEach(m=> tag.appendChild(el('span','tag-pill', m)) );
       tag.appendChild(el('span','tag-pill pct', etiquetaProbabilidad(p.pct)));
@@ -14129,9 +14150,9 @@ SCREENS.resultado = function(){
     big.style.marginTop = '0';
     big.style.marginBottom = '10px';
     box.appendChild(big);
-    const rollTxt = r.roll.natural20 ? '🎲 20 natural — éxito automático'
-      : r.roll.natural1 ? '🎲 1 natural — fallo automático'
-      : `🎲 1d20 (${r.roll.dado}) + ${r.roll.bono} bono contra Dificultad ${r.roll.dificultad}`;
+    const rollTxt = r.roll.natural20 ? `${iconoInline('dado',13)}20 natural — éxito automático`
+      : r.roll.natural1 ? `${iconoInline('dado',13)}1 natural — fallo automático`
+      : `${iconoInline('dado',13)}1d20 (${r.roll.dado}) + ${r.roll.bono} bono contra Dificultad ${r.roll.dificultad}`;
     box.appendChild(el('div','outcome-roll', rollTxt));
   }
   box.appendChild(el('div','outcome-text', r.rama.texto || fraseEfectos(cambios)));
@@ -14353,7 +14374,7 @@ SCREENS.playoffElim = function(){
     b.appendChild(document.createTextNode(op.texto));
     const p = probabilidadExito(j, op.tirada);
     const tag = el('span','tag');
-    tag.appendChild(el('span','tag-pill', `🎲 Dificultad ${p.dificultad}`));
+    tag.appendChild(el('span','tag-pill', `${iconoInline('dado',13)}Dificultad ${p.dificultad}`));
     tag.appendChild(el('span','tag-pill', `${NICE_ATTR[op.tirada.atributo]} +${p.bonoAtributo}`));
     p.mods.forEach(m=> tag.appendChild(el('span','tag-pill', m)) );
     tag.appendChild(el('span','tag-pill pct', etiquetaProbabilidad(p.pct)));
@@ -14812,7 +14833,7 @@ SCREENS.torneoSemifinal = function(){
     const p = probabilidadExito(j, tirada);
     const esLaMasDificil = op.dificultadBase === maxDificultad && dificultades[0] !== dificultades[1];
     const tag = el('span','tag');
-    tag.appendChild(el('span','tag-pill', `🎲 Dificultad ${p.dificultad}`));
+    tag.appendChild(el('span','tag-pill', `${iconoInline('dado',13)}Dificultad ${p.dificultad}`));
     tag.appendChild(el('span','tag-pill', `${NICE_ATTR[op.atributo]} +${p.bonoAtributo}`));
     p.mods.forEach(m=> tag.appendChild(el('span','tag-pill', m)) );
     tag.appendChild(el('span','tag-pill pct', etiquetaProbabilidad(p.pct)));
@@ -15808,7 +15829,7 @@ SCREENS.finTemporada = function(){
   if(r.pichichi) filasIndividual.push([`${iconoInline('trofeo',13)}${nombreMaximoGoleador(j)}`, iconoInline('check',13), true]);
   if(r.botaOro) filasIndividual.push([`${iconoInline('trofeo',13)}Bota de Oro`, iconoInline('check',13), true]);
   if(r.mvp) filasIndividual.push([`${iconoInline('estrella',13)}Mejor jugador de la liga (MVP)`, iconoInline('check',13), true]);
-  if(r.balonDeOroPuesto) filasIndividual.push([`${iconoInline('estrella',13)}Balón de Oro`, r.balonDeOroPuesto===1 ? '🥇 1º' : (r.balonDeOroPuesto===2 ? '🥈 2º' : '🥉 3º'), true, r.balonDeOroPuesto===1]);
+  if(r.balonDeOroPuesto) filasIndividual.push([`${iconoInline('estrella',13)}Balón de Oro`, `${iconoInline('medalla',13)}${r.balonDeOroPuesto===1?'1º':(r.balonDeOroPuesto===2?'2º':'3º')}`, true, r.balonDeOroPuesto===1]);
   if(r.enOnceIdeal) filasIndividual.push([`${iconoInline('estrella',13)}Once ideal de la temporada`, iconoInline('check',13), true]);
 
   // Sección 4: promesas resueltas esta temporada, en último lugar
