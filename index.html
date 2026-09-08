@@ -4847,6 +4847,8 @@ const ICONOS_SECTOR_MARCA = {
 };
 function logoMarca(nombre, tamano, colores){
   tamano = tamano || 30;
+  const custom = escudoPersonalizado('marcas', nombre);
+  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" style="object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
   let primario = (colores && colores[0]) || colorDesdeTexto(nombre);
   // Un color de marca casi negro (Nike, Adidas...) se pierde sobre el fondo oscuro del juego:
   // por debajo de este umbral de luminancia se sustituye por un gris claro legible.
@@ -8367,27 +8369,29 @@ function nombreCopaNacional(pais){
   return COPA_NACIONAL_POR_PAIS[pais] || "Copa nacional";
 }
 /* ============ Escudos personalizados (mod local, opcional) ============
-   Cualquier jugador puede sustituir el escudo generado de un club, el de una selección nacional
-   o el logo de una liga/categoría, por una imagen propia — pensado para quien quiera meter los
-   reales por su cuenta, sin que el juego los incluya ni los distribuya (son marcas registradas,
-   ver escudoSVG). Todo vive SOLO en el localStorage de ese navegador (fichaje10_escudos_custom_v1,
-   { clubes:{nombre:valor}, selecciones:{pais:valor}, ligas:{nombre:valor} }); nunca se sube a
-   ningún sitio. Gestión desde el menú principal — SCREENS.escudosPersonalizados.
+   Cualquier jugador puede sustituir el escudo generado de un club, el de una selección nacional,
+   el logo de una liga/categoría, el trofeo de un título o el logo de una marca patrocinadora,
+   por una imagen propia — pensado para quien quiera meter los reales por su cuenta, sin que el
+   juego los incluya ni los distribuya (son marcas registradas, ver escudoSVG/logoMarca). Todo
+   vive SOLO en el localStorage de ese navegador (fichaje10_escudos_custom_v1,
+   { clubes:{nombre:valor}, selecciones:{pais:valor}, ligas:{nombre:valor}, titulos:{...},
+   marcas:{...} }); nunca se sube a ningún sitio. Gestión desde el menú principal —
+   SCREENS.escudosPersonalizados.
    IMPORTANTE: "selecciones" es la identidad de la FEDERACIÓN/equipo nacional que juega torneos
    (ver escudoSeleccion) — la bandera del PAÍS (nacionalidad de un jugador o de un club, ver
    banderaPais) es un dato geográfico aparte y nunca se personaliza; son cosas distintas aunque
    compartan el mismo nombre de país. */
 function cargarEscudosPersonalizados(){
-  const vacio = { clubes:{}, selecciones:{}, ligas:{}, titulos:{} };
+  const vacio = { clubes:{}, selecciones:{}, ligas:{}, titulos:{}, marcas:{} };
   try{
     const datos = JSON.parse(localStorage.getItem('fichaje10_escudos_custom_v1')) || {};
     // Migración: la clave se llamaba "paises" antes de separar bandera de selección.
     if(datos.paises && !datos.selecciones){
-      const normalizado = { clubes: datos.clubes||{}, selecciones: datos.paises, ligas: datos.ligas||{}, titulos: datos.titulos||{} };
+      const normalizado = { clubes: datos.clubes||{}, selecciones: datos.paises, ligas: datos.ligas||{}, titulos: datos.titulos||{}, marcas: datos.marcas||{} };
       guardarEscudosPersonalizados(normalizado);
       return normalizado;
     }
-    return { clubes: datos.clubes||{}, selecciones: datos.selecciones||{}, ligas: datos.ligas||{}, titulos: datos.titulos||{} };
+    return { clubes: datos.clubes||{}, selecciones: datos.selecciones||{}, ligas: datos.ligas||{}, titulos: datos.titulos||{}, marcas: datos.marcas||{} };
   }catch(e){ return vacio; }
 }
 function guardarEscudosPersonalizados(mapa){
@@ -8409,9 +8413,9 @@ function quitarEscudoPersonalizado(tipo, nombre){
   guardarEscudosPersonalizados(mapa);
 }
 function quitarTodosLosEscudosPersonalizados(){
-  guardarEscudosPersonalizados({ clubes:{}, selecciones:{}, ligas:{}, titulos:{} });
+  guardarEscudosPersonalizados({ clubes:{}, selecciones:{}, ligas:{}, titulos:{}, marcas:{} });
 }
-const CAMPOS_ESCUDOS_PERSONALIZADOS = ['clubes', 'selecciones', 'ligas', 'titulos'];
+const CAMPOS_ESCUDOS_PERSONALIZADOS = ['clubes', 'selecciones', 'ligas', 'titulos', 'marcas'];
 // Exportar/importar en bloque: el valor de cada clave puede ser tanto un data: URI (subido como
 // archivo) como una URL http(s) normal (pegada directamente) — da igual, ambos casos se guardan
 // como el mismo string y <img src="..."> los pinta exactamente igual, sin distinción en el resto
@@ -8444,14 +8448,14 @@ function importarEscudosPersonalizados(objeto){
   };
   let nuevos;
   try{
-    nuevos = { clubes: limpiar('clubes'), selecciones: { ...limpiar('paises'), ...limpiar('selecciones') }, ligas: limpiar('ligas'), titulos: limpiar('titulos') };
+    nuevos = { clubes: limpiar('clubes'), selecciones: { ...limpiar('paises'), ...limpiar('selecciones') }, ligas: limpiar('ligas'), titulos: limpiar('titulos'), marcas: limpiar('marcas') };
   }catch(e){ return { ok:false, error:'El archivo no tiene el formato esperado.' }; }
   const actual = cargarEscudosPersonalizados();
   const combinado = {};
   CAMPOS_ESCUDOS_PERSONALIZADOS.forEach(campo=>{ combinado[campo] = { ...actual[campo], ...nuevos[campo] }; });
   const ok = guardarEscudosPersonalizados(combinado);
   if(!ok) return { ok:false, error:'No hay espacio suficiente para importar todo el archivo.' };
-  return { ok:true, clubes: Object.keys(nuevos.clubes).length, selecciones: Object.keys(nuevos.selecciones).length, ligas: Object.keys(nuevos.ligas).length, titulos: Object.keys(nuevos.titulos).length };
+  return { ok:true, clubes: Object.keys(nuevos.clubes).length, selecciones: Object.keys(nuevos.selecciones).length, ligas: Object.keys(nuevos.ligas).length, titulos: Object.keys(nuevos.titulos).length, marcas: Object.keys(nuevos.marcas).length };
 }
 // Muchas imágenes "recortadas" que la gente encuentra sueltas por internet no llevan
 // transparencia de verdad: lo que parece fondo transparente en el visor es en realidad blanco
@@ -8486,6 +8490,20 @@ function quitarFondoBlanco(ctx, ancho, alto){
   }
   ctx.putImageData(datos, 0, 0);
 }
+// Cuenta cuántos píxeles del canvas siguen siendo visibles (con algo de opacidad real).
+function contarPixelesVisibles(ctx, ancho, alto){
+  const datos = ctx.getImageData(0, 0, ancho, alto);
+  const px = datos.data;
+  let visibles = 0;
+  for(let i=3; i<px.length; i+=4){ if(px[i] > 10) visibles++; }
+  return visibles;
+}
+// Si el propio logo es blanco (no solo su fondo), quitarFondoBlanco no tiene forma de
+// distinguirlo del fondo — son el mismo color y están conectados entre sí — y la inundación se
+// come la imagen entera, dejándola invisible. UMBRAL_LOGO_BLANCO detecta ese caso a posteriori
+// (queda casi nada visible en el canvas) para deshacerlo: quien llama a esto vuelve a dibujar
+// desde cero SIN quitar fondo, conservando la transparencia real que ya trajera el archivo.
+const UMBRAL_LOGO_BLANCO = 0.04;
 // Recorta el canvas al rectángulo real de contenido no transparente (con un pequeño margen de
 // aire) y lo reescala para volver a ocupar todo el lienzo — así una imagen con mucho margen
 // vacío alrededor del escudo real (típico tras quitarFondoBlanco) no se queda pequeña dentro de
@@ -8532,10 +8550,15 @@ function redimensionarImagenEscudo(file){
         const canvas = document.createElement('canvas');
         canvas.width = TAM; canvas.height = TAM;
         const ctx = canvas.getContext('2d');
-        const escala = Math.max(TAM / img.width, TAM / img.height);
-        const w = img.width * escala, h = img.height * escala;
-        ctx.drawImage(img, (TAM - w) / 2, (TAM - h) / 2, w, h);
+        const dibujar = ()=>{
+          ctx.clearRect(0, 0, TAM, TAM);
+          const escala = Math.max(TAM / img.width, TAM / img.height);
+          const w = img.width * escala, h = img.height * escala;
+          ctx.drawImage(img, (TAM - w) / 2, (TAM - h) / 2, w, h);
+        };
+        dibujar();
         quitarFondoBlanco(ctx, TAM);
+        if(contarPixelesVisibles(ctx, TAM, TAM) < TAM*TAM*UMBRAL_LOGO_BLANCO) dibujar();
         recortarAlContenido(canvas, ctx, TAM);
         resolve(canvas.toDataURL('image/png'));
       };
@@ -8560,10 +8583,15 @@ function procesarUrlParaEscudo(url){
         const canvas = document.createElement('canvas');
         canvas.width = TAM; canvas.height = TAM;
         const ctx = canvas.getContext('2d');
-        const escala = Math.max(TAM / img.width, TAM / img.height);
-        const w = img.width * escala, h = img.height * escala;
-        ctx.drawImage(img, (TAM - w) / 2, (TAM - h) / 2, w, h);
+        const dibujar = ()=>{
+          ctx.clearRect(0, 0, TAM, TAM);
+          const escala = Math.max(TAM / img.width, TAM / img.height);
+          const w = img.width * escala, h = img.height * escala;
+          ctx.drawImage(img, (TAM - w) / 2, (TAM - h) / 2, w, h);
+        };
+        dibujar();
         quitarFondoBlanco(ctx, TAM);
+        if(contarPixelesVisibles(ctx, TAM, TAM) < TAM*TAM*UMBRAL_LOGO_BLANCO) dibujar();
         recortarAlContenido(canvas, ctx, TAM);
         resolve(canvas.toDataURL('image/png'));
       }catch(e){ reject(e); }
@@ -8591,8 +8619,10 @@ function redimensionarImagenLiga(file){
         const canvas = document.createElement('canvas');
         canvas.width = ANCHO; canvas.height = ALTO;
         const ctx = canvas.getContext('2d');
-        ajustarImagenLigaEnCanvas(img, ctx, ANCHO, ALTO);
+        const dibujar = ()=>{ ctx.clearRect(0, 0, ANCHO, ALTO); ajustarImagenLigaEnCanvas(img, ctx, ANCHO, ALTO); };
+        dibujar();
         quitarFondoBlanco(ctx, ANCHO, ALTO);
+        if(contarPixelesVisibles(ctx, ANCHO, ALTO) < ANCHO*ALTO*UMBRAL_LOGO_BLANCO) dibujar();
         resolve(canvas.toDataURL('image/png'));
       };
       img.src = reader.result;
@@ -8611,8 +8641,10 @@ function procesarUrlParaLiga(url){
         const canvas = document.createElement('canvas');
         canvas.width = ANCHO; canvas.height = ALTO;
         const ctx = canvas.getContext('2d');
-        ajustarImagenLigaEnCanvas(img, ctx, ANCHO, ALTO);
+        const dibujar = ()=>{ ctx.clearRect(0, 0, ANCHO, ALTO); ajustarImagenLigaEnCanvas(img, ctx, ANCHO, ALTO); };
+        dibujar();
         quitarFondoBlanco(ctx, ANCHO, ALTO);
+        if(contarPixelesVisibles(ctx, ANCHO, ALTO) < ANCHO*ALTO*UMBRAL_LOGO_BLANCO) dibujar();
         resolve(canvas.toDataURL('image/png'));
       }catch(e){ reject(e); }
     };
@@ -8674,6 +8706,20 @@ function todasLasLigasDelJuego(){
   const nombres = new Set(CATEGORIAS);
   CLUBES_EXTRANJERO.forEach(c=>{ if(c.liga) nombres.add(c.liga); });
   return [...nombres].sort((a,b)=> a.localeCompare(b,'es'));
+}
+// Marcas de patrocinio (MARCAS_PATROCINIO.local/regional/nacional) — mismo patrón que
+// _mapaColoresClubes: se calcula una vez y sirve tanto para la lista del buscador como para
+// pintar la miniatura de cada marca con sus colores reales.
+let _mapaColoresMarcas = null;
+function asegurarMapaColoresMarcas(){
+  if(_mapaColoresMarcas) return;
+  _mapaColoresMarcas = new Map();
+  Object.values(MARCAS_PATROCINIO).forEach(arr=> arr.forEach(m=>{ if(!_mapaColoresMarcas.has(m.nombre)) _mapaColoresMarcas.set(m.nombre, m.colores); }));
+}
+function coloresMarcaDelJuego(nombre){ asegurarMapaColoresMarcas(); return _mapaColoresMarcas.get(nombre) || null; }
+function todasLasMarcasDelJuego(){
+  asegurarMapaColoresMarcas();
+  return [..._mapaColoresMarcas.keys()].sort((a,b)=> a.localeCompare(b,'es'));
 }
 // A diferencia de clubes/selecciones, una liga no tiene escudo generado de reserva — sin imagen
 // personalizada no se pinta nada (el nombre de la liga ya se muestra como texto donde se usa).
@@ -12126,7 +12172,7 @@ SCREENS.escudosPersonalizados = function(){
 
   c.appendChild(crearEyebrow('Mod local · opcional'));
   c.appendChild(el('h2',null,'Personalizar escudos'));
-  const intro = el('div', null, 'Sustituye el escudo generado de un club, el de una selección nacional, el logo de una liga o el trofeo de un título, por una imagen tuya. Se guarda solo en este dispositivo — el juego no incluye ni reparte escudos ni trofeos oficiales. (La bandera geográfica de un país no se toca: esta pantalla es solo para el escudo de la selección que compite, no para la bandera en sí.)');
+  const intro = el('div', null, 'Sustituye el escudo generado de un club, el de una selección nacional, el logo de una liga, el trofeo de un título o el logo de una marca patrocinadora, por una imagen tuya. Se guarda solo en este dispositivo — el juego no incluye ni reparte escudos, trofeos ni logos oficiales. (La bandera geográfica de un país no se toca: esta pantalla es solo para el escudo de la selección que compite, no para la bandera en sí.) Si el logo que subes es blanco y desaparece al procesarlo, se detecta solo y se guarda sin quitarle el fondo.');
   intro.style.cssText = 'font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:16px;';
   c.appendChild(intro);
 
@@ -12162,7 +12208,7 @@ SCREENS.escudosPersonalizados = function(){
       const texto = await file.text();
       const resultado = importarEscudosPersonalizados(JSON.parse(texto));
       if(!resultado.ok){ mostrarAvisoEscudos(resultado.error); return; }
-      mostrarAvisoEscudos(`Importados ${resultado.clubes} clubes, ${resultado.selecciones} selecciones, ${resultado.ligas} ligas y ${resultado.titulos} títulos.`, true);
+      mostrarAvisoEscudos(`Importados ${resultado.clubes} clubes, ${resultado.selecciones} selecciones, ${resultado.ligas} ligas, ${resultado.titulos} títulos y ${resultado.marcas} marcas.`, true);
       pintarFilas();
     }catch(e){
       mostrarAvisoEscudos('El archivo no es un JSON válido.');
@@ -12204,7 +12250,7 @@ SCREENS.escudosPersonalizados = function(){
   c.appendChild(filaMod);
 
   if(S.escudosVista === undefined) S.escudosVista = 'clubes';
-  const ETIQUETAS_TIPO_ESCUDO = { clubes:{ tab:'Clubes', singular:'club', plural:'clubes' }, selecciones:{ tab:'Selecciones', singular:'selección', plural:'selecciones' }, ligas:{ tab:'Ligas', singular:'liga', plural:'ligas' }, titulos:{ tab:'Títulos', singular:'título', plural:'títulos' } };
+  const ETIQUETAS_TIPO_ESCUDO = { clubes:{ tab:'Clubes', singular:'club', plural:'clubes' }, selecciones:{ tab:'Selecciones', singular:'selección', plural:'selecciones' }, ligas:{ tab:'Ligas', singular:'liga', plural:'ligas' }, titulos:{ tab:'Títulos', singular:'título', plural:'títulos' }, marcas:{ tab:'Marcas', singular:'marca', plural:'marcas' } };
   const tabs = el('div','coleccion-tabs');
   Object.entries(ETIQUETAS_TIPO_ESCUDO).forEach(([id,{tab}])=>{
     const btn = el('div', 'ctab'+(S.escudosVista===id?' activo':''), tab);
@@ -12237,12 +12283,14 @@ SCREENS.escudosPersonalizados = function(){
     if(tipo === 'clubes') return todosLosClubesDelJuego();
     if(tipo === 'selecciones') return todosLosPaisesDelJuego();
     if(tipo === 'titulos') return TITULOS_PERSONALIZABLES;
+    if(tipo === 'marcas') return todasLasMarcasDelJuego();
     return todasLasLigasDelJuego();
   }
   function miniaturaDelTipo(tipo, nombre){
     if(tipo === 'clubes') return escudoSVG(nombre, 34, coloresClubDelJuego(nombre));
     if(tipo === 'selecciones') return escudoSeleccion(nombre, 34);
     if(tipo === 'titulos') return logoTitulo(nombre, 34);
+    if(tipo === 'marcas') return logoMarca(nombre, 34, coloresMarcaDelJuego(nombre));
     return logoLiga(nombre, 30); // sin generado de reserva: puede volver vacío, ver CSS .miniatura
   }
   function resizeDelTipo(tipo, file){ return tipo === 'ligas' ? redimensionarImagenLiga(file) : redimensionarImagenEscudo(file); }
@@ -12378,7 +12426,7 @@ SCREENS.escudosPersonalizados = function(){
   pintarFilas();
 
   const guardados = cargarEscudosPersonalizados();
-  const hayAlguno = Object.keys(guardados.clubes||{}).length || Object.keys(guardados.selecciones||{}).length || Object.keys(guardados.ligas||{}).length || Object.keys(guardados.titulos||{}).length;
+  const hayAlguno = Object.keys(guardados.clubes||{}).length || Object.keys(guardados.selecciones||{}).length || Object.keys(guardados.ligas||{}).length || Object.keys(guardados.titulos||{}).length || Object.keys(guardados.marcas||{}).length;
   if(hayAlguno){
     const btnReset = document.createElement('button');
     btnReset.className = 'btn-secondary';
