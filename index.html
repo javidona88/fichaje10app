@@ -1642,7 +1642,10 @@ const LOGROS = [
   { id:'ultima_etapa', cat:'carrera', nombre:'El último gran cheque', desc:'Firma el gran contrato de fin de carrera.', icono:'💰', pesoRareza:10,
     cond:j=> (j.trayectoria||[]).some(e=>PAISES_ULTIMA_ETAPA.includes(e.pais)) },
   { id:'llegar_arriba', cat:'carrera', nombre:'Desde abajo', desc:'Llega a jugar en 1ª división.', icono:'🔝', pesoRareza:30,
-    cond:j=> (j.trayectoria||[]).some(e=>e.categoria==='LaLiga') || j.club.categoria==='LaLiga' },
+    // OJO enFilial: j.club.categoria es siempre la del PRIMER equipo, aunque estés cedido en el
+    // filial jugando una categoría bastante más baja (j.categoriaFilial) — sin este descarte, el
+    // logro se concedía por estar adscrito a un club de LaLiga, sin haber pisado LaLiga de verdad.
+    cond:j=> (j.trayectoria||[]).some(e=>e.categoria==='LaLiga') || (j.club.categoria==='LaLiga' && !j.enFilial) },
 
   // ---- Títulos ----
   { id:'primer_titulo', cat:'titulos', nombre:'Se estrena la vitrina', desc:'Levanta tu primer trofeo, del nivel que sea.', icono:ICONOS_SVG.trofeo, pesoRareza:55,
@@ -4315,6 +4318,58 @@ const BANCO_EVENTOS = [
         efectos:{mental:2} }
     ]
   },
+  // Pelea por la titularidad: 3 eventos que dan voz a j.confianzaEntrenador (ver
+  // calcularRolTemporada) — a petición expresa, para que hacerte con el puesto sea un proceso con
+  // el que puedas interactuar de verdad, no solo el resultado silencioso de una fórmula.
+  {
+    id:"pelea_titularidad_entrenador", cooldown:3,
+    trigger:{ edadMin:18, probabilidad:0.22, condicion: j => !j.enFilial && S.rolTemporada && S.rolTemporada.corto !== 'Titular' && (j.temporadasEnClub||0) >= 1 },
+    texto:"No estás conforme con tus minutos. Pides una reunión con el entrenador para plantearle tu situación cara a cara.",
+    variantes:[
+      "Llevas semanas rumiando tu situación en el equipo. Aprovechas un hueco en la agenda del entrenador para ir a hablar con él sin rodeos.",
+      "El cuerpo técnico convoca reuniones individuales con toda la plantilla. Cuando te toca a ti, decides no callarte lo que piensas de tus minutos."
+    ],
+    opciones:[
+      { texto:"Defender tu caso con argumentos, sin perder las formas", tirada:{atributo:"mental", dificultadBase:13},
+        exito:{ texto:"El entrenador valora tu franqueza y te promete oportunidades reales en las próximas semanas.",
+          efectosFn: j => { j.confianzaEntrenador = Math.min(100, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) + 12); return {confianza:5,mental:4}; } },
+        fallo:{ texto:"La conversación no sale como esperabas: el técnico se cierra en banda y te pide paciencia, sin más.",
+          efectosFn: j => { j.confianzaEntrenador = Math.max(0, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) - 5); return {mental:-4}; } } },
+      { texto:"Callarte y demostrarlo solo en el campo",
+        resultado:"Prefieres no forzar la conversación y dejar que el rendimiento hable por ti.",
+        efectos:{mental:2} }
+    ]
+  },
+  {
+    id:"pelea_titularidad_companero", cooldown:3,
+    trigger:{ edadMin:17, probabilidad:0.2, condicion: j => !j.enFilial && S.rolTemporada && S.rolTemporada.corto !== 'Titular' },
+    texto:"En los rondos de esta semana el entrenador os enfrenta directamente a ti y al compañero que ahora mismo te gana el puesto: quien destaque más se lleva la titularidad del próximo partido.",
+    opciones:[
+      { texto:"Ir a por todas, sin guardarte nada", tirada:{atributo:"velocidad", dificultadBase:14},
+        exito:{ texto:"Le ganas la partida con claridad. El entrenador lo ve, y no lo olvida.",
+          efectosFn: j => { j.confianzaEntrenador = Math.min(100, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) + 10); return {forma:6,confianza:5}; } },
+        fallo:{ texto:"Tu compañero está más fino esta semana y se lleva el duelo. Toca seguir esperando tu momento.",
+          efectosFn: j => { j.confianzaEntrenador = Math.max(0, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) - 4); return {confianza:-3}; } } },
+      { texto:"Jugar en equipo, sin convertirlo en un duelo personal",
+        resultado:"Prefieres no entrar al pique directo y centrarte en tu propio trabajo.",
+        efectos:{vestuario:3,mental:1} }
+    ]
+  },
+  {
+    id:"pelea_titularidad_oportunidad", cooldown:2,
+    trigger:{ edadMin:17, probabilidad:0.22, condicion: j => !j.enFilial && S.rolTemporada && S.rolTemporada.corto !== 'Titular' },
+    texto:"El titular en tu posición está tocado y sales desde el banquillo con la sensación de que esta es tu oportunidad real de asentarte en el once.",
+    opciones:[
+      { texto:"Aprovecharla al máximo", tirada:{atributo:"tiro", dificultadBase:14},
+        exito:{ texto:"Decides el partido nada más entrar. El entrenador ya no puede mirar hacia otro lado.",
+          efectosFn: j => { j.confianzaEntrenador = Math.min(100, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) + 15); return {forma:10,confianza:8,reputacion:3}; } },
+        fallo:{ texto:"No consigues aprovechar los minutos. Vuelves al banquillo con la sensación de haber dejado pasar algo importante.",
+          efectosFn: j => { j.confianzaEntrenador = Math.max(0, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) - 5); return {confianza:-5}; } } },
+      { texto:"Jugar con cabeza, sin forzar nada",
+        resultado:"Cumples sin sobresaltos, sin que la ocasión llegue a marcar un antes y un después.",
+        efectosFn: j => { j.confianzaEntrenador = Math.min(100, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) + 3); return {mental:1}; } }
+    ]
+  },
   {
     id:"entrada_filial", unico:true,
     trigger:{ edadMin:16, edadMax:18, probabilidad:0.3, condicion: j => !j.enFilial && CATEGORIAS.indexOf(j.club.categoria) >= 2 && S.rolTemporada && S.rolTemporada.corto !== 'Titular' },
@@ -4345,6 +4400,13 @@ const BANCO_EVENTOS = [
     ]
   },
   {
+    // Arco realista de ascenso desde el filial (a petición expresa: no es "el filial asciende de
+    // categoría", es "TÚ subes al primer equipo del club"). 3 etapas, cada una su propio evento,
+    // ninguna resoluble en una sola tirada: primero te llaman a entrenar con el primer equipo
+    // (esta), luego empiezas a jugar algún partido de verdad alternando con el filial
+    // (filial_debut_primer_equipo), y solo al final te hacen fijo (filial_contrato_definitivo).
+    // j.filialProgreso.etapa: 0 (solo filial) -> 1 (entrenas con el primer equipo) -> 2 (ya
+    // alternas partidos, esperando el contrato definitivo).
     id:"oportunidad_primer_equipo", cooldown:1,
     trigger:{ probabilidad: j => {
       const rating = ratingJugador(j);
@@ -4354,7 +4416,7 @@ const BANCO_EVENTOS = [
       base += esTitular ? 0.15 : 0;
       base += Math.min(0.1, Math.max(0, (j.stats.forma-60)/300));
       return Math.min(0.55, base);
-    }, condicion: j => !!j.enFilial },
+    }, condicion: j => !!j.enFilial && (!j.filialProgreso || j.filialProgreso.etapa === 0) },
     texto: j => {
       const nombreFilial = FILIAL_DE_CLUB[j.club.nombre] || 'el filial';
       const variantes = [
@@ -4366,14 +4428,78 @@ const BANCO_EVENTOS = [
     },
     opciones:[
       { texto:"Aprovechar la oportunidad al máximo", tirada:{atributo:"mental", dificultadBase:13},
-        exito:{ texto:"Dejas una gran impresión en los entrenamientos. El club decide subirte al primer equipo de forma definitiva.", efectos:{forma:10,confianza:8,reputacion:5}, filialFin:true },
+        exito:{ texto:"Dejas una gran impresión en los entrenamientos. Te ganas un sitio fijo en las sesiones del primer equipo — los partidos, de momento, los sigues jugando con el filial.",
+          efectosFn: j => { j.filialProgreso = j.filialProgreso || { etapa:0, partidosPrimerEquipo:0 }; j.filialProgreso.etapa = 1; j.confianzaEntrenador = Math.min(100, (j.confianzaEntrenador||35) + 10); return {forma:6,confianza:6}; } },
         fallo:{ texto: j => `Los nervios te pueden y no terminas de mostrar tu mejor versión. Vuelves a ${FILIAL_DE_CLUB[j.club.nombre] || 'el filial'} a seguir puliéndote.`, efectos:{confianza:-4} } },
       { texto:"Dejar que tu calidad hable por sí sola, sin pensar en la presión", tirada:{atributo:"tecnica", dificultadBase:14},
-        exito:{ texto:"No haces ruido, pero tu nivel en los rondos y los amistosos deja claro que ya no pintas nada en el filial. Te suben sin discusión.", efectos:{forma:8,confianza:6,reputacion:6}, filialFin:true },
+        exito:{ texto:"No haces ruido, pero tu nivel en los rondos y los amistosos no pasa desapercibido. A partir de ahora entrenas de forma habitual con el primer equipo — los partidos, todavía con el filial.",
+          efectosFn: j => { j.filialProgreso = j.filialProgreso || { etapa:0, partidosPrimerEquipo:0 }; j.filialProgreso.etapa = 1; j.confianzaEntrenador = Math.min(100, (j.confianzaEntrenador||35) + 10); return {forma:5,confianza:5}; } },
         fallo:{ texto: j => `Un par de errores técnicos en los momentos clave te dejan fuera de la decisión final. Vuelves a ${FILIAL_DE_CLUB[j.club.nombre] || 'el filial'} con la sensación de haber desaprovechado tu oportunidad.`, efectos:{confianza:-5} } },
       { texto:"Ir con calma, sin forzar nada",
         resultado: j => `Entrenas con el grupo sin dar un paso al frente. Vuelves a ${FILIAL_DE_CLUB[j.club.nombre] || 'el filial'} la semana siguiente, sin más.`,
         efectos:{mental:1} }
+    ]
+  },
+  {
+    id:"filial_debut_primer_equipo", cooldown:1,
+    trigger:{ probabilidad: j => {
+      const rating = ratingJugador(j);
+      let base = 0.2 + Math.min(0.25, Math.max(0, (rating-9)/35)) + Math.min(0.1, Math.max(0, (j.stats.forma-60)/300));
+      return Math.min(0.6, base);
+    }, condicion: j => !!j.enFilial && j.filialProgreso && j.filialProgreso.etapa === 1 },
+    texto: j => {
+      const nombreFilial = FILIAL_DE_CLUB[j.club.nombre] || 'el filial';
+      const variantes = [
+        `Una baja de última hora en el primer equipo obliga al entrenador a completar la convocatoria con canteranos. Tu nombre está en la lista.`,
+        `El primer equipo ya tiene la eliminatoria de Copa resuelta y el técnico aprovecha para dar minutos a la gente de ${nombreFilial}. Vas a jugar de verdad, aunque sea desde el banquillo.`,
+        `Con la permanencia asegurada a falta de poco, el entrenador rota el once para las últimas jornadas y te da tu primera oportunidad real con el primer equipo.`
+      ];
+      return variantes[Math.floor(Math.random()*variantes.length)];
+    },
+    opciones:[
+      { texto:"Salir a comerte el partido", tirada:{atributo:"tiro", dificultadBase:13},
+        exito:{ texto:"Respondes con un partidazo. El entrenador toma nota — no eres ya solo un chico del filial de paso por el primer equipo.",
+          efectosFn: j => {
+            j.filialProgreso.partidosPrimerEquipo = (j.filialProgreso.partidosPrimerEquipo||0) + 1;
+            if(j.filialProgreso.partidosPrimerEquipo >= 2) j.filialProgreso.etapa = 2;
+            j.confianzaEntrenador = Math.min(100, (j.confianzaEntrenador||35) + 8);
+            return {forma:8,confianza:6,reputacion:3};
+          } },
+        fallo:{ texto: j => `Te falta rodaje al nivel del primer equipo y se nota. Vuelves a ${FILIAL_DE_CLUB[j.club.nombre] || 'el filial'} con deberes pendientes.`,
+          efectosFn: j => { j.confianzaEntrenador = Math.max(0, (j.confianzaEntrenador||35) - 4); return {confianza:-4}; } } },
+      { texto:"Jugar sobre seguro, sin arriesgar nada", tirada:{atributo:"mental", dificultadBase:11},
+        exito:{ texto:"No destacas, pero cumples sin fisuras. Un paso pequeño pero real hacia hacerte un hueco arriba.",
+          efectosFn: j => {
+            j.filialProgreso.partidosPrimerEquipo = (j.filialProgreso.partidosPrimerEquipo||0) + 1;
+            if(j.filialProgreso.partidosPrimerEquipo >= 2) j.filialProgreso.etapa = 2;
+            j.confianzaEntrenador = Math.min(100, (j.confianzaEntrenador||35) + 4);
+            return {forma:3,confianza:2};
+          } },
+        fallo:{ texto: j => `Jugar con tanto miedo a fallar acaba siendo tu propio error. Vuelves a ${FILIAL_DE_CLUB[j.club.nombre] || 'el filial'}, sin haber aprovechado la ocasión.`, efectos:{confianza:-3} } }
+    ]
+  },
+  {
+    id:"filial_contrato_definitivo", cooldown:1,
+    trigger:{ probabilidad: j => {
+      const rating = ratingJugador(j);
+      let base = 0.25 + Math.min(0.3, Math.max(0, (rating-9)/30)) + Math.min(0.15, Math.max(0, (j.confianzaEntrenador-50)/200));
+      return Math.min(0.65, base);
+    }, condicion: j => !!j.enFilial && j.filialProgreso && j.filialProgreso.etapa >= 2 },
+    texto: j => {
+      const nombreFilial = FILIAL_DE_CLUB[j.club.nombre] || 'el filial';
+      return `Se acerca el final de temporada y el club tiene que decidir tu futuro: renovar la cesión a ${nombreFilial} un año más, o hacerte fijo del primer equipo de una vez por todas.`;
+    },
+    opciones:[
+      { texto:"Plantarte y pedir tu sitio en el primer equipo, sin más vueltas", tirada:{atributo:"mental", dificultadBase:15},
+        exito:{ texto:"El club lo tiene claro: te hacen contrato con el primer equipo, a todos los efectos. Se acabó ir y venir del filial.",
+          efectos:{forma:12,confianza:10,reputacion:6}, filialFin:true },
+        fallo:{ texto: j => `El club prefiere esperar un año más para confirmarlo. Sigues a caballo entre ${FILIAL_DE_CLUB[j.club.nombre] || 'el filial'} y el primer equipo.`,
+          efectosFn: j => { j.confianzaEntrenador = Math.max(0, (j.confianzaEntrenador||35) - 5); return {confianza:-5}; } } },
+      { texto:"Dejar que los números hablen por ti", tirada:{atributo:"tecnica", dificultadBase:16},
+        exito:{ texto:"No hace falta que digas nada: lo que has hecho esta temporada habla solo. Te hacen contrato con el primer equipo, a todos los efectos.",
+          efectos:{forma:10,confianza:8,reputacion:7}, filialFin:true },
+        fallo:{ texto: j => `El club decide que aún te falta un empujón más. Sigues a caballo entre ${FILIAL_DE_CLUB[j.club.nombre] || 'el filial'} y el primer equipo.`,
+          efectosFn: j => { j.confianzaEntrenador = Math.max(0, (j.confianzaEntrenador||35) - 4); return {confianza:-4}; } } }
     ]
   },
   {
@@ -6960,6 +7086,8 @@ function migrarJugadorGuardado(j){
   if(j.rachaGafada === undefined) j.rachaGafada = !!j.malDeOjo;
   if(j.enFilial === undefined) j.enFilial = false;
   if(j.categoriaFilial === undefined) j.categoriaFilial = j.enFilial ? categoriaFilialDe(j.club.categoria) : null;
+  if(j.filialProgreso === undefined) j.filialProgreso = j.enFilial ? { etapa:0, partidosPrimerEquipo:0 } : null;
+  if(j.confianzaEntrenador === undefined) j.confianzaEntrenador = 35;
   if(j.tienePareja === undefined) j.tienePareja = false;
   if(j.titulosSeleccion === undefined) j.titulosSeleccion = [];
   if(j.historialSeleccion === undefined) j.historialSeleccion = [];
@@ -7064,6 +7192,8 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia,estiloId
     tienePareja:false,
     rachaGafada:false,
     esCapitan:false,
+    filialProgreso:null,
+    confianzaEntrenador:35,
     comprasUnicas:[],
     cocheActual:0, motoActual:0,
     lesionSemanas:0, sancionActiva:false,
@@ -7924,6 +8054,18 @@ function procesarFinTemporada(j, ascensoPlayoff){
   evolucionarCompaneros(j);
   S.temporadaResumen = calcularResumenTemporada(j, ascensoPlayoff);
   if(j.objetos && j.objetos.rachaGoleador > 0) j.objetos.rachaGoleador--; // se consume, la haya usado calcularResumenTemporada o no
+  // Confianza del entrenador (ver calcularRolTemporada y los eventos "pelea por la titularidad"):
+  // evoluciona poco a poco según el rendimiento real de la temporada, nunca de golpe — así ganarte
+  // un puesto titular es un proceso de varias temporadas, no una sola tirada afortunada.
+  {
+    const nota = S.temporadaResumen.nota;
+    let deltaConfianza = 0;
+    if(nota >= 7.5) deltaConfianza = 8;
+    else if(nota >= 6.5) deltaConfianza = 4;
+    else if(nota < 5) deltaConfianza = -6;
+    else if(nota < 5.8) deltaConfianza = -2;
+    j.confianzaEntrenador = Math.max(0, Math.min(100, (j.confianzaEntrenador!=null ? j.confianzaEntrenador : 35) + deltaConfianza));
+  }
   // Reto de goles de un compañero (companero_reto_goles): se resuelve aquí, con los goles ya
   // definitivos de la temporada, y se muestra en el resumen (ver filasRetos en SCREENS.temporadaResumen).
   S.resultadoRetoGoles = null;
@@ -8227,20 +8369,33 @@ function ratingJugador(j){
   return (j.atributos.fisico + j.atributos.velocidad + j.atributos.tiro + j.atributos.regate + j.atributos.pase + j.atributos.desmarque) / 6;
 }
 function calcularRolTemporada(j){
+  const temporadasAqui = j.temporadasEnClub || 0;
+  const factorAguante = Math.min(0.09, j.atributos.fisico/220); // más físico, menos partidos de descanso
+  // Fichaje de estrella (j.club.fichajeEstrella, ver iniciarFichaje — reputación >= 55 al fichar):
+  // en la vida real un fichaje de ese nivel juega titular desde el primer día, no se lo tiene que
+  // ganar como un canterano más. Garantizado solo la temporada del propio fichaje.
+  if(j.club.fichajeEstrella && temporadasAqui === 0){
+    return { label:'Titular habitual', corto:'Titular', clase:'ok', fraccion:0.83 + factorAguante, pct:100 };
+  }
   const rating = ratingJugador(j);
   let chance = 0.55 + Math.min(0.3, (rating-7)/40) + Math.min(0.15, j.stats.reputacion/150);
-  // Ser nuevo en el club cuesta: sin haber jugado antes ahí, cuesta ganarse un puesto en el once, por bueno que seas
-  const temporadasAqui = j.temporadasEnClub || 0;
-  const factorNovato = temporadasAqui === 0 ? -0.28 : (temporadasAqui === 1 ? -0.12 : 0);
+  // Ser nuevo en el club cuesta: sin haber jugado antes ahí, cuesta ganarse un puesto en el once,
+  // por bueno que seas — salvo que llegaras como fichaje de estrella, que no parte de cero.
+  const factorNovato = j.club.fichajeEstrella ? 0 : (temporadasAqui === 0 ? -0.28 : (temporadasAqui === 1 ? -0.12 : 0));
   chance += factorNovato;
   // Cerca del final de la carrera, los entrenadores empiezan a dosificarte
   const factorEdadAvanzada = j.edad >= 33 ? -Math.min(0.35, (j.edad-32) * 0.09) : 0;
   chance += factorEdadAvanzada;
   // Adrián disputándote el puesto en el mismo vestuario aprieta el once
   if(j.rival && j.rival.compartiendoVestuario) chance -= 0.14;
+  // Confianza del entrenador (j.confianzaEntrenador, 0-100): ser bueno sobre el papel no basta,
+  // hay que ganarse el puesto de verdad — ver los eventos "pelea por la titularidad". Actúa como
+  // multiplicador, no como suma, para que quien acaba de llegar (confianza baja) no pueda saltar
+  // directo a titular en una o dos temporadas solo a base de atributos altos.
+  const factorConfianzaEntrenador = 0.55 + Math.min(100, Math.max(0, j.confianzaEntrenador!=null ? j.confianzaEntrenador : 35))/200;
+  chance *= factorConfianzaEntrenador;
   chance = Math.max(0.12, Math.min(0.88, chance));
   const pct = Math.round((chance-0.12)/(0.88-0.12)*100);
-  const factorAguante = Math.min(0.09, j.atributos.fisico/220); // más físico, menos partidos de descanso
   if(chance >= 0.62) return { label:'Titular habitual', corto:'Titular', clase:'ok', fraccion:0.83 + factorAguante, pct };
   if(chance >= 0.35) return { label:'Rotación con otro delantero', corto:'Rotación', clase:'warn', fraccion:0.52 + factorAguante, pct };
   return { label:'Suplente', corto:'Suplente', clase:'bad', fraccion:0.24 + factorAguante*0.5, pct };
@@ -8393,7 +8548,12 @@ function iniciarFichaje(j, nuevoClub, nuevoContrato, pantallaSiguiente){
     j.hitosLogro = j.hitosLogro || {}; j.hitosLogro.fichajePolemico = true;
   }
   if(nuevoClub.extranjero && nuevoClub.pais && versionAlMenos(j.versionCreacion, VERSION_MINIMA_LOGROS_CROMOS)) desbloquearCromo(nuevoClub.pais);
+  // Fichaje de estrella: llegas con la reputación suficiente para que el club cuente contigo desde
+  // el primer día, no para hacerte ganarte un puesto como un canterano más — ver calcularRolTemporada
+  // (titular garantizado la temporada del fichaje) y el reinicio de confianzaEntrenador de abajo.
+  nuevoClub.fichajeEstrella = j.stats.reputacion >= 55;
   j.club = nuevoClub;
+  j.confianzaEntrenador = nuevoClub.fichajeEstrella ? 75 : 30;
   if(nuevoContrato){
     if(nuevoContrato.duracionOriginal == null) nuevoContrato.duracionOriginal = nuevoContrato.duracionTemporadas;
     j.contrato = nuevoContrato;
@@ -14470,8 +14630,8 @@ SCREENS.evento = function(){
         const cambios = aplicarEfectos(j, efectosReales);
         if(op.patrocinioFn) j.patrocinio = op.patrocinioFn(j);
         if(op.contratarRepresentante) j.representante = crearRepresentante(0.06);
-        if(op.filialInicio){ j.enFilial = true; j.categoriaFilial = categoriaFilialDe(j.club.categoria); }
-        if(op.filialFin) j.enFilial = false;
+        if(op.filialInicio){ j.enFilial = true; j.categoriaFilial = categoriaFilialDe(j.club.categoria); j.filialProgreso = { etapa:0, partidosPrimerEquipo:0 }; }
+        if(op.filialFin){ j.enFilial = false; j.filialProgreso = null; j.confianzaEntrenador = 40; }
         if(op.parejaInicio){ j.tienePareja = true; j.stats.felicidadPareja = 60; j.pareja = generarNombrePareja(); }
         if(op.parejaFin){ j.tienePareja = false; j.stats.felicidadPareja = 0; j.pareja = null; }
         const cambioDeClub = procesarBanderasFichaje(j, { fichaje:op.fichaje, fichajeExtranjero:op.fichajeExtranjero, fichajeUltimaEtapa:op.fichajeUltimaEtapa, fichajeGrande:op.fichajeGrande, diferirVerano:op.diferirVerano });
@@ -14666,8 +14826,8 @@ SCREENS.tirando = function(){
             S.objetosNuevosSinVer = (S.objetosNuevosSinVer||0) + 1;
           }
           if(rama.contratarRepresentante) j.representante = crearRepresentante(0.06);
-          if(rama.filialInicio){ j.enFilial = true; j.categoriaFilial = categoriaFilialDe(j.club.categoria); }
-          if(rama.filialFin) j.enFilial = false;
+          if(rama.filialInicio){ j.enFilial = true; j.categoriaFilial = categoriaFilialDe(j.club.categoria); j.filialProgreso = { etapa:0, partidosPrimerEquipo:0 }; }
+          if(rama.filialFin){ j.enFilial = false; j.filialProgreso = null; j.confianzaEntrenador = 40; }
           if(rama.parejaInicio){ j.tienePareja = true; j.stats.felicidadPareja = 60; j.pareja = generarNombrePareja(); }
           if(rama.parejaFin){ j.tienePareja = false; j.stats.felicidadPareja = 0; j.pareja = null; }
           j.historial.push({ temporada:S.temporada, evento: ev.id||'relleno' });
