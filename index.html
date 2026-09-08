@@ -2519,7 +2519,9 @@ const BANCO_EVENTOS = [
   },
   {
     id:"veterano_consejo", cooldown:6,
-    trigger:{ edadMin:25, probabilidad:0.15 },
+    // !j.enFilial: aquí el jugador hace de veterano al que un canterano admira — no tiene sentido
+    // si el propio jugador es quien está jugando en el filial (ver filial_consejo_primer_equipo).
+    trigger:{ edadMin:25, probabilidad:0.15, condicion: j => !j.enFilial },
     texto:"Un jugador joven del filial se acerca a pedirte consejo. Te recuerda a ti mismo hace unos años.",
     variantes:[
       "Uno de los chavales del filial se arma de valor para acercarse a pedirte un consejo.",
@@ -3644,7 +3646,10 @@ const BANCO_EVENTOS = [
   },
   {
     id:"visita_cantera", cooldown:6,
-    trigger:{ edadMin:20, probabilidad:0.14 },
+    // !j.enFilial: este suceso te trata como un profesional consagrado que visita la base de su
+    // club para inspirar a los más pequeños — no tiene sentido si el que está jugando en el
+    // filial eres tú mismo (ver filial_consejo_primer_equipo, su equivalente en ese caso).
+    trigger:{ edadMin:20, probabilidad:0.14, condicion: j => !j.enFilial },
     texto:"El club te pide que dediques una tarde a visitar la cantera: entrenar un rato con los más pequeños, firmar autógrafos, hacerles ilusión.",
     opciones:[
       { texto:"Volcarte de verdad, quedarte más tiempo del pactado",
@@ -4516,6 +4521,30 @@ const BANCO_EVENTOS = [
           efectos:{forma:10,confianza:8,reputacion:7}, filialFin:true },
         fallo:{ texto: j => `El club decide que aún te falta un empujón más. Sigues a caballo entre ${FILIAL_DE_CLUB[j.club.nombre] || 'el filial'} y el primer equipo.`,
           efectosFn: j => { j.confianzaEntrenador = Math.max(0, (j.confianzaEntrenador||35) - 4); return {confianza:-4}; } } }
+    ]
+  },
+  {
+    // Equivalente de veterano_consejo/visita_cantera para cuando el jugador es quien está en el
+    // filial: aquí no tiene sentido "hacer de veterano ante la cantera" — lo que toca es
+    // relacionarte con el primer equipo al que aspiras (a petición expresa del usuario).
+    id:"filial_consejo_primer_equipo", cooldown:5,
+    trigger:{ edadMin:17, probabilidad:0.16, condicion: j => !!j.enFilial },
+    texto: j => {
+      const variantes = [
+        "Coincides con un veterano del primer equipo en las instalaciones del club. Te ve entrenar un rato y se acerca a darte un consejo, sin que nadie se lo pida.",
+        "El club reparte unas entradas entre los canteranos para ver un partido del primer equipo desde la grada. Ver de cerca el nivel al que aspiras te deja pensando.",
+        "Te cruzas con el entrenador del primer equipo por el pasillo de las instalaciones. Te saluda por tu nombre — señal de que, aunque sigas abajo, no eres invisible para él."
+      ];
+      return variantes[Math.floor(Math.random()*variantes.length)];
+    },
+    opciones:[
+      { texto:"Aprovechar el momento al máximo", tirada:{atributo:"mental", dificultadBase:11},
+        exito:{ texto:"Sacas algo valioso del momento — una idea, una sensación, la confirmación de que vas por el buen camino.",
+          efectosFn: j => { j.confianzaEntrenador = Math.min(100, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) + 5); return {confianza:5,mental:3}; } },
+        fallo:{ texto:"Te quedas más pendiente de la ocasión que de aprovecharla de verdad, y se te escapa entre los dedos.", efectos:{mental:-1} } },
+      { texto:"Vivirlo con naturalidad, sin darle más importancia",
+        resultado:"Lo disfrutas sin obsesionarte. Un buen recuerdo más del camino hacia arriba.",
+        efectos:{mental:2} }
     ]
   },
   {
