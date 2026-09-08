@@ -1952,6 +1952,66 @@ const BANCO_EVENTOS = [
     ]
   },
   {
+    id:"video_analisis_rival", cooldown:4, soloSiSano:true,
+    trigger:{ probabilidad:0.14 },
+    texto: j => {
+      const debilidades = [
+        'el lateral izquierdo rival no vuelve a defender cuando sube',
+        'el portero rival flojea claramente en los balones altos',
+        'el central zurdo rival pierde comodidad si le presionas al primer toque',
+        'el equipo rival se descompone por bandas en cuanto pierde el balón en ataque'
+      ];
+      const debilidad = debilidades[Math.floor(Math.random()*debilidades.length)];
+      S._debilidadRivalTexto = debilidad;
+      const nivelAnalista = (j.suscripciones && j.suscripciones.analista) || 0;
+      if(nivelAnalista >= 2){
+        return `Tu analista de rendimiento ha hecho los deberes: en el vídeo previo, el cuerpo técnico te enseña con datos exactos que ${debilidad}. Sales al campo sabiendo por dónde apretar.`;
+      }
+      return `Antes del partido, el cuerpo técnico pone un vídeo con la debilidad del rival de esta semana: ${debilidad}.`;
+    },
+    opciones:[
+      { texto:'Centrar tu partido en esa debilidad', tirada:{atributo:'desmarque', dificultadBase:12},
+        exito:{ texto: j => `Encuentras el hueco exacto que había visto el cuerpo técnico: ${S._debilidadRivalTexto}, y lo aprovechas a la perfección.`, efectos:{forma:6,reputacion:3} },
+        fallo:{ texto:'Lo intentas, pero el rival corrige a tiempo y la debilidad deja de estar tan clara sobre el campo.', efectos:{confianza:-2} } },
+      { texto:'Confiar más en tu instinto que en el informe', tirada:{atributo:'regate', dificultadBase:13},
+        exito:{ texto:'Ignoras el plan y te sale a base de calidad pura. El cuerpo técnico se queda con ganas de decir "te lo dije", pero el resultado manda.', efectos:{confianza:6,vestuario:-2} },
+        fallo:{ texto:'Vas por libre y no te sale. El análisis previo, esta vez, tenía razón.', efectos:{confianza:-4} } },
+      { texto:'Jugar el partido con normalidad, sin forzar el plan',
+        resultado:'No fuerzas nada especial. El partido se resuelve por otros motivos.',
+        efectos:{} }
+    ]
+  },
+  {
+    id:"entrenador_aviso_banco", cooldown:6, soloSiSano:true,
+    trigger:{ probabilidad:0.1, condicion: j => !j.avisoBancoPendiente },
+    texto:'El entrenador te para a la salida del entrenamiento: "No estoy viendo lo que necesito de ti. Si no me lo demuestras en los próximos partidos, te vas a sentar en el banquillo." No es una charla más: sabes que esta vez va en serio.',
+    opciones:[
+      { texto:'Tomártelo como un aviso y redoblar el esfuerzo', tirada:{atributo:'mental', dificultadBase:11},
+        exito:{ texto:'Te lo tomas con la cabeza fría: entrenamiento extra, atención a cada detalle. Se nota desde el primer día.',
+          efectosFn: j => { j.avisoBancoPendiente = true; return {forma:4,confianza:2}; } },
+        fallo:{ texto:'El aviso te pesa más de lo que esperabas y te cuesta quitártelo de la cabeza.',
+          efectosFn: j => { j.avisoBancoPendiente = true; return {confianza:-3}; } } },
+      { texto:'No darle más importancia de la que tiene',
+        resultado:'Decides no obsesionarte. Ya se verá lo que pasa en el campo.',
+        efectosFn: j => { j.avisoBancoPendiente = true; return {}; } }
+    ]
+  },
+  {
+    id:"entrenador_resolucion_banco", cooldown:1, soloSiSano:true,
+    trigger:{ probabilidad:0.4, condicion: j => !!j.avisoBancoPendiente },
+    texto:'Ha llegado el momento de la verdad: el entrenador te lo dijo hace unos partidos, y hoy toca comprobar si te has ganado el puesto o si el aviso se cumple.',
+    opciones:[
+      { texto:'Jugártelo todo a una gran actuación', tirada:{atributo:'tiro', dificultadBase:12},
+        exito:{ texto:'Respondes justo cuando tocaba. El entrenador no dice gran cosa, pero el puesto vuelve a ser tuyo sin discusión.',
+          efectosFn: j => { j.avisoBancoPendiente = false; return {confianza:8,reputacion:3,vestuario:4}; } },
+        fallo:{ texto:'No consigues levantar tu nivel a tiempo. El entrenador cumple su palabra y te manda al banquillo unas semanas.',
+          efectosFn: j => { j.avisoBancoPendiente = false; return {confianza:-6,vestuario:-3}; } } },
+      { texto:'Aceptar que quizá toca ser paciente',
+        resultado:'No fuerzas nada especial. El entrenador decide por su cuenta lo que hacer contigo, sin que dependa de un único partido.',
+        efectosFn: j => { j.avisoBancoPendiente = false; return {confianza:-1}; } }
+    ]
+  },
+  {
     id:"celebracion_titulo", soloTrasTitulo:true,
     trigger:{ probabilidad:1, condicion: () => {
       const ultimoTitulo = (S.titulosTemporadaActual||[])[S.titulosTemporadaActual.length-1];
@@ -6629,6 +6689,7 @@ function migrarJugadorGuardado(j){
   if(j.temporadasEnClub === undefined) j.temporadasEnClub = 0;
   if(j.temporadasSinEquipo === undefined) j.temporadasSinEquipo = [];
   if(j.enParo === undefined) j.enParo = false;
+  if(j.avisoBancoPendiente === undefined) j.avisoBancoPendiente = false;
   if(j.provincia === undefined) j.provincia = '';
   if(j.idCarrera === undefined) j.idCarrera = generarIdCarrera();
   // Partidas de antes de guardar el estilo de juego elegido en creación: se infiere el más
@@ -6721,6 +6782,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia,estiloId
     comprasUnicas:[],
     cocheActual:0, motoActual:0,
     lesionSemanas:0, sancionActiva:false,
+    avisoBancoPendiente:false,
     carinoAficion:20,
     temporadasEnClub:0,
     maxCarinoAlcanzado:20,
