@@ -5444,7 +5444,11 @@ const BANDERAS_SVG = {
   "Jamaica": '<rect width="40" height="40" fill="#FED100"/><polygon points="0,0 20,20 0,40" fill="#000000"/><polygon points="40,0 20,20 40,40" fill="#000000"/><polygon points="0,0 40,0 20,20" fill="#009B3A"/><polygon points="0,40 40,40 20,20" fill="#009B3A"/>',
   "Qatar": '<rect width="40" height="40" fill="#8A1538"/><rect width="10" height="40" x="0" fill="#FFFFFF"/><polygon points="10,0 14,2 10,4 14,6 10,8 14,10 10,12 14,14 10,16 14,18 10,20 14,22 10,24 14,26 10,28 14,30 10,32 14,34 10,36 14,38 10,40" fill="#8A1538"/>',
   "Rumanía": '<rect width="13.3" height="40" x="0" fill="#002B7F"/><rect width="13.4" height="40" x="13.3" fill="#FCD116"/><rect width="13.3" height="40" x="26.6" fill="#CE1126"/>',
-  "Túnez": '<rect width="40" height="40" fill="#E70013"/><circle cx="20" cy="20" r="9" fill="#FFFFFF"/><polygon points="20,14 21.8,18.5 26.5,18.8 22.8,21.8 24,26.3 20,23.6 16,26.3 17.2,21.8 13.5,18.8 18.2,18.5" fill="#E70013"/>'
+  "Túnez": '<rect width="40" height="40" fill="#E70013"/><circle cx="20" cy="20" r="9" fill="#FFFFFF"/><polygon points="20,14 21.8,18.5 26.5,18.8 22.8,21.8 24,26.3 20,23.6 16,26.3 17.2,21.8 13.5,18.8 18.2,18.5" fill="#E70013"/>',
+  // Añadidas para completar los 24 países de PAISES_EUROCOPA_POR_POTE (solo 21 de los de arriba
+  // son UEFA — el resto del Mundial es de otras confederaciones — y hacían falta 23 sin España).
+  "Suecia": '<rect width="40" height="40" fill="#006AA7"/><rect width="6" height="40" x="14" fill="#FECC02"/><rect width="40" height="6" y="17" fill="#FECC02"/>',
+  "Hungría": '<rect width="40" height="13.3" y="0" fill="#CD2A3E"/><rect width="40" height="13.3" y="13.3" fill="#FFFFFF"/><rect width="40" height="13.4" y="26.6" fill="#436F4D"/>'
 };
 /* ============ Cromos del mundo: ficha de cada país con curiosidades de fútbol reales ============
    Colección de por vida (localStorage, no de la partida) — se desbloquea un país la primera vez
@@ -5556,7 +5560,9 @@ const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResul
   // al menú, a la tienda o al plan de entreno — como en las demás secuencias "de un tirón" de
   // esta misma lista (rueda de prensa, reveals de título...). Se reactiva solo al terminar
   // (victoria final o eliminación), cuando S.mundial se pone a null y vuelve la pantalla base.
-  'mundialIntro','mundialBombos','mundialSorteo','mundialPrensa','mundialGrupo','mundialGrupoTabla','mundialElim','mundialPenaltis','mundialCampeones','mundialEliminado']);
+  'mundialIntro','mundialBombos','mundialSorteo','mundialPrensa','mundialGrupo','mundialGrupoTabla','mundialElim','mundialPenaltis','mundialCampeones','mundialEliminado',
+  // La Eurocopa (mismo sistema, con S.eurocopa en vez de S.mundial) es la misma secuencia de un tirón.
+  'eurocopaIntro','eurocopaBombos','eurocopaSorteo','eurocopaPrensa','eurocopaGrupo','eurocopaGrupoTabla','eurocopaElim','eurocopaPenaltis','eurocopaCampeones','eurocopaEliminado']);
 // Subconjunto de las pantallas del Mundial de arriba que SÍ deben poder ser S.pantallaBase (el
 // "punto de retorno" que usan el botón Avanzar y el "Volver" de Ajustes/Logros): todas menos las
 // dos de cierre puro (mundialCampeones/mundialEliminado, ya con su reveal-side-effect aplicado al
@@ -5565,7 +5571,8 @@ const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResul
 // deshabilitada) dejaba "Volver" apuntando a una pantalla vieja de antes de empezar el torneo,
 // en vez de a la pantalla del Mundial en la que estabas — se veía como que la vuelta se quedaba
 // trabada en un sitio que no tenía sentido.
-const PANTALLAS_MUNDIAL_JUEGO = new Set(['mundialIntro','mundialBombos','mundialSorteo','mundialPrensa','mundialGrupo','mundialGrupoTabla','mundialElim','mundialPenaltis']);
+const PANTALLAS_MUNDIAL_JUEGO = new Set(['mundialIntro','mundialBombos','mundialSorteo','mundialPrensa','mundialGrupo','mundialGrupoTabla','mundialElim','mundialPenaltis',
+  'eurocopaIntro','eurocopaBombos','eurocopaSorteo','eurocopaPrensa','eurocopaGrupo','eurocopaGrupoTabla','eurocopaElim','eurocopaPenaltis']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
 const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras','blackjack']);
@@ -5724,12 +5731,14 @@ function elegirRivalesSeleccion(pool){
 }
 
 /* ============ Mundial nuevo (formato real 2026: fase de grupos + eliminatoria completa) ============
-   Sustituye la vieja abstracción semifinal→final SOLO para el Mundial absoluto (torneoDeVerano
-   === 'Mundial' y cfg.id === 'seleccion_absoluta') — ver iniciarTorneoEliminatorio. La Eurocopa y
-   las categorías Sub-21 siguen con el sistema de siempre: el formato de grupos + bombos es
-   específico del Mundial real, no tiene sentido replicarlo para un torneo ficticio.
+   Sustituye la vieja abstracción semifinal→final para el Mundial y la Eurocopa absolutos
+   (torneoDeVerano === 'Mundial'/'Eurocopa' y cfg.id === 'seleccion_absoluta') — ver
+   iniciarTorneoEliminatorio. Las categorías Sub-21 siguen con el sistema de siempre, sin fase de
+   grupos ni bombos.
    Estado completo en S.mundial — todo dato plano (nunca funciones), porque guardarPartida()
-   serializa TODO S con JSON.stringify y una función ahí se perdería en silencio al recargar. */
+   serializa TODO S con JSON.stringify y una función ahí se perdería en silencio al recargar.
+   El bloque de la Eurocopa (S.eurocopa, más abajo, después de iniciarMundialNuevo) sigue el mismo
+   patrón y reutiliza directamente las funciones puras de aquí (tirarMundial, marcadorMundial...). */
 // 12 selecciones por bombo (más España, siempre fija en el Bombo 1) = 48 en total, como en el
 // Mundial real de 2026. El bombo 1 son las 11 más fuertes (junto a España); el resto reparte el
 // resto de confederaciones sin buscar exactitud oficial de ranking, solo variedad real por edición.
@@ -5849,6 +5858,141 @@ function iniciarMundialNuevo(cfg){
   };
   j.historial.push({ temporada:S.temporada, evento:'torneo_'+cfg.id });
   S.screen = 'mundialIntro';
+}
+
+/* ============ Eurocopa (mismo sistema que el Mundial nuevo, formato real: 24 selecciones, 6
+   grupos de 4, 4 bombos de 6) ============
+   Estado completo en S.eurocopa — todo dato plano (nunca funciones), mismo motivo que S.mundial:
+   guardarPartida() serializa TODO S con JSON.stringify.
+   Reutiliza directamente (son funciones puras, sin nada específico del Mundial dentro):
+   tirarMundial, marcadorMundial, resultadoPartidoMundial, marcadorEnPantalla, filaEquipoMundial,
+   elegirRivalEliminatorioMundial, preguntaPrensaMundial. Se escriben aparte solo las piezas que sí
+   dependen de datos o del propio S.mundial: los bombos/dificultad de 24 equipos, las fases (la
+   Eurocopa no tiene dieciseisavos —el primer cruce ya es con 16 equipos— ni partido por el 3er
+   puesto, a diferencia del Mundial) y el estado de la propia S.eurocopa. */
+// 5 selecciones por bombo (más España, siempre fija en el Bombo 1) = 24 en total, como en la
+// Eurocopa real desde 2016. Bombo 1 son las más fuertes; el resto reparte al azar sin buscar
+// exactitud de ranking oficial, solo variedad real por edición — mismo criterio que el Mundial.
+const PAISES_EUROCOPA_POR_POTE = {
+  1: ["Alemania","Francia","Inglaterra","Portugal","Países Bajos"],
+  2: ["Bélgica","Italia","Croacia","Suiza","Dinamarca","Austria"],
+  3: ["Turquía","Serbia","Polonia","Ucrania","Gales","República Checa"],
+  4: ["Escocia","Grecia","Noruega","Rumanía","Suecia","Hungría"]
+};
+// Igual que DIFICULTAD_MUNDIAL, pero sin dieciseisavos ni tercerPuesto (la Eurocopa no los tiene):
+// octavos/cuartos/semis/final usan los mismos valores que el Mundial en la ronda equivalente por
+// equipos restantes (los octavos de la Eurocopa, con 16 equipos, caen en el mismo punto del
+// torneo que los octavos del Mundial, no en su dieciseisavos).
+const DIFICULTAD_EUROCOPA = {
+  grupo:   {1:10, 2:8,  3:6,  4:4},
+  octavos: {1:11, 2:10, 3:9,  4:7},
+  cuartos: {1:12, 2:11, 3:10, 4:8},
+  semis:   {1:14, 2:13, 3:11, 4:9},
+  final:   {1:16, 2:15, 3:13, 4:11}
+};
+const FASES_EUROCOPA = [
+  { id:'octavos', nombre:'Octavos de final' },
+  { id:'cuartos', nombre:'Cuartos de final' },
+  { id:'semis', nombre:'Semifinal' },
+  { id:'final', nombre:'Final' }
+];
+function buscarFaseEurocopa(id){
+  const idx = FASES_EUROCOPA.findIndex(f=>f.id===id);
+  return { info: FASES_EUROCOPA[idx], idx };
+}
+function poteDePaisEurocopa(nombre){
+  for(const pote of [1,2,3,4]){ if(PAISES_EUROCOPA_POR_POTE[pote].includes(nombre)) return pote; }
+  return 4;
+}
+function sortearGrupoEurocopa(){
+  const elegirDePote = pote => {
+    const pool = PAISES_EUROCOPA_POR_POTE[pote];
+    return pool[Math.floor(Math.random()*pool.length)];
+  };
+  return [
+    { n:'España', pot:1 },
+    { n:elegirDePote(2), pot:2 },
+    { n:elegirDePote(3), pot:3 },
+    { n:elegirDePote(4), pot:4 }
+  ];
+}
+function iniciarEurocopaNueva(cfg){
+  const j = S.jugador;
+  S.eurocopa = {
+    grupo: sortearGrupoEurocopa(), sorteoRevelados: 0, sorteoPausado: false,
+    tuALaIzquierda: null,
+    prensaPregunta: null, prensaRespuesta: null,
+    calendarioGrupo: null, jornada: 0, resultadosGrupo: [],
+    fase: null, pasosElim: [],
+    rivalElimActual: null, penaltisCtx: null, monedaGirando: false, monedaGanador: null, monedaCaraActual: null,
+    eliminado: null, campeon: false,
+    _tirando: false, _tiradaResultado: null, _resultadoPartido: null,
+    efectosVictoria: cfg.efectosVictoria
+  };
+  j.historial.push({ temporada:S.temporada, evento:'torneo_'+cfg.id });
+  S.screen = 'eurocopaIntro';
+}
+// El camino hasta ahora (grupos + eliminatorias), igual que crearResumenCaminoMundial.
+function crearResumenCaminoEurocopa(){
+  const m = S.eurocopa;
+  if(!m || (!m.pasosElim.length && !m.resultadosGrupo.length)) return null;
+  const resumen = el('div','card');
+  resumen.appendChild(crearEyebrow('Camino hasta aquí'));
+  m.resultadosGrupo.forEach(r=>{
+    const paso = el('div','bracket-paso '+r.resultado);
+    paso.appendChild(el('span','fase','Fase de grupos'));
+    paso.appendChild(el('span','resultado', `${r.marcador} vs ${r.rival.n}`));
+    resumen.appendChild(paso);
+  });
+  m.pasosElim.forEach(p=>{
+    const paso = el('div','bracket-paso '+p.resultado);
+    paso.appendChild(el('span','fase', p.nombre));
+    paso.appendChild(el('span','resultado', `${p.marcador} vs ${p.rival.n}${p.penaltis?' (penaltis)':''}`));
+    resumen.appendChild(paso);
+  });
+  return resumen;
+}
+// Igual que finalizarEstadisticasMundial: solo se acumulan los partidos que de verdad se juegan.
+function finalizarEstadisticasEurocopa(j){
+  const m = S.eurocopa;
+  const partidos = m.resultadosGrupo.length + m.pasosElim.length;
+  const tasaGol = Math.min(0.6, 0.12 + (j.atributos.tiro/ATRIBUTO_MAX)*0.34 + (j.atributos.desmarque/ATRIBUTO_MAX)*0.12);
+  const goles = Math.max(0, Math.round(partidos * tasaGol * (0.65 + Math.random()*0.7)));
+  const asistencias = Math.max(0, Math.round(partidos * (0.06 + (j.atributos.pase/ATRIBUTO_MAX)*0.16) * (0.6 + Math.random()*0.8)));
+  j.carrera.partidosSeleccion = (j.carrera.partidosSeleccion||0) + partidos;
+  j.carrera.golesSeleccion = (j.carrera.golesSeleccion||0) + goles;
+  j.carrera.asistenciasSeleccion = (j.carrera.asistenciasSeleccion||0) + asistencias;
+  j.historialSeleccion = j.historialSeleccion || [];
+  j.historialSeleccion.push({ temporada: S.temporada, torneo: 'Eurocopa', sub21:false, partidos, goles, asistencias });
+}
+function resolverEliminatoriaEurocopa(faseInfo, idx, rival, resultado, penaltis, marcador){
+  const j = S.jugador;
+  const m = S.eurocopa;
+  m.pasosElim.push({ fase:faseInfo.id, nombre:faseInfo.nombre, rival, resultado, penaltis, marcador });
+  m.rivalElimActual = null; m.penaltisCtx = null; m.monedaGirando = false; m.monedaGanador = null; m.monedaCaraActual = null; m.tuALaIzquierda = null;
+  if(resultado === 'derrota'){
+    const esFinal = faseInfo.id === 'final';
+    aplicarEfectos(j, esFinal ? {forma:-4,reputacion:2} : {forma:-6});
+    S.faseCompeticiones = S.faseCompeticiones || {};
+    S.faseCompeticiones['Eurocopa'] = esFinal ? 'Final' : faseInfo.nombre;
+    finalizarEstadisticasEurocopa(j);
+    m.eliminado = { fase:faseInfo.nombre, penaltis, esFinal };
+    S.screen = 'eurocopaEliminado';
+  } else if(faseInfo.id === 'final'){
+    aplicarEfectos(j, m.efectosVictoria);
+    S.titulosTemporadaActual = S.titulosTemporadaActual || [];
+    S.titulosTemporadaActual.push('Eurocopa');
+    S.ultimoEventoFueTitulo = true;
+    S.faseCompeticiones = S.faseCompeticiones || {};
+    S.faseCompeticiones['Eurocopa'] = 'Campeón';
+    finalizarEstadisticasEurocopa(j);
+    m.campeon = true;
+    S.screen = 'eurocopaCampeones';
+  } else {
+    m.fase = FASES_EUROCOPA[idx+1].id;
+    S.screen = 'eurocopaElim';
+  }
+  render();
 }
 
 const TEXTOS_SEMIFINAL_CLUB = [
@@ -9434,6 +9578,11 @@ function pintar(){
   // mundialEliminado) — sin este check, SCREENS[S.screen]() reventaba leyendo S.mundial.algo
   // sobre null y la pantalla se quedaba en blanco.
   if(S.screen.indexOf('mundial') === 0 && !S.mundial){
+    S.screen = S.jugador ? 'tabJugador' : 'menu';
+    S.pantallaBase = undefined;
+  }
+  // Misma red de seguridad que arriba, para la Eurocopa (S.eurocopa en vez de S.mundial).
+  if(S.screen.indexOf('eurocopa') === 0 && !S.eurocopa){
     S.screen = S.jugador ? 'tabJugador' : 'menu';
     S.pantallaBase = undefined;
   }
@@ -14787,10 +14936,14 @@ function acumularEstadisticasSeleccion(j, cfg, nombreCompeticion){
 }
 function iniciarTorneoEliminatorio(cfg){
   const j = S.jugador;
-  // El Mundial absoluto (no Eurocopa, no Sub-21) usa el sistema nuevo de 48 selecciones —
-  // fase de grupos + eliminatoria completa — en vez de la vieja abstracción semifinal→final.
+  // El Mundial y la Eurocopa absolutos (no Sub-21) usan el sistema nuevo de fase de grupos +
+  // eliminatoria completa, en vez de la vieja abstracción semifinal→final.
   if(cfg.id === 'seleccion_absoluta' && torneoDeVerano(S.temporada) === 'Mundial'){
     iniciarMundialNuevo(cfg);
+    return;
+  }
+  if(cfg.id === 'seleccion_absoluta' && torneoDeVerano(S.temporada) === 'Eurocopa'){
+    iniciarEurocopaNueva(cfg);
     return;
   }
   const esSeleccion = cfg.tipo === 'seleccion' || cfg.tipo === 'seleccion_sub21';
@@ -15397,9 +15550,11 @@ function marcadorEnPantalla(marcador, tuALaIzquierda){
   const partes = marcador.split('-');
   return partes.length === 2 ? `${partes[1]}-${partes[0]}` : marcador;
 }
+// Compartida entre el Mundial y la Eurocopa (mismo bloque visual: cabecera VS, tirada, marcador).
+// opts.estado es S.mundial o S.eurocopa según el torneo — el resto de opts no cambia entre los dos.
 function pintarPartidoMundial(opts){
   const j = S.jugador;
-  const m = S.mundial;
+  const m = opts.estado;
   // Un lado distinto cada partido, como en la vida real — se fija una sola vez por partido (no en
   // cada repintado) y la pantalla de penaltis, si llega, hereda el mismo lado hasta resolverse.
   if(m.tuALaIzquierda == null) m.tuALaIzquierda = Math.random() < 0.5;
@@ -15651,6 +15806,7 @@ SCREENS.mundialGrupo = function(){
   const dificultad = DIFICULTAD_MUNDIAL.grupo[rival.pot];
   topbar('Mundial');
   pintarPartidoMundial({
+    estado: m,
     eyebrowTxt: `Fase de grupos · Jornada ${m.jornada+1} de 3`,
     rival, dificultad,
     onResultado: (r)=>{
@@ -15760,6 +15916,7 @@ SCREENS.mundialElim = function(){
   const dificultad = DIFICULTAD_MUNDIAL[faseInfo.id][m.rivalElimActual.pot];
   topbar('Mundial');
   pintarPartidoMundial({
+    estado: m,
     eyebrowTxt: `Eliminatoria · ${faseInfo.nombre}`,
     rival: m.rivalElimActual, dificultad,
     textoContinuar: 'Continuar →', textoContinuarEmpate: 'Ir a los penaltis →',
@@ -15893,6 +16050,371 @@ SCREENS.mundialCampeones = function(){
   c.appendChild(btn);
   app.appendChild(c);
   const resumen = crearResumenCaminoMundial();
+  if(resumen) app.appendChild(resumen);
+  setTimeout(()=> Sonido.aficionCelebra(), 400);
+};
+
+SCREENS.eurocopaIntro = function(){
+  const j = S.jugador;
+  const anio = temporadaAAnoUnico(S.temporada);
+  Sonido.trofeo();
+  topbar('Eurocopa ' + anio);
+  const c = el('div','season-reveal campeon');
+  const iconoBox = el('div','icon','');
+  iconoBox.innerHTML = iconoInsignia('trofeo', 76);
+  iconoBox.style.cssText = 'display:flex;justify-content:center;margin-bottom:14px;';
+  c.appendChild(iconoBox);
+  const numEl = c.appendChild(el('div','num', `Empieza la Eurocopa ${anio}`));
+  numEl.style.fontSize = '26px';
+  c.appendChild(el('div','sub', `Después de una temporada exigente con ${j.club.sinEquipo ? 'tu carrera' : j.club.nombre}, te incorporas a la concentración de España. Quedan semanas de trabajo antes del sorteo de grupos — el torneo continental que puede marcar tu carrera está a punto de empezar.`));
+  const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Ver el sorteo de bombos →';
+  btn.onclick = ()=>{ S.screen = 'eurocopaBombos'; render(); };
+  c.appendChild(btn);
+  app.appendChild(c);
+};
+
+SCREENS.eurocopaBombos = function(){
+  topbar('Bombos de la Eurocopa');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Previa del sorteo'));
+  c.appendChild(el('h2',null,'Así quedan los bombos'));
+  c.appendChild(el('div','lore-box','España entra en el Bombo 1 junto a las mejores selecciones del ranking. En unos minutos, la UEFA sorteará un rival de cada bombo para completar tu grupo.'));
+  for(let p=1; p<=4; p++){
+    c.appendChild(el('div','bombo-lbl', `Bombo ${p}`));
+    const grid = el('div','bombo-grid');
+    const paisesDelBombo = p===1 ? ['España', ...PAISES_EUROCOPA_POR_POTE[1]] : PAISES_EUROCOPA_POR_POTE[p];
+    paisesDelBombo.forEach(nombre=>{
+      const item = el('div','bombo-pais'+(nombre==='España'?' tuyo':''));
+      const mini = el('div','mini','');
+      mini.innerHTML = banderaPais(nombre, 30);
+      item.appendChild(mini);
+      item.appendChild(el('div','nombre', nombre));
+      grid.appendChild(item);
+    });
+    c.appendChild(grid);
+  }
+  const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Realizar el sorteo →';
+  btn.onclick = ()=>{ S.screen = 'eurocopaSorteo'; render(); };
+  c.appendChild(btn);
+  app.appendChild(c);
+};
+
+SCREENS.eurocopaSorteo = function(){
+  const m = S.eurocopa;
+  topbar('Sorteo de la Eurocopa');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Fase de grupos'));
+  c.appendChild(el('h2',null,'El sorteo decide tu grupo'));
+  c.appendChild(el('div','lore-box','España conoce a sus rivales de la fase de grupos, uno de cada bombo.'));
+
+  const lista = el('div','mundial-sorteo-lista');
+  const filas = [];
+  m.grupo.forEach((pais, idx)=>{
+    const fila = el('div','mundial-sorteo-fila');
+    const mini = el('div','mundial-sorteo-mini');
+    const nombreEl = el('span','mundial-sorteo-nombre');
+    fila.appendChild(mini); fila.appendChild(nombreEl); fila.appendChild(el('span','mundial-sorteo-bombo', `Bombo ${idx+1}`));
+    lista.appendChild(fila);
+    filas.push({fila, mini, nombreEl});
+  });
+  c.appendChild(lista);
+
+  function pintarFila(idx, nombre, revelado){
+    const {fila, mini, nombreEl} = filas[idx];
+    mini.innerHTML = banderaPais(nombre, 28);
+    nombreEl.textContent = revelado ? nombre : '···';
+    fila.classList.toggle('revelado', revelado);
+    if(idx===0) fila.classList.add('fijo');
+  }
+  m.grupo.forEach((pais, idx)=> pintarFila(idx, (idx===0 || idx<=m.sorteoRevelados) ? pais.n : PAISES_EUROCOPA_POR_POTE[idx+1][0], idx===0 || idx<=m.sorteoRevelados));
+
+  const zonaBoton = document.createElement('div');
+  c.appendChild(zonaBoton);
+  app.appendChild(c);
+
+  if(m.sorteoRevelados < 3 && !m.sorteoPausado){
+    const poteActual = m.sorteoRevelados + 2;
+    const candidatosPote = PAISES_EUROCOPA_POR_POTE[poteActual];
+    const idxFila = m.sorteoRevelados + 1;
+    let ticks = 0;
+    const cicloId = setInterval(()=>{
+      pintarFila(idxFila, candidatosPote[Math.floor(Math.random()*candidatosPote.length)], false);
+      Sonido.tick();
+      ticks++;
+    }, 110);
+    setTimeout(()=>{
+      clearInterval(cicloId);
+      m.sorteoRevelados++;
+      Sonido.click();
+      if(m.sorteoRevelados < 3){
+        m.sorteoPausado = true;
+        pintar();
+        setTimeout(()=>{ m.sorteoPausado = false; pintar(); }, 650);
+      } else {
+        pintar();
+      }
+    }, 900);
+  } else if(m.sorteoRevelados >= 3){
+    const btn = el('button','btn-main','Continuar a la rueda de prensa →');
+    btn.onclick = ()=>{ S.screen='eurocopaPrensa'; render(); };
+    zonaBoton.appendChild(btn);
+  }
+};
+
+SCREENS.eurocopaPrensa = function(){
+  const m = S.eurocopa;
+  // preguntaPrensaMundial(m) es genérica (solo usa m.grupo, no hace referencia al Mundial en
+  // ningún texto), así que se reutiliza tal cual para la Eurocopa.
+  if(!m.prensaPregunta) m.prensaPregunta = preguntaPrensaMundial(m);
+  const pregunta = m.prensaPregunta;
+  topbar('Rueda de prensa');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Antes del debut'));
+  c.appendChild(el('h2',null,'Un periodista te pregunta'));
+  c.appendChild(el('div','lore-box', pregunta.texto));
+  if(m.prensaRespuesta == null){
+    pregunta.opciones.forEach((op,i)=>{
+      const b = el('button','opt', op.texto);
+      b.onclick = ()=>{ m.prensaRespuesta = i; pintar(); };
+      c.appendChild(b);
+    });
+  } else {
+    c.appendChild(el('div','lore-box', pregunta.opciones[m.prensaRespuesta].tono));
+    const btn = el('button','btn-main','Empieza la Eurocopa →');
+    btn.onclick = ()=>{ S.screen = 'eurocopaGrupo'; render(); };
+    c.appendChild(btn);
+  }
+  app.appendChild(c);
+};
+
+SCREENS.eurocopaGrupo = function(){
+  const m = S.eurocopa;
+  if(m.jornada >= 3){ S.screen = 'eurocopaGrupoTabla'; SCREENS.eurocopaGrupoTabla(); return; }
+  if(!m.calendarioGrupo){
+    const arr = m.grupo.slice(1);
+    for(let i=arr.length-1;i>0;i--){ const jx=Math.floor(Math.random()*(i+1)); [arr[i],arr[jx]]=[arr[jx],arr[i]]; }
+    m.calendarioGrupo = arr;
+  }
+  const rival = m.calendarioGrupo[m.jornada];
+  const dificultad = DIFICULTAD_EUROCOPA.grupo[rival.pot];
+  topbar('Eurocopa');
+  pintarPartidoMundial({
+    estado: m,
+    eyebrowTxt: `Fase de grupos · Jornada ${m.jornada+1} de 3`,
+    rival, dificultad,
+    onResultado: (r)=>{
+      m.resultadosGrupo.push({ rival, ...r });
+      m.jornada++;
+      m.tuALaIzquierda = null;
+      if(m.jornada >= 3) S.screen = 'eurocopaGrupoTabla';
+      render();
+    }
+  });
+};
+
+// La Eurocopa real clasifica a los 2 primeros de cada uno de los 6 grupos (12) más los 4 mejores
+// tercero de la tabla general de terceros (4) = 16. El juego solo simula TU grupo (no los otros
+// 5), así que no hay tabla real de terceros con la que comparar — en vez de fingir una, un 3º
+// puesto tiene una probabilidad de "colarse" que escala con tus propios puntos dentro del rango
+// de 3º (más puntos, más opciones), calibrada para que en conjunto ronde el ~67% real (4 de 6
+// terceros pasan en un Eurocopa de verdad). Mismo espíritu de aproximación jugable que ya usa el
+// sorteo ponderado de la Supercopa de España.
+function probabilidadMejorTerceroEurocopa(puntos){
+  if(puntos >= 3) return 0.75;
+  if(puntos === 2) return 0.60;
+  return 0.40;
+}
+SCREENS.eurocopaGrupoTabla = function(){
+  const j = S.jugador;
+  const m = S.eurocopa;
+  const puntos = m.resultadosGrupo.reduce((acc,r)=> acc + (r.resultado==='victoria'?3:r.resultado==='empate'?1:0), 0);
+  const posicion = puntos>=7 ? 1 : puntos>=4 ? 2 : puntos>=1 ? 3 : 4;
+  let clasificas = posicion <= 2;
+  let coladoComoTercero = false;
+  if(posicion === 3 && m._terceroClasifica === undefined){
+    m._terceroClasifica = Math.random() < probabilidadMejorTerceroEurocopa(puntos);
+  }
+  if(posicion === 3 && m._terceroClasifica){ clasificas = true; coladoComoTercero = true; }
+  topbar('Eurocopa · Fase de grupos');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Fin de la fase de grupos'));
+  c.appendChild(el('h2',null, `${ORDINAL_GRUPO_MUNDIAL[posicion]} · ${puntos} puntos`));
+  const tabla = el('div','historial-temporadas');
+  m.resultadosGrupo.forEach(r=>{
+    const fila = el('div','historial-fila');
+    fila.innerHTML = `<span class="temp">${banderaPais(r.rival.n,18)} ${r.rival.n}</span><div class="historial-fila-stats"><span class="dato">${r.marcador}</span><span class="dato${r.resultado==='victoria'?' oro':''}">${r.resultado==='victoria'?'V':r.resultado==='empate'?'E':'D'}</span></div>`;
+    tabla.appendChild(fila);
+  });
+  c.appendChild(tabla);
+  let textoResultado;
+  if(coladoComoTercero) textoResultado = 'España acaba tercera de grupo, pero la tabla general de mejores terceros sonríe: ¡hay billete para los octavos de final!';
+  else if(clasificas) textoResultado = 'España pasa a los octavos de final. La Eurocopa de verdad empieza ahora.';
+  else if(posicion === 3) textoResultado = 'España acaba tercera de grupo, y esta vez la tabla de mejores terceros no acompaña. Fuera de la Eurocopa por la mínima.';
+  else textoResultado = 'España se queda fuera de la Eurocopa en la fase de grupos. Un golpe duro, y una vuelta a casa mucho antes de lo soñado.';
+  const cajaResultado = el('div','lore-box', textoResultado);
+  cajaResultado.style.marginTop = '16px';
+  c.appendChild(cajaResultado);
+  const btn = el('button','btn-main', clasificas ? 'Ir a octavos →' : 'Continuar →');
+  btn.onclick = ()=>{
+    if(clasificas){
+      m.fase = 'octavos';
+      S.screen = 'eurocopaElim';
+      render();
+    } else {
+      aplicarEfectos(j, {forma:-6});
+      S.faseCompeticiones = S.faseCompeticiones || {};
+      S.faseCompeticiones['Eurocopa'] = 'Fase de grupos';
+      finalizarEstadisticasEurocopa(j);
+      m.eliminado = { fase:'Fase de grupos', penaltis:false };
+      S.screen = 'eurocopaEliminado';
+      render();
+    }
+  };
+  c.appendChild(btn);
+  app.appendChild(c);
+  const resumen = crearResumenCaminoEurocopa();
+  if(resumen) app.insertBefore(resumen, app.firstChild.nextSibling);
+};
+
+SCREENS.eurocopaElim = function(){
+  const m = S.eurocopa;
+  const { info: faseInfo, idx } = buscarFaseEurocopa(m.fase);
+  const usados = new Set(['España', ...m.grupo.slice(1).map(p=>p.n), ...m.pasosElim.map(p=>p.rival.n)]);
+  if(!m.rivalElimActual){
+    const candidatos = [1,2,3,4].flatMap(p=> PAISES_EUROCOPA_POR_POTE[p].filter(n=>!usados.has(n)).map(n=>({n,pot:p})));
+    // elegirRivalEliminatorioMundial es genérica (solo usa candidatos/idxRonda), se reutiliza tal cual.
+    m.rivalElimActual = elegirRivalEliminatorioMundial(candidatos, idx);
+  }
+  const dificultad = DIFICULTAD_EUROCOPA[faseInfo.id][m.rivalElimActual.pot];
+  topbar('Eurocopa');
+  pintarPartidoMundial({
+    estado: m,
+    eyebrowTxt: `Eliminatoria · ${faseInfo.nombre}`,
+    rival: m.rivalElimActual, dificultad,
+    textoContinuar: 'Continuar →', textoContinuarEmpate: 'Ir a los penaltis →',
+    onResultado: (r)=>{
+      if(r.resultado === 'empate'){
+        m.penaltisCtx = { faseId: faseInfo.id, idx, rival: m.rivalElimActual, marcador: r.marcador };
+        S.screen = 'eurocopaPenaltis';
+        render();
+        return;
+      }
+      resolverEliminatoriaEurocopa(faseInfo, idx, m.rivalElimActual, r.resultado, false, r.marcador);
+    }
+  });
+  const resumen = crearResumenCaminoEurocopa();
+  if(resumen) app.insertBefore(resumen, app.firstChild.nextSibling);
+};
+
+SCREENS.eurocopaPenaltis = function(){
+  const m = S.eurocopa;
+  const { faseId, idx, rival, marcador } = m.penaltisCtx;
+  const { info: faseInfo } = buscarFaseEurocopa(faseId);
+  topbar('Eurocopa · Penaltis');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow(`Eliminatoria · ${faseInfo.nombre}`));
+  c.appendChild(el('h2',null,`Empate ${marcadorEnPantalla(marcador, m.tuALaIzquierda)} — se decide en los penaltis`));
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:18px;margin:28px 0 22px;';
+  const filaEspana = filaEquipoMundial({n:'España'});
+  const filaRival = filaEquipoMundial(rival);
+  if(m.tuALaIzquierda !== false){ row.appendChild(filaEspana); row.appendChild(el('div','vs-mundial','VS')); row.appendChild(filaRival); }
+  else { row.appendChild(filaRival); row.appendChild(el('div','vs-mundial','VS')); row.appendChild(filaEspana); }
+  c.appendChild(row);
+
+  const wrap = el('div','moneda-wrap');
+  const moneda = el('div','moneda'+(m.monedaGirando?' girando':''));
+  if(m.monedaGanador){
+    moneda.innerHTML = `<div class="moneda-cara">${banderaPais(m.monedaGanador,44)}</div>`;
+  } else if(m.monedaGirando){
+    moneda.innerHTML = `<div class="moneda-cara">${banderaPais(m.monedaCaraActual || rival.n, 44)}</div>`;
+  } else {
+    moneda.innerHTML = `<div class="moneda-cara moneda-split"><div class="mitad izq">${banderaPais('España',44)}</div><div class="mitad der">${banderaPais(rival.n,44)}</div></div>`;
+  }
+  wrap.appendChild(moneda);
+  c.appendChild(wrap);
+
+  if(!m.monedaGanador){
+    c.appendChild(el('div','lore-box', m.monedaGirando ? 'La moneda gira en el aire…' : `Nada separa a los dos equipos. Cara España, cruz ${rival.n} — gana quien salga.`));
+    const btn = el('button','btn-main', m.monedaGirando ? 'Lanzando…' : 'Lanzar la moneda →');
+    btn.disabled = !!m.monedaGirando;
+    btn.onclick = ()=>{
+      m.monedaGirando = true;
+      Sonido.tick();
+      pintar();
+      let ticks = 0;
+      const iv = setInterval(()=>{
+        m.monedaCaraActual = ticks%2===0 ? rival.n : 'España';
+        ticks++;
+        Sonido.tick();
+        pintar();
+      }, 90);
+      setTimeout(()=>{
+        clearInterval(iv);
+        m.monedaGirando = false;
+        m.monedaCaraActual = null;
+        m.monedaGanador = Math.random()<0.5 ? 'España' : rival.n;
+        const gana = m.monedaGanador === 'España';
+        (gana ? Sonido.exito : Sonido.fallo)();
+        pintar();
+      }, 1000);
+    };
+    c.appendChild(btn);
+  } else {
+    const gana = m.monedaGanador === 'España';
+    c.appendChild(el('div','moneda-resultado', `Sale ${m.monedaGanador}`));
+    c.appendChild(el('div','lore-box', gana ? 'España se lleva la tanda de penaltis.' : `${rival.n} se lleva la tanda de penaltis.`));
+    const btn = el('button','btn-main','Continuar →');
+    btn.onclick = ()=>{ resolverEliminatoriaEurocopa(faseInfo, idx, rival, gana?'victoria':'derrota', true, marcador); };
+    c.appendChild(btn);
+  }
+  app.appendChild(c);
+};
+
+SCREENS.eurocopaEliminado = function(){
+  const info = S.eurocopa.eliminado;
+  const esFinal = !!info.esFinal;
+  topbar('Eurocopa');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Eurocopa'));
+  let titulo, texto;
+  if(esFinal){
+    titulo = 'Subcampeones de Europa';
+    texto = info.penaltis
+      ? 'La final se decide en la tanda de penaltis, el peor final posible. Os quedáis a un paso del título.'
+      : 'España pierde la final. Llegar tan lejos ya es un torneo histórico, pero el título se queda a un paso.';
+  } else if(info.fase === 'Fase de grupos'){
+    titulo = 'Eliminados en la fase de grupos';
+    texto = 'La Eurocopa termina antes de empezar de verdad. Una decepción para toda la afición, y para ti también.';
+  } else {
+    titulo = `Eliminados en ${info.fase}`;
+    texto = info.penaltis
+      ? 'Se decide en la tanda de penaltis, el peor final posible. El sueño continental tendrá que esperar cuatro años más.'
+      : 'La Eurocopa termina aquí. Vuelves a tu club con la sensación agridulce de haber vivido algo grande.';
+  }
+  c.appendChild(el('h2',null,titulo));
+  c.appendChild(el('div','event-text',texto));
+  const btn = el('button','btn-main','Continuar →');
+  btn.onclick = ()=>{ const j = S.jugador; S.eurocopa = null; continuarTrasPasoTorneo(j); render(); };
+  c.appendChild(btn);
+  app.appendChild(c);
+  const resumen = crearResumenCaminoEurocopa();
+  if(resumen) app.appendChild(resumen);
+};
+
+SCREENS.eurocopaCampeones = function(){
+  const j = S.jugador;
+  Sonido.trofeo();
+  topbar('Eurocopa');
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Campeones de Europa'));
+  c.appendChild(el('h2',null,'¡España, campeona de Europa!'));
+  c.appendChild(el('div','event-text', `${j.nombre} se corona campeón de Europa con España. El himno suena una vez más, esta vez como campeones continentales, y millones de personas lo celebran en las calles en este mismo instante. Tu nombre queda unido para siempre a esta plantilla — el mejor momento posible de tu carrera.`));
+  const btn = el('button','btn-main','Continuar →');
+  btn.onclick = ()=>{ S.eurocopa = null; continuarTrasPasoTorneo(j); render(); };
+  c.appendChild(btn);
+  app.appendChild(c);
+  const resumen = crearResumenCaminoEurocopa();
   if(resumen) app.appendChild(resumen);
   setTimeout(()=> Sonido.aficionCelebra(), 400);
 };
