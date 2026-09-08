@@ -8039,9 +8039,15 @@ function vistoReciente(jugador, ev){
 function elegirEvento(jugador){
   const trasTitulo = !!S.ultimoEventoFueTitulo;
   S.ultimoEventoFueTitulo = false;
+  // Siempre se devuelve una COPIA superficial, nunca la entrada compartida de BANCO_EVENTOS tal
+  // cual: SCREENS.evento resuelve `opciones` (cuando es función) directamente sobre el objeto que
+  // recibe, para que sobreviva a guardarPartida()/JSON.stringify. Si devolviéramos la referencia
+  // compartida, esa resolución se quedaría pegada para siempre en BANCO_EVENTOS — el mismo suceso
+  // volvería a salir con las opciones "congeladas" del primer jugador que lo vivió, en vez de
+  // recalcularse para cada jugador/temporada según su estado real.
   if(trasTitulo){
     const evCelebracion = BANCO_EVENTOS.find(e=>e.id==='celebracion_titulo');
-    if(evCelebracion) return evCelebracion;
+    if(evCelebracion) return Object.assign({}, evCelebracion);
   }
   const candidatos = BANCO_EVENTOS.filter(ev=>{
     if(ev.soloTrasTitulo) return false; // solo se dispara justo después de un título, nunca por el pool normal
@@ -8054,8 +8060,8 @@ function elegirEvento(jugador){
     if(ev.trigger.condicion && !ev.trigger.condicion(jugador)) return false;
     return Math.random() < ev.trigger.probabilidad;
   });
-  if(candidatos.length===0) return EVENTO_RELLENO;
-  return candidatos[Math.floor(Math.random()*candidatos.length)];
+  if(candidatos.length===0) return Object.assign({}, EVENTO_RELLENO);
+  return Object.assign({}, candidatos[Math.floor(Math.random()*candidatos.length)]);
 }
 function registrarEvento(jugador, ev){
   if(ev && ev.id) jugador.eventosVistos.push({ id: ev.id, temporada: S.temporada });
@@ -9964,9 +9970,39 @@ function pintar(){
     console.error('Error al pintar la pantalla "' + S.screen + '":', e);
     app.innerHTML = '';
     document.getElementById('topbar-root').innerHTML = '';
-    S.screen = S.jugador ? 'tabJugador' : 'menu';
-    S.pantallaBase = undefined;
-    SCREENS[S.screen]();
+    // Si lo que reventó fue el suceso de la semana (p. ej. S.eventoActual corrupto tras cargar
+    // una partida vieja — `ev.opciones` como función no sobrevive el JSON.stringify de
+    // guardarPartida), no basta con caer a tabJugador: S.eventoActual seguiría ahí, corrupto, y
+    // "Avanzar" no tendría a dónde llevar al jugador (pantallaBase se perdería). Se sustituye
+    // por un suceso nuevo válido para ese mismo paso de temporada, en vez de dejar la partida en
+    // un callejón sin salida.
+    let recuperado = false;
+    if(S.screen === 'evento' && S.jugador){
+      try{
+        S.eventoActual = elegirEvento(S.jugador);
+        registrarEvento(S.jugador, S.eventoActual);
+        S.pantallaBase = 'evento';
+        SCREENS.evento();
+        recuperado = true;
+      }catch(e2){
+        console.error('Fallo también al regenerar el suceso de recuperación:', e2);
+      }
+    }
+    if(!recuperado){
+      S.screen = S.jugador ? 'tabJugador' : 'menu';
+      S.pantallaBase = undefined;
+      // Este último intento NO puede quedar sin proteger: si también fallara, la excepción saldría
+      // sin capturar de pintar() entero y ni pintarTabbar() ni procesarAvisosLogros() llegarían a
+      // ejecutarse — dejando la barra inferior y sus avisos (notificaciones, insignias) congelados
+      // en lo que tuvieran pintado, aunque el propio setTimeout de un aviso siguiera disparándose
+      // por detrás sin nadie que refleje el cambio en el DOM.
+      try{
+        SCREENS[S.screen]();
+      }catch(e3){
+        console.error('Fallo también al recuperar a la pantalla base:', e3);
+        app.innerHTML = '';
+      }
+    }
   }
   pintarTabbar();
   procesarAvisosLogros();
@@ -14651,8 +14687,13 @@ SCREENS.evento = function(){
   let respondiendo = false; // evita que un doble toque resuelva el mismo suceso dos veces (260ms de transición)
   // ev.opciones normalmente es un array fijo, pero también admite j=>array para sucesos cuyas
   // opciones cambian según lo que tenga contratado el jugador (p. ej. una opción extra solo si
-  // tiene cierto servicio de la tienda).
-  const opcionesEvento = typeof ev.opciones === 'function' ? ev.opciones(j) : ev.opciones;
+  // tiene cierto servicio de la tienda). Se resuelve UNA VEZ y se deja en el propio ev.opciones
+  // (sustituyendo la función por el array ya calculado): guardarPartida() serializa S entero con
+  // JSON.stringify, que borra en silencio cualquier función — si ev.opciones seguía siendo función
+  // al guardar, al recargar la partida quedaba en undefined y este forEach reventaba, dejando
+  // S.screen atascado (bug real: "Avanzar" sin efecto tras recargar en medio de este suceso).
+  if(typeof ev.opciones === 'function') ev.opciones = ev.opciones(j);
+  const opcionesEvento = ev.opciones;
   opcionesEvento.forEach(op=>{
     const b = el('div','opt');
     b.appendChild(document.createTextNode(op.texto));
