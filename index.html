@@ -1870,23 +1870,28 @@ function mostrarCromoEsquina(c){
 }
 
 /* ============ BANCO DE EVENTOS ============ */
+// "momento" distingue si el encargo tiene sentido dicho antes del partido (un plan, algo sobre
+// el rival) o solo tiene sentido a mitad de partido (referencia al minuto, al marcador, a una
+// expulsión...) — antes TODOS se envolvían con un intro de "charla previa", aunque el propio
+// texto dijera "quedan cinco minutos" o "nos hemos quedado con uno menos". Cada grupo usa su
+// propio INTROS_ENCARGO_TACTICO_* de abajo.
 const ENCARGOS_TACTICOS = [
-  { texto:'Entra en el minuto 70, presiona la salida de balón y no pierdas la posesión.', atributo:'desmarque', dificultad:11 },
-  { texto:'Cierra bien tu carril y no te subas al ataque salvo que la ocasión sea clarísima.', atributo:'fisico', dificultad:11 },
-  { texto:'Busca la profundidad en cuanto haya un hueco, sin esperar a construir la jugada.', atributo:'velocidad', dificultad:12 },
-  { texto:'Simplifica: pase corto y seguro, nada de arriesgar con balones largos.', atributo:'pase', dificultad:10 },
-  { texto:'En cuanto perdamos el balón, presiona arriba. No dejes salir cómodo al rival.', atributo:'fisico', dificultad:12 },
-  { texto:'Al contragolpe, no dudes: encara directo a portería en cuanto tengas el balón.', atributo:'regate', dificultad:12 },
-  { texto:'Si te llega un balón dentro del área, no lo pienses: dispara a la primera.', atributo:'tiro', dificultad:12 },
-  { texto:'El rival juega con línea alta: en cuanto haya un pase filtrado, gánale la espalda al central.', atributo:'velocidad', dificultad:12 },
-  { texto:'Vamos ajustados a falta de poco: mantén la cabeza fría y no te precipites en la última decisión.', atributo:'mental', dificultad:13 },
-  { texto:'El árbitro está dejando jugar mucho: si te cargan, no repliques y sigue centrado en el partido.', atributo:'mental', dificultad:11 },
-  { texto:'Su lateral sube mucho: cada vez que ataque, aprovecha el hueco que deja atrás.', atributo:'desmarque', dificultad:11 },
-  { texto:'Busca los córners para ganar posición en las dos áreas, hoy se va a decidir a balón parado.', atributo:'fisico', dificultad:11 },
-  { texto:'No hay descanso: si robas el balón en su campo, verticaliza en dos toques como mucho.', atributo:'pase', dificultad:11 },
-  { texto:'Nos hemos quedado con uno menos: cierra bien y sacrifica tu juego por el equipo.', atributo:'fisico', dificultad:13 },
-  { texto:'Quedan cinco minutos y hay que arriesgar: es el momento de probar algo desde fuera del área.', atributo:'tiro', dificultad:13 },
-  { texto:'Su portero es flojo con el balón en los pies: presiónale en cuanto reciba de los centrales.', atributo:'velocidad', dificultad:11 },
+  { texto:'Entra en el minuto 70, presiona la salida de balón y no pierdas la posesión.', atributo:'desmarque', dificultad:11, momento:'directo' },
+  { texto:'Cierra bien tu carril y no te subas al ataque salvo que la ocasión sea clarísima.', atributo:'fisico', dificultad:11, momento:'previo' },
+  { texto:'Busca la profundidad en cuanto haya un hueco, sin esperar a construir la jugada.', atributo:'velocidad', dificultad:12, momento:'previo' },
+  { texto:'Simplifica: pase corto y seguro, nada de arriesgar con balones largos.', atributo:'pase', dificultad:10, momento:'previo' },
+  { texto:'En cuanto perdamos el balón, presiona arriba. No dejes salir cómodo al rival.', atributo:'fisico', dificultad:12, momento:'previo' },
+  { texto:'Al contragolpe, no dudes: encara directo a portería en cuanto tengas el balón.', atributo:'regate', dificultad:12, momento:'previo' },
+  { texto:'Si te llega un balón dentro del área, no lo pienses: dispara a la primera.', atributo:'tiro', dificultad:12, momento:'previo' },
+  { texto:'El rival juega con línea alta: en cuanto haya un pase filtrado, gánale la espalda al central.', atributo:'velocidad', dificultad:12, momento:'previo' },
+  { texto:'Vamos ajustados a falta de poco: mantén la cabeza fría y no te precipites en la última decisión.', atributo:'mental', dificultad:13, momento:'directo' },
+  { texto:'El árbitro está dejando jugar mucho: si te cargan, no repliques y sigue centrado en el partido.', atributo:'mental', dificultad:11, momento:'directo' },
+  { texto:'Su lateral sube mucho: cada vez que ataque, aprovecha el hueco que deja atrás.', atributo:'desmarque', dificultad:11, momento:'previo' },
+  { texto:'Busca los córners para ganar posición en las dos áreas, hoy se va a decidir a balón parado.', atributo:'fisico', dificultad:11, momento:'previo' },
+  { texto:'No hay descanso: si robas el balón en su campo, verticaliza en dos toques como mucho.', atributo:'pase', dificultad:11, momento:'directo' },
+  { texto:'Nos hemos quedado con uno menos: cierra bien y sacrifica tu juego por el equipo.', atributo:'fisico', dificultad:13, momento:'directo' },
+  { texto:'Quedan cinco minutos y hay que arriesgar: es el momento de probar algo desde fuera del área.', atributo:'tiro', dificultad:13, momento:'directo' },
+  { texto:'Su portero es flojo con el balón en los pies: presiónale en cuanto reciba de los centrales.', atributo:'velocidad', dificultad:11, momento:'previo' },
 ];
 const INTROS_ENCARGO_TACTICO = [
   base => `El técnico te da instrucciones concretas antes del partido: "${base}"`,
@@ -1895,16 +1900,27 @@ const INTROS_ENCARGO_TACTICO = [
   base => `Antes de saltar al campo, el segundo entrenador se acerca y te repite la orden una vez más: "${base}"`,
   base => `En la pizarra táctica de hoy, tu nombre lleva una única anotación al lado: "${base}"`
 ];
+const INTROS_ENCARGO_TACTICO_DIRECTO = [
+  base => `Con el partido ya en marcha, el entrenador te grita la instrucción desde la banda: "${base}"`,
+  base => `En una parada del juego, el técnico aprovecha para dejarte bien claro: "${base}"`,
+  base => `El cuarto árbitro te acerca a pie de campo un mensaje del banquillo: "${base}"`,
+  base => `El entrenador se lleva las manos a la boca para que le oigas bien desde la banda: "${base}"`,
+  base => `Con el partido en marcha, el míster te hace una seña y te grita: "${base}"`
+];
 const BANCO_EVENTOS = [
   ...ENCARGOS_TACTICOS.map((base, i) => ({
     id:`encargo_tactico_${i}`, cooldown:5, soloSiSano:true,
     trigger:{ probabilidad:0.14 },
-    texto: j => INTROS_ENCARGO_TACTICO[Math.floor(Math.random()*INTROS_ENCARGO_TACTICO.length)](base.texto),
+    texto: j => {
+      const intros = base.momento === 'directo' ? INTROS_ENCARGO_TACTICO_DIRECTO : INTROS_ENCARGO_TACTICO;
+      return intros[Math.floor(Math.random()*intros.length)](base.texto);
+    },
     opciones:[
       { texto:'Cumplir el encargo al pie de la letra', tirada:{atributo:base.atributo, dificultadBase:base.dificultad},
         exito:{ texto:'Haces exactamente lo que te ha pedido el técnico. Al acabar, te lo reconoce delante de todo el equipo.',
           efectosFn: j => {
             S.rachaEncargosCumplidos = (S.rachaEncargosCumplidos||0) + 1;
+            j.confianzaEntrenador = Math.min(100, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) + 4);
             if(S.rachaEncargosCumplidos >= 2){
               j.objetos.confianzaCiega = (j.objetos.confianzaCiega||0) + 1;
               S.rachaEncargosCumplidos = 0;
@@ -1915,12 +1931,12 @@ const BANCO_EVENTOS = [
             return {confianza:5, vestuario:3};
           } },
         fallo:{ texto:'Lo intentas, pero no consigues ejecutarlo tal y como pedía el técnico. Al menos lo has intentado.',
-          efectosFn: j => { S.rachaEncargosCumplidos = 0; return {confianza:1}; } } },
+          efectosFn: j => { S.rachaEncargosCumplidos = 0; j.confianzaEntrenador = Math.max(0, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) - 1); return {confianza:1}; } } },
       { texto:'Ir a tu bola e intentar algo por tu cuenta', tirada:{atributo:base.atributo, dificultadBase:base.dificultad+5},
         exito:{ texto:'Te saltas el guion y te sale de maravilla: un golpe de calidad individual que nadie olvida. Aunque el técnico tuerce el gesto en la banda.',
-          efectosFn: j => { S.rachaEncargosCumplidos = 0; return usarConfianzaCiegaSiHay(j, {forma:10,reputacion:4,vestuario:-4}, {forma:10,reputacion:4}); } },
+          efectosFn: j => { S.rachaEncargosCumplidos = 0; j.confianzaEntrenador = Math.max(0, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) - 3); return usarConfianzaCiegaSiHay(j, {forma:10,reputacion:4,vestuario:-4}, {forma:10,reputacion:4}); } },
         fallo:{ texto:'No te sale, y encima has ignorado lo que te pedían. El técnico no dice nada al llegar al vestuario, pero el gesto lo dice todo.',
-          efectosFn: j => { S.rachaEncargosCumplidos = 0; return usarConfianzaCiegaSiHay(j, {forma:-6,vestuario:-4}, {forma:-6}); } } },
+          efectosFn: j => { S.rachaEncargosCumplidos = 0; j.confianzaEntrenador = Math.max(0, (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) - 6); return usarConfianzaCiegaSiHay(j, {forma:-6,vestuario:-4}, {forma:-6}); } } },
       { texto:'Jugar sobre seguro, sin arriesgar nada',
         resultado:'Cumples sin destacar ni desentonar. Nadie te va a aplaudir por esto, pero tampoco te van a señalar.',
         efectos:{confianza:1} }
