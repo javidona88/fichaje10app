@@ -3117,17 +3117,17 @@ const BANCO_EVENTOS = [
   },
   {
     id:"amigo_no_futbolista_casino", cooldown:6,
-    trigger:{ edadMin:18, probabilidad:0.14, condicion: j => !!j.amigoNoFutbol },
+    trigger:{ edadMin:18, probabilidad:0.14, condicion: j => !!j.amigoNoFutbol && !(S.retoCasinoAmigo && S.retoCasinoAmigo.activo) },
     texto: j => {
       const etiqueta = j.amigoNoFutbol.genero==='f' ? 'Tu amiga' : 'Tu amigo';
-      return `${etiqueta} ${j.amigoNoFutbol.apodo}, que lleva meses metiéndose contigo por lo del casino, te sorprende proponiendo ir juntos "una vez, solo para reírnos un rato". Te reta a irte de allí sin perder la cabeza, pase lo que pase en la mesa.`;
+      return `${etiqueta} ${j.amigoNoFutbol.apodo}, que lleva meses metiéndose contigo por lo del casino, te reta en serio: la próxima vez que vayas, tienes ${RETO_CASINO_GIROS} manos (entre ruleta y tragaperras) para salir ganando. Si lo consigues, promete no volver a sacar el tema. Si no... ya sabes lo que va a decir.`;
     },
+    // Sin tirada a propósito: el reto se juega de verdad en la ruleta o la tragaperras
+    // (resolverGiroRetoCasinoAmigo), no con un dado — aquí solo se acepta o se declina.
     opciones:[
-      { texto:"Aceptar el reto: jugar con la cabeza fría, gane quien gane", tirada:{atributo:"mental", dificultadBase:12},
-        exito:{ texto: j => `${j.amigoNoFutbol.apodo} no da crédito: te vas exactamente cuando dijiste que te irías, con la cabeza igual de fría que al entrar. Como premio de consolación por hacerle caso por una vez, te desliza una ficha dorada por debajo de la mesa: "para la próxima, que te dé suerte".`,
-          efectosFn: j => { j.objetos.fichaSuerte = (j.objetos.fichaSuerte||0) + 1; j.amigoNoFutbol.relacion = Math.min(100, j.amigoNoFutbol.relacion+6); return {mental:4}; } },
-        fallo:{ texto: j => `Todo va bien hasta que decides que "una más" no puede hacer daño. ${j.amigoNoFutbol.apodo} te saca de allí a rastras, cumpliendo justo la profecía que llevaba meses haciendo.`,
-          efectosFn: j => { j.amigoNoFutbol.relacion = Math.max(-100, j.amigoNoFutbol.relacion-4); return {mental:-4, dinero:-Math.round((j.stats.dinero||0)*0.05)}; } } },
+      { texto:"Aceptar el reto",
+        resultado: j => `Aceptas. "Trato hecho", dice ${j.amigoNoFutbol.apodo}, ya pensando en la de veces que te lo va a recordar si fallas.`,
+        efectosFn: j => { S.retoCasinoAmigo = { activo:true, girosRestantes:RETO_CASINO_GIROS, girosTotales:RETO_CASINO_GIROS, gananciaNeta:0, amigoApodo:j.amigoNoFutbol.apodo, amigoGenero:j.amigoNoFutbol.genero }; return {mental:1}; } },
       { texto:"Declinar: mejor no tentar a la suerte",
         resultado: j => `${j.amigoNoFutbol.apodo} se ríe: "Sabia decisión, la verdad". Os quedáis con los planes de siempre.`,
         efectos:{mental:1} }
@@ -10743,6 +10743,8 @@ SCREENS.casino = function(){
   const c = el('div','card');
   c.appendChild(crearEyebrow('Sala de juegos'));
   c.appendChild(el('h2',null,'¿A qué te apetece jugar?'));
+  const bannerReto0 = bannerRetoCasinoAmigo();
+  if(bannerReto0) c.appendChild(bannerReto0);
   c.appendChild(el('div','event-text', `Llevas encima ${formatearDinero(j.stats.dinero)}. Aquí dentro, lo que entra por la puerta no siempre sale.`));
   const btnRuleta = document.createElement('button'); btnRuleta.className='btn-main'; btnRuleta.textContent='🎡 Ruleta';
   btnRuleta.onclick = ()=>{ S.screen = 'ruleta'; render(); };
@@ -10789,6 +10791,7 @@ function cobrarBoteTraga(j){
     aplicarEfectos(j, { dinero: S.tragaBote });
     if(S.tragaBote >= (S.tragaApuesta||10)*35) aplicarEfectos(j, { mental:3, confianza:3 });
     if(S.tragaBote >= 50000){ j.hitosLogro = j.hitosLogro || {}; j.hitosLogro.boteGrande = true; }
+    resolverGiroRetoCasinoAmigo(j, S.tragaBote - (S.tragaApuesta||0));
   }
   S.tragaMensaje = S.tragaBote > 0 ? `Cobras ${formatearDinero(S.tragaBote)}` : S.tragaMensaje;
   S.tragaBote = 0;
@@ -10805,6 +10808,8 @@ SCREENS.tragaperras = function(){
   topbar("Tragaperras");
   const c = el('div','card');
   c.appendChild(crearEyebrow('Casino · Tragaperras'));
+  const bannerRetoT = bannerRetoCasinoAmigo();
+  if(bannerRetoT) c.appendChild(bannerRetoT);
 
   const enRiesgo = S.tragaFase === 'riesgo';
 
@@ -10921,6 +10926,7 @@ SCREENS.tragaperras = function(){
           Sonido.tragaPierde();
           S.tragaMensaje = 'Lo pierdes todo en el riesgo';
           S.tragaBote = 0; S.tragaFase = null; S.tragaComboGanador = null;
+          resolverGiroRetoCasinoAmigo(j, -(S.tragaApuesta||0));
           registrarRondaCasino(j);
         }
         pintar();
@@ -10957,6 +10963,7 @@ SCREENS.tragaperras = function(){
         } else {
           S.tragaMensaje = 'Sin premio esta vez';
           setTimeout(()=> Sonido.tragaPierde(), 120);
+          resolverGiroRetoCasinoAmigo(j, -apuesta);
           registrarRondaCasino(j);
         }
         pintar();
@@ -11002,6 +11009,8 @@ SCREENS.ruleta = function(){
   topbar("Ruleta");
   const c = el('div','card');
   c.appendChild(crearEyebrow('Casino · Ruleta'));
+  const bannerRetoR = bannerRetoCasinoAmigo();
+  if(bannerRetoR) c.appendChild(bannerRetoR);
   const cajaDinero = el('div',null, `Dinero disponible: <b style="color:var(--gold);">${formatearDinero(j.stats.dinero)}</b>`);
   cajaDinero.style.cssText = "background:rgba(110,136,168,0.1);border-radius:8px;padding:14px 16px;margin-bottom:18px;font-family:'Space Grotesk',sans-serif;font-size:14.5px;line-height:1.55;color:var(--ink);";
   c.appendChild(cajaDinero);
@@ -11219,16 +11228,18 @@ SCREENS.ruleta = function(){
       else if(S.ruletaApuestaTipo === 'columna2' && numeroGanador !== 0 && (numeroGanador-1)%3 === 1){ gano = true; multiplicador = 3; }
       else if(S.ruletaApuestaTipo === 'columna3' && numeroGanador !== 0 && (numeroGanador-1)%3 === 2){ gano = true; multiplicador = 3; }
       const apuesta = S.ruletaApuestaCantidad;
-      // Ficha de la suerte (evento amigo_no_futbolista_casino): dobla el premio la próxima vez
-      // que ganes, en ruleta o tragaperras, y se consume en ese momento — nunca en una pérdida.
+      // Ficha de la suerte (recompensa de un reto de casino cumplido, ver resolverGiroRetoCasinoAmigo):
+      // dobla el premio la próxima vez que ganes, en ruleta o tragaperras, y se consume en ese momento.
       let usoFichaSuerte = false;
       if(gano && j.objetos.fichaSuerte > 0){ j.objetos.fichaSuerte--; multiplicador *= 2; usoFichaSuerte = true; }
       const ganancia = gano ? apuesta*multiplicador : 0;
-      aplicarEfectos(j, { dinero: gano ? (ganancia-apuesta) : -apuesta });
+      const netoGiro = gano ? (ganancia-apuesta) : -apuesta;
+      aplicarEfectos(j, { dinero: netoGiro });
       if(gano && multiplicador >= 36) aplicarEfectos(j, { mental:3, confianza:3 });
       if(!gano && apuesta >= j.stats.dinero + apuesta) aplicarEfectos(j, { mental:-2 });
       if(gano) Sonido.ruletaGana(); else Sonido.ruletaPierde();
       S.ruletaUltimoResultado = { numero:numeroGanador, colorTexto, gano, ganancia: gano?ganancia-apuesta:0, apuesta, usoFichaSuerte };
+      resolverGiroRetoCasinoAmigo(j, netoGiro);
       S.ruletaGirando = false;
       registrarRondaCasino(j);
       pintar();
@@ -11318,6 +11329,40 @@ function etiquetaInterrupcionCasino(entry, j){
 // (S.casinoInterrupcionId) antes de dejarte jugar otra ronda, sea cual sea el juego en el
 // que te pille. Los textos del aviso (INTERRUPCIONES_CASINO) son deliberadamente genéricos
 // ("el casino", nunca un juego concreto) para que valgan estés donde estés.
+// Reto de casino de un amigo (evento amigo_no_futbolista_casino): a diferencia de casi todo lo
+// demás en el juego, esto NO se resuelve con una tirada — hay que jugar de verdad en la ruleta o
+// la tragaperras. S.retoCasinoAmigo = { activo, girosRestantes, girosTotales, gananciaNeta,
+// amigoApodo, amigoGenero } vive en S (JSON-serializable, sobrevive a guardar partida). Se llama
+// una vez por mano jugada hasta el final (en la tragaperras, solo cuando el bote queda resuelto
+// de verdad — al cobrar o al reventar en el riesgo — nunca a mitad del "¿otra vez?").
+const RETO_CASINO_GIROS = 5;
+function resolverGiroRetoCasinoAmigo(j, netoGiro){
+  const reto = S.retoCasinoAmigo;
+  if(!reto || !reto.activo) return;
+  reto.girosRestantes--;
+  reto.gananciaNeta += netoGiro;
+  const etiqueta = reto.amigoGenero === 'f' ? 'tu amiga' : 'tu amigo';
+  if(reto.gananciaNeta > 0){
+    reto.activo = false;
+    j.objetos.fichaSuerte = (j.objetos.fichaSuerte||0) + 1;
+    if(j.amigoNoFutbol) j.amigoNoFutbol.relacion = Math.min(100, j.amigoNoFutbol.relacion + 6);
+    mostrarNotificacion(`<b>Reto de ${reto.amigoApodo} superado</b> — sales del casino ganando. Te desliza una Ficha de la suerte.`, 'objeto');
+  } else if(reto.girosRestantes <= 0){
+    reto.activo = false;
+    if(j.amigoNoFutbol) j.amigoNoFutbol.relacion = Math.max(-100, j.amigoNoFutbol.relacion - 4);
+    mostrarNotificacion(`<b>Reto de ${etiqueta} ${reto.amigoApodo} fallido</b> — sales del casino perdiendo, tal y como predijo.`, 'riesgo');
+  }
+}
+// Banner de "reto activo" mostrado en la sala del casino, la ruleta y la tragaperras mientras
+// dure. null si no hay ningún reto en marcha (caso normal, no se pinta nada).
+function bannerRetoCasinoAmigo(){
+  const reto = S.retoCasinoAmigo;
+  if(!reto || !reto.activo) return null;
+  const signo = reto.gananciaNeta > 0 ? '+' : '';
+  const banner = el('div','badge token', `Reto de ${reto.amigoApodo}: te quedan ${reto.girosRestantes} de ${reto.girosTotales} manos · balance ${signo}${formatearDinero(reto.gananciaNeta)}`);
+  banner.style.cssText += 'display:block;text-align:center;margin-bottom:14px;';
+  return banner;
+}
 function registrarRondaCasino(j){
   S.casinoManosJugadas = (S.casinoManosJugadas||0) + 1;
   if(S.casinoManosJugadas % UMBRAL_INTERRUPCION_CASINO === 0){
