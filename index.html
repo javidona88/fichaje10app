@@ -2897,6 +2897,23 @@ const BANCO_EVENTOS = [
     ]
   },
   {
+    id:"detalle_con_pareja", cooldown:3, soloSiSano:true,
+    trigger:{ probabilidad:0.22, condicion: j => j.tienePareja && (j.stats.felicidadPareja||0) < 85 },
+    texto: j => `Tienes un hueco libre en la agenda esta semana. ${j.pareja ? j.pareja.apodo : 'Tu pareja'} lleva tiempo insinuando que le encantaría hacer algo especial, solo los dos.`,
+    variantes:[
+      j => `Un rato libre inesperado en el calendario. Podrías aprovecharlo para estar con ${j.pareja ? j.pareja.apodo : 'tu pareja'}, aunque también te vendría bien para descansar tú.`,
+      j => `${j.pareja ? j.pareja.apodo : 'Tu pareja'} menciona, como quien no quiere la cosa, que hace mucho que no hacéis un plan especial juntos.`
+    ],
+    opciones:[
+      { texto:"Organizar algo especial para los dos", tirada:{atributo:"mental", dificultadBase:10},
+        exito:{ texto: j => `Aciertas de lleno. ${j.pareja ? j.pareja.apodo : 'Tu pareja'} se acuerda de esta noche durante semanas.`, efectos:{felicidadPareja:16,mental:3} },
+        fallo:{ texto:"El plan no sale como lo tenías en la cabeza, pero al menos el gesto de intentarlo no pasa desapercibido.", efectos:{felicidadPareja:5} } },
+      { texto:"Aprovechar el hueco para descansar tú",
+        resultado: j => `Recargas pilas, aunque notas que ${j.pareja ? j.pareja.apodo : 'tu pareja'} esperaba otra cosa de esta semana libre.`,
+        efectos:{forma:3,felicidadPareja:-4} }
+    ]
+  },
+  {
     id:"ruptura_pareja", cooldown:6,
     trigger:{ probabilidad:0.22, condicion: j => j.tienePareja && (j.stats.felicidadPareja||0) < 35 },
     texto: j => `La distancia, los horarios imposibles y la presión del oficio pasan factura. Una noche, la conversación que llevabas tiempo esquivando con ${j.pareja ? j.pareja.apodo : 'tu pareja'} se hace inevitable.`,
@@ -7797,7 +7814,14 @@ function avanzarPaso(j){
   }
   aplicarEfectosServiciosPasivo(j);
   if(j.tienePareja){
-    j.stats.felicidadPareja = Math.max(0, (j.stats.felicidadPareja||0) - 3); // el fútbol absorbe tiempo; hay que dedicarle atención de verdad
+    // Antes bajaba -3 fijo cada paso, sin suelo salvo el 0 — así que con el tiempo suficiente
+    // (y sin que salieran los sucesos adecuados) CUALQUIER pareja acababa en crisis tarde o
+    // temprano, quisieras o no. Igual que decaerForma, ahora tiende hacia un valor de reposo
+    // ("Distante", el escalón justo antes de crisis) en vez de hacia 0 — el simple paso del
+    // tiempo ya no te hunde solo; para llegar a la crisis de verdad hace falta que pasen cosas
+    // (sucesos negativos), no solo dejar pasar temporadas.
+    const reposoPareja = 40;
+    j.stats.felicidadPareja = Math.max(0, Math.round((j.stats.felicidadPareja||0) + (reposoPareja - (j.stats.felicidadPareja||0)) * 0.12));
   }
   // OJO: no borrar S.pendienteLesionReveal aquí. Si un evento acaba de dejar una lesión
   // pendiente (efectosFn), tiene que sobrevivir hasta el check de abajo. Se limpia sola en
