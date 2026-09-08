@@ -1952,6 +1952,34 @@ const BANCO_EVENTOS = [
     ]
   },
   {
+    id:"pique_salida_entreno", cooldown:4, soloSiSano:true,
+    trigger:{ probabilidad:0.13, condicion: j => (j.cocheActual||0) > 0 || (j.motoActual||0) > 0 },
+    texto: j => {
+      const conMoto = (j.motoActual||0) > 0 && (!((j.cocheActual||0) > 0) || Math.random() < 0.5);
+      S._piqueConMoto = conMoto;
+      return conMoto
+        ? 'A la salida del entrenamiento, un compañero se pone a tu altura en el semáforo con la moto y te reta con la mirada: "¿Echamos una carrerita hasta la rotonda?"'
+        : 'A la salida del entrenamiento, un compañero se cuela a tu lado con el coche en el semáforo: "¿Echamos una carrerita hasta la rotonda, o tienes miedo?"';
+    },
+    opciones:[
+      { texto:'Aceptar el pique', tirada:{atributo:'velocidad', dificultadBase:12},
+        exito:{ texto: j => `Le sacas ventaja desde la salida y llegas primero a la rotonda${S._piqueConMoto?' con la moto casi tumbada en la curva':''}, entre risas de los dos.`,
+          efectos:{confianza:4,vestuario:5,popularidad:2} },
+        fallo:{ texto: j => S._piquePolicia
+            ? 'Vais tan lanzados que un coche de policía os para en el siguiente semáforo. Menuda bronca (y una multa) para los dos.'
+            : 'Sales bien pero él conoce mejor la zona y te termina rebasando justo en la rotonda. Pierdes, entre risas.',
+          efectosFn: j => {
+            S._piquePolicia = Math.random() < 0.25;
+            return S._piquePolicia
+              ? {confianza:-2,reputacion:-3,dinero:-Math.round(j.contrato.sueldoAnual*0.01)}
+              : {confianza:-2,vestuario:2};
+          } } },
+      { texto:'Declinar, no es buena idea a estas horas',
+        resultado:'Le dices que no, con la carretera no se juega. Se ríe y te llama aburrido, pero lo entiende.',
+        efectos:{vestuario:-1} }
+    ]
+  },
+  {
     id:"video_analisis_rival", cooldown:4, soloSiSano:true,
     trigger:{ probabilidad:0.14 },
     texto: j => {
@@ -2196,20 +2224,30 @@ const BANCO_EVENTOS = [
       "Algo que dijiste en un podcast hace meses resurge de la nada y se convierte en tendencia.",
       "Una historia antigua tuya vuelve a circular por redes justo cuando menos te conviene."
     ],
-    opciones:[
-      { texto:"Borrarlo y no decir nada más",
-        resultado:"Lo eliminas en silencio. La polémica se apaga sola en un par de días, aunque algunos capturaron pantalla antes.",
-        efectos:{popularidad:-3} },
-      { texto:"Salir a explicarlo con humor", tirada:{atributo:"mental", dificultadBase:12},
-        exito:{ texto:"La respuesta se hace más viral que la publicación original, pero para bien.", efectos:{popularidad:10,reputacion:3} },
-        fallo:{ texto:"El intento de gracia sienta mal y la polémica se alarga toda la semana.", efectos:{popularidad:-10,reputacion:-5} } },
-      { texto:"No decir nada y responder con un partidazo sobre el campo", tirada:{atributo:"tecnica", dificultadBase:13},
-        exito:{ texto:"Firmas un partido tan bueno que la polémica pasa a un segundo plano por completo. Los titulares hablan de tu juego, no de la publicación.", efectos:{popularidad:8,reputacion:6,forma:4} },
-        fallo:{ texto:"El partido no sale como esperabas, y sin nada que contraponer, la polémica sigue siendo lo único de lo que se habla.", efectos:{popularidad:-6,confianza:-3} } },
-      { texto:"Ignorarlo por completo",
-        resultado:"Decides no darle más oxígeno al tema. Un par de días después ya nadie habla de ello.",
-        efectos:{popularidad:-1} }
-    ]
+    opciones: j => {
+      const base = [
+        { texto:"Borrarlo y no decir nada más",
+          resultado:"Lo eliminas en silencio. La polémica se apaga sola en un par de días, aunque algunos capturaron pantalla antes.",
+          efectos:{popularidad:-3} },
+        { texto:"Salir a explicarlo con humor", tirada:{atributo:"mental", dificultadBase:12},
+          exito:{ texto:"La respuesta se hace más viral que la publicación original, pero para bien.", efectos:{popularidad:10,reputacion:3} },
+          fallo:{ texto:"El intento de gracia sienta mal y la polémica se alarga toda la semana.", efectos:{popularidad:-10,reputacion:-5} } },
+        { texto:"No decir nada y responder con un partidazo sobre el campo", tirada:{atributo:"tecnica", dificultadBase:13},
+          exito:{ texto:"Firmas un partido tan bueno que la polémica pasa a un segundo plano por completo. Los titulares hablan de tu juego, no de la publicación.", efectos:{popularidad:8,reputacion:6,forma:4} },
+          fallo:{ texto:"El partido no sale como esperabas, y sin nada que contraponer, la polémica sigue siendo lo único de lo que se habla.", efectos:{popularidad:-6,confianza:-3} } },
+        { texto:"Ignorarlo por completo",
+          resultado:"Decides no darle más oxígeno al tema. Un par de días después ya nadie habla de ello.",
+          efectos:{popularidad:-1} }
+      ];
+      // Con un Community Manager de nivel 2+ ("gestión activa de la imagen pública"), pagas
+      // precisamente para no tener que lidiar tú con esto — una opción sin tirada, sin riesgo.
+      if((j.suscripciones && j.suscripciones.comunicacion) >= 2){
+        base.unshift({ texto:"Dejar que lo gestione tu Community Manager",
+          resultado:"Es exactamente para esto para lo que le pagas: en un par de horas ha convertido una polémica en una nota de prensa aburrida. Ni rastro del tema al día siguiente.",
+          efectos:{popularidad:3,reputacion:1} });
+      }
+      return base;
+    }
   },
   {
     id:"primer_gol_profesional", unico:true, soloSiSano:true,
@@ -3494,17 +3532,25 @@ const BANCO_EVENTOS = [
       "Alguien graba el momento exacto en que confundes el nombre de un compañero en una entrevista, y el clip lleva horas circulando sin parar.",
       "Un vídeo tuyo bailando fatal en la celebración de un gol se ha convertido en el meme del día en todas las redes."
     ],
-    opciones:[
-      { texto:"Reírte de ti mismo y compartirlo en tus redes", tirada:{atributo:"mental", dificultadBase:9},
-        exito:{ texto:"Le sacas partido con gracia. La gente valora que no te lo tomes tan en serio, y el cariño hacia ti crece.", efectos:{popularidad:12,confianza:3} },
-        fallo:{ texto:"El intento de broma no termina de aterrizar, y algunos comentarios se ceban más de la cuenta contigo.", efectos:{popularidad:4,mental:-3} } },
-      { texto:"Responder por la vía rápida: una jugada de calidad en el siguiente partido", tirada:{atributo:"regate", dificultadBase:12},
-        exito:{ texto:"Encadenas un regate tan bueno que se hace viral por méritos propios, tapando por completo el vídeo anterior.", efectos:{popularidad:10,reputacion:4} },
-        fallo:{ texto:"El partido no te da la ocasión que buscabas, y el vídeo sigue siendo lo único de lo que se habla.", efectos:{popularidad:2} } },
-      { texto:"Ignorarlo y esperar a que pase de moda",
-        resultado:"No dices nada. El revuelo se apaga solo en un par de días, como suele pasar con estas cosas.",
-        efectos:{popularidad:3} }
-    ]
+    opciones: j => {
+      const base = [
+        { texto:"Reírte de ti mismo y compartirlo en tus redes", tirada:{atributo:"mental", dificultadBase:9},
+          exito:{ texto:"Le sacas partido con gracia. La gente valora que no te lo tomes tan en serio, y el cariño hacia ti crece.", efectos:{popularidad:12,confianza:3} },
+          fallo:{ texto:"El intento de broma no termina de aterrizar, y algunos comentarios se ceban más de la cuenta contigo.", efectos:{popularidad:4,mental:-3} } },
+        { texto:"Responder por la vía rápida: una jugada de calidad en el siguiente partido", tirada:{atributo:"regate", dificultadBase:12},
+          exito:{ texto:"Encadenas un regate tan bueno que se hace viral por méritos propios, tapando por completo el vídeo anterior.", efectos:{popularidad:10,reputacion:4} },
+          fallo:{ texto:"El partido no te da la ocasión que buscabas, y el vídeo sigue siendo lo único de lo que se habla.", efectos:{popularidad:2} } },
+        { texto:"Ignorarlo y esperar a que pase de moda",
+          resultado:"No dices nada. El revuelo se apaga solo en un par de días, como suele pasar con estas cosas.",
+          efectos:{popularidad:3} }
+      ];
+      if((j.suscripciones && j.suscripciones.comunicacion) >= 2){
+        base.unshift({ texto:"Pasarle el marrón a tu Community Manager",
+          resultado:"Convierte el vídeo en contenido: lo resube con un pie de foto gracioso antes de que nadie más pueda ridiculizarte, y le da la vuelta a la narrativa en un rato.",
+          efectos:{popularidad:9,confianza:2} });
+      }
+      return base;
+    }
   },
   {
     id:"visita_cantera", cooldown:6,
@@ -6897,12 +6943,17 @@ function comprobarNumerosRojos(j){
   j.suscripciones = j.suscripciones || {};
   const activas = Object.keys(j.suscripciones).filter(fam => j.suscripciones[fam] > 0);
   if(!activas.length) return null;
-  const cancelados = activas.map(fam=>{
+  // Un Asesor fiscal de nivel 2+ ("planificación de inversiones", "gestión patrimonial completa")
+  // es precisamente quien te saca de un apuro así: sobrevive a la purga en vez de cancelarse con
+  // todo lo demás — es el único servicio que sigue teniendo sentido pagar estando en números rojos.
+  const salvaAsesorFiscal = (j.suscripciones.asesorFiscal||0) >= 2;
+  const cancelados = activas.filter(fam => !(salvaAsesorFiscal && fam === 'asesorFiscal')).map(fam=>{
     const servicio = TIENDA_SERVICIOS.find(s=>s.familia===fam);
     j.suscripciones[fam] = 0;
     if(fam === 'representante') j.representante = null;
     return servicio ? servicio.nombre : fam;
   });
+  cancelados.asesorFiscalSalvado = salvaAsesorFiscal;
   return cancelados;
 }
 function procesarBanderasFichaje(j, rama){
@@ -7891,7 +7942,7 @@ function pasarTemporadaSinEquipo(j){
   j.temporadasSinEquipo = j.temporadasSinEquipo || [];
   j.temporadasSinEquipo.push(S.temporada);
   S.paroResumen = {
-    temporada: S.temporada, coste, serviciosCancelados: !!cancelados,
+    temporada: S.temporada, coste, serviciosCancelados: !!(cancelados && cancelados.length),
     repDelta: j.stats.reputacion - repAntes,
     valorDelta: j.stats.valorMercado - valorAntes,
     formaDelta: j.stats.forma - formaAntes
@@ -8763,7 +8814,10 @@ function calcularSueldoOferta(j, categoria, nombreClub, multiplicadorExtra){
     factorPrestigio = 0.7 + (prestigio - 1) * 0.3; // nivel1: x0.7 · nivel2: x1.0 · nivel3: x1.3
   }
   const azar = 0.92 + Math.random()*0.16;
-  const factorRepresentante = j.representante ? 1.1 : 1;
+  // Antes daba el mismo +10% tuvieras la agencia que tuvieras — así que subir de nivel (más
+  // comisión) no se notaba nada en las ofertas de verdad. Ahora escala con la comisión misma
+  // (3/6/10%): nivel1 ~1.11x, nivel2 ~1.14x, nivel3 ~1.18x — una agencia grande negocia mejor.
+  const factorRepresentante = j.representante ? 1.08 + j.representante.comision : 1;
   const sueldo = SUELDO_BASE_POR_CATEGORIA[categoria] * factorRating * factorExperiencia * factorEdad * factorNota * factorReputacion * factorPrestigio * factorRepresentante * azar * (multiplicadorExtra||1);
   return Math.max(300, Math.round(sueldo/50)*50);
 }
@@ -13927,7 +13981,11 @@ SCREENS.numerosRojosReveal = function(){
   c.appendChild(el('div','lbl', 'Tu cuenta se queda en números rojos'));
   const cifra = c.appendChild(el('div','num', formatearDinero(j.stats.dinero)));
   cifra.style.cssText = 'font-size:32px;color:var(--red);';
-  c.appendChild(el('div','event-text', `Con el saldo en negativo, cancelas de golpe todos los servicios profesionales que tenías activos: ${S.pendienteNumerosRojos.join(', ')}. En cuanto tu cuenta vuelva a positivo, podrás contratar de nuevo lo que necesites.`));
+  const listaCancelados = S.pendienteNumerosRojos;
+  const textoNumerosRojos = listaCancelados.length
+    ? `Con el saldo en negativo, cancelas de golpe ${listaCancelados.asesorFiscalSalvado ? 'casi todos' : 'todos'} los servicios profesionales que tenías activos: ${listaCancelados.join(', ')}.${listaCancelados.asesorFiscalSalvado ? ' Tu Asesor fiscal es la excepción: precisamente para esto le pagas, y sigue trabajando en tus cuentas.' : ''} En cuanto tu cuenta vuelva a positivo, podrás contratar de nuevo lo que necesites.`
+    : 'Con el saldo en negativo, tocaría cancelar tus servicios profesionales de golpe — pero tu Asesor fiscal se encarga de que eso no haga falta. Sigue trabajando en tus cuentas mientras el resto espera a que vuelvas a números positivos.';
+  c.appendChild(el('div','event-text', textoNumerosRojos));
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Entendido →';
   btn.onclick = ()=>{
     S.pendienteNumerosRojos = null;
@@ -13993,7 +14051,11 @@ SCREENS.evento = function(){
   c.appendChild(el('div','event-text', textoMostrado));
 
   let respondiendo = false; // evita que un doble toque resuelva el mismo suceso dos veces (260ms de transición)
-  ev.opciones.forEach(op=>{
+  // ev.opciones normalmente es un array fijo, pero también admite j=>array para sucesos cuyas
+  // opciones cambian según lo que tenga contratado el jugador (p. ej. una opción extra solo si
+  // tiene cierto servicio de la tienda).
+  const opcionesEvento = typeof ev.opciones === 'function' ? ev.opciones(j) : ev.opciones;
+  opcionesEvento.forEach(op=>{
     const b = el('div','opt');
     b.appendChild(document.createTextNode(op.texto));
     const costeDinero = (op.efectos && op.efectos.dinero < 0) ? Math.abs(op.efectos.dinero) : (typeof op.costeEstimado === 'function' ? op.costeEstimado(j) : 0);
