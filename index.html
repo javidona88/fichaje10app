@@ -9874,7 +9874,19 @@ function pintarTabbar(){
     }
     if(!deshabilitada){
       btn.onclick = ()=>{
-        S.screen = t.pantalla || S.pantallaBase || S.screen;
+        if(t.id === 'avanzar'){
+          // Red de seguridad: "Avanzar" tiene que llevarte SIEMPRE a una pantalla distinta de la
+          // que ya estás viendo. Si S.pantallaBase hubiera quedado apuntando a la propia pestaña
+          // activa (un camino excepcional, no el habitual) el botón se quedaba pulsando la misma
+          // pantalla sin avisar de nada — daba la sensación de que Avanzar había dejado de
+          // funcionar. Con esto, si pantallaBase no mueve nada, cae a tabJugador como último recurso.
+          let destino = S.pantallaBase || 'tabJugador';
+          if(destino === S.screen) destino = 'tabJugador';
+          if(destino === S.screen) return;
+          S.screen = destino;
+        } else {
+          S.screen = t.pantalla || S.pantallaBase || S.screen;
+        }
         render();
       };
     }
