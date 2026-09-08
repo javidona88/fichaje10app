@@ -822,6 +822,14 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   border:1px solid var(--line); background:none; color:var(--ink-soft); cursor:pointer;
 }
 .escudos-io button:hover{ border-color:var(--gold); color:var(--gold); }
+.escudos-mod-card{
+  display:flex; flex-direction:column; gap:8px; padding:14px 16px; margin-bottom:14px;
+  border-radius:12px; border:1.5px solid var(--gold-dim); background:rgba(212,175,55,.08);
+}
+.escudos-mod-card .cab{ display:flex; align-items:center; gap:8px; color:var(--gold); }
+.escudos-mod-card .cab .tit{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); }
+.escudos-mod-card .sub{ font-size:11.5px; color:var(--ink-soft); line-height:1.5; }
+.escudos-mod-card .btn-main{ margin-top:2px; padding:10px; font-size:13px; }
 .escudos-contador{ font-size:11px; color:var(--ink-soft); margin-bottom:8px; }
 .escudos-vacio{ font-size:13px; color:var(--ink-soft); text-align:center; padding:24px 0; }
 .fila-escudo{ display:flex; align-items:center; gap:9px; padding:9px 2px; border-bottom:1px solid var(--line); }
@@ -1457,6 +1465,8 @@ const ICONOS_SVG = {
   declive: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l6 6 4-4 6 8"/><path d="M20 17h-4M20 17v-4"/></svg>',
   camiseta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3l4 2 4-2 4 4-3 3v11H7V10L4 7z"/></svg>',
   confianzaCiega: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3v5.5c0 5-3.2 8.7-7.5 10.5-4.3-1.8-7.5-5.5-7.5-10.5V5.5z"/><path d="M8.5 12l2.3 2.3 4.7-4.7"/></svg>',
+  fichaSuerte: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="9" stroke-dasharray="1.8 3.4"/><circle cx="12" cy="12" r="3.6"/></svg>',
+  rachaGoleador: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="13.5" r="7"/><path d="M10 9l1.3 2.7 3 .4-2.2 2 .6 2.9-2.7-1.4-2.7 1.4.6-2.9-2.2-2 3-.4z"/><path d="M17.3 4c1 .9 1.4 1.9 1.1 3-.25 .9-1.1 1.4-1.1 2.4 0 .8.5 1.3 1.2 1.4"/></svg>',
   lupa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-5-5"/></svg>',
   tabFicha: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10.5" r="2"/><path d="M6 16c0-1.8 1.5-3 3-3s3 1.2 3 3"/><path d="M14 9h4M14 13h4"/></svg>',
   tabAvanzar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.3l5.5 3.7-5.5 3.7z" fill="currentColor" stroke="none"/></svg>',
@@ -2386,12 +2396,16 @@ const BANCO_EVENTOS = [
   {
     id:"final_copa_federacion", cooldown:4, soloSiSano:true,
     trigger:{ probabilidad:0.12, condicion: j => CATEGORIAS.indexOf(j.club.categoria) <= 1 && !primerEquipoDeFilial(j.club.nombre) },
-    texto:"Final de la Copa Federación. Empate en el marcador y te toca a ti el último penalti de la tanda.",
-    opciones:[
-      { texto:"Buscar la escuadra a placer, pura calidad de disparo", tirada:{atributo:"tiro", dificultadBase:15},
+    texto: j => j.esCapitan
+      ? "Final de la Copa Federación. Empate en el marcador y, como capitán, eres tú quien da un paso al frente para tirar el último penalti de la tanda."
+      : "Final de la Copa Federación. Empate en el marcador y te toca a ti el último penalti de la tanda.",
+    // Ser capitán (j.esCapitan, ver primer_capitan) resta 2 a la dificultad de ambas tiradas: la
+    // costumbre de llevar la responsabilidad del equipo también pesa en este momento concreto.
+    opciones: j => [
+      { texto:"Buscar la escuadra a placer, pura calidad de disparo", tirada:{atributo:"tiro", dificultadBase: j.esCapitan?13:15},
         exito:{ texto:"Gol por la escuadra, sin opción para el portero. El equipo se abalanza sobre ti. Un título más para la vitrina del club.", efectos:{forma:12,popularidad:15,reputacion:8,vestuario:3}, titulo:"Copa Federación" },
         fallo:{ texto:"El disparo se marcha fuera por poco. El silencio del vestuario después dice más que cualquier palabra.", efectos:{forma:-10,mental:-8,vestuario:-4} } },
-      { texto:"Tirarlo con la cabeza fría, sin pensar en las consecuencias", tirada:{atributo:"mental", dificultadBase:13},
+      { texto:"Tirarlo con la cabeza fría, sin pensar en las consecuencias", tirada:{atributo:"mental", dificultadBase: j.esCapitan?11:13},
         exito:{ texto:"Ni te tiembla el pulso. Con un disparo centrado pero perfecto, el equipo estalla de alegría. Un título más para la vitrina del club.", efectos:{forma:10,popularidad:13,reputacion:7,vestuario:3}, titulo:"Copa Federación" },
         fallo:{ texto:"Los nervios te pueden más de lo que esperabas. El portero adivina tu intención.", efectos:{forma:-10,mental:-6,vestuario:-4} } },
       { texto:"Cederle la responsabilidad a un compañero",
@@ -2402,12 +2416,14 @@ const BANCO_EVENTOS = [
   {
     id:"final_copa_nacional_extranjero", cooldown:4, soloSiSano:true,
     trigger:{ probabilidad:0.1, condicion: j => !!j.club.extranjero },
-    texto: j => `Final de la ${nombreCopaNacional(j.club.pais)}. Empate en el marcador y te toca a ti el último penalti de la tanda, con todo el país pendiente de la televisión.`,
-    opciones:[
-      { texto:"Buscar la escuadra a placer, pura calidad de disparo", tirada:{atributo:"tiro", dificultadBase:16},
+    texto: j => j.esCapitan
+      ? `Final de la ${nombreCopaNacional(j.club.pais)}. Empate en el marcador y, como capitán, eres tú quien da un paso al frente para tirar el último penalti de la tanda, con todo el país pendiente de la televisión.`
+      : `Final de la ${nombreCopaNacional(j.club.pais)}. Empate en el marcador y te toca a ti el último penalti de la tanda, con todo el país pendiente de la televisión.`,
+    opciones: j => [
+      { texto:"Buscar la escuadra a placer, pura calidad de disparo", tirada:{atributo:"tiro", dificultadBase: j.esCapitan?14:16},
         exito:{ texto: j => `Gol por la escuadra. Estallido total en la grada. Levantas la ${nombreCopaNacional(j.club.pais)} ante todo el país.`, efectos:{forma:16,popularidad:22,reputacion:14,valorMercado:60000}, tituloFn: j => nombreCopaNacional(j.club.pais) },
         fallo:{ texto:"El disparo se marcha fuera por poco. Se escapa el título más grande de tu carrera hasta ahora.", efectos:{forma:-12,mental:-10} } },
-      { texto:"Tirarlo con la cabeza fría, sin pensar en las consecuencias", tirada:{atributo:"mental", dificultadBase:14},
+      { texto:"Tirarlo con la cabeza fría, sin pensar en las consecuencias", tirada:{atributo:"mental", dificultadBase: j.esCapitan?12:14},
         exito:{ texto: j => `Ni te tiembla el pulso con todo un país mirando. Estallido total en la grada. Levantas la ${nombreCopaNacional(j.club.pais)} ante todo el país.`, efectos:{forma:14,popularidad:20,reputacion:12,valorMercado:50000}, tituloFn: j => nombreCopaNacional(j.club.pais) },
         fallo:{ texto:"Los nervios te pueden más de lo que esperabas. El portero adivina tu intención.", efectos:{forma:-12,mental:-8} } },
       { texto:"Cederle la responsabilidad a un compañero",
@@ -3100,6 +3116,24 @@ const BANCO_EVENTOS = [
     ]
   },
   {
+    id:"amigo_no_futbolista_casino", cooldown:6,
+    trigger:{ edadMin:18, probabilidad:0.14, condicion: j => !!j.amigoNoFutbol },
+    texto: j => {
+      const etiqueta = j.amigoNoFutbol.genero==='f' ? 'Tu amiga' : 'Tu amigo';
+      return `${etiqueta} ${j.amigoNoFutbol.apodo}, que lleva meses metiéndose contigo por lo del casino, te sorprende proponiendo ir juntos "una vez, solo para reírnos un rato". Te reta a irte de allí sin perder la cabeza, pase lo que pase en la mesa.`;
+    },
+    opciones:[
+      { texto:"Aceptar el reto: jugar con la cabeza fría, gane quien gane", tirada:{atributo:"mental", dificultadBase:12},
+        exito:{ texto: j => `${j.amigoNoFutbol.apodo} no da crédito: te vas exactamente cuando dijiste que te irías, con la cabeza igual de fría que al entrar. Como premio de consolación por hacerle caso por una vez, te desliza una ficha dorada por debajo de la mesa: "para la próxima, que te dé suerte".`,
+          efectosFn: j => { j.objetos.fichaSuerte = (j.objetos.fichaSuerte||0) + 1; j.amigoNoFutbol.relacion = Math.min(100, j.amigoNoFutbol.relacion+6); return {mental:4}; } },
+        fallo:{ texto: j => `Todo va bien hasta que decides que "una más" no puede hacer daño. ${j.amigoNoFutbol.apodo} te saca de allí a rastras, cumpliendo justo la profecía que llevaba meses haciendo.`,
+          efectosFn: j => { j.amigoNoFutbol.relacion = Math.max(-100, j.amigoNoFutbol.relacion-4); return {mental:-4, dinero:-Math.round((j.stats.dinero||0)*0.05)}; } } },
+      { texto:"Declinar: mejor no tentar a la suerte",
+        resultado: j => `${j.amigoNoFutbol.apodo} se ríe: "Sabia decisión, la verdad". Os quedáis con los planes de siempre.`,
+        efectos:{mental:1} }
+    ]
+  },
+  {
     id:"hermano_sigue_tus_pasos", unico:true,
     trigger:{ edadMin:20, probabilidad:0.2, condicion: j => !j.hermano },
     texto: j => {
@@ -3488,6 +3522,26 @@ const BANCO_EVENTOS = [
     ]
   },
   {
+    id:"companero_reto_goles", cooldown:4, soloSiSano:true,
+    trigger:{ edadMin:17, probabilidad:0.16, condicion: j => !S.retoGolesCompanero && (j.companeros||[]).some(c=>!c.retirado && c.club===j.club.nombre) },
+    texto: j => {
+      if(!S._retoGolesCandidato){
+        const candidatos = j.companeros.filter(c=>!c.retirado && c.club===j.club.nombre);
+        S._retoGolesCandidato = candidatos[Math.floor(Math.random()*candidatos.length)].id;
+      }
+      const c = j.companeros.find(x=>x.id===S._retoGolesCandidato);
+      return `Tu compañero ${c.apodo} te reta en el vestuario, medio en broma medio en serio: apuesta a que no eres capaz de marcar ${retoGolesMeta(j)} goles esta temporada.`;
+    },
+    opciones:[
+      { texto:"Aceptar el reto",
+        resultado: j => { const c = j.companeros.find(x=>x.id===S._retoGolesCandidato); return `Chocáis la mano. "Trato hecho", dice ${c.apodo}. Ya no hay marcha atrás.`; },
+        efectosFn: j => { S.retoGolesCompanero = { companeroId: S._retoGolesCandidato, meta: retoGolesMeta(j) }; return {mental:2}; } },
+      { texto:"Reírte y no entrar al trapo",
+        resultado:"Prefieres no ponerte presión de más. El vestuario se ríe contigo, sin rencor.",
+        efectos:{vestuario:2} }
+    ]
+  },
+  {
     id:"cruce_campo_adrian", cooldown:5, soloSiSano:true,
     trigger:{ probabilidad:0.13, condicion: j => {
       if(!j.rival.trayectoriaIniciada || !j.rival.club || j.rival.club === j.club.nombre) return false;
@@ -3841,7 +3895,8 @@ const BANCO_EVENTOS = [
     texto:"El entrenador te llama aparte antes del partido: quiere que lleves el brazalete de capitán por primera vez en tu carrera.",
     opciones:[
       { texto:"Aceptar con la responsabilidad que conlleva", tirada:{atributo:"mental", dificultadBase:12},
-        exito:{ texto:"Llevas el brazalete con una naturalidad que sorprende hasta a los veteranos. El vestuario responde a tu liderazgo.", efectos:{reputacion:6,mental:4,popularidad:5,vestuario:10} },
+        exito:{ texto:"Llevas el brazalete con una naturalidad que sorprende hasta a los veteranos. El vestuario responde a tu liderazgo — y esa cabeza fría se nota también cuando el partido se decide en los últimos metros.",
+          efectosFn: j => { j.esCapitan = true; return {reputacion:6,mental:4,popularidad:5,vestuario:10}; } },
         fallo:{ texto:"El peso del brazalete se te hace raro toda la semana. Cuesta encontrar el tono adecuado con los compañeros.", efectos:{mental:-3,vestuario:-3} } },
       { texto:"Pedir que se lo den a alguien con más experiencia",
         resultado:"Prefieres esperar tu momento. El entrenador respeta la decisión, aunque se queda con la idea de volver a preguntarte.",
@@ -5596,7 +5651,9 @@ const OBJETO_INFO = {
   segundaOportunidad: { nombre:'Segunda Oportunidad', desc:'Si fallas una tirada, puedes usarla para tirar de nuevo y quedarte con el mejor de los dos resultados.' },
   avalNegociacion: { nombre:'Aval de Negociación', desc:'Garantiza una petición en una negociación de contrato, sin necesidad de tirar dados.' },
   rachaGafada: { nombre:'Racha gafada', desc:'Tu próxima tirada saldrá con −3. Aparece al sacar un 1 natural.' },
-  confianzaCiega: { nombre:'Confianza ciega', desc:'El entrenador confía tanto en ti que la próxima vez que decidas ir a tu bola en un encargo táctico, salga como salga, no perjudicará a tu vestuario. Se consigue tras cumplir 4 encargos tácticos seguidos.' }
+  confianzaCiega: { nombre:'Confianza ciega', desc:'El entrenador confía tanto en ti que la próxima vez que decidas ir a tu bola en un encargo táctico, salga como salga, no perjudicará a tu vestuario. Se consigue tras cumplir 4 encargos tácticos seguidos.' },
+  fichaSuerte: { nombre:'Ficha de la suerte', desc:'La próxima vez que ganes en el casino (ruleta o tragaperras), el premio se dobla.' },
+  rachaGoleador: { nombre:'Racha goleadora', desc:'Un empujón extra a tu puntería de cara a gol durante la próxima temporada.' }
 };
 const nicelabel = {forma:"Forma",reputacion:"Reputación",salud:"Salud",dinero:"Dinero",popularidad:"Popularidad",valorMercado:"Valor mercado"};
 
@@ -6873,6 +6930,9 @@ function migrarJugadorGuardado(j){
   if(j.objetos.segundaOportunidad === undefined) j.objetos.segundaOportunidad = 0;
   if(j.objetos.vestuario === undefined) j.objetos.vestuario = 0;
   if(j.objetos.confianzaCiega === undefined) j.objetos.confianzaCiega = 0;
+  if(j.objetos.fichaSuerte === undefined) j.objetos.fichaSuerte = 0;
+  if(j.objetos.rachaGoleador === undefined) j.objetos.rachaGoleador = 0;
+  if(j.esCapitan === undefined) j.esCapitan = false;
   if(j.stats.vestuario === undefined) j.stats.vestuario = 55;
   if(j.sancionActiva === undefined) j.sancionActiva = false;
   if(j.motoActual === undefined) j.motoActual = 0;
@@ -6986,9 +7046,10 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia,estiloId
     prioridadesEntreno:[],
     suscripciones:{},
     atributos, atributosProgreso, mentalidad, mentalidadProgreso:0,
-    objetos:{ inspiracion:0, avalNegociacion:0, segundaOportunidad:0, vestuario:0, confianzaCiega:0 },
+    objetos:{ inspiracion:0, avalNegociacion:0, segundaOportunidad:0, vestuario:0, confianzaCiega:0, fichaSuerte:0, rachaGoleador:0 },
     tienePareja:false,
     rachaGafada:false,
+    esCapitan:false,
     comprasUnicas:[],
     cocheActual:0, motoActual:0,
     lesionSemanas:0, sancionActiva:false,
@@ -7258,6 +7319,13 @@ function evaluarPromesas(j){
   j.promesasActivas = pendientes;
   return resultados.length ? resultados : null;
 }
+// Meta del reto de goles de un compañero (companero_reto_goles): un estirón modesto sobre lo que
+// ya hiciste la temporada pasada, para que se sienta alcanzable pero no gratis. Sin temporada
+// previa (debut), un número de partida razonable para Tercera RFEF.
+function retoGolesMeta(j){
+  const ultima = (j.historialTemporadas && j.historialTemporadas.length) ? j.historialTemporadas[j.historialTemporadas.length-1].goles : 0;
+  return Math.max(6, Math.round(ultima * 1.2) + 2);
+}
 function calcularResumenTemporada(j, ascensoPlayoff){
   // Mientras juegas cedido en el filial, toda esta función razona sobre SU categoría real (un
   // escalón por debajo del primer equipo), no la del primer equipo — así el filial tiene su
@@ -7289,7 +7357,11 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   const ocasionesPorPartido = (1.1 + (j.atributos.velocidad + j.atributos.regate) / 20) * factorDificultadCategoria;
   const ocasiones = partidos * ocasionesPorPartido;
   const conversion = (0.10 + (j.atributos.tiro / ATRIBUTO_MAX) * 0.28) * factorDificultadCategoria;
-  const goles = Math.max(0, Math.round(ocasiones * conversion * factorForma * factorExperiencia * azar * factorVestuario));
+  // Racha goleadora (objeto ganado al cumplir el reto de un compañero, ver companero_reto_goles):
+  // empujón del 20% a la puntería de cara a gol durante una temporada. Se lee aquí y se consume
+  // (se descuenta una unidad) en procesarFinTemporada, justo después de llamar a esta función.
+  const factorRachaGoleador = (j.objetos && j.objetos.rachaGoleador > 0) ? 1.2 : 1;
+  const goles = Math.max(0, Math.round(ocasiones * conversion * factorForma * factorExperiencia * azar * factorVestuario * factorRachaGoleador));
 
   // Pase decide tu capacidad de generar asistencias
   const asistBase = (0.12 + (j.atributos.pase / ATRIBUTO_MAX) * 0.30) * factorDificultadCategoria;
@@ -7805,6 +7877,7 @@ function registrarEvento(jugador, ev){
   S._padreMadreCandidato = null;
   S._mentorCandidato = null;
   S._amigoAyuda = null;
+  S._retoGolesCandidato = null;
 }
 
 /* ============ AVANCE DE LA TEMPORADA ============ */
@@ -7836,6 +7909,18 @@ function procesarFinTemporada(j, ascensoPlayoff){
   evolucionarProtegido(j);
   evolucionarCompaneros(j);
   S.temporadaResumen = calcularResumenTemporada(j, ascensoPlayoff);
+  if(j.objetos && j.objetos.rachaGoleador > 0) j.objetos.rachaGoleador--; // se consume, la haya usado calcularResumenTemporada o no
+  // Reto de goles de un compañero (companero_reto_goles): se resuelve aquí, con los goles ya
+  // definitivos de la temporada, y se muestra en el resumen (ver filasRetos en SCREENS.temporadaResumen).
+  S.resultadoRetoGoles = null;
+  if(S.retoGolesCompanero){
+    const reto = S.retoGolesCompanero;
+    const companero = (j.companeros||[]).find(c=>c.id===reto.companeroId);
+    const cumplida = S.temporadaResumen.goles >= reto.meta;
+    if(cumplida) j.objetos.rachaGoleador = (j.objetos.rachaGoleador||0) + 1;
+    S.resultadoRetoGoles = { texto:`Reto de ${companero ? companero.apodo : 'tu compañero'}: marcar ${reto.meta} goles`, cumplida };
+    S.retoGolesCompanero = null;
+  }
   if(S.temporadaResumen.campeon){
     S.titulosTemporadaActual = S.titulosTemporadaActual || [];
     S.titulosTemporadaActual.push(j.club.extranjero ? j.club.liga : (j.club.categoria === "LaLiga" ? "LaLiga" : TIER_CATEGORIA[j.club.categoria]));
@@ -10380,7 +10465,7 @@ function seccionEstadisticas(j){
 }
 
 function seccionObjetos(j){
-  const hayObjetos = j.objetos && (j.objetos.inspiracion>0 || j.objetos.segundaOportunidad>0 || j.objetos.avalNegociacion>0 || j.objetos.vestuario>0 || j.objetos.confianzaCiega>0 || j.rachaGafada);
+  const hayObjetos = j.objetos && (j.objetos.inspiracion>0 || j.objetos.segundaOportunidad>0 || j.objetos.avalNegociacion>0 || j.objetos.vestuario>0 || j.objetos.confianzaCiega>0 || j.objetos.fichaSuerte>0 || j.objetos.rachaGoleador>0 || j.rachaGafada);
   if(!hayObjetos) return null;
   const secObjetos = seccionPlegable('VENTAJAS Y DESVENTAJAS','objetos');
   if(S.fichaAcordeon.objetos){
@@ -10390,7 +10475,9 @@ function seccionObjetos(j){
       ['vestuario', j.objetos.vestuario],
       ['confianzaCiega', j.objetos.confianzaCiega],
       ['segundaOportunidad', j.objetos.segundaOportunidad],
-      ['avalNegociacion', j.objetos.avalNegociacion]
+      ['avalNegociacion', j.objetos.avalNegociacion],
+      ['fichaSuerte', j.objetos.fichaSuerte],
+      ['rachaGoleador', j.objetos.rachaGoleador]
     ];
     listaObjetos.forEach(([clave,cantidad])=>{
       if(!cantidad) return;
@@ -10858,10 +10945,14 @@ SCREENS.tragaperras = function(){
         S.tragaGirando = false;
         if(res.mult > 0){
           S.tragaBote = apuesta * res.mult;
+          // Ficha de la suerte (evento amigo_no_futbolista_casino): dobla el premio la próxima
+          // vez que ganes, en ruleta o tragaperras, y se consume en ese momento.
+          let usoFichaSuerte = false;
+          if(j.objetos.fichaSuerte > 0){ j.objetos.fichaSuerte--; S.tragaBote *= 2; usoFichaSuerte = true; }
           S.tragaFase = 'riesgo';
           S.tragaRiesgos = 0;
           S.tragaComboGanador = res.combo;
-          S.tragaMensaje = `${res.texto} · ${formatearDinero(S.tragaBote)}`;
+          S.tragaMensaje = `${res.texto} · ${formatearDinero(S.tragaBote)}${usoFichaSuerte ? ' (¡doblado con tu Ficha de la suerte!)' : ''}`;
           setTimeout(()=> Sonido.tragaGana(), 120);
         } else {
           S.tragaMensaje = 'Sin premio esta vez';
@@ -10981,7 +11072,7 @@ SCREENS.ruleta = function(){
       + (r.gano ? 'background:rgba(76,175,109,0.16);color:var(--green);' : 'background:rgba(217,73,92,0.16);color:var(--red);');
     resBox.innerHTML = `<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${puntoColor};border:1px solid rgba(255,255,255,0.5);vertical-align:-1px;margin-right:6px;"></span>`
       + (r.gano
-        ? `Sale el <b>${r.numero}</b> (${r.colorTexto}). Ganas <b>${formatearDinero(r.ganancia)}</b>`
+        ? `Sale el <b>${r.numero}</b> (${r.colorTexto}). Ganas <b>${formatearDinero(r.ganancia)}</b>${r.usoFichaSuerte ? ' (premio doblado con tu Ficha de la suerte)' : ''}`
         : `Sale el <b>${r.numero}</b> (${r.colorTexto}). Pierdes <b>${formatearDinero(r.apuesta)}</b>`);
     c.appendChild(resBox);
   }
@@ -11128,12 +11219,16 @@ SCREENS.ruleta = function(){
       else if(S.ruletaApuestaTipo === 'columna2' && numeroGanador !== 0 && (numeroGanador-1)%3 === 1){ gano = true; multiplicador = 3; }
       else if(S.ruletaApuestaTipo === 'columna3' && numeroGanador !== 0 && (numeroGanador-1)%3 === 2){ gano = true; multiplicador = 3; }
       const apuesta = S.ruletaApuestaCantidad;
+      // Ficha de la suerte (evento amigo_no_futbolista_casino): dobla el premio la próxima vez
+      // que ganes, en ruleta o tragaperras, y se consume en ese momento — nunca en una pérdida.
+      let usoFichaSuerte = false;
+      if(gano && j.objetos.fichaSuerte > 0){ j.objetos.fichaSuerte--; multiplicador *= 2; usoFichaSuerte = true; }
       const ganancia = gano ? apuesta*multiplicador : 0;
       aplicarEfectos(j, { dinero: gano ? (ganancia-apuesta) : -apuesta });
       if(gano && multiplicador >= 36) aplicarEfectos(j, { mental:3, confianza:3 });
       if(!gano && apuesta >= j.stats.dinero + apuesta) aplicarEfectos(j, { mental:-2 });
       if(gano) Sonido.ruletaGana(); else Sonido.ruletaPierde();
-      S.ruletaUltimoResultado = { numero:numeroGanador, colorTexto, gano, ganancia: gano?ganancia-apuesta:0, apuesta };
+      S.ruletaUltimoResultado = { numero:numeroGanador, colorTexto, gano, ganancia: gano?ganancia-apuesta:0, apuesta, usoFichaSuerte };
       S.ruletaGirando = false;
       registrarRondaCasino(j);
       pintar();
@@ -12188,6 +12283,43 @@ SCREENS.escudosPersonalizados = function(){
     aviso._t = setTimeout(()=> aviso.classList.remove('show'), 4200);
   }
 
+  // Mod Escudos 2026/2027: lote ya preparado que viene con el propio juego (mod-escudos-2026-2027.json,
+  // fuera de index.html porque son ~2,8 MB de imágenes — no tiene sentido cargarlo con cada visita,
+  // solo cuando alguien pulsa el botón). Mismo importarEscudosPersonalizados() que "Importar desde
+  // archivo": fusiona con lo que ya hubiera, no borra nada. Destacado como tarjeta propia (borde y
+  // botón dorados) por delante de Exportar/Importar: es la vía más rápida para tener escudos reales
+  // de golpe, sin subir nada a mano.
+  const modCard = el('div','escudos-mod-card');
+  const modCab = el('div','cab');
+  modCab.innerHTML = `${iconoInline('estrella',18)}<span class="tit">Mod Escudos 2026/2027</span>`;
+  modCard.appendChild(modCab);
+  modCard.appendChild(el('div','sub','Lote de escudos reales de clubes, selecciones y ligas, ya preparado por el propio juego — listo para cargar de golpe, sin subir nada a mano.'));
+  const btnMod = document.createElement('button');
+  btnMod.className = 'btn-main';
+  btnMod.textContent = 'Cargar Mod Escudos 2026/2027';
+  btnMod.onclick = async ()=>{
+    if(!confirm('Se van a aplicar los escudos del "Mod Escudos 2026/2027" (clubes, selecciones y ligas ya preparados). Se fusiona con lo que ya tengas personalizado, sin borrar nada. ¿Continuar?')) return;
+    btnMod.disabled = true;
+    const textoOriginal = btnMod.textContent;
+    btnMod.textContent = 'Cargando…';
+    try{
+      const resp = await fetch('mod-escudos-2026-2027.json');
+      if(!resp.ok) throw new Error('http');
+      const datos = await resp.json();
+      const resultado = importarEscudosPersonalizados(datos);
+      if(!resultado.ok){ mostrarAvisoEscudos(resultado.error); return; }
+      mostrarAvisoEscudos(`Mod cargado: ${resultado.clubes} clubes, ${resultado.selecciones} selecciones y ${resultado.ligas} ligas.`, true);
+      pintarFilas();
+    }catch(e){
+      mostrarAvisoEscudos('No se ha podido cargar el mod. Comprueba tu conexión e inténtalo de nuevo.');
+    }finally{
+      btnMod.disabled = false;
+      btnMod.textContent = textoOriginal;
+    }
+  };
+  modCard.appendChild(btnMod);
+  c.appendChild(modCard);
+
   const filaIO = el('div','escudos-io');
   const btnExportar = document.createElement('button');
   btnExportar.textContent = 'Exportar todo';
@@ -12217,37 +12349,6 @@ SCREENS.escudosPersonalizados = function(){
   filaIO.appendChild(btnImportar);
   filaIO.appendChild(inputImportar);
   c.appendChild(filaIO);
-
-  // Mod Escudos 2026/2027: lote ya preparado que viene con el propio juego (mod-escudos-2026-2027.json,
-  // fuera de index.html porque son ~2,8 MB de imágenes — no tiene sentido cargarlo con cada visita,
-  // solo cuando alguien pulsa el botón). Mismo importarEscudosPersonalizados() que "Importar desde
-  // archivo": fusiona con lo que ya hubiera, no borra nada.
-  const filaMod = el('div','escudos-io');
-  filaMod.style.marginTop = '-6px';
-  const btnMod = document.createElement('button');
-  btnMod.textContent = 'Cargar Mod Escudos 2026/2027';
-  btnMod.onclick = async ()=>{
-    if(!confirm('Se van a aplicar los escudos del "Mod Escudos 2026/2027" (clubes, selecciones y ligas ya preparados). Se fusiona con lo que ya tengas personalizado, sin borrar nada. ¿Continuar?')) return;
-    btnMod.disabled = true;
-    const textoOriginal = btnMod.textContent;
-    btnMod.textContent = 'Cargando…';
-    try{
-      const resp = await fetch('mod-escudos-2026-2027.json');
-      if(!resp.ok) throw new Error('http');
-      const datos = await resp.json();
-      const resultado = importarEscudosPersonalizados(datos);
-      if(!resultado.ok){ mostrarAvisoEscudos(resultado.error); return; }
-      mostrarAvisoEscudos(`Mod cargado: ${resultado.clubes} clubes, ${resultado.selecciones} selecciones y ${resultado.ligas} ligas.`, true);
-      pintarFilas();
-    }catch(e){
-      mostrarAvisoEscudos('No se ha podido cargar el mod. Comprueba tu conexión e inténtalo de nuevo.');
-    }finally{
-      btnMod.disabled = false;
-      btnMod.textContent = textoOriginal;
-    }
-  };
-  filaMod.appendChild(btnMod);
-  c.appendChild(filaMod);
 
   if(S.escudosVista === undefined) S.escudosVista = 'clubes';
   const ETIQUETAS_TIPO_ESCUDO = { clubes:{ tab:'Clubes', singular:'club', plural:'clubes' }, selecciones:{ tab:'Selecciones', singular:'selección', plural:'selecciones' }, ligas:{ tab:'Ligas', singular:'liga', plural:'ligas' }, titulos:{ tab:'Títulos', singular:'título', plural:'títulos' }, marcas:{ tab:'Marcas', singular:'marca', plural:'marcas' } };
@@ -15983,6 +16084,7 @@ SCREENS.mundialElim = function(){
 };
 
 SCREENS.mundialPenaltis = function(){
+  const j = S.jugador;
   const m = S.mundial;
   const { faseId, idx, rival, marcador } = m.penaltisCtx;
   const { info: faseInfo } = buscarFaseMundial(faseId);
@@ -16012,7 +16114,7 @@ SCREENS.mundialPenaltis = function(){
   c.appendChild(wrap);
 
   if(!m.monedaGanador){
-    c.appendChild(el('div','lore-box', m.monedaGirando ? 'La moneda gira en el aire…' : `Nada separa a los dos equipos. Cara España, cruz ${rival.n} — gana quien salga.`));
+    c.appendChild(el('div','lore-box', m.monedaGirando ? 'La moneda gira en el aire…' : (j.esCapitan ? `Como capitán, te adelantas a pedir la moneda tú mismo. Cara España, cruz ${rival.n} — gana quien salga.` : `Nada separa a los dos equipos. Cara España, cruz ${rival.n} — gana quien salga.`)));
     const btn = el('button','btn-main', m.monedaGirando ? 'Lanzando…' : 'Lanzar la moneda →');
     btn.disabled = !!m.monedaGirando;
     btn.onclick = ()=>{
@@ -16030,7 +16132,9 @@ SCREENS.mundialPenaltis = function(){
         clearInterval(iv);
         m.monedaGirando = false;
         m.monedaCaraActual = null;
-        m.monedaGanador = Math.random()<0.5 ? 'España' : rival.n;
+        // Ser capitán (j.esCapitan, ver primer_capitan) sesga la moneda a tu favor: liderar la
+        // tanda no cambia las reglas, pero sí cómo de convencido pides cara o cruz.
+        m.monedaGanador = Math.random() < (j.esCapitan ? 0.62 : 0.5) ? 'España' : rival.n;
         const gana = m.monedaGanador === 'España';
         (gana ? Sonido.exito : Sonido.fallo)();
         pintar();
@@ -16355,6 +16459,7 @@ SCREENS.eurocopaElim = function(){
 };
 
 SCREENS.eurocopaPenaltis = function(){
+  const j = S.jugador;
   const m = S.eurocopa;
   const { faseId, idx, rival, marcador } = m.penaltisCtx;
   const { info: faseInfo } = buscarFaseEurocopa(faseId);
@@ -16383,7 +16488,7 @@ SCREENS.eurocopaPenaltis = function(){
   c.appendChild(wrap);
 
   if(!m.monedaGanador){
-    c.appendChild(el('div','lore-box', m.monedaGirando ? 'La moneda gira en el aire…' : `Nada separa a los dos equipos. Cara España, cruz ${rival.n} — gana quien salga.`));
+    c.appendChild(el('div','lore-box', m.monedaGirando ? 'La moneda gira en el aire…' : (j.esCapitan ? `Como capitán, te adelantas a pedir la moneda tú mismo. Cara España, cruz ${rival.n} — gana quien salga.` : `Nada separa a los dos equipos. Cara España, cruz ${rival.n} — gana quien salga.`)));
     const btn = el('button','btn-main', m.monedaGirando ? 'Lanzando…' : 'Lanzar la moneda →');
     btn.disabled = !!m.monedaGirando;
     btn.onclick = ()=>{
@@ -16401,7 +16506,8 @@ SCREENS.eurocopaPenaltis = function(){
         clearInterval(iv);
         m.monedaGirando = false;
         m.monedaCaraActual = null;
-        m.monedaGanador = Math.random()<0.5 ? 'España' : rival.n;
+        // Ser capitán (j.esCapitan, ver primer_capitan) sesga la moneda a tu favor, igual que en el Mundial.
+        m.monedaGanador = Math.random() < (j.esCapitan ? 0.62 : 0.5) ? 'España' : rival.n;
         const gana = m.monedaGanador === 'España';
         (gana ? Sonido.exito : Sonido.fallo)();
         pintar();
@@ -16644,6 +16750,12 @@ SCREENS.finTemporada = function(){
     filasPromesas.push([`"${res.texto}"`, res.cumplida ? iconoInline('check',13) : iconoInline('cruz',13), true, res.cumplida]);
   });
 
+  // Sección 5: retos personales resueltos esta temporada (companero_reto_goles, de momento el único)
+  const filasRetos = [];
+  if(S.resultadoRetoGoles){
+    filasRetos.push([`"${S.resultadoRetoGoles.texto}"`, S.resultadoRetoGoles.cumplida ? iconoInline('check',13) : iconoInline('cruz',13), true, S.resultadoRetoGoles.cumplida]);
+  }
+
   function pintarSeccion(titulo, filas){
     if(!filas.length) return [];
     modal.appendChild(el('div','reveal-section-title', titulo));
@@ -16658,7 +16770,8 @@ SCREENS.finTemporada = function(){
   const filasEl = [
     ...pintarSeccion('Competiciones', filasCompeticion),
     ...pintarSeccion('Títulos individuales', filasIndividual),
-    ...pintarSeccion('Promesas', filasPromesas)
+    ...pintarSeccion('Promesas', filasPromesas),
+    ...pintarSeccion('Retos', filasRetos)
   ];
 
   const notaValor = r.nota;
@@ -16671,6 +16784,7 @@ SCREENS.finTemporada = function(){
   const btn = document.createElement('button'); btn.className='btn-main'; btn.style.marginTop='22px'; btn.textContent='Empezar temporada siguiente →';
   btn.onclick = ()=>{
     S.resultadoPromesas = null;
+    S.resultadoRetoGoles = null;
     j.edad += 1;
     j.stats.forma = 55;
     j.contrato.duracionTemporadas -= 1;
