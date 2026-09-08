@@ -1911,6 +1911,44 @@ const BANCO_EVENTOS = [
     ]
   })),
   {
+    id:"entrenador_experimento_posicional", cooldown:5, soloSiSano:true,
+    trigger:{ edadMin:17, probabilidad:0.12 },
+    texto:'El entrenador te prueba en un papel que no es el tuyo: "Hoy te quiero más metido en la construcción del juego, no arriba esperando el balón. Necesito otra cosa de ti."',
+    opciones:[
+      { texto:'Aceptar el experimento y jugar más retrasado', tirada:{atributo:'pase', dificultadBase:13},
+        exito:{ texto:'Te adaptas mejor de lo que nadie esperaba, tirando del equipo desde una posición que no es la tuya. El vestuario lo valora.', efectos:{vestuario:6,reputacion:3,confianza:4} },
+        fallo:{ texto:'Te cuesta encontrarte fuera de tu sitio habitual, y se nota en el partido. El experimento no sale como esperaba el técnico.', efectos:{confianza:-4,vestuario:-2} } },
+      { texto:'Decirle que confíe en lo que mejor sabes hacer',
+        resultado:'El técnico respeta que tengas claro tu papel, aunque no oculta que le hubiera gustado probar la idea.',
+        efectos:{confianza:2,vestuario:-1} }
+    ]
+  },
+  {
+    id:"entrenador_orden_compartida", cooldown:4, soloSiSano:true,
+    trigger:{ probabilidad:0.16, condicion: j => j.companeros.some(c=>!c.retirado && c.club===j.club.nombre) },
+    texto: j => {
+      const candidatos = j.companeros.filter(c=>!c.retirado && c.club===j.club.nombre);
+      const elegido = candidatos[Math.floor(Math.random()*candidatos.length)];
+      S._ordenCompartidaId = elegido.id;
+      return `El entrenador os junta a ti y a tu compañero ${elegido.apodo} antes del partido: la misma instrucción para los dos, y solo va a caber uno en la jugada. "El primero que vea el hueco, que lo aproveche."`;
+    },
+    opciones:[
+      { texto:'Cederle el protagonismo a tu compañero', tirada:{atributo:'mental', dificultadBase:9},
+        exito:{ texto: j => { const c = j.companeros.find(x=>x.id===S._ordenCompartidaId); return `Te echas a un lado sin dudarlo. ${c.apodo} aprovecha la ocasión, y no se olvida de quién se la dejó.`; },
+          efectosFn: j => { const c = j.companeros.find(x=>x.id===S._ordenCompartidaId); c.relacion = Math.min(100, c.relacion+10); return {vestuario:5}; } },
+        fallo:{ texto: j => { const c = j.companeros.find(x=>x.id===S._ordenCompartidaId); return `Intentas cederle sitio pero el gesto sale forzado y la jugada se malogra para los dos. Al menos ${c.apodo} nota la intención.`; },
+          efectosFn: j => { const c = j.companeros.find(x=>x.id===S._ordenCompartidaId); c.relacion = Math.min(100, c.relacion+3); return {}; } } },
+      { texto:'Ir a por ello tú también, que decida el campo', tirada:{atributo:'regate', dificultadBase:13},
+        exito:{ texto: j => { const c = j.companeros.find(x=>x.id===S._ordenCompartidaId); return `Te adelantas a ${c.apodo} y resuelves tú la jugada. Un puntito de rivalidad sana que el vestuario comenta entre risas.`; },
+          efectosFn: j => { const c = j.companeros.find(x=>x.id===S._ordenCompartidaId); c.relacion = Math.max(-100, c.relacion-4); return {confianza:6,reputacion:2}; } },
+        fallo:{ texto: j => { const c = j.companeros.find(x=>x.id===S._ordenCompartidaId); return `Vas a por todas y no te sale nada. ${c.apodo} se queda con las ganas de que le hubieras dejado intentarlo a él.`; },
+          efectosFn: j => { const c = j.companeros.find(x=>x.id===S._ordenCompartidaId); c.relacion = Math.max(-100, c.relacion-6); return {confianza:-4}; } } },
+      { texto:'No pensarlo demasiado y jugar con naturalidad',
+        resultado: j => { const c = j.companeros.find(x=>x.id===S._ordenCompartidaId); return `Ninguno de los dos fuerza nada. La jugada se resuelve sola y ${c.apodo} tampoco le da más vueltas.`; },
+        efectos:{vestuario:1} }
+    ]
+  },
+  {
     id:"celebracion_titulo", soloTrasTitulo:true,
     trigger:{ probabilidad:1, condicion: () => {
       const ultimoTitulo = (S.titulosTemporadaActual||[])[S.titulosTemporadaActual.length-1];
