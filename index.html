@@ -9850,17 +9850,18 @@ function pintarPanelEntreno(j){
     requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ overlay.classList.add('show'); }); });
   }
 }
+const DURACION_NOTIFICACION_MS = 5000;
 function mostrarNotificacion(texto, tipo){
   tipo = tipo || 'info';
   S.notificaciones = S.notificaciones || [];
   if(S.notificaciones.some(n=>n.texto===texto)) return; // evita acumular avisos duplicados
   const id = Date.now()+'_'+Math.random();
-  S.notificaciones.push({ id, texto, tipo });
+  S.notificaciones.push({ id, texto, tipo, creadoEn: Date.now() });
   pintarTabbar();
   setTimeout(()=>{
     S.notificaciones = (S.notificaciones||[]).filter(n=>n.id!==id);
     pintarTabbar();
-  }, 5000);
+  }, DURACION_NOTIFICACION_MS);
 }
 function pintarTabbar(){
   const raiz = document.getElementById('tabbar-root');
@@ -9874,6 +9875,17 @@ function pintarTabbar(){
   document.body.classList.add('con-tabbar');
   document.body.classList.add('con-barra-entreno');
   raiz.innerHTML = '';
+  // Red de seguridad: lo que retira un aviso a los 5s es un setTimeout en memoria, que NO
+  // sobrevive a una recarga de página (recargar el navegador, o el móvil descargando la pestaña
+  // en segundo plano) — pero S.notificaciones sí, porque guardarPartida() serializa S entero. Sin
+  // esto, un aviso visible justo en el momento de recargar se quedaba "colgado" para siempre, sin
+  // ningún temporizador vivo que lo fuera a quitar (bug real reportado: "Cariño de la afición" no
+  // desaparecía). Aquí se purga por edad real (reloj), no por el temporizador, así que se autocura
+  // en el primer repintado de la tabbar tras cargar la partida, sin depender de que el timer original
+  // sobreviviera. Un aviso sin `creadoEn` (guardado con una versión anterior a este arreglo) se trata
+  // como ya caducado.
+  const ahora = Date.now();
+  S.notificaciones = (S.notificaciones||[]).filter(n => (n.creadoEn ? (ahora - n.creadoEn) : Infinity) < DURACION_NOTIFICACION_MS);
   const notifWrap = el('div','notif-wrap');
   (S.notificaciones||[]).forEach(n=>{
     const item = el('div','notif-toast '+n.tipo);
