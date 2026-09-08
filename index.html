@@ -4604,11 +4604,18 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.5.2';
+const VERSION_JUEGO = 'v1.5.3';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.5.3', titulo:'Ascenso real desde el filial y titularidad ganada de verdad', cambios:[
+    'Ascender jugando en el filial ahora significa de verdad subir tú al primer equipo (como en la vida real): primero te llaman a entrenar con la plantilla grande, luego intercalas algunos partidos con el filial, y solo al final llega el contrato definitivo con el primer equipo — antes "ascender" en el filial no llevaba a ninguna parte.',
+    'Nuevo sistema de confianza del entrenador: ganarte un puesto de titular ya no es automático en una o dos temporadas, depende de tu rendimiento y de nuevos eventos dedicados a pelear por minutos. Excepción real: si fichas siendo ya una estrella reconocida, juegas titular desde el primer día, como pasaría de verdad.',
+    'Corregidos varios encargos tácticos del entrenador que decían "en la charla previa" siendo claramente instrucciones de mitad de partido (p. ej. "quedan cinco minutos..."); ahora estos encargos, ya sean antes o durante el partido, también afectan a la confianza del entrenador en ti.',
+    'Corregidos los sucesos de filial y cantera: si tú mismo estás cedido en el filial (p. ej. el Real Madrid Castilla), ya no te hablan de "visitar" o "aconsejar" al filial desde fuera — ahora, en esa situación, los sucesos son sobre tu relación con el primer equipo.',
+    'Arreglado un bloqueo real: si recargabas la partida a mitad de ciertos sucesos con opciones que dependen de lo que tengas contratado (p. ej. los de redes sociales), el botón "Avanzar" se quedaba sin efecto y una notificación podía quedar visible más tiempo del debido. Si a alguien le pasó, cargar la partida ahora debería dejarle continuar con normalidad.'
+  ]},
   { version:'v1.5.2', titulo:'Eurocopa, retos de verdad y más eventos conectados', cambios:[
     'Nueva Eurocopa con el mismo sistema de torneo de verdad que el Mundial: 24 selecciones en 4 bombos, fase de grupos, clasifican los 2 primeros de cada grupo más los mejores terceros, y eliminatoria directa (octavos a final) sin partido por el tercer puesto.',
     'El reto de casino de un amigo/a ya no se resuelve con un dado, como casi todo lo demás: hay que jugar de verdad varias manos en la ruleta o la tragaperras para superarlo, con premio si sales del casino ganando.',
