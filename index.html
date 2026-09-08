@@ -6676,6 +6676,7 @@ function migrarJugadorGuardado(j){
   if(j.suscripciones === undefined) j.suscripciones = {};
   if(j.rachaGafada === undefined) j.rachaGafada = !!j.malDeOjo;
   if(j.enFilial === undefined) j.enFilial = false;
+  if(j.categoriaFilial === undefined) j.categoriaFilial = j.enFilial ? categoriaFilialDe(j.club.categoria) : null;
   if(j.tienePareja === undefined) j.tienePareja = false;
   if(j.titulosSeleccion === undefined) j.titulosSeleccion = [];
   if(j.historialSeleccion === undefined) j.historialSeleccion = [];
@@ -7044,14 +7045,18 @@ function evaluarPromesas(j){
   return resultados.length ? resultados : null;
 }
 function calcularResumenTemporada(j, ascensoPlayoff){
-  const partidosBase = PARTIDOS_POR_CATEGORIA[j.club.categoria];
+  // Mientras juegas cedido en el filial, toda esta función razona sobre SU categoría real (un
+  // escalón por debajo del primer equipo), no la del primer equipo — así el filial tiene su
+  // propio recorrido de ascenso, independiente y nunca coincidente con el de j.club.
+  const categoriaEfectiva = (j.enFilial && j.categoriaFilial) ? j.categoriaFilial : j.club.categoria;
+  const partidosBase = PARTIDOS_POR_CATEGORIA[categoriaEfectiva];
   const semanasLesion = S.temporadaSemanasLesion || 0;
   const fraccionSalud = Math.max(0.4, 1 - semanasLesion/36);
   const fraccionRol = j.enFilial ? 0.7 : ((S.rolTemporada && S.rolTemporada.fraccion) || 0.85);
   // Copas domésticas, competición europea y convocatorias con la selección suman partidos aparte de la liga
   const partidosExtra = Math.round(
-    (j.club.clasificacionEuropea ? (4 + Math.random()*4) : 0) +
-    (CATEGORIAS.indexOf(j.club.categoria) >= 2 ? (1 + Math.random()*2) : 0) // copa doméstica, a partir de Primera RFEF
+    (j.club.clasificacionEuropea && !j.enFilial ? (4 + Math.random()*4) : 0) +
+    (CATEGORIAS.indexOf(categoriaEfectiva) >= 2 ? (1 + Math.random()*2) : 0) // copa doméstica, a partir de Primera RFEF
   );
   const partidos = Math.max(1, Math.round(partidosBase * fraccionSalud * fraccionRol * (0.92 + Math.random()*0.16))) + Math.round(partidosExtra * fraccionSalud * fraccionRol);
 
@@ -7064,7 +7069,7 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   // Cuanto más arriba juegas, mejores son los rivales y más cuesta mantener el mismo rendimiento
   const factorDificultadCategoria = j.club.extranjero
     ? 1 - ((PRESTIGIO_CLUB[j.club.nombre]||2) - 1) * 0.06 - 0.12
-    : 1 - CATEGORIAS.indexOf(j.club.categoria) * 0.06;
+    : 1 - CATEGORIAS.indexOf(categoriaEfectiva) * 0.06;
 
   // Velocidad y Regate generan ocasiones; Tiro decide cuántas de esas ocasiones acaban en gol
   const ocasionesPorPartido = (1.1 + (j.atributos.velocidad + j.atributos.regate) / 20) * factorDificultadCategoria;
@@ -7078,8 +7083,12 @@ function calcularResumenTemporada(j, ascensoPlayoff){
 
   const posicionFinal = Math.min(EQUIPOS_EN_LIGA, Math.max(1, S.posicionLiga || 10));
 
-  const esMaximaCategoria = CATEGORIAS.indexOf(j.club.categoria) >= CATEGORIAS.length-1;
-  const umbralAscensoDirecto = j.club.categoria === "LaLiga2" ? 2 : 1;
+  // Un filial nunca puede alcanzar (ni superar) la categoría de su propio primer equipo, así que
+  // aquí "categoría máxima" para él es siempre un escalón por debajo de la del primer equipo real.
+  const esMaximaCategoria = j.enFilial
+    ? CATEGORIAS.indexOf(categoriaEfectiva) >= CATEGORIAS.indexOf(j.club.categoria) - 1
+    : CATEGORIAS.indexOf(categoriaEfectiva) >= CATEGORIAS.length-1;
+  const umbralAscensoDirecto = categoriaEfectiva === "LaLiga2" ? 2 : 1;
   const enPlayoff = ascensoPlayoff !== undefined;
   const ascenso = !esMaximaCategoria && (posicionFinal <= umbralAscensoDirecto || ascensoPlayoff === true);
   const campeon = posicionFinal === 1;
@@ -7120,13 +7129,13 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   const fasesCompeticiones = [];
   // La competición continental que se ha DISPUTADO esta temporada es la que tenías al empezar (j.club.nivelEuropeo,
   // aún sin sobrescribir), no la que te acabas de ganar para la que viene. Así no aparecen dos europeas a la vez.
-  const nivelEuropeoJugado = j.club.nivelEuropeo || null;
+  const nivelEuropeoJugado = j.enFilial ? null : (j.club.nivelEuropeo || null);
   if(nivelEuropeoJugado){
     const nombreCompEuropea = nivelEuropeoJugado === 'libertadores' ? 'Copa Libertadores' : NOMBRE_COMPETICION_CONTINENTAL[nivelEuropeoJugado];
     const faseReal = (S.faseCompeticiones||{})[nombreCompEuropea];
     fasesCompeticiones.push({ nombre: nombreCompEuropea, fase: faseReal || simularFaseCompeticion(j) });
   }
-  if(CATEGORIAS.indexOf(j.club.categoria) >= 2){
+  if(CATEGORIAS.indexOf(categoriaEfectiva) >= 2){
     const nombreCopa = j.club.extranjero ? nombreCopaNacional(j.club.pais) : "Copa del Rey";
     const faseReal = (S.faseCompeticiones||{})[nombreCopa];
     fasesCompeticiones.push({ nombre: nombreCopa, fase: faseReal || simularFaseCompeticion(j, true) });
@@ -7135,7 +7144,7 @@ function calcularResumenTemporada(j, ascensoPlayoff){
 
   const ratioGoles = goles / partidos;
   const nombresTitulosGanados = [];
-  if(campeon) nombresTitulosGanados.push(j.club.extranjero ? j.club.liga : (TIER_CATEGORIA[j.club.categoria] || j.club.categoria));
+  if(campeon) nombresTitulosGanados.push(j.club.extranjero ? j.club.liga : (TIER_CATEGORIA[categoriaEfectiva] || categoriaEfectiva));
   fasesCompeticiones.forEach(f=>{ if(f.fase === 'Campeón') nombresTitulosGanados.push(f.nombre); });
   let tier;
   if(nombresTitulosGanados.length >= 3) tier = 'triplete';
@@ -7150,9 +7159,10 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   else if(ratioGoles >= 0.25) tier = 'notable';
   else if(ratioGoles >= 0.1) tier = 'discreto';
   else tier = 'flojo';
-  let titular = elegirTitular(tier, { nombre:j.nombre, club:j.club.nombre, goles, asistencias, partidos, posicion:posicionFinal, titulosNombres:nombresTitulosGanados, tituloNombre:nombresTitulosGanados[0] });
+  const nombreClubEfectivo = (j.enFilial && FILIAL_DE_CLUB[j.club.nombre]) || j.club.nombre;
+  let titular = elegirTitular(tier, { nombre:j.nombre, club:nombreClubEfectivo, goles, asistencias, partidos, posicion:posicionFinal, titulosNombres:nombresTitulosGanados, tituloNombre:nombresTitulosGanados[0] });
 
-  const idxCat = CATEGORIAS.indexOf(j.club.categoria);
+  const idxCat = CATEGORIAS.indexOf(categoriaEfectiva);
   const prestigioClub = PRESTIGIO_CLUB[j.club.nombre] || 2;
   const factorPrestigioClub = 0.7 + (prestigioClub-1) * 0.33; // nivel1 x0.7 · nivel2 x1.03 · nivel3 x1.36 · nivel4 x1.69
   const crecimientoBase = (goles*28000 + asistencias*12000) * (1 + idxCat*2.5) * factorPrestigioClub;
@@ -7230,7 +7240,10 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   // Evaluar si se ha cumplido el objetivo marcado por el club, y ajustar la ambición de cara al año que viene
   let objetivoCumplido = null, objetivoTexto = null, objetivoTipo = null;
   const objetivoTmp = { ascenso, campeon, clasificacionEuropea, posicionFinal };
-  if(j.club.objetivoActual){
+  // Mientras juegas cedido en el filial, ascenso/campeón/posicionFinal son del FILIAL, no del primer
+  // equipo — comparar eso contra el objetivo del primer equipo (y tocar su ambición según ese
+  // resultado ajeno) no tendría sentido, así que esta evaluación se salta entera ese año.
+  if(j.club.objetivoActual && !j.enFilial){
     objetivoTexto = j.club.objetivoActual.texto;
     objetivoTipo = j.club.objetivoActual.tipo;
     objetivoCumplido = evaluarObjetivo(j.club.objetivoActual.tipo, objetivoTmp);
@@ -7589,6 +7602,18 @@ function decaerForma(j){
 function zonaPlayoff(categoria){
   return categoria === "LaLiga2" ? [3,6] : [2,5];
 }
+// La categoría real de arranque del filial: dos escalones por debajo del primer equipo (como en
+// la realidad — el filial de un club de LaLiga suele partir de Primera o Segunda RFEF, no de
+// LaLiga2), dejándole margen real para subir hasta un escalón por debajo del primer equipo, techo
+// que nunca puede alcanzar ni superar. Antes de esto, mientras j.enFilial, todo el cálculo de
+// temporada seguía usando j.club.categoria del PRIMER equipo sin más — así que "ascender jugando
+// en el filial" era, la mayoría de las veces, matemáticamente imposible: la mayoría de clubes con
+// filial documentado (FILIAL_DE_CLUB) ya juegan en LaLiga, la categoría máxima, donde nunca hay
+// ascenso posible por definición.
+function categoriaFilialDe(categoriaClub){
+  const idx = CATEGORIAS.indexOf(categoriaClub);
+  return CATEGORIAS[Math.max(0, idx-2)];
+}
 function procesarFinTemporada(j, ascensoPlayoff){
   if(j.rival && j.rival.compartiendoVestuario){
     j.rival.temporadasCompartiendo = (j.rival.temporadasCompartiendo || 0) + 1;
@@ -7652,17 +7677,24 @@ function procesarFinTemporada(j, ascensoPlayoff){
     // los chips de trayectoria ni el recuento de trofeos). Sirven, de momento, solo para decidir
     // quién juega la Supercopa de España la temporada siguiente (ver TORNEOS_CONFIG).
     etapaActual.subcampeonatos = etapaActual.subcampeonatos || [];
-    if(!j.club.extranjero && j.club.categoria === 'LaLiga' && S.temporadaResumen.posicionFinal === 2){
+    if(!j.enFilial && !j.club.extranjero && j.club.categoria === 'LaLiga' && S.temporadaResumen.posicionFinal === 2){
       etapaActual.subcampeonatos.push({ nombre:'LaLiga', temporada: S.temporada });
     }
-    if(!j.club.extranjero && (S.temporadaResumen.fasesCompeticiones||[]).some(f => f.nombre === 'Copa del Rey' && f.fase === 'Final')){
+    if(!j.enFilial && !j.club.extranjero && (S.temporadaResumen.fasesCompeticiones||[]).some(f => f.nombre === 'Copa del Rey' && f.fase === 'Final')){
       etapaActual.subcampeonatos.push({ nombre:'Copa del Rey', temporada: S.temporada });
     }
   }
-  S.temporadaResumen.categoriaJugada = j.club.categoria;
+  S.temporadaResumen.categoriaJugada = (j.enFilial && j.categoriaFilial) ? j.categoriaFilial : j.club.categoria;
   if(S.temporadaResumen.ascenso){
-    const idxAscenso = Math.min(CATEGORIAS.indexOf(j.club.categoria)+1, CATEGORIAS.length-1);
-    j.club.categoria = CATEGORIAS[idxAscenso];
+    if(j.enFilial){
+      // El filial asciende dentro de su propio recorrido — nunca toca la categoría del primer
+      // equipo (j.club.categoria), y nunca puede alcanzarla ni superarla.
+      const idxAscensoFilial = Math.min(CATEGORIAS.indexOf(j.categoriaFilial)+1, CATEGORIAS.indexOf(j.club.categoria)-1);
+      j.categoriaFilial = CATEGORIAS[Math.max(0, idxAscensoFilial)];
+    } else {
+      const idxAscenso = Math.min(CATEGORIAS.indexOf(j.club.categoria)+1, CATEGORIAS.length-1);
+      j.club.categoria = CATEGORIAS[idxAscenso];
+    }
     j.carrera.ascensos++;
     j.stats.popularidad = Math.min(100, j.stats.popularidad + 3); // subir de categoría te da algo más de foco mediático, al margen de tu rendimiento
   }
@@ -13995,7 +14027,7 @@ SCREENS.evento = function(){
         const cambios = aplicarEfectos(j, efectosReales);
         if(op.patrocinioFn) j.patrocinio = op.patrocinioFn(j);
         if(op.contratarRepresentante) j.representante = crearRepresentante(0.06);
-        if(op.filialInicio) j.enFilial = true;
+        if(op.filialInicio){ j.enFilial = true; j.categoriaFilial = categoriaFilialDe(j.club.categoria); }
         if(op.filialFin) j.enFilial = false;
         if(op.parejaInicio){ j.tienePareja = true; j.stats.felicidadPareja = 60; j.pareja = generarNombrePareja(); }
         if(op.parejaFin){ j.tienePareja = false; j.stats.felicidadPareja = 0; j.pareja = null; }
@@ -14191,7 +14223,7 @@ SCREENS.tirando = function(){
             S.objetosNuevosSinVer = (S.objetosNuevosSinVer||0) + 1;
           }
           if(rama.contratarRepresentante) j.representante = crearRepresentante(0.06);
-          if(rama.filialInicio) j.enFilial = true;
+          if(rama.filialInicio){ j.enFilial = true; j.categoriaFilial = categoriaFilialDe(j.club.categoria); }
           if(rama.filialFin) j.enFilial = false;
           if(rama.parejaInicio){ j.tienePareja = true; j.stats.felicidadPareja = 60; j.pareja = generarNombrePareja(); }
           if(rama.parejaFin){ j.tienePareja = false; j.stats.felicidadPareja = 0; j.pareja = null; }
@@ -15910,7 +15942,8 @@ SCREENS.finTemporada = function(){
 
   const modal = el('div','card resumen-card');
   const clubParaCabecera = { ...j.club, categoria: r.categoriaJugada || j.club.categoria };
-  modal.appendChild(crearEyebrow(`${j.club.nombre} (${categoriaCorta(clubParaCabecera)})`));
+  const nombreClubCabecera = (j.enFilial && FILIAL_DE_CLUB[j.club.nombre]) || j.club.nombre;
+  modal.appendChild(crearEyebrow(`${nombreClubCabecera} (${categoriaCorta(clubParaCabecera)})`));
   modal.appendChild(el('h2',null, `"${r.titular}"`));
 
   // Sección 1: estadísticas principales, en horizontal
@@ -16058,10 +16091,11 @@ SCREENS.campeonReveal = function(){
   iconoBox.style.justifyContent = 'center';
   iconoBox.style.color = 'var(--gold)';
   c.appendChild(iconoBox);
+  const nombreClubCampeon = (j.enFilial && FILIAL_DE_CLUB[j.club.nombre]) || j.club.nombre;
   c.appendChild(el('div','lbl', `Campeón de ${nombreLigaCampeon}`));
-  const tituloClub = c.appendChild(el('div','num', j.club.nombre));
+  const tituloClub = c.appendChild(el('div','num', nombreClubCampeon));
   tituloClub.style.fontSize = '34px';
-  c.appendChild(el('div','sub', `${j.nombre} levanta el título de ${nombreLigaCampeon} con ${articuloClub(j.club.nombre)} ${j.club.nombre}. Un nombre más para la historia del club.`));
+  c.appendChild(el('div','sub', `${j.nombre} levanta el título de ${nombreLigaCampeon} con ${articuloClub(nombreClubCampeon)} ${nombreClubCampeon}. Un nombre más para la historia del club.`));
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Seguir →';
   btn.onclick = irASiguienteReveal;
   c.appendChild(btn);
@@ -16073,10 +16107,12 @@ SCREENS.ascensoReveal = function(){
   Sonido.trofeo();
   topbar("Ascenso");
   const c = el('div','season-reveal');
+  const categoriaAscenso = (j.enFilial && j.categoriaFilial) ? j.categoriaFilial : j.club.categoria;
+  const nombreClubAscenso = (j.enFilial && FILIAL_DE_CLUB[j.club.nombre]) || j.club.nombre;
   c.appendChild(el('div','icon','⬆️'));
   c.appendChild(el('div','lbl','Ascenso conseguido'));
-  c.appendChild(el('div','num', TIER_CATEGORIA[j.club.categoria] || j.club.categoria));
-  c.appendChild(el('div','sub', `${articuloClub(j.club.nombre)==='la'?'La':'El'} ${j.club.nombre} asciende a ${TIER_CATEGORIA[j.club.categoria] || j.club.categoria}. Toca competir en una categoría más exigente la próxima temporada.`));
+  c.appendChild(el('div','num', TIER_CATEGORIA[categoriaAscenso] || categoriaAscenso));
+  c.appendChild(el('div','sub', `${articuloClub(nombreClubAscenso)==='la'?'La':'El'} ${nombreClubAscenso} asciende a ${TIER_CATEGORIA[categoriaAscenso] || categoriaAscenso}. Toca competir en una categoría más exigente la próxima temporada.`));
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Seguir →';
   btn.onclick = irASiguienteReveal;
   c.appendChild(btn);
