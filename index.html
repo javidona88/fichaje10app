@@ -643,8 +643,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* ---- reveal a pantalla completa (temporada / ascenso / campeón) ---- */
 .season-reveal{ text-align:center; padding-top:8px; }
 .season-reveal .lbl{ font-family:'Space Grotesk',sans-serif; letter-spacing:.25em; text-transform:uppercase; font-size:12px; color:var(--ink-soft); margin-bottom:10px; }
-.season-reveal .num{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:80px; color:var(--gold); line-height:1; }
-.season-reveal .num.small{ font-size:30px; text-transform:uppercase; letter-spacing:.03em; font-family:'Space Grotesk',sans-serif; font-weight:700; }
+/* Space Grotesk, no Big Shoulders: este mismo elemento reutiliza .num tanto para cifras (goles,
+   partidos) como para titulares de texto (nombre de club, de torneo, de jugador...) — la condensada
+   solo pega bien con dígitos, con palabras largas se ve forzada. */
+.season-reveal .num{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:68px; color:var(--gold); line-height:1; }
+.season-reveal .num.small{ font-size:28px; text-transform:uppercase; letter-spacing:.03em; }
 .season-reveal .objetivo{ margin-top:10px; font-family:'Space Grotesk',sans-serif; font-size:11.5px; color:var(--ink-soft); }
 .season-reveal .objetivo b{ color:var(--gold); font-weight:700; }
 .season-reveal.campeon .num{ color:var(--gold); }
@@ -660,7 +663,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* Esquina recta + doblez: es un papel (una oferta de contrato), no un panel de menú — el redondeado
    se reserva para lo que de verdad se toca (los botones dentro de la propia tarjeta). */
 .oferta-card{
-  border:1px solid var(--line); border-left:2px solid var(--gold-dim); border-radius:0;
+  border:1px solid var(--line); border-radius:0;
   padding:14px; margin-bottom:10px; background:var(--bg2); position:relative;
 }
 .oferta-card::after{
