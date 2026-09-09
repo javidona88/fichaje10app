@@ -9937,15 +9937,23 @@ function pintarTabbar(){
     if(!deshabilitada){
       btn.onclick = ()=>{
         if(t.id === 'avanzar'){
-          // Red de seguridad: "Avanzar" tiene que llevarte SIEMPRE a una pantalla distinta de la
-          // que ya estás viendo. Si S.pantallaBase hubiera quedado apuntando a la propia pestaña
-          // activa (un camino excepcional, no el habitual) el botón se quedaba pulsando la misma
-          // pantalla sin avisar de nada — daba la sensación de que Avanzar había dejado de
-          // funcionar. Con esto, si pantallaBase no mueve nada, cae a tabJugador como último recurso.
+          // Red de seguridad: "Avanzar" tiene que llevarte SIEMPRE a alguna parte. Si
+          // S.pantallaBase hubiera quedado apuntando a la propia pestaña activa (un camino
+          // excepcional, no el habitual — p. ej. un flujo de fichaje abandonado a medias por un
+          // bug ya corregido, pero cuya partida guardada quedó así) caía a tabJugador como último
+          // recurso, y si AÚN así coincidía con la pantalla actual, se quedaba sin hacer nada —
+          // exactamente igual que si el botón hubiera dejado de funcionar. Ahora, en ese caso
+          // límite, se hace avanzar la temporada de verdad (avanzarPaso): cualquier fichaje o
+          // evento que hubiera quedado a medias ya se aplicó en su momento, así que no hay nada
+          // que perder por seguir adelante, y el jugador nunca se queda sin ningún botón que
+          // le mueva la partida.
           let destino = S.pantallaBase || 'tabJugador';
           if(destino === S.screen) destino = 'tabJugador';
-          if(destino === S.screen) return;
-          S.screen = destino;
+          if(destino === S.screen){
+            if(S.jugador){ avanzarPaso(S.jugador); guardarPartida(); }
+          } else {
+            S.screen = destino;
+          }
         } else {
           S.screen = t.pantalla || S.pantallaBase || S.screen;
         }
