@@ -290,6 +290,47 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .historial-fila.total{ border-bottom:none; border-top:1px solid var(--line); margin-top:6px; padding-top:10px; }
 .historial-fila.total .temp{ color:var(--gold); font-size:12.5px; }
 .historial-fila.total .dato{ color:var(--gold); font-weight:700; }
+/* Trayectoria por temporadas: fila plegable con desglose por competición (seccionEstadisticas).
+   Cabecera, fila de temporada y filas de competición comparten esta misma rejilla de columnas
+   para que los iconos de PJ/Goles/Asistencias/Nota caigan siempre justo sobre su número. */
+.trayectoria-grid{ display:grid; grid-template-columns:26px 1fr 22px 22px 22px 34px; column-gap:8px; align-items:center; }
+.trayectoria-col-heads{ margin:0 0 4px; }
+.trayectoria-col-heads span{ color:var(--gold-dim); display:flex; align-items:center; justify-content:center; }
+.trayectoria-col-heads span svg{ width:14px; height:14px; }
+.trayectoria-temporada{ border-top:1px dashed rgba(255,255,255,0.08); }
+.trayectoria-temporada:first-of-type{ border-top:none; }
+.trayectoria-fila{ padding:9px 0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.trayectoria-escudo svg, .trayectoria-escudo img{ display:block; }
+.trayectoria-club{ min-width:0; display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.trayectoria-club-txt{ min-width:0; }
+.trayectoria-nombre{ font-size:12.5px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.trayectoria-temp{ font-size:10.5px; color:var(--ink-soft); margin-top:1px; display:flex; align-items:center; }
+.trayectoria-chev{ flex-shrink:0; color:var(--ink-soft); transition:transform .2s; }
+.trayectoria-temporada.abierta .trayectoria-chev{ transform:rotate(180deg); color:var(--gold); }
+.trayectoria-stat{ text-align:center; font-family:'Big Shoulders Display',sans-serif; font-weight:700; font-size:14.5px; color:var(--ink); font-variant-numeric:tabular-nums; }
+.trayectoria-nota{ width:32px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; justify-self:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; color:#14161F; }
+.trayectoria-nota.nota-verde{ background:var(--green); }
+.trayectoria-nota.nota-naranja{ background:var(--amber); }
+.trayectoria-nota.nota-roja{ background:var(--red); color:#fff; }
+.trayectoria-nota.nota-sin{ background:none; color:var(--ink-soft); font-size:13px; }
+.trayectoria-detalle-inner{ padding:2px 0 12px; }
+.trayectoria-comp-tabla{ border-radius:9px; background:var(--panel2); padding:2px 9px; }
+.trayectoria-comp-fila{ padding:8px 0; }
+.trayectoria-comp-fila + .trayectoria-comp-fila{ border-top:1px solid var(--line); }
+.insignia-competicion{ border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; }
+.insignia-competicion svg{ width:56%; height:56%; }
+.trayectoria-comp-nombre{ font-size:11px; font-weight:600; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.trayectoria-comp-fila.es-liga .trayectoria-comp-nombre{ color:var(--ink); }
+.trayectoria-comp-stat{ text-align:center; font-family:'Big Shoulders Display',sans-serif; font-weight:700; font-size:13px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.trayectoria-comp-fila.es-liga .trayectoria-comp-stat{ color:var(--ink); }
+.trayectoria-comp-nota{ width:28px; height:19px; border-radius:5px; display:flex; align-items:center; justify-content:center; justify-self:center; font-size:10.5px; font-weight:700; color:#14161F; }
+.trayectoria-comp-nota.nota-verde{ background:var(--green); }
+.trayectoria-comp-nota.nota-naranja{ background:var(--amber); }
+.trayectoria-comp-nota.nota-roja{ background:var(--red); color:#fff; }
+.trayectoria-comp-nota.nota-sin{ background:none; color:var(--ink-soft); font-size:11px; }
+.trayectoria-extra{ display:flex; flex-direction:column; gap:5px; padding:10px 2px 0; }
+.trayectoria-extra-linea{ display:flex; align-items:center; font-size:11px; color:var(--ink-soft); }
+.trayectoria-extra-linea b{ color:var(--ink); font-weight:600; }
 .stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; margin-top:10px; }
 .stat-grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px 10px; }
 .stat-grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:8px 10px; }
@@ -4698,11 +4739,12 @@ const VERSION_JUEGO = 'v1.5.5';
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
-  { version:'v1.5.5', titulo:'Ajustes rediseñado y últimos retoques del menú', cambios:[
+  { version:'v1.5.5', titulo:'Ajustes rediseñado y estadísticas por competición', cambios:[
     'La barra superior usa ahora el mismo logo "FICHAJE 10" del menú principal (con el mismo grosor de trazo y el 10 en blanco), manteniendo su altura de siempre.',
     'Ajustes, durante la partida, rediseñado con el mismo estilo de tarjetas del menú principal; se ha quitado de ahí la lista de partidas guardadas (ya vive en "Continuar carrera") y se ha añadido un botón para volver al menú principal sin perder la partida.',
     'Corregido que el fondo animado del menú principal diera un corte visible al entrar o salir de una opción.',
-    'Los rankings de jugadores usan ya iconos propios en vez de emoji.'
+    'Los rankings de jugadores usan ya iconos propios en vez de emoji.',
+    'Estadísticas → Clubes rediseñado: cada temporada es ahora una fila con el escudo real del club que se despliega al tocarla, mostrando el desglose por competición (liga, copa, competición continental y, si tocó, selección) con sus propios partidos, goles, asistencias y nota — antes solo se veía el agregado de toda la temporada en una línea.'
   ]},
   { version:'v1.5.4', titulo:'Menú principal renovado', cambios:[
     'Menú principal rediseñado: cuatro opciones claras (Nueva carrera, Continuar carrera, Personalizar escudos, Ajustes), cada una con su propio icono, y fondo animado con un degradado azul oscuro en movimiento.',
@@ -6901,6 +6943,27 @@ function iconoInline(clave, tamano){
   const svg = ICONOS_SVG[clave] || '';
   return `<span class="icono-inline" style="display:inline-flex;vertical-align:middle;width:${tamano}px;height:${tamano}px;margin-right:5px;">${svg}</span>`;
 }
+// Insignia circular por TIPO de competición (liga/copa/europa/selección), usada en el desglose
+// de SCREENS.tabEstadisticas — reutiliza iconos ya existentes de ICONOS_SVG, nunca el logo real
+// de una liga/copa/UEFA (mismo criterio que escudoSVG con los escudos de club).
+const COMPETICION_TIPO_ESTILO = {
+  liga:      { color:'#2F5FD1', icono:'tabClub' },
+  copa:      { color:'#9C2B44', icono:'trofeo' },
+  europa:    { color:'#151B33', icono:'estrella' },
+  seleccion: { color:'#1B6E43', icono:'seleccionTitulo' }
+};
+function insigniaCompeticion(tipo, tamano){
+  const cfg = COMPETICION_TIPO_ESTILO[tipo] || COMPETICION_TIPO_ESTILO.liga;
+  return `<span class="insignia-competicion" style="width:${tamano}px;height:${tamano}px;background:${cfg.color};">${ICONOS_SVG[cfg.icono]}</span>`;
+}
+// Mismo criterio de color que el reveal de nota de fin de temporada (nota-roja/naranja/verde,
+// ver SCREENS.temporadaResumen): <6 roja, <7 naranja, resto verde; null (pocos minutos) sin color.
+function claseNotaChip(nota){
+  if(nota == null) return 'nota-sin';
+  if(nota < 6) return 'nota-roja';
+  if(nota < 7) return 'nota-naranja';
+  return 'nota-verde';
+}
 function inicialesClub(nombre){
   const palabras = nombre.replace(/^(CD|UD|CF|SD|Real|Atlético|Racing|Sporting|Deportivo|Olympique de)\s+/,'').split(' ');
   return (palabras[0][0] + (palabras[1] ? palabras[1][0] : palabras[0][1]||'')).toUpperCase();
@@ -7635,6 +7698,20 @@ function retoGolesMeta(j){
   const ultima = (j.historialTemporadas && j.historialTemporadas.length) ? j.historialTemporadas[j.historialTemporadas.length-1].goles : 0;
   return Math.max(6, Math.round(ultima * 1.2) + 2);
 }
+// Reparte un total entero entre varios "cubos" proporcionalmente a sus pesos, sin descuadrar el
+// total (método del resto mayor: parte entera de cada cubo + los restos más altos se llevan las
+// unidades sobrantes). Usado para desglosar goles/asistencias de la temporada entre competiciones
+// (liga/copa/europa) a partir de los partidos jugados en cada una — ver procesarFinTemporada.
+function repartoEnteros(total, pesos){
+  const sumaPesos = pesos.reduce((s,p)=>s+p,0);
+  if(sumaPesos <= 0) return pesos.map(()=>0);
+  const brutos = pesos.map(p => total * p / sumaPesos);
+  const base = brutos.map(Math.floor);
+  let resto = total - base.reduce((s,v)=>s+v,0);
+  const orden = brutos.map((v,i)=>({ i, frac: v - base[i] })).sort((a,b)=>b.frac-a.frac);
+  for(let k=0; k<resto; k++) base[orden[k].i]++;
+  return base;
+}
 function calcularResumenTemporada(j, ascensoPlayoff){
   // Mientras juegas cedido en el filial, toda esta función razona sobre SU categoría real (un
   // escalón por debajo del primer equipo), no la del primer equipo — así el filial tiene su
@@ -7644,12 +7721,14 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   const semanasLesion = S.temporadaSemanasLesion || 0;
   const fraccionSalud = Math.max(0.4, 1 - semanasLesion/36);
   const fraccionRol = j.enFilial ? 0.7 : ((S.rolTemporada && S.rolTemporada.fraccion) || 0.85);
-  // Copas domésticas, competición europea y convocatorias con la selección suman partidos aparte de la liga
-  const partidosExtra = Math.round(
-    (j.club.clasificacionEuropea && !j.enFilial ? (4 + Math.random()*4) : 0) +
-    (CATEGORIAS.indexOf(categoriaEfectiva) >= 2 ? (1 + Math.random()*2) : 0) // copa doméstica, a partir de Primera RFEF
-  );
-  const partidos = Math.max(1, Math.round(partidosBase * fraccionSalud * fraccionRol * (0.92 + Math.random()*0.16))) + Math.round(partidosExtra * fraccionSalud * fraccionRol);
+  // Copa doméstica y competición europea suman partidos aparte de la liga. Se calculan cada una
+  // por separado (en vez de un "partidosExtra" combinado) para poder repartir después goles y
+  // asistencias competición a competición en el desglose de SCREENS.tabEstadisticas — ver
+  // competiciones en procesarFinTemporada.
+  const partidosLiga = Math.max(1, Math.round(partidosBase * fraccionSalud * fraccionRol * (0.92 + Math.random()*0.16)));
+  const partidosEuropa = (j.club.clasificacionEuropea && !j.enFilial) ? Math.round((4 + Math.random()*4) * fraccionSalud * fraccionRol) : 0;
+  const partidosCopa = (CATEGORIAS.indexOf(categoriaEfectiva) >= 2) ? Math.round((1 + Math.random()*2) * fraccionSalud * fraccionRol) : 0; // a partir de Primera RFEF
+  const partidos = partidosLiga + partidosEuropa + partidosCopa;
 
   const factorForma = j.stats.forma / 60;
   const factorExperiencia = Math.min(1, 0.35 + (S.temporada-1) * 0.13);
@@ -7897,7 +7976,7 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   const enOnceIdeal = nota >= 7.8 && titular && partidos >= 20 && esMaximaCategoria && !j.club.extranjero;
 
   j.carrera.valorMercadoMaximo = Math.max(j.carrera.valorMercadoMaximo||0, j.stats.valorMercado);
-  return { partidos, goles, asistencias, ascenso, campeon, clasificacionEuropea, nivelEuropeo, titular, posicionFinal, crecimientoValor, pichichi, botaOro, mvp, nota, objetivoCumplido, objetivoTexto, objetivoTipo, declive, enOnceIdeal, balonDeOroPuesto, enPlayoff, fasesCompeticiones };
+  return { partidos, partidosLiga, partidosCopa, partidosEuropa, goles, asistencias, ascenso, campeon, clasificacionEuropea, nivelEuropeo, titular, posicionFinal, crecimientoValor, pichichi, botaOro, mvp, nota, objetivoCumplido, objetivoTexto, objetivoTipo, declive, enOnceIdeal, balonDeOroPuesto, enPlayoff, fasesCompeticiones };
 }
 function aplicarDeclivePorEdad(j){
   j.atributosEnDeclive = {};
@@ -8268,13 +8347,43 @@ function procesarFinTemporada(j, ascensoPlayoff){
   if(S.temporadaResumen.mvp) j.carrera.mvps = (j.carrera.mvps||0) + 1;
   if(S.temporadaResumen.botaOro) j.carrera.botasOro = (j.carrera.botasOro||0) + 1;
   j.historialTemporadas = j.historialTemporadas || [];
+  // Desglose por competición (liga/copa/europa/selección) para el tab de Estadísticas. Los
+  // partidos de cada una ya están separados en calcularResumenTemporada (partidosLiga/Copa/
+  // Europa); goles y asistencias se reparten proporcionalmente a esos partidos con
+  // repartoEnteros, así que la suma siempre coincide con el total de la temporada — nunca se
+  // inventan por separado. Los nombres y fases de copa/europa salen de fasesCompeticiones (ya
+  // calculado con el resultado real si jugaste semifinal/final); la selección usa las cifras
+  // reales de j.historialSeleccion, que ya se registran aparte y con datos de verdad.
+  const competicionesTemporada = [];
+  {
+    const r = S.temporadaResumen;
+    const [gLiga, gCopa, gEuropa] = repartoEnteros(r.goles, [r.partidosLiga, r.partidosCopa, r.partidosEuropa]);
+    const [aLiga, aCopa, aEuropa] = repartoEnteros(r.asistencias, [r.partidosLiga, r.partidosCopa, r.partidosEuropa]);
+    const nombreLiga = j.club.extranjero ? j.club.liga : j.club.categoria;
+    competicionesTemporada.push({ nombre: nombreLiga, tipo:'liga', partidos:r.partidosLiga, goles:gLiga, asistencias:aLiga, nota:r.nota });
+    const NOMBRES_CONTINENTALES = Object.values(NOMBRE_COMPETICION_CONTINENTAL);
+    (r.fasesCompeticiones||[]).forEach(f=>{
+      const esEuropea = NOMBRES_CONTINENTALES.includes(f.nombre);
+      const partidosComp = esEuropea ? r.partidosEuropa : r.partidosCopa;
+      if(partidosComp <= 0) return; // sorteada pero sin partidos que repartir (p. ej. baja por lesión casi toda la temporada)
+      const notaComp = Math.max(1, Math.min(10, Math.round((r.nota + (BONUS_NOTA_FASE[f.fase]||0)*1.5)*10)/10));
+      competicionesTemporada.push({
+        nombre: f.nombre, tipo: esEuropea ? 'europa' : 'copa',
+        partidos: partidosComp, goles: esEuropea ? gEuropa : gCopa, asistencias: esEuropea ? aEuropa : aCopa, nota: notaComp
+      });
+    });
+    (j.historialSeleccion||[]).filter(h=>h.temporada===S.temporada).forEach(h=>{
+      competicionesTemporada.push({ nombre:h.torneo, tipo:'seleccion', partidos:h.partidos, goles:h.goles, asistencias:h.asistencias, nota:null });
+    });
+  }
   j.historialTemporadas.push({
     temporada: S.temporada, club: j.club.nombre, categoria: j.club.categoria, liga: j.club.liga || null,
     pais: j.club.extranjero ? j.club.pais : 'España', extranjero: !!j.club.extranjero,
     partidos: S.temporadaResumen.partidos, goles: S.temporadaResumen.goles, asistencias: S.temporadaResumen.asistencias,
     nota: S.temporadaResumen.nota, carino: j.carinoAficion, valorMercado: j.stats.valorMercado, edad: j.edad,
     titulos: (S.titulosTemporadaActual||[]).length, ascenso: !!S.temporadaResumen.ascenso,
-    trofeosIndividuales: (S.temporadaResumen.pichichi?1:0) + (S.temporadaResumen.mvp?1:0) + (S.temporadaResumen.balonDeOroPuesto?1:0) + (S.temporadaResumen.botaOro?1:0)
+    trofeosIndividuales: (S.temporadaResumen.pichichi?1:0) + (S.temporadaResumen.mvp?1:0) + (S.temporadaResumen.balonDeOroPuesto?1:0) + (S.temporadaResumen.botaOro?1:0),
+    competiciones: competicionesTemporada
   });
   if((S.titulosTemporadaActual||[]).length > 0){
     aplicarEfectos(j, {vestuario:6}); // ganar algo con el equipo refuerza el vestuario, sea cual sea el título
@@ -10749,6 +10858,9 @@ function seccionEstadisticas(j){
     if(historial.length){
       secStats.appendChild(el('div','stat-section-titulo','CLUBES'));
       const tabla = el('div','historial-temporadas');
+      const colHeads = el('div','trayectoria-grid trayectoria-col-heads');
+      colHeads.innerHTML = `<span></span><span></span><span>${ICONOS_SVG.camiseta}</span><span>${ICONOS_SVG.tiro}</span><span>${ICONOS_SVG.pase}</span><span>${ICONOS_SVG.estrella}</span>`;
+      tabla.appendChild(colHeads);
       const etapas = [];
       historial.forEach(h=>{
         const ultima = etapas[etapas.length-1];
@@ -10761,17 +10873,56 @@ function seccionEstadisticas(j){
         const textoCarino = ultimaFila.carino!=null ? estadoCarino(ultimaFila.carino).texto : null;
         tabla.appendChild(el('div','historial-club-header', `${bandera} ${etapa.club}${textoCarino ? ` <span style="text-transform:lowercase;">(${textoCarino})</span>` : ''}`));
         etapa.filas.forEach(h=>{
-          const fila = el('div','historial-fila');
-          fila.appendChild(el('span','temp', `${temporadaAAno(h.temporada)} - ${categoriaCorta(h)}${h.ascenso ? ` ${iconoInline('ascenso',12)}` : ''}`));
-          const stats = el('div','historial-fila-stats');
-          stats.appendChild(el('span','dato', `${h.partidos} PJ`));
-          stats.appendChild(el('span','dato', `${h.goles} G`));
-          stats.appendChild(el('span','dato', `${h.asistencias} A`));
-          if(h.nota!=null) stats.appendChild(el('span','dato nota', formatearNumero(h.nota)));
-          stats.appendChild(el('span','dato'+(h.titulos>0?' oro':''), h.titulos>0 ? `${iconoInline('trofeo',12)}${h.titulos}` : `${iconoInline('trofeo',12)}—`));
-          stats.appendChild(el('span','dato'+(h.trofeosIndividuales>0?' oro':''), h.trofeosIndividuales>0 ? `${iconoInline('estrella',12)}${h.trofeosIndividuales}` : `${iconoInline('estrella',12)}—`));
-          fila.appendChild(stats);
-          tabla.appendChild(fila);
+          const key = `t_${h.temporada}`;
+          const abierta = !!(S.trayectoriaAbiertas && S.trayectoriaAbiertas[key]);
+          const filaTemporada = el('div','trayectoria-temporada'+(abierta?' abierta':''));
+
+          const cab = el('div','trayectoria-fila trayectoria-grid');
+          cab.innerHTML = `
+            <span class="trayectoria-escudo">${escudoSVG(h.club, 24, coloresClubDelJuego(h.club))}</span>
+            <span class="trayectoria-club">
+              <span class="trayectoria-club-txt">
+                <span class="trayectoria-nombre">${categoriaCorta(h)}</span>
+                <span class="trayectoria-temp">${temporadaAAnoCompleto(h.temporada)}${h.ascenso ? ` ${iconoInline('ascenso',11)}` : ''}</span>
+              </span>
+              <svg class="trayectoria-chev" width="11" height="7" viewBox="0 0 12 8" fill="none"><path d="M1 1.5l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="trayectoria-stat">${h.partidos}</span>
+            <span class="trayectoria-stat">${h.goles}</span>
+            <span class="trayectoria-stat">${h.asistencias}</span>
+            <span class="trayectoria-nota ${claseNotaChip(h.nota)}">${h.nota!=null ? formatearNumero(h.nota) : '—'}</span>
+          `;
+          cab.onclick = ()=>{
+            S.trayectoriaAbiertas = S.trayectoriaAbiertas || {};
+            S.trayectoriaAbiertas[key] = !S.trayectoriaAbiertas[key];
+            pintar();
+          };
+          filaTemporada.appendChild(cab);
+
+          if(abierta){
+            // Saves antiguos sin desglose por competición: se cae a una única fila "liga" con el
+            // agregado que ya tenían, para no dejar el desplegable vacío.
+            const comps = (h.competiciones && h.competiciones.length) ? h.competiciones
+              : [{ nombre: categoriaCorta(h), tipo:'liga', partidos:h.partidos, goles:h.goles, asistencias:h.asistencias, nota:h.nota }];
+            const filasComp = comps.map(cmp => `
+              <div class="trayectoria-comp-fila trayectoria-grid${cmp.tipo==='liga'?' es-liga':''}">
+                ${insigniaCompeticion(cmp.tipo, 19)}
+                <span class="trayectoria-comp-nombre">${cmp.nombre}</span>
+                <span class="trayectoria-comp-stat">${cmp.partidos}</span>
+                <span class="trayectoria-comp-stat">${cmp.goles}</span>
+                <span class="trayectoria-comp-stat">${cmp.asistencias}</span>
+                <span class="trayectoria-comp-nota ${claseNotaChip(cmp.nota)}">${cmp.nota!=null ? formatearNumero(cmp.nota) : '—'}</span>
+              </div>`).join('');
+            const extra = [];
+            if(h.titulos>0) extra.push(`<div class="trayectoria-extra-linea">${iconoInline('trofeo',13)}<b>${h.titulos}</b>&nbsp;título${h.titulos===1?'':'s'} esa temporada</div>`);
+            if(h.trofeosIndividuales>0) extra.push(`<div class="trayectoria-extra-linea">${iconoInline('estrella',13)}<b>${h.trofeosIndividuales}</b>&nbsp;distinción${h.trofeosIndividuales===1?'':'es'} individual${h.trofeosIndividuales===1?'':'es'}</div>`);
+            if(h.valorMercado!=null) extra.push(`<div class="trayectoria-extra-linea">${iconoInline('valorMercado',13)}Valor de mercado: <b>${formatearDinero(h.valorMercado)}</b></div>`);
+            const detalle = el('div','trayectoria-detalle');
+            detalle.innerHTML = `<div class="trayectoria-detalle-inner"><div class="trayectoria-comp-tabla">${filasComp}</div>${extra.length?`<div class="trayectoria-extra">${extra.join('')}</div>`:''}</div>`;
+            filaTemporada.appendChild(detalle);
+          }
+
+          tabla.appendChild(filaTemporada);
         });
       });
 
