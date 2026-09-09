@@ -2482,7 +2482,11 @@ const BANCO_EVENTOS = [
   },
   {
     id:"entrenador_nuevo", cooldown:3, evitarTrasTitulo:true,
-    trigger:{ probabilidad:0.35, condicion: j => S.pasoIndex === 1 },
+    // pasoIndex 0 es el primer paso de cada temporada (SEMANAS_POR_PASO=5, así que el paso 1 ya
+    // son semanas 6-10, mes y pico de competición oficial) — este suceso y los demás "de
+    // pretemporada" de este bloque estaban mal calibrados en pasoIndex===1 y podían salir bien
+    // entrada la temporada, contradiciendo su propio texto ("antes de empezar la temporada").
+    trigger:{ probabilidad:0.35, condicion: j => S.pasoIndex === 0 },
     texto:"El entrenador anuncia que deja el club al término de la pretemporada, y llega un sustituto con ideas distintas sobre cómo debes jugar.",
     variantes:[
       "Cambio en el banquillo antes de empezar la temporada: el nuevo entrenador llega con un sistema muy distinto al que tenías asumido.",
@@ -2727,7 +2731,7 @@ const BANCO_EVENTOS = [
   },
   {
     id:"pretemporada_exigente", cooldown:3, soloSiSano:true,
-    trigger:{ probabilidad:0.2, condicion: j => S.pasoIndex === 1 },
+    trigger:{ probabilidad:0.2, condicion: j => S.pasoIndex === 0 },
     texto:"El preparador físico plantea una tanda de trabajo mucho más dura de lo habitual. Varios compañeros ya se quejan del ritmo.",
     variantes:[
       "Esta semana viene marcada por un ritmo de trabajo que deja a más de uno con las piernas destrozadas.",
@@ -3311,7 +3315,9 @@ const BANCO_EVENTOS = [
   },
   {
     id:"salida_amigos_barrio", cooldown:4,
-    trigger:{ edadMin:18, probabilidad:0.22 },
+    // Quedar "esta noche" con la pandilla del barrio solo tiene sentido si estás jugando en
+    // España — jugando en el extranjero no puedes quedar en persona con ellos.
+    trigger:{ edadMin:18, probabilidad:0.22, condicion: j => !j.club.extranjero },
     texto: j => `${j.companeros.map(c=>c.apodo).join(', ')} y tú os escribís por el grupo de WhatsApp proponiendo salir esta noche, como en los viejos tiempos, antes de que nada de esto pasara.`,
     variantes:[
       j => `${j.companeros.map(c=>c.apodo).join(', ')} organizan una quedada por el grupo de WhatsApp y no aceptan un no por respuesta: "ya casi ni te vemos", te dicen.`,
@@ -4229,7 +4235,7 @@ const BANCO_EVENTOS = [
   },
   {
     id:"vacaciones_o_pretemporada", cooldown:1,
-    trigger:{ probabilidad:0.5, condicion: j => S.pasoIndex === 1 },
+    trigger:{ probabilidad:0.5, condicion: j => S.pasoIndex === 0 },
     texto:"Antes de que arranque de verdad la pretemporada, tienes una última semana libre. ¿Qué haces con ella?",
     variantes:[
       "El calendario oficial todavía no ha empezado y te queda una última semana para ti. ¿Cómo la aprovechas?",
@@ -4249,7 +4255,7 @@ const BANCO_EVENTOS = [
   },
   {
     id:"gira_pretemporada", cooldown:1,
-    trigger:{ probabilidad:0.3, condicion: j => S.pasoIndex === 1 && CATEGORIAS.indexOf(j.club.categoria) >= 2 },
+    trigger:{ probabilidad:0.3, condicion: j => S.pasoIndex === 0 && CATEGORIAS.indexOf(j.club.categoria) >= 2 },
     texto: j => `${articuloClub(j.club.nombre)==='la'?'La':'El'} ${j.club.nombre} organiza una gira de pretemporada con varios amistosos${j.club.extranjero ? ', alguno como visitante en otro país,' : ', algunos fuera de España,'} para preparar el curso y hacer caja con la afición.`,
     variantes:[
       j => `Antes de que empiece la competición oficial, ${articuloClub(j.club.nombre)} ${j.club.nombre} encadena una serie de amistosos de pretemporada para ir cogiendo forma.`,
@@ -4269,7 +4275,7 @@ const BANCO_EVENTOS = [
   },
   {
     id:"fiesta_ibiza_encuentro", cooldown:3,
-    trigger:{ edadMin:19, probabilidad:0.2, condicion: j => S.pasoIndex === 1 && j.stats.popularidad >= 10 },
+    trigger:{ edadMin:19, probabilidad:0.2, condicion: j => S.pasoIndex === 0 && j.stats.popularidad >= 10 },
     texto:"De vacaciones en Ibiza, coincides de fiesta con un jugador de otro equipo al que solo conocías de verle por la tele.",
     variantes:[
       "En una terraza de Ibiza te cruzas, para tu sorpresa, con un compañero de la selección de tu categoría al que apenas conocías en persona.",
