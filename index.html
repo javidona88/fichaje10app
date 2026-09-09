@@ -4693,11 +4693,17 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.5.4';
+const VERSION_JUEGO = 'v1.5.5';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.5.5', titulo:'Ajustes rediseñado y últimos retoques del menú', cambios:[
+    'La barra superior usa ahora el mismo logo "FICHAJE 10" del menú principal (con el mismo grosor de trazo y el 10 en blanco), manteniendo su altura de siempre.',
+    'Ajustes, durante la partida, rediseñado con el mismo estilo de tarjetas del menú principal; se ha quitado de ahí la lista de partidas guardadas (ya vive en "Continuar carrera") y se ha añadido un botón para volver al menú principal sin perder la partida.',
+    'Corregido que el fondo animado del menú principal diera un corte visible al entrar o salir de una opción.',
+    'Los rankings de jugadores usan ya iconos propios en vez de emoji.'
+  ]},
   { version:'v1.5.4', titulo:'Menú principal renovado', cambios:[
     'Menú principal rediseñado: cuatro opciones claras (Nueva carrera, Continuar carrera, Personalizar escudos, Ajustes), cada una con su propio icono, y fondo animado con un degradado azul oscuro en movimiento.',
     '"Nueva carrera" pasa siempre por el tutorial antes de crear el futbolista (antes solo se veía la primera vez de siempre) y usa automáticamente el primer hueco libre.',
