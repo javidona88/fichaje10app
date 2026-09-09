@@ -1001,6 +1001,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .menu-item:active{ background:rgba(255,255,255,0.05); }
 .menu-item:focus-visible{ outline:2px solid var(--gold); outline-offset:-2px; }
 .menu-item .icono{ flex-shrink:0; width:26px; height:26px; color:var(--gold); display:flex; align-items:center; justify-content:center; }
+.menu-item .icono svg{ width:100%; height:100%; }
+.menu-item-estado{ flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-size:11.5px; font-weight:700; color:var(--ink-soft); }
 .menu-item .txt{ flex:1; min-width:0; }
 .menu-item .titulo{ display:block; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; letter-spacing:.03em; text-transform:uppercase; color:var(--ink); }
 .menu-item .subtitulo{ display:block; font-family:'Space Grotesk',sans-serif; font-weight:400; font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
@@ -1039,6 +1041,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 </style>
 </head>
 <body>
+<!-- Fondo animado del menú principal: vive FUERA de #app (que pintar() vacía por completo en
+     cada repintado) para que la animación CSS no se reinicie de golpe cada vez que se pliega o
+     despliega algo dentro del menú — antes se recreaba en cada pintar() y el salto de posición
+     se veía como un corte. Oculto por defecto; pintar() lo muestra solo con S.screen==='menu'. -->
+<div id="bg-anim-menu" class="bg-anim" aria-hidden="true" style="display:none;"></div>
 <div id="topbar-root"></div>
 <div class="wrap" id="app"></div>
 <div id="tabbar-root"></div>
@@ -1537,6 +1544,8 @@ const ICONOS_SVG = {
   cruz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   ascenso: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6 4 4 6-8"/><path d="M20 7h-4M20 7v4"/></svg>',
   declive: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l6 6 4-4 6 8"/><path d="M20 17h-4M20 17v-4"/></svg>',
+  valorMercado: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><rect x="7" y="14" width="3" height="6" fill="currentColor" stroke="none"/><rect x="12" y="10" width="3" height="10" fill="currentColor" stroke="none"/><rect x="17" y="6" width="3" height="14" fill="currentColor" stroke="none"/></svg>',
+  seleccionTitulo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2l6.5 2.3v4.7c0 4.3-2.8 7.2-6.5 8.6-3.7-1.4-6.5-4.3-6.5-8.6V5.5z"/><path d="M12 8.3l1.1 2.2 2.4.35-1.75 1.7.4 2.45-2.15-1.15-2.15 1.15.4-2.45-1.75-1.7 2.4-.35z" fill="currentColor" stroke="none"/></svg>',
   camiseta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3l4 2 4-2 4 4-3 3v11H7V10L4 7z"/></svg>',
   confianzaCiega: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3v5.5c0 5-3.2 8.7-7.5 10.5-4.3-1.8-7.5-5.5-7.5-10.5V5.5z"/><path d="M8.5 12l2.3 2.3 4.7-4.7"/></svg>',
   fichaSuerte: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="9" stroke-dasharray="1.8 3.4"/><circle cx="12" cy="12" r="3.6"/></svg>',
@@ -10165,6 +10174,10 @@ function pintar(){
   } else {
     document.body.classList.add('sin-topbar');
   }
+  // El fondo animado del menú es un elemento persistente (ver comentario junto a su <div> en el
+  // HTML) — aquí solo se muestra u oculta, nunca se recrea, para que su animación CSS no se
+  // reinicie (y se vea como un corte) cada vez que se pliega/despliega algo en el menú.
+  document.getElementById('bg-anim-menu').style.display = (S.screen === 'menu') ? '' : 'none';
   // Al cambiar de pantalla, arriba del todo. Si es la MISMA pantalla repintándose
   // (p. ej. activar/desactivar un servicio), se mantiene el scroll donde estaba.
   window.scrollTo(0, mismaPantalla ? yScrollPrevio : 0);
@@ -10271,15 +10284,15 @@ async function obtenerRetirosDeduplicados(){
 // Rankings que se muestran a los jugadores, en el mismo orden en SCREENS.rankings y como
 // candidatos a mencionar en SCREENS.final. clave = campo en datos; mayor = true si gana el que más tiene.
 const RANKINGS_JUGADORES = [
-  { id:'goles', titulo:'🥅 Máximos goleadores', etiqueta:'Goles', clave:'goles', destacar:true, fraseFinal:'goles marcados' },
-  { id:'asistencias', titulo:'🎯 Máximos asistentes', etiqueta:'Asist.', clave:'asistencias' },
-  { id:'dineroGanado', titulo:'💰 Mayor dinero generado', etiqueta:'Total', clave:'dineroGanado', formatear:'dinero', destacar:true, fraseFinal:'dinero generado' },
-  { id:'titulos', titulo:'🏆 Más títulos ganados', etiqueta:'Títulos', clave:'titulos', destacar:true, fraseFinal:'títulos ganados' },
-  { id:'valorMercadoMaximo', titulo:'📈 Mayor valor de mercado alcanzado', etiqueta:'Máximo', clave:'valorMercadoMaximo', formatear:'dinero', soloPositivos:true },
-  { id:'balonesDeOro', titulo:'🥇 Más Balones de Oro', etiqueta:'Balones', clave:'balonesDeOro', soloPositivos:true },
-  { id:'titulosSeleccion', titulo:'🎖️ Más títulos con la selección', etiqueta:'Títulos', clave:'titulosSeleccion', soloPositivos:true },
-  { id:'ascensos', titulo:'⬆️ Más ascensos logrados', etiqueta:'Ascensos', clave:'ascensos', soloPositivos:true },
-  { id:'notaMediaCarrera', titulo:'⭐ Mejor nota media de la carrera', etiqueta:'Nota media', clave:'notaMediaCarrera', formatear:'nota', soloPresentes:true, destacar:true, fraseFinal:'nota media de la carrera' }
+  { id:'goles', icono:'tiro', titulo:'Máximos goleadores', etiqueta:'Goles', clave:'goles', destacar:true, fraseFinal:'goles marcados' },
+  { id:'asistencias', icono:'pase', titulo:'Máximos asistentes', etiqueta:'Asist.', clave:'asistencias' },
+  { id:'dineroGanado', icono:'dinero', titulo:'Mayor dinero generado', etiqueta:'Total', clave:'dineroGanado', formatear:'dinero', destacar:true, fraseFinal:'dinero generado' },
+  { id:'titulos', icono:'trofeo', titulo:'Más títulos ganados', etiqueta:'Títulos', clave:'titulos', destacar:true, fraseFinal:'títulos ganados' },
+  { id:'valorMercadoMaximo', icono:'valorMercado', titulo:'Mayor valor de mercado alcanzado', etiqueta:'Máximo', clave:'valorMercadoMaximo', formatear:'dinero', soloPositivos:true },
+  { id:'balonesDeOro', icono:'medalla', titulo:'Más Balones de Oro', etiqueta:'Balones', clave:'balonesDeOro', soloPositivos:true },
+  { id:'titulosSeleccion', icono:'seleccionTitulo', titulo:'Más títulos con la selección', etiqueta:'Títulos', clave:'titulosSeleccion', soloPositivos:true },
+  { id:'ascensos', icono:'ascenso', titulo:'Más ascensos logrados', etiqueta:'Ascensos', clave:'ascensos', soloPositivos:true },
+  { id:'notaMediaCarrera', icono:'estrella', titulo:'Mejor nota media de la carrera', etiqueta:'Nota media', clave:'notaMediaCarrera', formatear:'nota', soloPresentes:true, destacar:true, fraseFinal:'nota media de la carrera' }
 ];
 // Ordena las filas de retiro (deduplicadas) por el campo de un ranking, aplicando sus filtros propios.
 function calcularRankingOrdenado(filas, def){
@@ -10349,10 +10362,10 @@ function calcularPosicionesRanking(datosRetiro){
 function logoCamiseta(tamano){
   tamano = tamano || 22;
   return `<svg viewBox="0 0 24 24" width="${tamano}" height="${tamano}" xmlns="http://www.w3.org/2000/svg">
-    <path d="M10.3,4.7 L9,5.6 L6.5,5.9 L2.5,7.7 L4.5,12.2 L6.5,9.7 L6.5,20.3 L17.5,20.3 L17.5,9.7 L19.5,12.2 L21.5,7.7 L17.5,5.9 L15,5.6 L13.7,4.7 Z" fill="none" stroke="#D4AF37" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="M10.3,4.7 L12,5.5 L13.7,4.7" fill="none" stroke="#D4AF37" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M10.3,4.7 L9,5.6 L6.5,5.9 L2.5,7.7 L4.5,12.2 L6.5,9.7 L6.5,20.3 L17.5,20.3 L17.5,9.7 L19.5,12.2 L21.5,7.7 L17.5,5.9 L15,5.6 L13.7,4.7 Z" fill="none" stroke="#D4AF37" stroke-width="0.9" stroke-linejoin="round"/>
+    <path d="M10.3,4.7 L12,5.5 L13.7,4.7" fill="none" stroke="#D4AF37" stroke-width="0.9" stroke-linejoin="round"/>
     <path d="M12 8.2l0.42 0.86 0.95 0.13-0.69 0.65 0.17 0.94-0.85-0.47-0.85 0.47 0.17-0.94-0.69-0.65 0.95-0.13z" fill="#D4AF37"/>
-    <text x="12" y="17.1" font-family="Arial, sans-serif" font-size="6.9" font-weight="700" fill="#D4AF37" text-anchor="middle">10</text>
+    <text x="12" y="17.1" font-family="Space Grotesk, Arial, sans-serif" font-size="6.9" font-weight="700" fill="#EEEFF3" text-anchor="middle">10</text>
   </svg>`;
 }
 // Camiseta recortada a su dibujo, con alto fijo en px (para alinearla con el texto "FICHAJE 10").
@@ -12142,94 +12155,124 @@ function pintarFilaSlot(slot, contenedor, opciones){
   if(filaBotones.children.length) fila.appendChild(filaBotones);
   contenedor.appendChild(fila);
 }
+// Iconos propios de la pantalla de Ajustes — mismo estilo sin círculo que ICONOS_MENU_PRINCIPAL
+// (se define aparte porque SCREENS.ajustes va antes que SCREENS.menu en el archivo, pero ambos
+// solo se leen cuando la pantalla se pinta de verdad, mucho después de cargar todo el script).
+const ICONOS_AJUSTES = {
+  menuPrincipal: `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 11.5L12 4l8 7.5"/>
+    <path d="M6 10v9.2a.8.8 0 00.8.8H10v-5.4h4V20h3.2a.8.8 0 00.8-.8V10"/>
+  </svg>`,
+  sonido: `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 9.5v5h3.2l4.3 3.6V5.9L7.2 9.5z" fill="currentColor" stroke="none"/>
+    <path d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12"/>
+  </svg>`,
+  musica: `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="7" cy="17.5" r="2.5" fill="currentColor" stroke="none"/>
+    <circle cx="16" cy="15.5" r="2.5" fill="currentColor" stroke="none"/>
+    <path d="M9.5 17.5V5.5L18.5 4v11.5"/>
+    <path d="M9.5 8.5l9-1.5"/>
+  </svg>`,
+  tutorial: `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M9.3 9.3a2.7 2.7 0 115.2 1c-.5 1-1.6 1.3-2.2 2.1-.3.4-.3.9-.3 1.4"/>
+    <circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>
+  </svg>`,
+  rankings: `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+    <rect x="3" y="13" width="5.5" height="7" rx="1"/>
+    <rect x="9.3" y="8.5" width="5.5" height="11.5" rx="1"/>
+    <rect x="15.6" y="15.5" width="5.5" height="4.5" rx="1"/>
+  </svg>`
+};
 SCREENS.ajustes = function(){
   topbar("Ajustes");
-  const c = el('div','card');
-
+  const cVolver = el('div','card');
   const btnVolver = document.createElement('button');
   btnVolver.className = 'btn-secondary';
   btnVolver.textContent = '← Volver';
-  btnVolver.style.marginBottom = '16px';
   btnVolver.onclick = ()=>{
     S.screen = S.pantallaAnteriorAjustes || (S.jugador ? 'tabJugador' : 'menu');
     S.pantallaAnteriorAjustes = null;
     render();
   };
-  c.appendChild(btnVolver);
+  cVolver.appendChild(btnVolver);
+  app.appendChild(cVolver);
 
-  c.appendChild(crearEyebrow('Partidas guardadas'));
-  for(let slot=1; slot<=NUM_SLOTS_GUARDADO; slot++){
-    pintarFilaSlot(slot, c, {
-      permitirCargar: true,
-      permitirGuardar: true,
-      permitirBorrar: true,
-      onCargar: (slotElegido)=>{
-        const cargarAhora = !S.jugador || confirm('Vas a cargar otra partida. Si no has guardado el progreso actual, se perderá. ¿Continuar?');
-        if(cargarAhora && cargarPartida(slotElegido)){
-          S.pantallaAnteriorAjustes = null;
-          render();
-        }
+  const menu = el('div','menu');
+
+  // Solo con una partida en curso: salir al menú principal sin perder el progreso (se guarda
+  // justo antes de salir). Las partidas guardadas en sí ya no se gestionan aquí — viven en
+  // "Continuar carrera", en el propio menú principal.
+  if(S.jugador){
+    const grupoSalir = el('div','menu-grupo');
+    const btnSalir = document.createElement('button'); btnSalir.className='menu-item'; btnSalir.type='button';
+    btnSalir.innerHTML = `<span class="icono">${ICONOS_AJUSTES.menuPrincipal}</span>
+      <span class="txt"><span class="titulo">Volver al menú principal</span><span class="subtitulo">Se guarda tu partida antes de salir</span></span>`;
+    btnSalir.onclick = ()=>{
+      if(confirm('¿Volver al menú principal? Se guarda tu partida antes de salir, y podrás continuarla desde "Continuar carrera".')){
+        guardarPartida();
+        S.jugador = null;
+        S.pantallaBase = undefined;
+        S.pantallaAnteriorAjustes = null;
+        S.screen = 'menu';
+        render();
       }
-    });
+    };
+    grupoSalir.appendChild(btnSalir);
+    menu.appendChild(grupoSalir);
   }
 
-  c.appendChild(crearEyebrow('Sonido'));
-  const filaEfectos = el('div','opt');
-  filaEfectos.style.display = 'flex';
-  filaEfectos.style.justifyContent = 'space-between';
-  filaEfectos.style.alignItems = 'center';
-  filaEfectos.appendChild(el('span',null,'Efectos de sonido'));
-  const estadoEfectos = el('span',null, Sonido.efectosActivos() ? '🔊 Activados' : '🔇 Desactivados');
-  filaEfectos.appendChild(estadoEfectos);
+  // Sonido: los dos interruptores comparten un mismo grupo, como el panel de huecos en el menú.
+  const grupoSonido = el('div','menu-grupo');
+  const filaEfectos = document.createElement('button'); filaEfectos.className='menu-item'; filaEfectos.type='button';
+  const estadoEfectosTxt = ()=> Sonido.efectosActivos() ? 'Activados' : 'Desactivados';
+  filaEfectos.innerHTML = `<span class="icono">${ICONOS_AJUSTES.sonido}</span>
+    <span class="txt"><span class="titulo">Efectos de sonido</span><span class="subtitulo">Clics, dados, fichajes, trofeos</span></span>
+    <span class="menu-item-estado">${estadoEfectosTxt()}</span>`;
   filaEfectos.onclick = ()=>{
-    const activo = Sonido.toggleEfectos();
-    estadoEfectos.textContent = activo ? '🔊 Activados' : '🔇 Desactivados';
+    Sonido.toggleEfectos();
+    filaEfectos.querySelector('.menu-item-estado').textContent = estadoEfectosTxt();
   };
-  c.appendChild(filaEfectos);
-
-  const filaMusica = el('div','opt');
-  filaMusica.style.display = 'flex';
-  filaMusica.style.justifyContent = 'space-between';
-  filaMusica.style.alignItems = 'center';
-  filaMusica.appendChild(el('span',null,'Música ambiente'));
-  const estadoMusica = el('span',null, Sonido.musicaActiva() ? '🎵 Activada' : '🔇 Desactivada');
-  filaMusica.appendChild(estadoMusica);
+  grupoSonido.appendChild(filaEfectos);
+  const filaMusica = document.createElement('button'); filaMusica.className='menu-item'; filaMusica.type='button';
+  const estadoMusicaTxt = ()=> Sonido.musicaActiva() ? 'Activada' : 'Desactivada';
+  filaMusica.innerHTML = `<span class="icono">${ICONOS_AJUSTES.musica}</span>
+    <span class="txt"><span class="titulo">Música ambiente</span><span class="subtitulo">Melodía de fondo durante la partida</span></span>
+    <span class="menu-item-estado">${estadoMusicaTxt()}</span>`;
   filaMusica.onclick = ()=>{
     const activa = Sonido.toggleMusica();
-    estadoMusica.textContent = activa ? '🎵 Activada' : '🔇 Desactivada';
+    filaMusica.querySelector('.menu-item-estado').textContent = estadoMusicaTxt();
     if(activa) Sonido.iniciarMusica(); else Sonido.detenerMusica();
   };
-  c.appendChild(filaMusica);
+  grupoSonido.appendChild(filaMusica);
+  menu.appendChild(grupoSonido);
 
-  c.appendChild(crearEyebrow('Ayuda'));
-  const filaTutorial = el('div','opt');
-  filaTutorial.textContent = 'Ver el tutorial otra vez';
-  filaTutorial.onclick = ()=>{ S.tutorialPaso = 0; S.pantallaAnteriorAjustes = null; S.screen = 'tutorial'; render(); };
-  c.appendChild(filaTutorial);
+  // Resto de opciones, una tarjeta cada una — mismo patrón que el menú principal.
+  [
+    { icono:ICONOS_AJUSTES.tutorial, titulo:'Ver el tutorial otra vez', sub:'Repasa cómo funciona el juego',
+      onclick:()=>{ S.tutorialPaso = 0; S.pantallaAnteriorAjustes = null; S.screen = 'tutorial'; render(); } },
+    { icono:ICONOS_SVG.calendario, titulo:'Historial de cambios', sub:'Qué ha cambiado en cada versión',
+      onclick:()=>{ S.screen = 'changelog'; render(); } },
+    { icono:ICONOS_AJUSTES.rankings, titulo:'Rankings de todos los jugadores', sub:'Compara tu carrera con las demás',
+      onclick:()=>{ S.pantallaAnteriorRankings = 'ajustes'; S.rankingsDatos = undefined; S.screen = 'rankings'; render(); } },
+    { icono:ICONOS_SVG.trofeo, titulo:'Tus logros y cromos', sub:'Tu colección de por vida',
+      onclick:()=>{ S.pantallaAnteriorLogros = 'ajustes'; S.logrosVistaActiva = 'logros'; S.screen = 'logros'; render(); } }
+  ].forEach(op=>{
+    const grupo = el('div','menu-grupo');
+    const btn = document.createElement('button'); btn.className='menu-item'; btn.type='button';
+    btn.innerHTML = `<span class="icono">${op.icono}</span>
+      <span class="txt"><span class="titulo">${op.titulo}</span><span class="subtitulo">${op.sub}</span></span>
+      ${SVG_CHEV_MENU}`;
+    btn.onclick = op.onclick;
+    grupo.appendChild(btn);
+    menu.appendChild(grupo);
+  });
 
-  c.appendChild(crearEyebrow('Novedades'));
-  const filaChangelog = el('div','opt');
-  filaChangelog.textContent = 'Ver el historial de cambios';
-  filaChangelog.onclick = ()=>{ S.screen = 'changelog'; render(); };
-  c.appendChild(filaChangelog);
-
-  c.appendChild(crearEyebrow('Comunidad'));
-  const filaRankings = el('div','opt');
-  filaRankings.textContent = 'Ver los rankings de todos los jugadores';
-  filaRankings.onclick = ()=>{ S.pantallaAnteriorRankings = 'ajustes'; S.rankingsDatos = undefined; S.screen = 'rankings'; render(); };
-  c.appendChild(filaRankings);
-
-  c.appendChild(crearEyebrow('Colección'));
-  const filaLogros = el('div','opt');
-  filaLogros.textContent = 'Ver tus logros y cromos';
-  filaLogros.onclick = ()=>{ S.pantallaAnteriorLogros = 'ajustes'; S.logrosVistaActiva = 'logros'; S.screen = 'logros'; render(); };
-  c.appendChild(filaLogros);
+  app.appendChild(menu);
 
   const version = el('div', null, `Fichaje 10 · ${VERSION_JUEGO}`);
   version.style.cssText = 'text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-soft);opacity:.6;margin-top:20px;';
-  c.appendChild(version);
-
-  app.appendChild(c);
+  app.appendChild(version);
 };
 
 SCREENS.changelog = function(){
@@ -12359,7 +12402,7 @@ SCREENS.rankings = function(){
   RANKINGS_JUGADORES.forEach(def=>{
     const cRk = el('div','card');
     cRk.appendChild(crearEyebrow('Ranking'));
-    cRk.appendChild(el('h2',null, def.titulo));
+    cRk.appendChild(el('h2',null, `${iconoInline(def.icono,18)}${def.titulo}`));
     const wrap = el('div','rk-table');
     pintarTablaRankingJuego(wrap, calcularRankingOrdenado(filas, def), def, idPropio);
     cRk.appendChild(wrap);
@@ -12716,20 +12759,10 @@ function pintarFilaSlotMenu(slot, contenedor, opciones){
   contenedor.appendChild(div);
 }
 SCREENS.menu = function(){
-  // Fondo animado, fijo a toda la pantalla — se destruye solo al salir de aquí, porque pintar()
-  // vacía #app entero en cada cambio de pantalla (nada que limpiar aparte).
-  const bg = el('div','bg-anim');
-  bg.setAttribute('aria-hidden','true');
-  app.appendChild(bg);
-
+  // El fondo animado (#bg-anim-menu) es un elemento persistente fuera de #app — pintar() ya lo
+  // muestra/oculta según la pantalla, aquí no hay que crear ni tocar nada.
   const hero = el('div','menu-hero');
-  const heroLogo = el('div','menu-hero-badge',
-    `<svg viewBox="0 0 24 24" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-      <path d="M10.3,4.7 L9,5.6 L6.5,5.9 L2.5,7.7 L4.5,12.2 L6.5,9.7 L6.5,20.3 L17.5,20.3 L17.5,9.7 L19.5,12.2 L21.5,7.7 L17.5,5.9 L15,5.6 L13.7,4.7 Z" fill="none" stroke="#D4AF37" stroke-width="0.9" stroke-linejoin="round"/>
-      <path d="M10.3,4.7 L12,5.5 L13.7,4.7" fill="none" stroke="#D4AF37" stroke-width="0.9" stroke-linejoin="round"/>
-      <path d="M12 8.2l0.42 0.86 0.95 0.13-0.69 0.65 0.17 0.94-0.85-0.47-0.85 0.47 0.17-0.94-0.69-0.65 0.95-0.13z" fill="#D4AF37"/>
-      <text x="12" y="17.1" font-family="Space Grotesk, Arial, sans-serif" font-size="6.9" font-weight="700" fill="#EEEFF3" text-anchor="middle">10</text>
-    </svg>`);
+  const heroLogo = el('div','menu-hero-badge', logoCamiseta(72).replace('width="72" height="72"','style="width:100%;height:100%;"'));
   hero.appendChild(heroLogo);
   hero.appendChild(el('div','menu-wordmark', `<span class="f">FICHAJE</span><span class="n">10</span>`));
   app.appendChild(hero);
