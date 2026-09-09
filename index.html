@@ -5822,6 +5822,14 @@ const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResul
 // trabada en un sitio que no tenía sentido.
 const PANTALLAS_MUNDIAL_JUEGO = new Set(['mundialIntro','mundialBombos','mundialSorteo','mundialPrensa','mundialGrupo','mundialGrupoTabla','mundialElim','mundialPenaltis',
   'eurocopaIntro','eurocopaBombos','eurocopaSorteo','eurocopaPrensa','eurocopaGrupo','eurocopaGrupoTabla','eurocopaElim','eurocopaPenaltis']);
+// Mismo problema que arriba, pero con el flujo de fichaje: rueda de prensa (y el "vuelves a casa"
+// que la precede si ya jugaste en ese club) son pantallas de puro formulario/lectura, sin ninguna
+// animación ni "reveal" con efecto aplicado al pulsar continuar — releerlas de nuevo tras pasar
+// por Logros/Ajustes no deja nada a medias. Sin esto, mirar el cromo nuevo de un fichaje al
+// extranjero (o cualquier otra cosa) desde el trofeo de la topbar MIENTRAS estabas en la rueda de
+// prensa hacía que "Volver" te mandara a la pantalla de antes de fichar en vez de aquí, abandonando
+// la rueda de prensa a medias — y de ahí en adelante "Avanzar" no tenía a dónde llevarte.
+const PANTALLAS_FICHAJE_SEGURAS = new Set(['regresoClub','ruedaPrensa','ruedaPrensaResultado']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
 const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras','blackjack']);
@@ -9975,7 +9983,7 @@ function pintar(){
   }
   const esGastosObligatorio = S.screen === 'gastos' && !S.pantallaAnteriorGastos;
   const excluirDePantallaBase = PANTALLAS_TAB.has(S.screen) && !esGastosObligatorio;
-  const bloqueadaParaPantallaBase = PANTALLAS_SIN_TABBAR.has(S.screen) && !PANTALLAS_MUNDIAL_JUEGO.has(S.screen);
+  const bloqueadaParaPantallaBase = PANTALLAS_SIN_TABBAR.has(S.screen) && !PANTALLAS_MUNDIAL_JUEGO.has(S.screen) && !PANTALLAS_FICHAJE_SEGURAS.has(S.screen);
   if(S.jugador && !S.enFaseCreacion && !bloqueadaParaPantallaBase && !PANTALLAS_CREACION.has(S.screen) && !excluirDePantallaBase){
     S.pantallaBase = S.screen;
   }
