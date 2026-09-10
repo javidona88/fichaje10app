@@ -9212,57 +9212,11 @@ async function recomprimirEscudosPersonalizados(){
   const ok = guardarEscudosPersonalizados(mapa);
   return { ok, procesadas, antesKB: Math.round(antes/1024), despuesKB: Math.round(despues/1024) };
 }
-// Muchas imágenes "recortadas" que la gente encuentra sueltas por internet no llevan
-// transparencia de verdad: lo que parece fondo transparente en el visor es en realidad blanco
-// quemado en los propios píxeles. Esto lo arregla solo: inundación (flood fill) de blanco desde
-// los cuatro bordes hacia dentro, así que solo se vacía el fondo que TOCA el borde de la imagen
-// — un detalle blanco de verdad en mitad del escudo (una estrella, una letra) no se toca porque
-// no está conectado con el borde.
-function quitarFondoBlanco(ctx, ancho, alto){
-  alto = alto === undefined ? ancho : alto;
-  const datos = ctx.getImageData(0, 0, ancho, alto);
-  const px = datos.data;
-  const UMBRAL = 240;
-  const visitado = new Uint8Array(ancho * alto);
-  const cola = [];
-  function encolarSiBlanco(x, y){
-    if(x < 0 || y < 0 || x >= ancho || y >= alto) return;
-    const idx = y * ancho + x;
-    if(visitado[idx]) return;
-    const i = idx * 4;
-    if(px[i] < UMBRAL || px[i+1] < UMBRAL || px[i+2] < UMBRAL) return;
-    visitado[idx] = 1;
-    cola.push(idx);
-  }
-  for(let x=0; x<ancho; x++){ encolarSiBlanco(x,0); encolarSiBlanco(x,alto-1); }
-  for(let y=0; y<alto; y++){ encolarSiBlanco(0,y); encolarSiBlanco(ancho-1,y); }
-  let cabeza = 0;
-  while(cabeza < cola.length){
-    const idx = cola[cabeza++];
-    const x = idx % ancho, y = (idx / ancho) | 0;
-    px[idx*4 + 3] = 0;
-    encolarSiBlanco(x+1,y); encolarSiBlanco(x-1,y); encolarSiBlanco(x,y+1); encolarSiBlanco(x,y-1);
-  }
-  ctx.putImageData(datos, 0, 0);
-}
-// Cuenta cuántos píxeles del canvas siguen siendo visibles (con algo de opacidad real).
-function contarPixelesVisibles(ctx, ancho, alto){
-  const datos = ctx.getImageData(0, 0, ancho, alto);
-  const px = datos.data;
-  let visibles = 0;
-  for(let i=3; i<px.length; i+=4){ if(px[i] > 10) visibles++; }
-  return visibles;
-}
-// Si el propio logo es blanco (no solo su fondo), quitarFondoBlanco no tiene forma de
-// distinguirlo del fondo — son el mismo color y están conectados entre sí — y la inundación se
-// come la imagen entera, dejándola invisible. UMBRAL_LOGO_BLANCO detecta ese caso a posteriori
-// (queda casi nada visible en el canvas) para deshacerlo: quien llama a esto vuelve a dibujar
-// desde cero SIN quitar fondo, conservando la transparencia real que ya trajera el archivo.
-const UMBRAL_LOGO_BLANCO = 0.04;
 // Recorta el canvas al rectángulo real de contenido no transparente (con un pequeño margen de
-// aire) y lo reescala para volver a ocupar todo el lienzo — así una imagen con mucho margen
-// vacío alrededor del escudo real (típico tras quitarFondoBlanco) no se queda pequeña dentro de
-// su caja cuadrada; se ajusta automáticamente para ocuparla sin perder su propia escala/proporción.
+// aire) y lo reescala para volver a ocupar todo el lienzo — así una imagen con transparencia
+// real ya traída del propio archivo, con mucho margen vacío alrededor del escudo, no se queda
+// pequeña dentro de su caja cuadrada; se ajusta automáticamente para ocuparla sin perder su
+// propia escala/proporción.
 function recortarAlContenido(canvas, ctx, tam){
   const datos = ctx.getImageData(0, 0, tam, tam);
   const px = datos.data;
@@ -9290,14 +9244,15 @@ function recortarAlContenido(canvas, ctx, tam){
   ctx.drawImage(temp, cx - lado/2, cy - lado/2, lado, lado, 0, 0, tam, tam);
 }
 // Lee el archivo elegido, lo recorta a cuadrado (mismo criterio "cover" que el resto de escudos),
-// le quita el fondo blanco si lo tuviera y recorta el aire sobrante alrededor del contenido real
-// antes de guardarlo a un tamaño que se vea nítido incluso ampliado (p. ej. al hacer zoom en un
-// cromo), sin que cientos de escudos personalizados agoten el localStorage.
+// recorta el aire sobrante alrededor del contenido real si ya trae transparencia propia, y lo
+// guarda a un tamaño que se vea nítido incluso ampliado (p. ej. al hacer zoom en un cromo), sin
+// que cientos de escudos personalizados agoten el localStorage. El fondo de la imagen se
+// respeta tal cual la sube el jugador — nunca se le quita nada de forma automática.
 // Núcleo compartido: dado un <img> ya cargado, produce el data: URI final de un escudo (recorte
-// "cover" a cuadrado + quitar fondo blanco + recorte de aire sobrante + WebP). Lo comparten la
-// subida de archivo, la subida por URL, y recomprimirEscudosPersonalizados() (que reprocesa lo que
-// ya hay guardado sin que el jugador tenga que volver a subir nada) — antes esta misma lógica
-// estaba duplicada en 2 sitios.
+// "cover" a cuadrado + recorte de aire sobrante + WebP). Lo comparten la subida de archivo, la
+// subida por URL, y recomprimirEscudosPersonalizados() (que reprocesa lo que ya hay guardado sin
+// que el jugador tenga que volver a subir nada) — antes esta misma lógica estaba duplicada en 2
+// sitios.
 // `tam` por defecto 320 (el que necesitan selecciones — se ven hasta a 360px al ampliar un cromo);
 // clubes/marcas/títulos no se muestran nunca a más de ~56px en ningún sitio del juego, así que
 // guardarlos a 320px gastaba 4 veces más espacio del necesario en el localStorage compartido con
@@ -9316,8 +9271,6 @@ function procesarImagenAEscudo(img, tam){
     ctx.drawImage(img, (TAM - w) / 2, (TAM - h) / 2, w, h);
   };
   dibujar();
-  quitarFondoBlanco(ctx, TAM);
-  if(contarPixelesVisibles(ctx, TAM, TAM) < TAM*TAM*UMBRAL_LOGO_BLANCO) dibujar();
   recortarAlContenido(canvas, ctx, TAM);
   return canvas.toDataURL('image/webp', 0.86);
 }
@@ -9334,11 +9287,11 @@ function redimensionarImagenEscudo(file, tam){
     reader.readAsDataURL(file);
   });
 }
-// Misma limpieza para una URL externa (recorte + quitar fondo blanco + recorte de aire sobrante),
-// aprovechando que ya se va a mostrar con <img> de todas formas. Si el servidor de esa URL no
-// permite CORS, leer los píxeles del canvas falla (canvas "contaminado") y esta función rechaza
-// la promesa — quien la llama debe entonces guardar la URL tal cual, sin procesar (se sigue
-// viendo, pero sin quitar el fondo ni funcionar sin conexión).
+// Mismo recorte para una URL externa (recorte a cuadrado + recorte de aire sobrante si ya trae
+// transparencia real), aprovechando que ya se va a mostrar con <img> de todas formas. Si el
+// servidor de esa URL no permite CORS, leer los píxeles del canvas falla (canvas "contaminado")
+// y esta función rechaza la promesa — quien la llama debe entonces guardar la URL tal cual, sin
+// procesar (se sigue viendo, pero sin funcionar sin conexión).
 function procesarUrlParaEscudo(url, tam){
   return new Promise((resolve, reject)=>{
     const img = new Image();
@@ -9352,7 +9305,7 @@ function procesarUrlParaEscudo(url, tam){
 }
 // El logo de una liga NO se recorta a cuadrado: muchos son un logotipo ancho (texto), y
 // forzarlos a un "cover" cuadrado los mutilaría. Se ajustan enteros dentro de una caja
-// rectangular (letterbox, conservando su proporción) antes de quitar el fondo blanco.
+// rectangular (letterbox, conservando su proporción).
 function ajustarImagenLigaEnCanvas(img, ctx, ancho, alto){
   const escala = Math.min(ancho / img.width, alto / img.height, 1) || 1;
   const w = img.width * escala, h = img.height * escala;
@@ -9365,8 +9318,6 @@ function procesarImagenALiga(img, ancho, alto){
   const ctx = canvas.getContext('2d');
   const dibujar = ()=>{ ctx.clearRect(0, 0, ancho, alto); ajustarImagenLigaEnCanvas(img, ctx, ancho, alto); };
   dibujar();
-  quitarFondoBlanco(ctx, ancho, alto);
-  if(contarPixelesVisibles(ctx, ancho, alto) < ancho*alto*UMBRAL_LOGO_BLANCO) dibujar();
   return canvas.toDataURL('image/webp', 0.86);
 }
 function redimensionarImagenLiga(file){
@@ -13450,9 +13401,8 @@ SCREENS.escudosPersonalizados = function(){
         if(!ok){ mostrarAvisoEscudos('No se ha podido guardar.'); return; }
         actualizar();
       };
-      // Se intenta recortar (o ajustar, si es una liga) y quitar el fondo blanco, igual que al
-      // subir un archivo; si el servidor de esa URL no permite leer la imagen (CORS), se
-      // guarda tal cual, sin procesar.
+      // Se intenta recortar (o ajustar, si es una liga), igual que al subir un archivo; si el
+      // servidor de esa URL no permite leer la imagen (CORS), se guarda tal cual, sin procesar.
       procesarUrlDelTipo(tipo, url).then(guardarYActualizar).catch(()=> guardarYActualizar(url));
     };
     acciones.appendChild(btnUrl);
