@@ -7507,6 +7507,11 @@ function cargarPartida(slot){
     S = data.estado;
     S.slotActivo = slot;
     migrarJugadorGuardado(S.jugador);
+    // La partida se guarda con S.screen tal cual estuviera en ese momento — a menudo "ajustes"
+    // (p. ej. al pulsar "Volver al menú principal" desde ahí, que guarda antes de salir). Al
+    // cargar, siempre se aterriza en la pantalla de juego real (S.pantallaBase, la que marca la
+    // pestaña "Avanzar"), nunca en Ajustes ni en ninguna otra pantalla de pestaña.
+    S.screen = S.pantallaBase || 'tabJugador';
     return true;
   }catch(e){ return false; }
 }
