@@ -9241,6 +9241,8 @@ function recortarAlContenido(canvas, ctx, tam){
   temp.width = tam; temp.height = tam;
   temp.getContext('2d').drawImage(canvas, 0, 0);
   ctx.clearRect(0, 0, tam, tam);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(temp, cx - lado/2, cy - lado/2, lado, lado, 0, 0, tam, tam);
 }
 // Lee el archivo elegido, lo recorta a cuadrado (mismo criterio "cover" que el resto de escudos),
@@ -9264,6 +9266,13 @@ function procesarImagenAEscudo(img, tam){
   const canvas = document.createElement('canvas');
   canvas.width = TAM; canvas.height = TAM;
   const ctx = canvas.getContext('2d');
+  // Por defecto el navegador reescala con el filtro más barato ('low'), que se nota especialmente
+  // en una reducción grande como la de un móvil actual (3000-4000px) al tamaño final guardado —
+  // exactamente el caso reportado: escudos que se suben nítidos pero se ven blandos ya en el
+  // juego, aunque se muestren pequeños. 'high' usa un filtro mejor (más lento, pero es una sola
+  // vez al subir la imagen) y conserva el detalle real en vez de difuminarlo.
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   const dibujar = ()=>{
     ctx.clearRect(0, 0, TAM, TAM);
     const escala = Math.max(TAM / img.width, TAM / img.height);
@@ -9316,6 +9325,8 @@ function procesarImagenALiga(img, ancho, alto){
   const canvas = document.createElement('canvas');
   canvas.width = ancho; canvas.height = alto;
   const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high'; // mismo motivo que en procesarImagenAEscudo — ver comentario ahí
   const dibujar = ()=>{ ctx.clearRect(0, 0, ancho, alto); ajustarImagenLigaEnCanvas(img, ctx, ancho, alto); };
   dibujar();
   return canvas.toDataURL('image/webp', 0.86);
