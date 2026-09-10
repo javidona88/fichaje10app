@@ -5016,9 +5016,16 @@ const TITULARES = {
     d => `${d.nombre} cierra una temporada gris, con la sensación de haber desaprovechado su momento`
   ]
 };
-const FASES_COMPETICION_GRUPOS = ['Fase de grupos','Dieciseisavos de final','Octavos de final','Cuartos de final'];
+// Competición continental de club (Champions/Europa/Conference/AFC): desde 2024-25 la UEFA (y la
+// AFC, que copió el modelo) sustituyó la fase de grupos por una liguilla única de 36 equipos
+// ("fase de liga"), seguida de un play-off para entrar en octavos — ya no hay "Fase de grupos"
+// de verdad. La Copa Libertadores y la Concacaf Champions Cup sí conservan un formato más
+// clásico, pero el juego no distingue el formato por confederación a este nivel de detalle
+// (siempre usa este mismo array vía simularFaseCompeticion), así que se deja la terminología UEFA
+// como aproximación general — es la que corresponde a la inmensa mayoría de estas tiradas.
+const FASES_COMPETICION_GRUPOS = ['Fase de liga','Play-offs','Octavos de final','Cuartos de final'];
 const FASES_COMPETICION_ELIMINATORIA = ['Primera ronda','Dieciseisavos de final','Octavos de final','Cuartos de final'];
-const BONUS_NOTA_FASE = { 'Fase de grupos':0, 'Primera ronda':0, 'Dieciseisavos de final':0.1, 'Octavos de final':0.2, 'Cuartos de final':0.35, 'Semifinales':0.5, 'Final':0.7, 'Campeón':1.0 };
+const BONUS_NOTA_FASE = { 'Fase de liga':0, 'Primera ronda':0, 'Play-offs':0.1, 'Dieciseisavos de final':0.1, 'Octavos de final':0.2, 'Cuartos de final':0.35, 'Semifinales':0.5, 'Final':0.7, 'Campeón':1.0 };
 const PENALIZACION_DIVISION_COPA = { "LaLiga":0, "LaLiga2":-6, "Primera RFEF":-14, "Segunda RFEF":-20, "Tercera RFEF":-26 };
 const PROMESAS_CLUB = [
   { id:'titular_garantizado', texto:'Tendrás minutos garantizados como titular', tipo:'titular', plazoTemporadas:1 },
