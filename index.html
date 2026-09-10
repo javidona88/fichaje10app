@@ -201,9 +201,9 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .icono-insignia svg{ width:58%; height:58%; }
 .icono-inline svg{ width:100%; height:100%; }
 .logo-text{ display:flex; align-items:baseline; }
-.logo-text .top{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; letter-spacing:.02em; color:var(--gold); }
+.logo-text .top{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:19px; letter-spacing:.01em; color:var(--gold); }
 .logo-text .main{
-  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; letter-spacing:.02em;
+  font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:19px; letter-spacing:.01em;
   color:var(--ink); margin-left:4px;
 }
 .card{
@@ -294,12 +294,12 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    Cabecera, fila de temporada y filas de competición comparten esta misma rejilla de columnas
    para que los iconos de PJ/Goles/Asistencias/Nota caigan siempre justo sobre su número. */
 .trayectoria-grid{ display:grid; grid-template-columns:26px 1fr 22px 22px 22px 34px; column-gap:8px; align-items:center; }
-.trayectoria-col-heads{ margin:0 0 4px; }
+.trayectoria-col-heads{ margin:0 0 4px; padding:0 9px; }
 .trayectoria-col-heads span{ color:var(--gold-dim); display:flex; align-items:center; justify-content:center; }
 .trayectoria-col-heads span svg{ width:14px; height:14px; }
 .trayectoria-temporada{ border-top:1px dashed rgba(255,255,255,0.08); }
 .trayectoria-temporada:first-of-type{ border-top:none; }
-.trayectoria-fila{ padding:9px 0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.trayectoria-fila{ padding:9px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .trayectoria-escudo svg, .trayectoria-escudo img{ display:block; }
 .trayectoria-club{ min-width:0; display:flex; align-items:center; justify-content:space-between; gap:6px; }
 .trayectoria-club-txt{ min-width:0; }
@@ -317,8 +317,10 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .trayectoria-comp-tabla{ border-radius:9px; background:var(--panel2); padding:2px 9px; }
 .trayectoria-comp-fila{ padding:8px 0; }
 .trayectoria-comp-fila + .trayectoria-comp-fila{ border-top:1px solid var(--line); }
-.insignia-competicion{ border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; }
+.insignia-competicion{ border-radius:50%; width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#fff; }
 .insignia-competicion svg{ width:56%; height:56%; }
+.trayectoria-comp-icono{ display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.trayectoria-comp-icono img, .trayectoria-comp-icono svg{ max-width:100%; max-height:100%; }
 .trayectoria-comp-nombre{ font-size:11px; font-weight:600; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .trayectoria-comp-fila.es-liga .trayectoria-comp-nombre{ color:var(--ink); }
 .trayectoria-comp-stat{ text-align:center; font-family:'Big Shoulders Display',sans-serif; font-weight:700; font-size:13px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
@@ -6943,18 +6945,20 @@ function iconoInline(clave, tamano){
   const svg = ICONOS_SVG[clave] || '';
   return `<span class="icono-inline" style="display:inline-flex;vertical-align:middle;width:${tamano}px;height:${tamano}px;margin-right:5px;">${svg}</span>`;
 }
-// Insignia circular por TIPO de competición (liga/copa/europa/selección), usada en el desglose
-// de SCREENS.tabEstadisticas — reutiliza iconos ya existentes de ICONOS_SVG, nunca el logo real
-// de una liga/copa/UEFA (mismo criterio que escudoSVG con los escudos de club).
-const COMPETICION_TIPO_ESTILO = {
-  liga:      { color:'#2F5FD1', icono:'tabClub' },
-  copa:      { color:'#9C2B44', icono:'trofeo' },
-  europa:    { color:'#151B33', icono:'estrella' },
-  seleccion: { color:'#1B6E43', icono:'seleccionTitulo' }
-};
-function insigniaCompeticion(tipo, tamano){
-  const cfg = COMPETICION_TIPO_ESTILO[tipo] || COMPETICION_TIPO_ESTILO.liga;
-  return `<span class="insignia-competicion" style="width:${tamano}px;height:${tamano}px;background:${cfg.color};">${ICONOS_SVG[cfg.icono]}</span>`;
+// Insignia circular genérica de reserva para el tipo "liga" del desglose de SCREENS.tabEstadisticas,
+// cuando no hay logo de liga personalizado (logoLiga() se queda vacío a propósito, ver su comentario).
+// Reutiliza iconos ya existentes de ICONOS_SVG, nunca el logo real de una liga.
+function insigniaCompeticion(tamano){
+  return `<span class="insignia-competicion" style="width:${tamano}px;height:${tamano}px;background:#2F5FD1;">${ICONOS_SVG.tabClub}</span>`;
+}
+// Logo de una fila de competición del desglose (liga/copa/europa/selección): usa el logo
+// personalizado del jugador si lo tiene cargado (logoLiga para la liga, logoTitulo para el resto —
+// logoTitulo ya mira su propio custom, luego el escudo coloreado de LOGOS_COMPETICION, y por
+// último el trofeo genérico), y solo cae en la insignia propia de aquí si es una liga sin logo
+// personalizado ni genérico (logoLiga nunca tiene reserva, a diferencia de logoTitulo).
+function logoFilaCompeticion(cmp, tamano){
+  const contenido = cmp.tipo === 'liga' ? (logoLiga(cmp.nombre, tamano) || insigniaCompeticion(tamano)) : logoTitulo(cmp.nombre, tamano);
+  return `<span class="trayectoria-comp-icono" style="width:${tamano}px;height:${tamano}px;">${contenido}</span>`;
 }
 // Mismo criterio de color que el reveal de nota de fin de temporada (nota-roja/naranja/verde,
 // ver SCREENS.temporadaResumen): <6 roja, <7 naranja, resto verde; null (pocos minutos) sin color.
@@ -8381,7 +8385,7 @@ function procesarFinTemporada(j, ascensoPlayoff){
     pais: j.club.extranjero ? j.club.pais : 'España', extranjero: !!j.club.extranjero,
     partidos: S.temporadaResumen.partidos, goles: S.temporadaResumen.goles, asistencias: S.temporadaResumen.asistencias,
     nota: S.temporadaResumen.nota, carino: j.carinoAficion, valorMercado: j.stats.valorMercado, edad: j.edad,
-    titulos: (S.titulosTemporadaActual||[]).length, ascenso: !!S.temporadaResumen.ascenso,
+    titulos: (S.titulosTemporadaActual||[]).length, titulosNombres: (S.titulosTemporadaActual||[]).slice(), ascenso: !!S.temporadaResumen.ascenso,
     trofeosIndividuales: (S.temporadaResumen.pichichi?1:0) + (S.temporadaResumen.mvp?1:0) + (S.temporadaResumen.balonDeOroPuesto?1:0) + (S.temporadaResumen.botaOro?1:0),
     competiciones: competicionesTemporada
   });
@@ -9347,6 +9351,10 @@ function temporadaAAnoCompleto(n){
   const inicio = 2026 + (n-1);
   const fin = inicio + 1;
   return String(inicio).slice(2) + '/' + String(fin).slice(2);
+}
+function temporadaAAnoLargo(n){
+  const inicio = 2026 + (n-1);
+  return `${inicio}/${inicio+1}`;
 }
 function rangoTemporadas(inicio, fin){
   return inicio === fin ? temporadaAAno(inicio) : `${temporadaAAno(inicio)} – ${temporadaAAno(fin)}`;
@@ -10861,69 +10869,62 @@ function seccionEstadisticas(j){
       const colHeads = el('div','trayectoria-grid trayectoria-col-heads');
       colHeads.innerHTML = `<span></span><span></span><span>${ICONOS_SVG.camiseta}</span><span>${ICONOS_SVG.tiro}</span><span>${ICONOS_SVG.pase}</span><span>${ICONOS_SVG.estrella}</span>`;
       tabla.appendChild(colHeads);
-      const etapas = [];
-      historial.forEach(h=>{
-        const ultima = etapas[etapas.length-1];
-        if(ultima && ultima.club === h.club) ultima.filas.push(h);
-        else etapas.push({ club:h.club, pais:h.pais, filas:[h] });
-      });
-      etapas.forEach(etapa=>{
-        const bandera = banderaPais(etapa.pais || 'España');
-        const ultimaFila = etapa.filas[etapa.filas.length-1];
-        const textoCarino = ultimaFila.carino!=null ? estadoCarino(ultimaFila.carino).texto : null;
-        tabla.appendChild(el('div','historial-club-header', `${bandera} ${etapa.club}${textoCarino ? ` <span style="text-transform:lowercase;">(${textoCarino})</span>` : ''}`));
-        etapa.filas.forEach(h=>{
-          const key = `t_${h.temporada}`;
-          const abierta = !!(S.trayectoriaAbiertas && S.trayectoriaAbiertas[key]);
-          const filaTemporada = el('div','trayectoria-temporada'+(abierta?' abierta':''));
+      // Más reciente primero (orden inverso al de historialTemporadas, que se va empujando
+      // temporada a temporada). Sin cabecera de etapa/club aparte: el escudo y el nombre del
+      // club van ya en cada fila, así que agruparlas por club aparte sería redundante.
+      historial.slice().reverse().forEach(h=>{
+        const key = `t_${h.temporada}`;
+        const abierta = !!(S.trayectoriaAbiertas && S.trayectoriaAbiertas[key]);
+        const filaTemporada = el('div','trayectoria-temporada'+(abierta?' abierta':''));
 
-          const cab = el('div','trayectoria-fila trayectoria-grid');
-          cab.innerHTML = `
-            <span class="trayectoria-escudo">${escudoSVG(h.club, 24, coloresClubDelJuego(h.club))}</span>
-            <span class="trayectoria-club">
-              <span class="trayectoria-club-txt">
-                <span class="trayectoria-nombre">${categoriaCorta(h)}</span>
-                <span class="trayectoria-temp">${temporadaAAnoCompleto(h.temporada)}${h.ascenso ? ` ${iconoInline('ascenso',11)}` : ''}</span>
-              </span>
-              <svg class="trayectoria-chev" width="11" height="7" viewBox="0 0 12 8" fill="none"><path d="M1 1.5l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        const cab = el('div','trayectoria-fila trayectoria-grid');
+        cab.innerHTML = `
+          <span class="trayectoria-escudo">${escudoSVG(h.club, 24, coloresClubDelJuego(h.club))}</span>
+          <span class="trayectoria-club">
+            <span class="trayectoria-club-txt">
+              <span class="trayectoria-nombre">${h.club}</span>
+              <span class="trayectoria-temp">${temporadaAAnoLargo(h.temporada)}${h.ascenso ? ` ${iconoInline('ascenso',11)}` : ''}</span>
             </span>
-            <span class="trayectoria-stat">${h.partidos}</span>
-            <span class="trayectoria-stat">${h.goles}</span>
-            <span class="trayectoria-stat">${h.asistencias}</span>
-            <span class="trayectoria-nota ${claseNotaChip(h.nota)}">${h.nota!=null ? formatearNumero(h.nota) : '—'}</span>
-          `;
-          cab.onclick = ()=>{
-            S.trayectoriaAbiertas = S.trayectoriaAbiertas || {};
-            S.trayectoriaAbiertas[key] = !S.trayectoriaAbiertas[key];
-            pintar();
-          };
-          filaTemporada.appendChild(cab);
+            <svg class="trayectoria-chev" width="11" height="7" viewBox="0 0 12 8" fill="none"><path d="M1 1.5l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="trayectoria-stat">${h.partidos}</span>
+          <span class="trayectoria-stat">${h.goles}</span>
+          <span class="trayectoria-stat">${h.asistencias}</span>
+          <span class="trayectoria-nota ${claseNotaChip(h.nota)}">${h.nota!=null ? formatearNumero(h.nota) : '—'}</span>
+        `;
+        cab.onclick = ()=>{
+          S.trayectoriaAbiertas = S.trayectoriaAbiertas || {};
+          S.trayectoriaAbiertas[key] = !S.trayectoriaAbiertas[key];
+          pintar();
+        };
+        filaTemporada.appendChild(cab);
 
-          if(abierta){
-            // Saves antiguos sin desglose por competición: se cae a una única fila "liga" con el
-            // agregado que ya tenían, para no dejar el desplegable vacío.
-            const comps = (h.competiciones && h.competiciones.length) ? h.competiciones
-              : [{ nombre: categoriaCorta(h), tipo:'liga', partidos:h.partidos, goles:h.goles, asistencias:h.asistencias, nota:h.nota }];
-            const filasComp = comps.map(cmp => `
-              <div class="trayectoria-comp-fila trayectoria-grid${cmp.tipo==='liga'?' es-liga':''}">
-                ${insigniaCompeticion(cmp.tipo, 19)}
-                <span class="trayectoria-comp-nombre">${cmp.nombre}</span>
-                <span class="trayectoria-comp-stat">${cmp.partidos}</span>
-                <span class="trayectoria-comp-stat">${cmp.goles}</span>
-                <span class="trayectoria-comp-stat">${cmp.asistencias}</span>
-                <span class="trayectoria-comp-nota ${claseNotaChip(cmp.nota)}">${cmp.nota!=null ? formatearNumero(cmp.nota) : '—'}</span>
-              </div>`).join('');
-            const extra = [];
-            if(h.titulos>0) extra.push(`<div class="trayectoria-extra-linea">${iconoInline('trofeo',13)}<b>${h.titulos}</b>&nbsp;título${h.titulos===1?'':'s'} esa temporada</div>`);
-            if(h.trofeosIndividuales>0) extra.push(`<div class="trayectoria-extra-linea">${iconoInline('estrella',13)}<b>${h.trofeosIndividuales}</b>&nbsp;distinción${h.trofeosIndividuales===1?'':'es'} individual${h.trofeosIndividuales===1?'':'es'}</div>`);
-            if(h.valorMercado!=null) extra.push(`<div class="trayectoria-extra-linea">${iconoInline('valorMercado',13)}Valor de mercado: <b>${formatearDinero(h.valorMercado)}</b></div>`);
-            const detalle = el('div','trayectoria-detalle');
-            detalle.innerHTML = `<div class="trayectoria-detalle-inner"><div class="trayectoria-comp-tabla">${filasComp}</div>${extra.length?`<div class="trayectoria-extra">${extra.join('')}</div>`:''}</div>`;
-            filaTemporada.appendChild(detalle);
-          }
+        if(abierta){
+          // Saves antiguos sin desglose por competición: se cae a una única fila "liga" con el
+          // agregado que ya tenían, para no dejar el desplegable vacío.
+          const comps = (h.competiciones && h.competiciones.length) ? h.competiciones
+            : [{ nombre: categoriaCorta(h), tipo:'liga', partidos:h.partidos, goles:h.goles, asistencias:h.asistencias, nota:h.nota }];
+          const filasComp = comps.map(cmp => `
+            <div class="trayectoria-comp-fila trayectoria-grid${cmp.tipo==='liga'?' es-liga':''}">
+              ${logoFilaCompeticion(cmp, 19)}
+              <span class="trayectoria-comp-nombre">${cmp.nombre}</span>
+              <span class="trayectoria-comp-stat">${cmp.partidos}</span>
+              <span class="trayectoria-comp-stat">${cmp.goles}</span>
+              <span class="trayectoria-comp-stat">${cmp.asistencias}</span>
+              <span class="trayectoria-comp-nota ${claseNotaChip(cmp.nota)}">${cmp.nota!=null ? formatearNumero(cmp.nota) : '—'}</span>
+            </div>`).join('');
+          const extra = [];
+          const nombresTitulos = (h.titulosNombres && h.titulosNombres.length) ? h.titulosNombres : null;
+          if(nombresTitulos) extra.push(`<div class="trayectoria-extra-linea">${iconoInline('trofeo',13)}<b>${nombresTitulos.length}</b>&nbsp;título${nombresTitulos.length===1?'':'s'}: <b>${nombresTitulos.join(', ')}</b></div>`);
+          else if(h.titulos>0) extra.push(`<div class="trayectoria-extra-linea">${iconoInline('trofeo',13)}<b>${h.titulos}</b>&nbsp;título${h.titulos===1?'':'s'} esa temporada</div>`);
+          if(h.trofeosIndividuales>0) extra.push(`<div class="trayectoria-extra-linea">${iconoInline('estrella',13)}<b>${h.trofeosIndividuales}</b>&nbsp;distinción${h.trofeosIndividuales===1?'':'es'} individual${h.trofeosIndividuales===1?'':'es'}</div>`);
+          if(h.valorMercado!=null) extra.push(`<div class="trayectoria-extra-linea">${iconoInline('valorMercado',13)}Valor de mercado: <b>${formatearDinero(h.valorMercado)}</b></div>`);
+          const detalle = el('div','trayectoria-detalle');
+          detalle.innerHTML = `<div class="trayectoria-detalle-inner"><div class="trayectoria-comp-tabla">${filasComp}</div>${extra.length?`<div class="trayectoria-extra">${extra.join('')}</div>`:''}</div>`;
+          filaTemporada.appendChild(detalle);
+        }
 
-          tabla.appendChild(filaTemporada);
-        });
+        tabla.appendChild(filaTemporada);
       });
 
       const totPartidos = historial.reduce((s,h)=>s+h.partidos,0);
