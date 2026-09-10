@@ -7641,6 +7641,40 @@ function comprobarNumerosRojos(j){
   cancelados.asesorFiscalSalvado = salvaAsesorFiscal;
   return cancelados;
 }
+// Al fichar por un club nuevo a mitad de carrera, ese club puede perfectamente llevar jugando
+// competición continental la temporada pasada — el juego no simula la liga entera de cada rival,
+// así que no hay un dato "real" que copiar, pero dejar SIEMPRE nivelEuropeo:null en el club nuevo
+// (como pasaba antes: se omitía sin más al construir el objeto) significa que fichar por el
+// mismísimo Real Madrid nunca te lleva a la Champions ese primer año — bug real, corregido aquí.
+// Solo tiene sentido en la máxima categoría del país de destino (donde de verdad se juega
+// competición continental); el resto de casos ni se sortea.
+function nivelEuropeoAlFichar(club){
+  const prestigio = PRESTIGIO_CLUB[club.nombre] || 2;
+  const esSudamerica = club.extranjero && PAISES_SUDAMERICANOS.includes(club.pais);
+  const esConcacaf = club.extranjero && PAISES_CONCACAF.includes(club.pais);
+  const esAsia = club.extranjero && PAISES_ASIA.includes(club.pais);
+  const dado = Math.random();
+  if(esSudamerica || esConcacaf || esAsia){
+    // Fuera de Europa el juego solo modela un nivel continental (Libertadores/Concacaf/AFC), sin
+    // un segundo escalón tipo Europa League — probabilidad única según prestigio del club.
+    const PROB_UNICA_POR_PRESTIGIO = { 4:0.55, 3:0.30, 2:0.12, 1:0.03 };
+    const prob = PROB_UNICA_POR_PRESTIGIO[prestigio] || PROB_UNICA_POR_PRESTIGIO[2];
+    const nivel = dado < prob ? (esSudamerica ? 'libertadores' : esConcacaf ? 'concacaf' : 'afc') : null;
+    return { clasificacionEuropea: !!nivel, nivelEuropeo: nivel };
+  }
+  const PROB_EUROPA_POR_PRESTIGIO = {
+    4: { champions:0.75, europa:0.15, conference:0.05 },
+    3: { champions:0.35, europa:0.25, conference:0.15 },
+    2: { champions:0.05, europa:0.15, conference:0.20 },
+    1: { champions:0,    europa:0.02, conference:0.08 }
+  };
+  const p = PROB_EUROPA_POR_PRESTIGIO[prestigio] || PROB_EUROPA_POR_PRESTIGIO[2];
+  let nivel = null;
+  if(dado < p.champions) nivel = 'champions';
+  else if(dado < p.champions + p.europa) nivel = 'europa';
+  else if(dado < p.champions + p.europa + p.conference) nivel = 'conference';
+  return { clasificacionEuropea: !!nivel, nivelEuropeo: nivel };
+}
 function procesarBanderasFichaje(j, rama){
   let cambioDeClub = false;
   let ofertaConstruida = null;
@@ -7649,6 +7683,7 @@ function procesarBanderasFichaje(j, rama){
     const nuevaCategoria = CATEGORIAS[idx];
     const clubElegido = clubAleatorio(nuevaCategoria, FILIAL_DE_CLUB[j.club.nombre]);
     const nuevoClubObj = { nombre: clubElegido.nombre, categoria: nuevaCategoria, colores: clubElegido.colores, ambicionNivel: ambicionInicial(clubElegido.nombre) };
+    if(nuevaCategoria === 'LaLiga') Object.assign(nuevoClubObj, nivelEuropeoAlFichar(nuevoClubObj));
     ofertaConstruida = {
       club: nuevoClubObj,
       sueldo: calcularSueldoOferta(j, nuevoClubObj.categoria, nuevoClubObj.nombre),
@@ -7664,6 +7699,7 @@ function procesarBanderasFichaje(j, rama){
     const clubExt = candidatosExt[Math.floor(Math.random()*candidatosExt.length)];
     const esGrandeExt = CLUBES_GRANDES_EXTRANJERO.includes(clubExt.nombre);
     const nuevoClubObj = { nombre: clubExt.nombre, categoria:"LaLiga", extranjero:true, pais: clubExt.pais, liga: clubExt.liga, colores: clubExt.colores, ambicionNivel: ambicionInicial(clubExt.nombre), ...(esGrandeExt ? { grande:true } : {}) };
+    Object.assign(nuevoClubObj, nivelEuropeoAlFichar(nuevoClubObj));
     ofertaConstruida = {
       club: nuevoClubObj,
       sueldo: esGrandeExt ? calcularSueldoOferta(j, "Grande") : calcularSueldoOferta(j, "Extranjero", clubExt.nombre, MULTIPLICADOR_SUELDO_LIGA[clubExt.liga] || 0.5),
@@ -7674,6 +7710,7 @@ function procesarBanderasFichaje(j, rama){
     const candidatosUltimaEtapa = CLUBES_EXTRANJERO.filter(c => PAISES_ULTIMA_ETAPA.includes(c.pais));
     const clubUE = candidatosUltimaEtapa[Math.floor(Math.random()*candidatosUltimaEtapa.length)];
     const nuevoClubObj = { nombre: clubUE.nombre, categoria:"LaLiga", extranjero:true, pais: clubUE.pais, liga: clubUE.liga, colores: clubUE.colores, ambicionNivel: ambicionInicial(clubUE.nombre) };
+    Object.assign(nuevoClubObj, nivelEuropeoAlFichar(nuevoClubObj));
     ofertaConstruida = {
       club: nuevoClubObj,
       sueldo: Math.round(calcularSueldoOferta(j, "Extranjero", clubUE.nombre) * 2.2 / 50) * 50, // el gran contrato de fin de carrera
@@ -7684,6 +7721,7 @@ function procesarBanderasFichaje(j, rama){
     const candidatosGrandes = CLUBES_GRANDES.filter(c => !(j.clubesEnfriados||{})[c] && c !== j.club.nombre && !esRivalDirecto(j.club.nombre, c));
     const nombreGrande = (candidatosGrandes.length ? candidatosGrandes : CLUBES_GRANDES)[Math.floor(Math.random()*(candidatosGrandes.length ? candidatosGrandes.length : CLUBES_GRANDES.length))];
     const nuevoClubObj = { nombre: nombreGrande, categoria:"LaLiga", grande:true, colores: coloresDeClub(nombreGrande, "LaLiga"), ambicionNivel: 3 };
+    Object.assign(nuevoClubObj, nivelEuropeoAlFichar(nuevoClubObj));
     ofertaConstruida = {
       club: nuevoClubObj,
       sueldo: calcularSueldoOferta(j, "Grande"),
