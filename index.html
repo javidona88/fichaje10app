@@ -13231,7 +13231,7 @@ SCREENS.escudosPersonalizados = function(){
   }
 
   // Mod Escudos 2026/2027: lote ya preparado que viene con el propio juego (mod-escudos-2026-2027.json,
-  // fuera de index.html porque son ~2,8 MB de imágenes — no tiene sentido cargarlo con cada visita,
+  // fuera de index.html porque son ~1,3 MB de imágenes — no tiene sentido cargarlo con cada visita,
   // solo cuando alguien pulsa el botón). Mismo importarEscudosPersonalizados() que "Importar desde
   // archivo": fusiona con lo que ya hubiera, no borra nada. Destacado como tarjeta propia (borde y
   // botón dorados) por delante de Exportar/Importar: es la vía más rápida para tener escudos reales
@@ -13240,12 +13240,12 @@ SCREENS.escudosPersonalizados = function(){
   const modCab = el('div','cab');
   modCab.innerHTML = `${iconoInline('estrella',18)}<span class="tit">Mod Escudos 2026/2027</span>`;
   modCard.appendChild(modCab);
-  modCard.appendChild(el('div','sub','Lote de escudos reales de clubes, selecciones y ligas, ya preparado por el propio juego — listo para cargar de golpe, sin subir nada a mano.'));
+  modCard.appendChild(el('div','sub','Lote de escudos reales de clubes, selecciones, ligas, títulos y marcas, ya preparado por el propio juego — listo para cargar de golpe, sin subir nada a mano.'));
   const btnMod = document.createElement('button');
   btnMod.className = 'btn-main';
   btnMod.textContent = 'Cargar Mod Escudos 2026/2027';
   btnMod.onclick = async ()=>{
-    if(!confirm('Se van a aplicar los escudos del "Mod Escudos 2026/2027" (clubes, selecciones y ligas ya preparados). Se fusiona con lo que ya tengas personalizado, sin borrar nada. ¿Continuar?')) return;
+    if(!confirm('Se van a aplicar los escudos del "Mod Escudos 2026/2027" (clubes, selecciones, ligas, títulos y marcas ya preparados). Se fusiona con lo que ya tengas personalizado, sin borrar nada. ¿Continuar?')) return;
     btnMod.disabled = true;
     const textoOriginal = btnMod.textContent;
     btnMod.textContent = 'Cargando…';
@@ -13255,7 +13255,7 @@ SCREENS.escudosPersonalizados = function(){
       const datos = await resp.json();
       const resultado = importarEscudosPersonalizados(datos);
       if(!resultado.ok){ mostrarAvisoEscudos(resultado.error); return; }
-      mostrarAvisoEscudos(`Mod cargado: ${resultado.clubes} clubes, ${resultado.selecciones} selecciones y ${resultado.ligas} ligas.`, true);
+      mostrarAvisoEscudos(`Mod cargado: ${resultado.clubes} clubes, ${resultado.selecciones} selecciones, ${resultado.ligas} ligas, ${resultado.titulos} títulos y ${resultado.marcas} marcas.`, true);
       pintarFilas();
     }catch(e){
       mostrarAvisoEscudos('No se ha podido cargar el mod. Comprueba tu conexión e inténtalo de nuevo.');
