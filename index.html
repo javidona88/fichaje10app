@@ -307,7 +307,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .trayectoria-temp{ font-size:10.5px; color:var(--ink-soft); margin-top:1px; display:flex; align-items:center; }
 .trayectoria-chev{ flex-shrink:0; color:var(--ink-soft); transition:transform .2s; }
 .trayectoria-temporada.abierta .trayectoria-chev{ transform:rotate(180deg); color:var(--gold); }
-.trayectoria-stat{ text-align:center; font-family:'Big Shoulders Display',sans-serif; font-weight:700; font-size:14.5px; color:var(--ink); font-variant-numeric:tabular-nums; }
+.trayectoria-stat{ text-align:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; color:var(--ink); font-variant-numeric:tabular-nums; }
 .trayectoria-nota{ width:32px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; justify-self:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; color:#14161F; }
 .trayectoria-nota.nota-verde{ background:var(--green); }
 .trayectoria-nota.nota-naranja{ background:var(--amber); }
@@ -323,7 +323,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .trayectoria-comp-icono img, .trayectoria-comp-icono svg{ max-width:100%; max-height:100%; }
 .trayectoria-comp-nombre{ font-size:11px; font-weight:600; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .trayectoria-comp-fila.es-liga .trayectoria-comp-nombre{ color:var(--ink); }
-.trayectoria-comp-stat{ text-align:center; font-family:'Big Shoulders Display',sans-serif; font-weight:700; font-size:13px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.trayectoria-comp-stat{ text-align:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
 .trayectoria-comp-fila.es-liga .trayectoria-comp-stat{ color:var(--ink); }
 .trayectoria-comp-nota{ width:28px; height:19px; border-radius:5px; display:flex; align-items:center; justify-content:center; justify-self:center; font-size:10.5px; font-weight:700; color:#14161F; }
 .trayectoria-comp-nota.nota-verde{ background:var(--green); }
@@ -593,14 +593,14 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* ---- resumen de temporada (modal progresivo) ---- */
 .resumen-card{ max-width:420px; margin:0 auto; }
 .resumen-card .eyebrow{ text-align:center; }
-.resumen-card h2{ text-align:center; font-size:22px; margin-bottom:14px; }
+.resumen-card h2{ text-align:center; font-size:22px; font-weight:400; margin-bottom:14px; }
 .reveal-stats-row{
   display:flex; gap:8px; margin-bottom:6px; opacity:0; transform:translateY(8px);
   transition:opacity .4s ease, transform .4s ease;
 }
 .reveal-stats-row.show{ opacity:1; transform:translateY(0); }
 .reveal-stat-box{ flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:10px 4px; text-align:center; }
-.reveal-stat-box .num{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:27px; color:var(--ink); line-height:1; }
+.reveal-stat-box .num{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:27px; color:var(--ink); line-height:1; }
 .reveal-stat-box .lbl{ font-family:'Space Grotesk',sans-serif; font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin-top:4px; }
 .reveal-section-title{
   font-family:'Space Grotesk',sans-serif; font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
@@ -1791,11 +1791,13 @@ const LOGROS = [
 
   // ---- Selección ----
   { id:'primera_convocatoria', cat:'seleccion', nombre:'La llamada', desc:'Tu primera convocatoria con la selección.', icono:'🎽', pesoRareza:25,
-    cond:j=> !!(j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21) },
+    cond:j=> !!(j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21 || j.tuvoPrimeraConvocatoriaSub23) },
   { id:'euro_seleccion', cat:'seleccion', nombre:'Otra estrella para la Roja', desc:'Gana la Eurocopa con la selección.', icono:'🌍', pesoRareza:6,
     cond:j=> (j.titulosSeleccion||[]).some(t=>t.nombre==='Eurocopa') || (S.titulosTemporadaActual||[]).includes('Eurocopa') },
   { id:'mundial', cat:'seleccion', nombre:'El mundo entero te vio levantarla', desc:'Gana el Mundial con la selección.', icono:'🌍', pesoRareza:5,
     cond:j=> (j.titulosSeleccion||[]).some(t=>t.nombre==='Mundial') || (S.titulosTemporadaActual||[]).includes('Mundial') },
+  { id:'juegos_olimpicos', cat:'seleccion', nombre:'Oro en los aros', desc:'Gana el oro olímpico con la selección Sub-23.', icono:'🥇', pesoRareza:7,
+    cond:j=> (j.titulosSeleccion||[]).some(t=>t.nombre==='Juegos Olímpicos') || (S.titulosTemporadaActual||[]).includes('Juegos Olímpicos') },
 
   // ---- Vida, más allá del fútbol ----
   { id:'boda', cat:'vida', nombre:'Contigo hasta la meta', desc:'Te casas con tu pareja.', icono:'💍', pesoRareza:40,
@@ -4746,7 +4748,11 @@ const CHANGELOG_JUEGO = [
     'Ajustes, durante la partida, rediseñado con el mismo estilo de tarjetas del menú principal; se ha quitado de ahí la lista de partidas guardadas (ya vive en "Continuar carrera") y se ha añadido un botón para volver al menú principal sin perder la partida.',
     'Corregido que el fondo animado del menú principal diera un corte visible al entrar o salir de una opción.',
     'Los rankings de jugadores usan ya iconos propios en vez de emoji.',
-    'Estadísticas → Clubes rediseñado: cada temporada es ahora una fila con el escudo real del club que se despliega al tocarla, mostrando el desglose por competición (liga, copa, competición continental y, si tocó, selección) con sus propios partidos, goles, asistencias y nota — antes solo se veía el agregado de toda la temporada en una línea.'
+    'Estadísticas → Clubes rediseñado: cada temporada es ahora una fila con el escudo real del club que se despliega al tocarla, mostrando el desglose por competición (liga, copa, competición continental y, si tocó, selección) con sus propios partidos, goles, asistencias y nota — antes solo se veía el agregado de toda la temporada en una línea.',
+    'Ese desglose usa ya tu logo personalizado de cada competición si lo has subido, va de la temporada más reciente a la más antigua, y muestra el club y el año completo (2049/2050) en vez de la liga y el año corto.',
+    'La nota de cada competición ya no sale calcada entre sí — cada una tiene su propia variación (más marcada en copa/europa, con menos partidos, que en liga), como pasaría de verdad.',
+    'Nuevo hueco para la selección Sub-23 y los Juegos Olímpicos, y un aviso de "en el radar de la selección" para cuando todavía no te han convocado pero tus números ya se acercan.',
+    'Números de Estadísticas y del resumen de fin de temporada de vuelta a la tipografía de toda la vida; el titular entrecomillado de fin de temporada usa una letra más fina.'
   ]},
   { version:'v1.5.4', titulo:'Menú principal renovado', cambios:[
     'Menú principal rediseñado: cuatro opciones claras (Nueva carrera, Continuar carrera, Personalizar escudos, Ajustes), cada una con su propio icono, y fondo animado con un degradado azul oscuro en movimiento.',
@@ -6058,7 +6064,7 @@ const NICE_STAT = {forma:"Forma",reputacion:"Reputación",salud:"Salud",dinero:"
 const CLAVES_STAT_INMEDIATA = ['forma','reputacion','dinero'];
 const NICE_TODO = Object.assign({}, NICE_ATTR, NICE_STAT, {tecnica:"Técnica"});
 
-const TITULOS_SELECCION_NOMBRES = ['Eurocopa', 'Mundial', 'Eurocopa Sub-21', 'Mundial Sub-21'];
+const TITULOS_SELECCION_NOMBRES = ['Eurocopa', 'Mundial', 'Eurocopa Sub-21', 'Mundial Sub-21', 'Juegos Olímpicos'];
 const LOGOS_COMPETICION = {
   "Champions League": { color:"#0E1E5B", letra:"UCL" },
   "Europa League": { color:"#F57B20", letra:"UEL" },
@@ -6082,6 +6088,7 @@ const LOGOS_COMPETICION = {
   "Mundial": { color:"#B08D00", letra:"FIFA" },
   "Eurocopa Sub-21": { color:"#003399", letra:"U21" },
   "Mundial Sub-21": { color:"#B08D00", letra:"U21" },
+  "Juegos Olímpicos": { color:"#0085C7", letra:"JJOO" },
   "LaLiga": { color:"#EE8707", letra:"LFP" },
   "LaLiga2": { color:"#00529F", letra:"LFP2" },
   "1ª RFEF": { color:"#4C8C6B", letra:"1RF" },
@@ -6590,6 +6597,30 @@ const TORNEOS_CONFIG = [
       return Math.max(0.04, Math.min(0.65, BASE_SELECCION_ABSOLUTA * factorPersonal * factorNota * factorForma));
     },
     efectosVictoria:{forma:15,popularidad:25,reputacion:15,valorMercado:80000} },
+  // Selección Sub-23, para los Juegos Olímpicos: en la vida real coinciden con la Eurocopa (2024,
+  // 2028...), así que aquí se enganchan al mismo hueco del calendario en vez de a cualquier verano
+  // con torneo — de ahí que aparezcan cada 4 temporadas, la mitad de veces que la Sub-21 (que sí
+  // sale en cualquier verano, sea Eurocopa o Mundial). Banda de reputación entre la Sub-21 y la
+  // absoluta: ya no es una promesa (eso es la Sub-21), pero tampoco un fijo de la absoluta todavía.
+  { id:'seleccion_sub23', nombreCompeticion:null, tipo:'seleccion_sub23', edadMax:23,
+    condicion: j => {
+      if(torneoDeVerano(S.temporada) !== 'Eurocopa') return false;
+      if(j.stats.reputacion < 40) return false;
+      if(!S.rolTemporada || S.rolTemporada.corto === 'Suplente') return false;
+      if(CATEGORIAS.indexOf(j.club.categoria) < 3) return false;
+      if(j.stats.reputacion >= 55) return false; // con ese perfil ya suena para la absoluta
+      if(j.stats.forma < 30) return false;
+      return true;
+    }, probabilidad: j => {
+      // Misma lógica que absoluta/Sub-21: España compite contra otras muchas selecciones por
+      // las plazas de semifinalista, no depende casi solo de ti.
+      const BASE_SELECCION_SUB23 = 0.28;
+      const factorReputacion = 0.8 + Math.min(0.4, (j.stats.reputacion-40)/30);
+      const factorNota = multiplicadorPorNota(j.ultimaNotaTemporada != null ? j.ultimaNotaTemporada : 6.5);
+      const factorForma = j.stats.forma >= 75 ? 1.2 : j.stats.forma >= 55 ? 1 : j.stats.forma >= 40 ? 0.6 : 0.3;
+      return Math.max(0.05, Math.min(0.6, BASE_SELECCION_SUB23 * factorReputacion * factorNota * factorForma));
+    },
+    efectosVictoria:{forma:12,popularidad:18,reputacion:11,valorMercado:50000} },
   { id:'seleccion_sub21', nombreCompeticion:null, tipo:'seleccion_sub21', edadMax:21,
     condicion: j => {
       const torneo = torneoDeVerano(S.temporada);
@@ -6613,6 +6644,60 @@ const TORNEOS_CONFIG = [
     },
     efectosVictoria:{forma:10,popularidad:14,reputacion:9,valorMercado:35000} }
 ];
+// Los 3 tipos de convocatoria con la selección (absoluta/Sub-21/Sub-23), agrupados aquí para no
+// repetir la misma lista de comparaciones en cada sitio del juego que necesita distinguir "esto es
+// un torneo de selección" de "esto es un torneo de club".
+const ES_TIPO_SELECCION = new Set(['seleccion', 'seleccion_sub21', 'seleccion_sub23']);
+const SUFIJO_TORNEO_SELECCION = { seleccion_sub21: ' Sub-21', seleccion_sub23: ' Sub-23' };
+const CLAVE_CONVOCATORIA_POR_TIPO = { seleccion:'tuvoPrimeraConvocatoriaAbsoluta', seleccion_sub21:'tuvoPrimeraConvocatoriaSub21', seleccion_sub23:'tuvoPrimeraConvocatoriaSub23' };
+// Textos propios de "te llaman por primera vez" para cada nivel de selección — SCREENS.convocatoriaSeleccion
+// (aviso de lista para el torneo de este verano) y SCREENS.primeraConvocatoria (la primera vez de siempre).
+const TEXTOS_CONVOCATORIA_SELECCION = {
+  seleccion: {
+    convocatoriaLbl: 'El seleccionador absoluto te llama',
+    primeraLbl: 'Primera convocatoria con la absoluta',
+    primeraSub: 'Recibes la llamada que sueña cualquier futbolista desde niño: el seleccionador absoluto te convoca. Ves tu nombre junto al de jugadores que llevas viendo por televisión toda la vida, y por fin entiendes que ya eres uno más.',
+    efectosPrimera: {popularidad:15,reputacion:8,mental:5}
+  },
+  seleccion_sub21: {
+    convocatoriaLbl: 'El seleccionador sub-21 te llama',
+    primeraLbl: 'Primera convocatoria',
+    primeraSub: 'Recibes la llamada del seleccionador sub-21. Ves tu nombre en la lista y durante un segundo te cuesta creerlo: vas a vestir de rojo por primera vez en tu vida.',
+    efectosPrimera: {popularidad:8,reputacion:4,mental:4}
+  },
+  seleccion_sub23: {
+    convocatoriaLbl: 'El seleccionador olímpico te llama',
+    primeraLbl: 'Primera convocatoria olímpica',
+    primeraSub: 'Recibes la llamada para representar a España en los Juegos Olímpicos. No es un torneo más: solo hay una lista cada cuatro años, y tu nombre está en ella.',
+    efectosPrimera: {popularidad:10,reputacion:6,mental:6}
+  }
+};
+// Nombre real del torneo de selección de este verano. Los Juegos Olímpicos son un caso especial:
+// no son "Eurocopa Sub-23" ni "Mundial Sub-23" (aunque el hueco del calendario coincida con el de
+// la Eurocopa, ver seleccion_sub23 en TORNEOS_CONFIG) — tienen nombre propio.
+function nombreTorneoSeleccion(tipo){
+  if(tipo === 'seleccion_sub23') return 'Juegos Olímpicos';
+  return (torneoDeVerano(S.temporada) || 'Torneo internacional') + (SUFIJO_TORNEO_SELECCION[tipo] || '');
+}
+// Estado "en el radar" para cuando todavía no ha habido ninguna convocatoria real, pero las stats
+// ya se acercan a alguno de los umbrales reales de TORNEOS_CONFIG (seleccion/seleccion_sub21/
+// seleccion_sub23) sin llegar a cumplirlos — no guarda nada, se recalcula con las stats actuales
+// cada vez que se pinta (SCREENS.tabJugador y la sección SELECCIÓN de seccionEstadisticas).
+function estadoSeguimientoSeleccion(j){
+  if(j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21 || j.tuvoPrimeraConvocatoriaSub23) return null;
+  if(j.stats.forma < 30) return null; // igual que las condiciones reales: sin forma no hay nada que valorar
+  const idxCat = CATEGORIAS.indexOf(j.club.categoria);
+  if(idxCat >= 4 && j.stats.reputacion >= 40 && j.stats.reputacion < 55){
+    return { texto:'Tu nombre ya suena en las quinielas de la absoluta. Una gran temporada más y puede llegar la llamada.' };
+  }
+  if(j.edad <= 23 && idxCat >= 3 && j.stats.reputacion >= 30 && j.stats.reputacion < 40){
+    return { texto:'El seleccionador olímpico ya tiene tu nombre en la prelista. Sigue así de cara a los próximos Juegos.' };
+  }
+  if(j.edad <= 21 && idxCat >= 2 && j.stats.reputacion >= 15 && j.stats.reputacion < 25){
+    return { texto:'El seleccionador Sub-21 ha empezado a fijarse en ti. Sigue así y la convocatoria puede llegar pronto.' };
+  }
+  return null;
+}
 
 const PAISES_UEFA = ["Alemania","Bélgica","España","Francia","Inglaterra","Italia","Países Bajos","Portugal","Turquía","Escocia","Croacia","Suiza","Grecia","Polonia","Austria","Dinamarca","Ucrania","República Checa"];
 // La Bota de Oro es un premio realmente paneuropeo, así que solo tiene sentido para las ligas de
@@ -8359,18 +8444,28 @@ function procesarFinTemporada(j, ascensoPlayoff){
   // calculado con el resultado real si jugaste semifinal/final); la selección usa las cifras
   // reales de j.historialSeleccion, que ya se registran aparte y con datos de verdad.
   const competicionesTemporada = [];
+  let notaMostradaTemporada = S.temporadaResumen.nota;
   {
     const r = S.temporadaResumen;
     const [gLiga, gCopa, gEuropa] = repartoEnteros(r.goles, [r.partidosLiga, r.partidosCopa, r.partidosEuropa]);
     const [aLiga, aCopa, aEuropa] = repartoEnteros(r.asistencias, [r.partidosLiga, r.partidosCopa, r.partidosEuropa]);
     const nombreLiga = j.club.extranjero ? j.club.liga : j.club.categoria;
-    competicionesTemporada.push({ nombre: nombreLiga, tipo:'liga', partidos:r.partidosLiga, goles:gLiga, asistencias:aLiga, nota:r.nota });
+    // Nota de cada competición: una variación propia e independiente sobre r.nota (la nota real de
+    // la temporada, la que de verdad mueve confianza/cariño/objetivos en el resto del juego — no se
+    // toca aquí). Así liga y copa no salen nunca con el mismo número clavado, como le pasaría a un
+    // futbolista de verdad partido a partido. Muestras pequeñas (copa/europa, un puñado de partidos)
+    // varían más que la liga (toda la temporada). notaMostradaTemporada, calculada más abajo, es solo
+    // la media ponderada por partidos de estas notas "de exhibición" — la que se pinta en la fila de
+    // la temporada; el motor del juego sigue usando r.nota tal cual, sin verse afectado.
+    const jitter = amplitud => (Math.random() - Math.random()) * amplitud; // triangular, centrada en 0
+    const notaLiga = Math.max(1, Math.min(10, Math.round((r.nota + jitter(0.4))*10)/10));
+    competicionesTemporada.push({ nombre: nombreLiga, tipo:'liga', partidos:r.partidosLiga, goles:gLiga, asistencias:aLiga, nota:notaLiga });
     const NOMBRES_CONTINENTALES = Object.values(NOMBRE_COMPETICION_CONTINENTAL);
     (r.fasesCompeticiones||[]).forEach(f=>{
       const esEuropea = NOMBRES_CONTINENTALES.includes(f.nombre);
       const partidosComp = esEuropea ? r.partidosEuropa : r.partidosCopa;
       if(partidosComp <= 0) return; // sorteada pero sin partidos que repartir (p. ej. baja por lesión casi toda la temporada)
-      const notaComp = Math.max(1, Math.min(10, Math.round((r.nota + (BONUS_NOTA_FASE[f.fase]||0)*1.5)*10)/10));
+      const notaComp = Math.max(1, Math.min(10, Math.round((r.nota + (BONUS_NOTA_FASE[f.fase]||0)*1.2 + jitter(1.0))*10)/10));
       competicionesTemporada.push({
         nombre: f.nombre, tipo: esEuropea ? 'europa' : 'copa',
         partidos: partidosComp, goles: esEuropea ? gEuropa : gCopa, asistencias: esEuropea ? aEuropa : aCopa, nota: notaComp
@@ -8379,12 +8474,17 @@ function procesarFinTemporada(j, ascensoPlayoff){
     (j.historialSeleccion||[]).filter(h=>h.temporada===S.temporada).forEach(h=>{
       competicionesTemporada.push({ nombre:h.torneo, tipo:'seleccion', partidos:h.partidos, goles:h.goles, asistencias:h.asistencias, nota:null });
     });
+    const conNota = competicionesTemporada.filter(c=>c.nota!=null && c.partidos>0);
+    if(conNota.length){
+      const sumaPartidos = conNota.reduce((s,c)=>s+c.partidos,0);
+      notaMostradaTemporada = Math.round((conNota.reduce((s,c)=>s+c.nota*c.partidos,0) / sumaPartidos) * 10) / 10;
+    }
   }
   j.historialTemporadas.push({
     temporada: S.temporada, club: j.club.nombre, categoria: j.club.categoria, liga: j.club.liga || null,
     pais: j.club.extranjero ? j.club.pais : 'España', extranjero: !!j.club.extranjero,
     partidos: S.temporadaResumen.partidos, goles: S.temporadaResumen.goles, asistencias: S.temporadaResumen.asistencias,
-    nota: S.temporadaResumen.nota, carino: j.carinoAficion, valorMercado: j.stats.valorMercado, edad: j.edad,
+    nota: notaMostradaTemporada, carino: j.carinoAficion, valorMercado: j.stats.valorMercado, edad: j.edad,
     titulos: (S.titulosTemporadaActual||[]).length, titulosNombres: (S.titulosTemporadaActual||[]).slice(), ascenso: !!S.temporadaResumen.ascenso,
     trofeosIndividuales: (S.temporadaResumen.pichichi?1:0) + (S.temporadaResumen.mvp?1:0) + (S.temporadaResumen.balonDeOroPuesto?1:0) + (S.temporadaResumen.botaOro?1:0),
     competiciones: competicionesTemporada
@@ -8531,7 +8631,7 @@ function avanzarPaso(j){
       procesarFinTemporada(j);
     }
   } else {
-    const torneoDisponible = (j.lesionSemanas > 0) ? null : TORNEOS_CONFIG.filter(cfg => cfg.tipo !== 'seleccion' && cfg.tipo !== 'seleccion_sub21').find(cfg => {
+    const torneoDisponible = (j.lesionSemanas > 0) ? null : TORNEOS_CONFIG.filter(cfg => !ES_TIPO_SELECCION.has(cfg.tipo)).find(cfg => {
       if(cfg.edadMax && j.edad > cfg.edadMax) return false;
       const yaJugado = j.historial.some(h => h.evento === 'torneo_'+cfg.id && h.temporada === S.temporada);
       if(yaJugado) return false;
@@ -8715,7 +8815,7 @@ function iniciarTemporadaJuego(j){
   j.companeros.forEach(cmp=>{ cmp.juntosActualmente = (cmp.club === j.club.nombre); });
   const reencuentroConAdrian = j.rival.trayectoriaIniciada && j.rival.club === j.club.nombre && !j.rival.juntosActualmente && !j.rival.compartiendoVestuario;
   j.rival.juntosActualmente = !!(j.rival.trayectoriaIniciada && j.rival.club === j.club.nombre);
-  const torneoVerano = TORNEOS_CONFIG.filter(cfg => cfg.tipo === 'seleccion' || cfg.tipo === 'seleccion_sub21').find(cfg => {
+  const torneoVerano = TORNEOS_CONFIG.filter(cfg => ES_TIPO_SELECCION.has(cfg.tipo)).find(cfg => {
     if(cfg.edadMax && j.edad > cfg.edadMax) return false;
     const yaJugado = j.historial.some(h => h.evento === 'torneo_'+cfg.id && h.temporada === S.temporada);
     if(yaJugado) return false;
@@ -8725,7 +8825,7 @@ function iniciarTemporadaJuego(j){
   });
   const continuarFlujoTemporada = ()=>{
     if(torneoVerano && sigueLesionadoEnVerano){
-      S.torneoPerdidoPorLesion = { nombreCompeticion: torneoDeVerano(S.temporada) + (torneoVerano.tipo === 'seleccion_sub21' ? ' Sub-21' : ''), semanasRestantes: j.lesionSemanas };
+      S.torneoPerdidoPorLesion = { nombreCompeticion: nombreTorneoSeleccion(torneoVerano.tipo), semanasRestantes: j.lesionSemanas };
       S.screen = 'veranoLesionado';
     } else if(torneoVerano){
       // No se entra directo al torneo: primero un aviso propio de convocatoria (con la lista
@@ -8737,7 +8837,7 @@ function iniciarTemporadaJuego(j){
       // primero te llaman a la selección, y solo después te enteras de para qué torneo es
       // (antes salía al revés: el aviso genérico del torneo, y justo detrás, sin que tuviera
       // sentido, "primera convocatoria con la absoluta").
-      const claveConvocatoria = torneoVerano.tipo === 'seleccion_sub21' ? 'tuvoPrimeraConvocatoriaSub21' : 'tuvoPrimeraConvocatoriaAbsoluta';
+      const claveConvocatoria = CLAVE_CONVOCATORIA_POR_TIPO[torneoVerano.tipo];
       if(!j[claveConvocatoria]){
         j[claveConvocatoria] = true;
         S.torneoActual = { tipo: torneoVerano.tipo };
@@ -9368,7 +9468,7 @@ function generarImagenResumenCarrera(j){
   const notaMedia = notasValidas.length ? (notasValidas.reduce((s,n)=>s+n,0)/notasValidas.length) : null;
   const mejorTemporada = historial.filter(h=>h.nota!=null).slice().sort((a,b)=>b.nota-a.nota)[0];
   const titulosSel = (j.titulosSeleccion||[]).length;
-  const partidosSel = (j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21 || titulosSel) ? true : false;
+  const partidosSel = (j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21 || j.tuvoPrimeraConvocatoriaSub23 || titulosSel) ? true : false;
   const valorMax = Math.max(j.carrera.valorMercadoMaximo||0, j.stats.valorMercado||0);
   const dineroGanado = Math.max(j.carrera.dineroGanado||0, j.stats.dinero||0);
   const balonesOro = j.carrera.balonesDeOro||0;
@@ -10949,7 +11049,7 @@ function seccionEstadisticas(j){
       secStats.appendChild(tabla);
     }
 
-    if(j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21 || (j.titulosSeleccion && j.titulosSeleccion.length)){
+    if(j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21 || j.tuvoPrimeraConvocatoriaSub23 || (j.titulosSeleccion && j.titulosSeleccion.length)){
       const tituloSeleccion = document.createElement('div');
       tituloSeleccion.className = 'stat-section-titulo';
       tituloSeleccion.style.marginTop = historial.length ? '16px' : '0';
@@ -10989,6 +11089,11 @@ function seccionEstadisticas(j){
           filaAbs.appendChild(el('span','temp', 'Internacional absoluto'));
           filaAbs.appendChild(el('div','historial-fila-stats', `<span class="dato oro">${iconoInline('estrella',12)}Convocado</span>`));
           tablaSel.appendChild(filaAbs);
+        } else if(j.tuvoPrimeraConvocatoriaSub23){
+          const filaSub23 = el('div','historial-fila');
+          filaSub23.appendChild(el('span','temp', 'Internacional Sub-23 (olímpica)'));
+          filaSub23.appendChild(el('div','historial-fila-stats', `<span class="dato oro">${iconoInline('estrella',12)}Convocado</span>`));
+          tablaSel.appendChild(filaSub23);
         } else if(j.tuvoPrimeraConvocatoriaSub21){
           const filaSub = el('div','historial-fila');
           filaSub.appendChild(el('span','temp', 'Internacional Sub-21'));
@@ -11005,6 +11110,21 @@ function seccionEstadisticas(j){
         }
       }
       secStats.appendChild(tablaSel);
+    } else {
+      // Todavía sin convocatoria de ningún tipo: si las condiciones reales están cerca (sin llegar
+      // a cumplirse), un aviso de que el seleccionador ya se está fijando en ti — ver
+      // estadoSeguimientoSeleccion, que no guarda nada, se recalcula cada vez con las stats actuales.
+      const seguimiento = estadoSeguimientoSeleccion(j);
+      if(seguimiento){
+        const tituloSeleccion = document.createElement('div');
+        tituloSeleccion.className = 'stat-section-titulo';
+        tituloSeleccion.style.marginTop = historial.length ? '16px' : '0';
+        tituloSeleccion.textContent = 'SELECCIÓN';
+        secStats.appendChild(tituloSeleccion);
+        const avisoSeguimiento = el('div','historial-temporadas');
+        avisoSeguimiento.innerHTML = `<div style="padding:10px 2px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;">${iconoInline('lupa',14)}${seguimiento.texto}</div>`;
+        secStats.appendChild(avisoSeguimiento);
+      }
     }
 
     const titulosClub = [];
@@ -11140,10 +11260,17 @@ SCREENS.tabJugador = function(){
   `));
   if(j.tuvoPrimeraConvocatoriaAbsoluta){
     c.appendChild(el('div','badge token', `${iconoInline('estrella',11)}Internacional absoluto con España`)).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
+  } else if(j.tuvoPrimeraConvocatoriaSub23){
+    c.appendChild(el('div','badge token', `${iconoInline('estrella',11)}Internacional Sub-23 con España`)).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
   } else if(j.tuvoPrimeraConvocatoriaSub21){
     c.appendChild(el('div','badge token', `${iconoInline('estrella',11)}Internacional Sub-21 con España`)).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
   } else {
-    c.appendChild(el('div','badge', 'Sin convocatoria con la selección todavía')).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
+    const seguimiento = estadoSeguimientoSeleccion(j);
+    if(seguimiento){
+      c.appendChild(el('div','badge', `${iconoInline('lupa',11)}En el radar de la selección`)).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
+    } else {
+      c.appendChild(el('div','badge', 'Sin convocatoria con la selección todavía')).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
+    }
   }
   if(j.estadoMental === 'racha'){
     c.appendChild(el('div','badge token', '🔥 En racha: todo te está saliendo bien últimamente'));
@@ -15366,7 +15493,7 @@ SCREENS.tirando = function(){
                 const cfg = S.torneoActual;
                 S.faseCompeticiones = S.faseCompeticiones || {};
                 S.faseCompeticiones[cfg.nombreCompeticion] = 'Semifinales';
-                S.torneoEliminadoTexto = (cfg.tipo === 'seleccion' || cfg.tipo === 'seleccion_sub21')
+                S.torneoEliminadoTexto = ES_TIPO_SELECCION.has(cfg.tipo)
                   ? `La selección cae eliminada en semifinales contra ${cfg.rival.nombre}. Toca digerir la decepción y volver a intentarlo en el próximo torneo.`
                   : `El equipo cae eliminado en semifinales ante ${articuloClub(cfg.rival.nombre)} ${cfg.rival.nombre}. La aventura en la ${cfg.nombreCompeticion} termina antes de lo esperado.`;
                 S.screen = 'torneoEliminado';
@@ -15926,7 +16053,7 @@ function iniciarTorneoEliminatorio(cfg){
     iniciarEurocopaNueva(cfg);
     return;
   }
-  const esSeleccion = cfg.tipo === 'seleccion' || cfg.tipo === 'seleccion_sub21';
+  const esSeleccion = ES_TIPO_SELECCION.has(cfg.tipo);
   let rivalSemi, rivalFinal, nombreCompeticion;
   if(esSeleccion){
     const nombreTorneo = torneoDeVerano(S.temporada) || 'Torneo internacional';
@@ -15934,7 +16061,7 @@ function iniciarTorneoEliminatorio(cfg){
     const [paisSemi, paisFinal] = elegirRivalesSeleccion(poolRivales);
     rivalSemi = { nombre: paisSemi };
     rivalFinal = { nombre: paisFinal };
-    nombreCompeticion = nombreTorneo + (cfg.tipo === 'seleccion_sub21' ? ' Sub-21' : '');
+    nombreCompeticion = nombreTorneoSeleccion(cfg.tipo);
   } else {
     const clubSemi = rivalClubTorneo(cfg);
     let clubFinal = rivalClubTorneo(cfg);
@@ -16119,8 +16246,8 @@ SCREENS.veranoLesionado = function(){
 SCREENS.convocatoriaSeleccion = function(){
   const j = S.jugador;
   const torneoVerano = S.torneoVeranoPendiente;
-  const esSub21 = torneoVerano.tipo === 'seleccion_sub21';
-  const nombreTorneo = (torneoDeVerano(S.temporada) || 'Torneo internacional') + (esSub21 ? ' Sub-21' : '');
+  const txt = TEXTOS_CONVOCATORIA_SELECCION[torneoVerano.tipo];
+  const nombreTorneo = nombreTorneoSeleccion(torneoVerano.tipo);
   Sonido.exito();
   topbar("Convocatoria");
   const c = el('div','season-reveal');
@@ -16128,9 +16255,14 @@ SCREENS.convocatoriaSeleccion = function(){
   iconoBox.innerHTML = banderaPais('España', 48);
   iconoBox.style.cssText = 'display:flex;justify-content:center;';
   c.appendChild(iconoBox);
-  c.appendChild(el('div','lbl', esSub21 ? 'El seleccionador sub-21 te llama' : 'El seleccionador absoluto te llama'));
+  c.appendChild(el('div','lbl', txt.convocatoriaLbl));
   c.appendChild(el('div','num', nombreTorneo)).style.fontSize = '22px';
-  c.appendChild(el('div','sub', `Formas parte de la lista para ${articuloCompeticion(nombreTorneo)==='el'?'el':'la'} ${nombreTorneo} de este verano. Quedan semanas de concentración con el resto de la plantilla antes del primer partido — por ahora, disfruta de la noticia.`));
+  // "Juegos Olímpicos" es plural — no encaja en la plantilla "el/la <competición>" del resto (el
+  // Mundial, la Eurocopa...), así que lleva su propia frase en vez de forzar el/la singular.
+  const descripcion = torneoVerano.tipo === 'seleccion_sub23'
+    ? `Formas parte de la lista para los Juegos Olímpicos de este verano. Quedan semanas de concentración con el resto de la plantilla antes del primer partido — por ahora, disfruta de la noticia.`
+    : `Formas parte de la lista para ${articuloCompeticion(nombreTorneo)==='el'?'el':'la'} ${nombreTorneo} de este verano. Quedan semanas de concentración con el resto de la plantilla antes del primer partido — por ahora, disfruta de la noticia.`;
+  c.appendChild(el('div','sub', descripcion));
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Llegar hasta el torneo →';
   btn.onclick = ()=>{
     S.torneoVeranoPendiente = null;
@@ -16143,7 +16275,7 @@ SCREENS.convocatoriaSeleccion = function(){
 SCREENS.primeraConvocatoria = function(){
   const j = S.jugador;
   const cfg = S.torneoActual;
-  const esSub21 = cfg.tipo === 'seleccion_sub21';
+  const txt = TEXTOS_CONVOCATORIA_SELECCION[cfg.tipo];
   Sonido.trofeo();
   topbar("Convocatoria histórica");
   const c = el('div','season-reveal campeon');
@@ -16152,13 +16284,11 @@ SCREENS.primeraConvocatoria = function(){
   iconoBox.style.display = 'flex';
   iconoBox.style.justifyContent = 'center';
   c.appendChild(iconoBox);
-  c.appendChild(el('div','lbl', esSub21 ? 'Primera convocatoria' : 'Primera convocatoria con la absoluta'));
+  c.appendChild(el('div','lbl', txt.primeraLbl));
   const nombreJugador = c.appendChild(el('div','num', j.nombre));
   nombreJugador.style.cssText = 'font-size:16px;font-weight:600;';
-  c.appendChild(el('div','sub', esSub21
-    ? `Recibes la llamada del seleccionador sub-21. Ves tu nombre en la lista y durante un segundo te cuesta creerlo: vas a vestir de rojo por primera vez en tu vida.`
-    : `Recibes la llamada que sueña cualquier futbolista desde niño: el seleccionador absoluto te convoca. Ves tu nombre junto al de jugadores que llevas viendo por televisión toda la vida, y por fin entiendes que ya eres uno más.`));
-  aplicarEfectos(j, esSub21 ? {popularidad:8,reputacion:4,mental:4} : {popularidad:15,reputacion:8,mental:5});
+  c.appendChild(el('div','sub', txt.primeraSub));
+  aplicarEfectos(j, txt.efectosPrimera);
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Vivir este momento →';
   btn.onclick = ()=>{
     S.torneoActual = null;
@@ -16172,7 +16302,7 @@ SCREENS.primeraConvocatoria = function(){
 SCREENS.torneoSemifinal = function(){
   const j = S.jugador;
   const cfg = S.torneoActual;
-  const esSeleccion = cfg.tipo === 'seleccion' || cfg.tipo === 'seleccion_sub21';
+  const esSeleccion = ES_TIPO_SELECCION.has(cfg.tipo);
   if(j.lesionSemanas > 0){
     topbar(cfg.nombreCompeticion);
     const c = el('div','card');
@@ -16275,7 +16405,7 @@ SCREENS.torneoEliminado = function(){
 SCREENS.torneoFinalIntro = function(){
   const j = S.jugador;
   const cfg = S.torneoActual;
-  const esSeleccion = cfg.tipo === 'seleccion' || cfg.tipo === 'seleccion_sub21';
+  const esSeleccion = ES_TIPO_SELECCION.has(cfg.tipo);
   topbar(cfg.nombreCompeticion);
   const c = el('div','card');
   if(cfg.sinSemifinal){
@@ -16371,7 +16501,7 @@ SCREENS.torneoFinalReveal = function(){
   const j = S.jugador;
   const cfg = S.torneoActual;
   const res = S.torneoFinalResultado;
-  const esSeleccion = cfg.tipo === 'seleccion' || cfg.tipo === 'seleccion_sub21';
+  const esSeleccion = ES_TIPO_SELECCION.has(cfg.tipo);
   topbar(cfg.nombreCompeticion);
   const c = el('div','season-reveal'+(res.gana?' campeon':''));
   c.appendChild(el('div','lbl', 'El árbitro pita el final...')).style.cssText = 'text-transform:none;letter-spacing:normal;margin-bottom:26px;';
@@ -18271,8 +18401,10 @@ SCREENS.final = function(){
     wrap.appendChild(grid);
     pb.appendChild(wrap);
   });
-  if(j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21){
-    const textoSeleccion = j.tuvoPrimeraConvocatoriaAbsoluta ? 'Llegó a debutar con la selección absoluta.' : 'Llegó a debutar con la selección Sub-21.';
+  if(j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21 || j.tuvoPrimeraConvocatoriaSub23){
+    const textoSeleccion = j.tuvoPrimeraConvocatoriaAbsoluta ? 'Llegó a debutar con la selección absoluta.'
+      : j.tuvoPrimeraConvocatoriaSub23 ? 'Llegó a debutar con la selección olímpica Sub-23.'
+      : 'Llegó a debutar con la selección Sub-21.';
     pb.appendChild(el('p',null,textoSeleccion));
   }
   const mejorEtapaCarinoFinal = clubConMasCarino(j);
