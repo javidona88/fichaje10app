@@ -2399,7 +2399,17 @@ const BANCO_EVENTOS = [
     texto:"Una publicación tuya en X de hace tiempo se hace viral en el peor momento posible: justo antes de un partido importante.",
     variantes:[
       "Una foto que subiste a Instagram hace tiempo vuelve a circular justo cuando menos te conviene.",
-      "Algo que dijiste en un podcast hace meses resurge de la nada y se convierte en tendencia.",
+      () => {
+        const citas = [
+          "Si me ofrecen salir mañana, me voy sin pensarlo dos veces",
+          "Este club se me queda pequeño, lo digo con total sinceridad",
+          "Prefiero cobrar bien a ganar títulos, para qué nos vamos a engañar",
+          "El nivel de esta liga está bastante por debajo de lo que se ve fuera",
+          "Con el entrenador que tuve antes aprendí más en un mes que aquí en todo un año"
+        ];
+        const cita = citas[Math.floor(Math.random()*citas.length)];
+        return `Algo que dijiste en un podcast hace meses resurge de la nada y se convierte en tendencia: «${cita}».`;
+      },
       "Una historia antigua tuya vuelve a circular por redes justo cuando menos te conviene."
     ],
     opciones: j => {
@@ -4041,10 +4051,19 @@ const BANCO_EVENTOS = [
   {
     id:"aburrimiento_lesion", cooldown:3, soloSiLesionado:true,
     trigger:{ probabilidad:0.3 },
-    texto:"Otra tarde más viendo el entrenamiento desde fuera, con la pierna en alto. El tiempo pasa muy despacio cuando no puedes hacer lo único que sabes hacer bien.",
+    // soloSiLesionado solo mira j.lesionSemanas>0, así que este evento también sale durante una
+    // sanción (que reutiliza ese mismo contador) — el texto tiene que distinguirlo, o sale
+    // hablando de "la pierna en alto" cuando en realidad no hay ninguna lesión de por medio.
+    texto: j => j.sancionActiva
+      ? "Otra tarde más entrenando aparte del grupo, cumpliendo la sanción. El tiempo pasa muy despacio cuando no puedes hacer lo único que sabes hacer bien."
+      : "Otra tarde más viendo el entrenamiento desde fuera, con la pierna en alto. El tiempo pasa muy despacio cuando no puedes hacer lo único que sabes hacer bien.",
     variantes:[
-      "Llevas días entre el gimnasio y el sofá de casa, y la impaciencia empieza a pesarte más que la propia lesión.",
-      "Ves por el móvil los resúmenes del último partido del equipo, sentado en el sofá con la pierna en alto. Verlo desde fuera no es fácil."
+      j => j.sancionActiva
+        ? "Llevas días entre el gimnasio y el sofá de casa, y la impaciencia empieza a pesarte más que la propia sanción."
+        : "Llevas días entre el gimnasio y el sofá de casa, y la impaciencia empieza a pesarte más que la propia lesión.",
+      j => j.sancionActiva
+        ? "Ves por el móvil los resúmenes del último partido del equipo, sentado en el sofá sin poder hacer nada por ayudar. Verlo desde fuera no es fácil."
+        : "Ves por el móvil los resúmenes del último partido del equipo, sentado en el sofá con la pierna en alto. Verlo desde fuera no es fácil."
     ],
     opciones:[
       { texto:"Aprovechar para estudiar rivales y ver mucho vídeo", tirada:{atributo:"mental", dificultadBase:10},
@@ -4058,7 +4077,9 @@ const BANCO_EVENTOS = [
   {
     id:"duda_tras_lesion", cooldown:6, soloSiLesionado:true,
     trigger:{ probabilidad:0.15, condicion: j => j.lesionSemanas >= 4 },
-    texto:"Con la baja alargándose, empieza a rondarte una pregunta incómoda: ¿volverás a ser el mismo cuando pises otra vez el campo?",
+    texto: j => j.sancionActiva
+      ? "Con la sanción alargándose, empieza a rondarte una pregunta incómoda: ¿te van a mirar igual cuando vuelvas a pisar el campo?"
+      : "Con la baja alargándose, empieza a rondarte una pregunta incómoda: ¿volverás a ser el mismo cuando pises otra vez el campo?",
     opciones:[
       { texto:"Hablarlo abiertamente con un psicólogo deportivo", tirada:{atributo:"mental", dificultadBase:11},
         exito:{ texto:"Poner en palabras el miedo ayuda más de lo que esperabas. Encaras la recta final de la recuperación con otra cabeza.", efectos:{mental:5,confianza:6} },
@@ -4726,14 +4747,33 @@ const BANCO_EVENTOS = [
       { texto:"Escuchar el plan y aceptar amañar el partido", tirada:{atributo:'mental', dificultadBase:15},
         exito:{ texto:"El partido sale tal y como Amorós había prometido, y nadie sospecha nada. Un par de días después, el dinero aparece en tu cuenta sin dejar rastro alguno. Te queda la mala conciencia, pero también el alivio de haberlo hecho callado.",
           efectos:{dinero:22000,confianza:-6} },
-        fallo:{ texto:"Un movimiento raro en las casas de apuestas enciende todas las alarmas. La investigación no tarda en salpicarte: la federación abre expediente, la prensa se lanza a por la historia y el club se desmarca de ti en público. La sanción es dura, y de Amorós no vuelves a saber nada.",
+        // La resolución NO llega en caliente: un movimiento raro en las apuestas abre expediente,
+        // pero la federación tarda meses en fallar — sigues jugando con normalidad el resto de
+        // esta temporada, bajo sospecha. El batacazo de verdad (dinero, reputación, popularidad,
+        // cariño, confianza) y la baja en sí (una temporada entera sin poder jugar, no las 2 de
+        // antes) se aplican al principio de la SIGUIENTE temporada — ver el intercept al principio
+        // de iniciarTemporadaJuego() y SCREENS.sancionReveal — igual que un jugador sancionado de
+        // verdad sigue formando parte de la plantilla mientras se resuelve el caso.
+        fallo:{ texto:"Un movimiento raro en las casas de apuestas enciende todas las alarmas. La federación abre expediente por posible amaño. De Amorós no vuelves a saber nada, y ahora solo te queda esperar a que se resuelva el caso.",
           efectosFn: j => {
-            const semanasSancion = SEMANAS_POR_PASO * SECUENCIA_TEMPORADA.length * 2;
-            j.lesionSemanas = Math.max(j.lesionSemanas||0, semanasSancion);
-            j.sancionActiva = true;
-            mostrarNotificacion(`${iconoInline('fisico',15)}Sancionado por amaño (${formatearDuracionLesion(semanasSancion)})`, 'riesgo');
-            return { dinero:-6000, reputacion:-30, popularidad:-25, carinoAficion:-25, confianza:-15 };
+            S.pendienteSancionAmano = true;
+            return { confianza:-8, mental:-4 };
           } } }
+    ]
+  },
+  // Mientras dura la instrucción del caso (S.pendienteSancionAmano) sigues jugando con
+  // normalidad — el batacazo de verdad llega al principio de la siguiente temporada, ver
+  // SCREENS.sancionReveal — pero la espera pesa, y tiene sentido que se note en algún suceso.
+  { id:"esperando_fallo_amano", unico:true, soloSiSano:true,
+    trigger:{ probabilidad:0.5, condicion: j => !!S.pendienteSancionAmano },
+    texto:"Con el expediente por el posible amaño todavía abierto, cada rueda de prensa se llena de preguntas incómodas sobre cuándo se resolverá el caso. El club, de momento, prefiere no pronunciarse en público.",
+    opciones:[
+      { texto:"Mantener en público que no hiciste nada malo", tirada:{atributo:'mental', dificultadBase:12},
+        exito:{ texto:"Tu tranquilidad al hablar convence a más de uno. La presión mediática baja un poco mientras se resuelve el expediente.", efectos:{mental:3,popularidad:2} },
+        fallo:{ texto:"Se te nota nervioso en cada pregunta, y eso alimenta más las sospechas antes incluso de que se resuelva nada.", efectos:{mental:-3,popularidad:-2} } },
+      { texto:"No hacer declaraciones hasta que se resuelva el expediente",
+        resultado:"Optas por el silencio. Ni ayuda ni empeora las cosas, pero al menos no añades más leña al fuego.",
+        efectos:{mental:1} }
     ]
   }
 ];
@@ -5003,6 +5043,13 @@ const TITULARES = {
     d => `Final de infarto para ${articuloClub(d.club)} ${d.club}, que se salva por poco en un año gris de ${d.nombre}`,
     d => `${d.club} respira con la permanencia asegurada tras una temporada para el olvido`,
     d => `${d.nombre} y ${articuloClub(d.club)} ${d.club} sufren de más en una campaña marcada por las dudas`
+  ],
+  temporada_lesion: [
+    d => `Temporada marcada por la lesión: ${d.nombre} pasa ${d.semanasLesion} de baja en ${articuloClub(d.club)} ${d.club}`,
+    d => `${d.nombre} pierde buena parte del año por lesión (${d.semanasLesion} de baja) en un curso para olvidar`,
+    d => `La lesión condiciona la temporada de ${d.nombre}, que se pierde ${d.semanasLesion} vestido de calle`,
+    d => `Año roto para ${d.nombre}: ${d.semanasLesion} en la enfermería lastran su temporada ${articuloClub(d.club)==='la'?'en la':'en el'} ${d.club}`,
+    d => `${articuloClub(d.club)==='la'?'La':'El'} ${d.club} echa de menos a ${d.nombre}, de baja ${d.semanasLesion} por lesión esta temporada`
   ],
   historico: [
     d => `Temporada de récord: ${d.nombre} arrasa con ${d.goles} goles en ${d.partidos} partidos`,
@@ -6221,7 +6268,7 @@ const PAISES_CROMO = [
     curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.','El Estadio Centenario de Montevideo, sede de la primera final de un Mundial en 1930, fue declarado Monumento Histórico por la FIFA.','Peñarol y Nacional protagonizan el Clásico uruguayo, uno de los derbis más antiguos de Sudamérica.'] }
 ];
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','changelog','rankings','logros','escudosPersonalizados',
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','sancionReveal','changelog','rankings','logros','escudosPersonalizados',
   // Todo el Mundial es una secuencia sin cortes: mientras dura, no tiene sentido poder escaparse
   // al menú, a la tienda o al plan de entreno — como en las demás secuencias "de un tirón" de
   // esta misma lista (rueda de prensa, reveals de título...). Se reactiva solo al terminar
@@ -6676,7 +6723,7 @@ const TEXTOS_SEMIFINAL_CLUB = [
   d => `El sorteo os empareja con ${articuloClub(d.rival)} ${d.rival}. Toca la ida y la vuelta para decidir quién sigue vivo en la ${d.competicion}.`,
   d => `Se acerca el partido más importante del año: semifinal de la ${d.competicion} contra ${articuloClub(d.rival)} ${d.rival}.`,
   d => `El vestuario respira nervios. Enfrente, ${articuloClub(d.rival)} ${d.rival}, dispuesto a cerraros el paso hacia la final de la ${d.competicion}.`,
-  d => `Últimos ochenta minutos antes de la final. ${articuloClub(d.rival)==='la'?'La':'El'} ${d.rival} llega lanzado, pero vosotros no habéis llegado hasta aquí por casualidad.`
+  d => `Estáis a un partido de la final. ${articuloClub(d.rival)==='la'?'La':'El'} ${d.rival} llega lanzado, pero vosotros no habéis llegado hasta aquí por casualidad.`
 ];
 const OPCIONES_SEMIFINAL_CLUB = [
   [ {texto:'Salir con personalidad, sin miedo a tenerla', atributo:'tecnica', dificultadBase:17},
@@ -6704,8 +6751,9 @@ const OPCIONES_SEMIFINAL_SELECCION = [
 ];
 
 // Cuánto multiplica tu nota media de la temporada pasada (j.ultimaNotaTemporada) la
-// probabilidad de tu equipo. Más franjas que un simple lineal, y calibrado para que el 8-10
-// habitual de quien juega competición europea siga teniendo recorrido dentro de la escala.
+// probabilidad de tu equipo. Más franjas que un simple lineal — desde que la nota se reequilibró
+// para que el 10 sea casi inalcanzable (ver el cálculo de `nota` en calcularResumenTemporada),
+// un 8-9 real ya es una temporada notable de verdad, no solo "jugar en Europa".
 function multiplicadorPorNota(nota){
   if(nota < 5.5) return 0.70;  // floja
   if(nota < 6.5) return 0.85;  // normalita
@@ -8226,13 +8274,17 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   else if(ascenso) tier = 'ascenso';
   else if(clasificacionEuropea) tier = esSudamerica ? 'libertadores' : (esConcacaf ? 'concacaf' : (esAsia ? 'afc' : 'europa'));
   else if(posicionFinal >= 18) tier = 'descenso_riesgo';
+  // Una baja que se come más de media temporada es la noticia del año si no ha pasado nada más
+  // grande (título, ascenso, Europa, pelea por el descenso) — antes el titular ignoraba la
+  // lesión por completo y hablaba solo del rendimiento en los pocos partidos que sí jugaste.
+  else if(semanasLesion >= (SEMANAS_POR_PASO * SECUENCIA_TEMPORADA.length) / 2) tier = 'temporada_lesion';
   else if(ratioGoles >= 0.75) tier = 'historico';
   else if(ratioGoles >= 0.45) tier = 'estelar';
   else if(ratioGoles >= 0.25) tier = 'notable';
   else if(ratioGoles >= 0.1) tier = 'discreto';
   else tier = 'flojo';
   const nombreClubEfectivo = (j.enFilial && FILIAL_DE_CLUB[j.club.nombre]) || j.club.nombre;
-  let titular = elegirTitular(tier, { nombre:j.nombre, club:nombreClubEfectivo, goles, asistencias, partidos, posicion:posicionFinal, titulosNombres:nombresTitulosGanados, tituloNombre:nombresTitulosGanados[0] });
+  let titular = elegirTitular(tier, { nombre:j.nombre, club:nombreClubEfectivo, goles, asistencias, partidos, posicion:posicionFinal, titulosNombres:nombresTitulosGanados, tituloNombre:nombresTitulosGanados[0], semanasLesion: formatearDuracionLesion(semanasLesion) });
 
   const idxCat = CATEGORIAS.indexOf(categoriaEfectiva);
   const prestigioClub = PRESTIGIO_CLUB[j.club.nombre] || 2;
@@ -8270,15 +8322,23 @@ function calcularResumenTemporada(j, ascensoPlayoff){
     j.carrera.trofeosIndividuales = (j.carrera.trofeosIndividuales||0) + 1;
   }
 
-  // Nota media de la temporada (1-10): rendimiento goleador + asistencias + posición + hitos
+  // Nota media de la temporada (1-10): rendimiento goleador + asistencias + posición + hitos.
+  // Reequilibrada para que el 10 sea prácticamente imposible: antes se llegaba al tope con un
+  // ratioGoles de 0.667 (dos goles cada tres partidos) combinado con ganar el título — bastante
+  // alcanzable en una carrera larga. Ahora el propio rendimiento (goles/asistencias) pesa más que
+  // antes en términos relativos, pero necesita un ratioGoles de 1.25 (más de un gol por partido
+  // durante TODA la temporada, algo que ningún futbolista real ha sostenido nunca) para agotar su
+  // propio tope; y lo que depende del equipo más que de ti (posición en liga, título, ascenso)
+  // pesa bastante menos que antes, para no seguir mezclando "tu equipo ganó" con "tú jugaste
+  // genial" en la misma cifra tanto como se mezclaba.
   let nota = 5.0;
-  nota += Math.min(2, ratioGoles*3);
-  nota += Math.min(0.8, (asistencias/partidos)*2.5);
-  nota += Math.min(1, (11 - posicionFinal) * 0.09);
-  if(campeon) nota += 0.6;
-  else if(ascenso || clasificacionEuropea) nota += 0.4;
+  nota += Math.min(2.5, ratioGoles*2);
+  nota += Math.min(0.7, (asistencias/partidos)*2);
+  nota += Math.min(0.5, (11 - posicionFinal) * 0.05);
+  if(campeon) nota += 0.4;
+  else if(ascenso || clasificacionEuropea) nota += 0.25;
   if(pichichi) nota += 0.3;
-  nota += Math.min(0.4, bonusNotaFases);
+  nota += Math.min(0.3, bonusNotaFases);
   nota = Math.max(1, Math.min(10, Math.round(nota*10)/10));
   j.ultimaNotaTemporada = nota;
 
@@ -9094,6 +9154,24 @@ function calcularRolTemporada(j){
   return { label:'Suplente', corto:'Suplente', clase:'bad', fraccion:0.24 + factorAguante*0.5, pct };
 }
 function iniciarTemporadaJuego(j){
+  // El expediente por amaño (propuesta_amano_amoros) se resuelve aquí, al empezar la temporada
+  // siguiente a la falta — no en caliente mid-temporada como antes (que dejaba una sanción de
+  // ¡2 temporadas! conviviendo de forma rara con el mercado de fichajes y el resto del calendario
+  // avanzando con normalidad). Ahora terminas la temporada de la falta jugando con normalidad,
+  // bajo sospecha, y la sanción de verdad (una temporada completa sin poder jugar, ver
+  // SCREENS.sancionReveal) cae de golpe al principio de la siguiente, igual que le pasaría a un
+  // jugador real mientras dura la instrucción del caso.
+  if(S.pendienteSancionAmano){
+    S.pendienteSancionAmano = false;
+    const semanasSancion = SEMANAS_POR_PASO * SECUENCIA_TEMPORADA.length;
+    j.lesionSemanas = Math.max(j.lesionSemanas||0, semanasSancion);
+    j.sancionActiva = true;
+    const cambios = aplicarEfectos(j, { dinero:-6000, reputacion:-30, popularidad:-25, carinoAficion:-25, confianza:-15 });
+    S.sancionRevealDatos = { semanas: semanasSancion, cambios };
+    S.screen = 'sancionReveal';
+    guardarPartida();
+    return;
+  }
   S.comprasHechas = 0;
   S.comprasEstaTemporada = [];
   S.mostrandoPanelEntreno = S.temporada === 1;
@@ -15602,6 +15680,43 @@ SCREENS.lesionReveal = function(){
   c.appendChild(btn);
   app.appendChild(c);
 };
+SCREENS.sancionReveal = function(){
+  const j = S.jugador;
+  const d = S.sancionRevealDatos;
+  Sonido.bajaNivel();
+  topbar("Resolución del expediente");
+  const c = el('div','season-reveal');
+  const iconoBox = el('div','icon','');
+  iconoBox.innerHTML = iconoInline('fisico', 44);
+  iconoBox.style.cssText = 'display:flex;justify-content:center;color:var(--red);';
+  c.appendChild(iconoBox);
+  c.appendChild(el('div','lbl', 'La federación falla en tu contra'));
+  const tituloSemanas = c.appendChild(el('div','num', `${formatearDuracionLesion(d.semanas)} sin poder jugar`));
+  tituloSemanas.style.fontSize = '32px';
+  c.appendChild(el('div','event-text', `Meses después de aquel partido, la investigación por el amaño llega a su fin: la federación te sanciona con ${formatearDuracionLesion(d.semanas)} de baja, con efecto inmediato desde hoy. ${articuloClub(j.club.nombre)==='la'?'La':'El'} ${j.club.nombre} emite un comunicado tibio — no rescinde tu contrato, pero tampoco sale a defenderte en público.`));
+  const eff = el('div','effects');
+  eff.style.cssText = 'justify-content:center;margin-top:10px;';
+  (d.cambios||[]).forEach(c2=>{
+    if(c2.tipo==='stat'){
+      const nombre = NICE_TODO[c2.clave] || cap(c2.clave);
+      const texto = `${nombre} ${textoCambioStat(c2.clave, c2.delta)}`;
+      eff.appendChild(el('span','eff-chip '+(c2.delta>=0?'pos':'neg'), texto));
+    } else {
+      const nombre = NICE_ATTR[c2.clave] || cap(c2.clave);
+      const texto = c2.clave === 'mental' ? `${nombre} ${c2.subio?'↑':'↓'}` : `${nombre} → ${c2.nuevoValor}${c2.subio?' ⬆':' ⬇'}`;
+      eff.appendChild(el('span','eff-chip '+(c2.subio?'pos':'neg'), texto));
+    }
+  });
+  c.appendChild(eff);
+  const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Entendido →';
+  btn.onclick = ()=>{
+    S.sancionRevealDatos = null;
+    iniciarTemporadaJuego(j);
+    render();
+  };
+  c.appendChild(btn);
+  app.appendChild(c);
+};
 
 // ---- Contexto de partido (solo encargos tácticos, id "encargo_tactico_N") ----
 // Un encargo táctico, por construcción, nunca puede coincidir con el pasoIndex real de una
@@ -15647,7 +15762,7 @@ function candidatasContextoPartido(j){
   }
   return candidatas;
 }
-function renderContextoPartido(j){
+function renderContextoPartido(j, momento){
   const candidatas = candidatasContextoPartido(j);
   if(!candidatas.length) return '';
   const cand = candidatas[Math.floor(Math.random()*candidatas.length)];
@@ -15655,10 +15770,17 @@ function renderContextoPartido(j){
   const jugadorLocal = Math.random() < 0.5;
   const local = jugadorLocal ? equipoJ : cand.rival;
   const visitante = jugadorLocal ? cand.rival : equipoJ;
-  const golesLocal = Math.floor(Math.random()*3);
-  const golesVisitante = Math.floor(Math.random()*3);
-  const minuto = 1 + Math.floor(Math.random()*90);
-  const segundos = Math.floor(Math.random()*60);
+  // Un encargo "previo" (charla antes del partido) no puede mostrar goles ni minutos ya jugados
+  // — el marcador todavía está a 0 y el reloj sin arrancar. Solo un encargo "directo" (con el
+  // partido en marcha) reparte goles y elige de verdad entre 1ª y 2ª parte, en vez de caer
+  // siempre en la 2ª como antes (por lo que nunca se veía "PERIODO 1").
+  const enJuego = momento === 'directo';
+  const enSegundaParte = enJuego && Math.random() < 0.6;
+  const golesLocal = enJuego ? Math.floor(Math.random()*3) : 0;
+  const golesVisitante = enJuego ? Math.floor(Math.random()*3) : 0;
+  const minuto = enJuego ? (enSegundaParte ? 46 + Math.floor(Math.random()*45) : 1 + Math.floor(Math.random()*45)) : 0;
+  const segundos = enJuego ? Math.floor(Math.random()*60) : 0;
+  const periodo = enSegundaParte ? 2 : 1;
   const badge = cand.tipo === 'liga'
     ? logoFilaCompeticion({tipo:'liga', nombre:cand.nombreCompeticion}, 15)
     : logoTitulo(cand.nombreCompeticion, 15);
@@ -15675,7 +15797,7 @@ function renderContextoPartido(j){
         </div>
         <div class="marcador-centro">
           <div class="marcador-reloj">${minuto}:${String(segundos).padStart(2,'0')}</div>
-          <div class="marcador-periodo-linea">PERIODO 2</div>
+          <div class="marcador-periodo-linea">PERIODO ${periodo}</div>
         </div>
         <div class="marcador-celda">
           <div class="marcador-equipo">${escudoSVG(visitante.nombre, 24, visitante.colores)}<span class="marcador-nombre">${visitante.nombre}</span></div>
@@ -15697,7 +15819,9 @@ SCREENS.evento = function(){
     : resolverTexto(ev.texto, j);
   c.appendChild(el('div','event-text', textoMostrado));
   if(ev.id && ev.id.indexOf('encargo_tactico_') === 0){
-    const contextoHTML = renderContextoPartido(j);
+    const idxEncargo = parseInt(ev.id.slice('encargo_tactico_'.length), 10);
+    const momentoEncargo = (ENCARGOS_TACTICOS[idxEncargo] || {}).momento || 'previo';
+    const contextoHTML = renderContextoPartido(j, momentoEncargo);
     if(contextoHTML) c.appendChild(el('div', null, contextoHTML));
   }
 
@@ -16232,23 +16356,30 @@ SCREENS.playoffElim = function(){
     { texto:'Jugar con la cabeza fría, sin salirte del plan', tirada:{atributo:'mental', dificultadBase:13},
       exito:{ texto:'Controlas la eliminatoria con inteligencia de principio a fin, sumando en los dos partidos. El equipo pasa a la final del playoff con solvencia.', avanza:true },
       fallo:{ texto:'La eliminatoria se complica y el rival aprovecha vuestros errores en el cómputo global. Se acaba el sueño del ascenso por esta vez.', avanza:false } },
-    { texto:'Arriesgar desde el principio para llevarte la eliminatoria por delante', tirada:{atributo:'tecnica', dificultadBase:16}, masMerito:true,
+    { texto:'Arriesgar desde el principio para llevarte la eliminatoria por delante', tirada:{atributo:'tecnica', dificultadBase:16},
       exito:{ texto:'Tu atrevimiento desborda al rival durante los dos partidos. Billete directo a la final del playoff.', avanza:true },
       fallo:{ texto:'Te precipitas y el rival castiga cada pérdida de balón en el marcador global. Otro año más en la categoría.', avanza:false } }
   ];
-  opciones.forEach(op=>{
+  // "Más mérito" según la probabilidad real de cada opción para este jugador (no la dificultadBase
+  // en crudo, que compara mental vs técnica sin mirar en cuál de las dos está mejor el jugador) —
+  // mismo criterio que SCREENS.torneoSemifinal.
+  const probsPlayoff = opciones.map(op => probabilidadExito(j, op.tirada));
+  const pctsPlayoff = probsPlayoff.map(p => p.pct);
+  const idxMasMeritoPlayoff = pctsPlayoff[0] !== pctsPlayoff[1] ? pctsPlayoff.indexOf(Math.min(...pctsPlayoff)) : -1;
+  opciones.forEach((op,idxOp)=>{
     const b = el('div','opt');
     b.appendChild(document.createTextNode(op.texto));
-    const p = probabilidadExito(j, op.tirada);
+    const p = probsPlayoff[idxOp];
+    const esMasMerito = idxOp === idxMasMeritoPlayoff;
     const tag = el('span','tag');
     tag.appendChild(el('span','tag-pill', `${iconoInline('dado',13)}Dificultad ${p.dificultad}`));
     tag.appendChild(el('span','tag-pill', `${NICE_ATTR[op.tirada.atributo]} +${p.bonoAtributo}`));
     p.mods.forEach(m=> tag.appendChild(el('span','tag-pill', m)) );
     tag.appendChild(el('span','tag-pill pct', etiquetaProbabilidad(p.pct)));
-    if(op.masMerito) tag.appendChild(el('span','tag-pill pos', '⭐ más mérito si sale bien'));
+    if(esMasMerito) tag.appendChild(el('span','tag-pill pos', '⭐ más mérito si sale bien'));
     b.appendChild(tag);
     b.onclick = ()=>{
-      S.pendingRoll = { j, ev:{id:'playoff_semifinal'}, op, r:null, esSemifinal:true, tipoSemifinal:'playoff', masMerito:!!op.masMerito };
+      S.pendingRoll = { j, ev:{id:'playoff_semifinal'}, op, r:null, esSemifinal:true, tipoSemifinal:'playoff', masMerito:esMasMerito };
       S.pendingRoll.r = tirar(j, op.tirada);
       S.screen = 'tirando';
       render();
@@ -16697,15 +16828,23 @@ SCREENS.torneoSemifinal = function(){
   c.appendChild(el('h2',null, cfg.nombreCompeticion));
   c.appendChild(el('div','lore-box', cfg.textoSemifinal));
 
-  const dificultades = cfg.opcionesSemifinal.map(op=>op.dificultadBase);
-  const maxDificultad = Math.max(...dificultades);
+  // "Más mérito" tiene que reflejar lo difícil que es DE VERDAD para este jugador, no la
+  // dificultadBase en crudo: las dos opciones usan atributos distintos, así que una
+  // dificultadBase más alta no siempre es la más arriesgada — depende de en qué atributo esté
+  // mejor el jugador. Se compara la probabilidad real ya calculada (probabilidadExito) y se marca
+  // la de menor % (bug corregido: antes comparaba dificultadBase, que podía premiar la opción que
+  // en realidad era más fácil para ese jugador en concreto).
+  const tiradas = cfg.opcionesSemifinal.map(op => ({ atributo:op.atributo, dificultadBase:op.dificultadBase }));
+  const probs = tiradas.map(t => probabilidadExito(j, t));
+  const pcts = probs.map(p => p.pct);
+  const idxMasMerito = pcts[0] !== pcts[1] ? pcts.indexOf(Math.min(...pcts)) : -1;
 
-  cfg.opcionesSemifinal.forEach(op=>{
+  cfg.opcionesSemifinal.forEach((op,idxOp)=>{
     const b = el('div','opt');
     b.appendChild(document.createTextNode(op.texto));
-    const tirada = { atributo:op.atributo, dificultadBase:op.dificultadBase };
-    const p = probabilidadExito(j, tirada);
-    const esLaMasDificil = op.dificultadBase === maxDificultad && dificultades[0] !== dificultades[1];
+    const tirada = tiradas[idxOp];
+    const p = probs[idxOp];
+    const esLaMasDificil = idxOp === idxMasMerito;
     const tag = el('span','tag');
     tag.appendChild(el('span','tag-pill', `${iconoInline('dado',13)}Dificultad ${p.dificultad}`));
     tag.appendChild(el('span','tag-pill', `${NICE_ATTR[op.atributo]} +${p.bonoAtributo}`));
