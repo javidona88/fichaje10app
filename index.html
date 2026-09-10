@@ -1845,6 +1845,8 @@ const LOGROS = [
     cond:j=> !!(j.hitosLogro && j.hitosLogro.boteGrande) },
   { id:'millonario', cat:'estilo', nombre:'Más ceros que dorsal', desc:'Llega a tener 5 millones de euros ahorrados.', icono:'💵', pesoRareza:15,
     cond:j=> (j.stats.dinero||0) >= 5000000 },
+  { id:'influencer', cat:'estilo', nombre:'Más seguido que el club', desc:'Supera los 5 millones de seguidores.', icono:'📱', pesoRareza:14,
+    cond:j=> (j.stats.seguidores||0) >= 5000000 },
 
   // ---- Rarezas ----
   { id:'sancion_amano', cat:'rarezas', nombre:'El Cabesa te tendió una trampa', desc:'Sobrevive a una sanción por amaño de partido.', icono:ICONOS_SVG.dado, pesoRareza:8,
@@ -2294,17 +2296,17 @@ const BANCO_EVENTOS = [
     id:"entrevista_post_derrota", cooldown:2, soloSiSano:true,
     trigger:{ probabilidad:0.3 },
     texto: j => {
-      const tier = tierPatrocinio(j.club.categoria);
+      const tier = tierPatrocinio(j.club.categoria, j.stats.seguidores);
       const prensa = tier === 'nacional' ? 'la prensa nacional' : (tier === 'regional' ? 'la prensa regional' : 'la prensa local');
       const resultados = ['3-0','4-1','2-0','3-1','1-0','4-0'];
       const resultado = resultados[Math.floor(Math.random()*resultados.length)];
       return `Perdéis ${resultado} y ${prensa} te espera a la salida del vestuario para preguntarte qué ha pasado.`;
     },
     variantes:[
-      j => tierPatrocinio(j.club.categoria) === 'local'
+      j => tierPatrocinio(j.club.categoria, j.stats.seguidores) === 'local'
         ? "Otra derrota dolorosa. Un par de aficionados te paran nada más pisar la calle para preguntarte qué ha pasado."
         : "Otra derrota dolorosa. Los micrófonos te esperan nada más pisar el túnel de vestuarios.",
-      j => tierPatrocinio(j.club.categoria) === 'local'
+      j => tierPatrocinio(j.club.categoria, j.stats.seguidores) === 'local'
         ? "El marcador ha sido durísimo. En el grupo de WhatsApp del equipo ya hay quien pide explicaciones antes de que subas al autobús."
         : "El marcador ha sido durísimo. La prensa quiere una explicación antes de que subas al autobús."
     ],
@@ -2437,6 +2439,39 @@ const BANCO_EVENTOS = [
       return base;
     }
   },
+  // Seguidores como sistema propio: crecen solos cada fin de temporada (actualizarSeguidores,
+  // según la popularidad del año), pero estos dos sucesos les dan textura — un pico puntual que
+  // premia una buena decisión, y una vía de ingresos que solo se desbloquea con una cuenta grande
+  // de verdad, aparte del sistema de patrocinio local/regional/nacional de siempre.
+  { id:"video_viral_seguidores", cooldown:4,
+    trigger:{ probabilidad:0.16 },
+    texto:"Un vídeo tuyo de hace unos días —una jugada, una celebración, una imagen cualquiera del día a día— empieza a circular sin que nadie sepa muy bien por qué, y no para de crecer.",
+    variantes:[
+      "Alguien sube un clip tuyo del último entreno y, sin venir a cuento, se hace viral en cuestión de horas.",
+      "Una foto tuya de un partido reciente empieza a circular con un comentario gracioso, y la cosa se dispara sola."
+    ],
+    opciones:[
+      { texto:"Aprovechar el tirón y responder en redes", tirada:{atributo:"mental", dificultadBase:11},
+        exito:{ texto:"Tu respuesta añade más leña al fuego, pero para bien: el momento se convierte en una de esas cosas que todo el mundo comparte durante días.",
+          efectosFn: j => ({ popularidad:6, seguidores: Math.round((500 + (j.stats.seguidores||0)*0.05) * (0.8+Math.random()*0.6)) }) },
+        fallo:{ texto:"Tu intento de subirte a la ola no cuaja, y el momento se apaga tan rápido como llegó.", efectos:{popularidad:-2} } },
+      { texto:"Dejar que corra solo, sin decir nada",
+        resultado:"El momento se viraliza solo, sin que tengas que mover un dedo. Ganas seguidores de la noche a la mañana, aunque bastantes menos de los que habrías sacado exprimiéndolo tú mismo.",
+        efectosFn: j => ({ seguidores: Math.round((250 + (j.stats.seguidores||0)*0.025) * (0.8+Math.random()*0.6)) }) }
+    ]
+  },
+  { id:"marca_contacta_por_seguidores", cooldown:3,
+    trigger:{ probabilidad:0.22, condicion: j => (j.stats.seguidores||0) >= 150000 },
+    texto:"Una marca te escribe directamente por redes: no les interesa tu categoría ni tu palmarés, solo el alcance que tienes con tu cuenta. Te ofrecen un pago único por publicar un par de posts patrocinados.",
+    opciones:[
+      { texto:"Aceptar la colaboración",
+        resultado: j => `Publicas el contenido acordado y la marca queda satisfecha con el resultado. Nada que ver con tu carrera como futbolista, pero el dinero es real.`,
+        efectosFn: j => ({ dinero: Math.round((j.stats.seguidores||0) * 0.045 / 50) * 50 }) },
+      { texto:"Rechazarlo, no quieres mezclar tu imagen con publicidad de este tipo",
+        resultado:"Declinas la propuesta. Prefieres que tu cuenta hable de fútbol, no de productos de marcas que no conoces de nada.",
+        efectos:{reputacion:2} }
+    ]
+  },
   {
     id:"primer_gol_profesional", unico:true, soloSiSano:true,
     trigger:{ probabilidad:0.5, condicion: j => CATEGORIAS.indexOf(j.club.categoria) >= 1 && (j.carrera.goles||0) === 0 },
@@ -2488,7 +2523,7 @@ const BANCO_EVENTOS = [
     id:"oferta_patrocinio_local", cooldown:1,
     trigger:{ edadMin:17, probabilidad:0.3, condicion: j => !j.patrocinio },
     texto: j => {
-      const tier = tierPatrocinio(j.club.categoria);
+      const tier = tierPatrocinio(j.club.categoria, j.stats.seguidores);
       if(tier==='nacional') return "Una marca de alcance nacional te propone ser su imagen a cambio de un buen dinero y varias apariciones al año.";
       if(tier==='regional') return "Una marca con presencia regional te propone ser su imagen a cambio de un buen dinero y unas cuantas apariciones al año.";
       return "Una marca de la zona te propone ser su imagen a cambio de un buen dinero y unas cuantas apariciones al mes.";
@@ -2496,7 +2531,7 @@ const BANCO_EVENTOS = [
     opciones:[
       { texto:"Escuchar la propuesta y sentarte a negociar",
         resultado: j => {
-          const tier = tierPatrocinio(j.club.categoria);
+          const tier = tierPatrocinio(j.club.categoria, j.stats.seguidores);
           const marcas = MARCAS_PATROCINIO[tier];
           const marcaObj = marcas[Math.floor(Math.random()*marcas.length)];
           const base = Math.max(300, Math.round((250 + CATEGORIAS.indexOf(j.club.categoria)*350 + j.stats.valorMercado*0.002 + j.stats.reputacion*15) / 50) * 50);
@@ -2517,7 +2552,7 @@ const BANCO_EVENTOS = [
     variantes:[
       "Sale una noticia asegurando que hay un club interesado en ficharte. Nadie te ha llamado, pero el rumor ya corre.",
       j => {
-        const tier = tierPatrocinio(j.club.categoria);
+        const tier = tierPatrocinio(j.club.categoria, j.stats.seguidores);
         if(tier === 'nacional'){
           const fuente = Math.random() < 0.5 ? 'Fabrizio Romano' : 'Jijantes';
           return `${fuente} menciona tu nombre como posible fichaje de otro equipo. En el vestuario ya se comenta.`;
@@ -4203,20 +4238,20 @@ const BANCO_EVENTOS = [
     id:"polemica_arbitral", cooldown:4, soloSiSano:true,
     trigger:{ probabilidad:0.16 },
     texto: j => {
-      const tier = tierPatrocinio(j.club.categoria);
+      const tier = tierPatrocinio(j.club.categoria, j.stats.seguidores);
       if(tier === 'nacional') return "Una decisión arbitral muy discutida marca el resultado del partido, y todas las cámaras te buscan a ti para la reacción en caliente.";
       if(tier === 'regional') return "Una decisión arbitral muy discutida marca el resultado del partido, y la prensa regional te busca nada más acabar para la reacción en caliente.";
       return "Una decisión arbitral muy discutida marca el resultado del partido, y varios aficionados que lo han grabado con el móvil ya te preguntan por ello según sales del vestuario.";
     },
     variantes:[
       j => {
-        const tier = tierPatrocinio(j.club.categoria);
+        const tier = tierPatrocinio(j.club.categoria, j.stats.seguidores);
         if(tier === 'nacional') return "El colegiado toma una decisión que cambia el partido, y en la zona mixta todos quieren saber qué opinas.";
         if(tier === 'regional') return "El colegiado toma una decisión que cambia el partido, y el periodista de la radio local te espera a la salida para que opines.";
         return "El colegiado toma una decisión que cambia el partido, y el vídeo ya corre por el grupo de WhatsApp del equipo antes de que te duches.";
       },
       j => {
-        const tier = tierPatrocinio(j.club.categoria);
+        const tier = tierPatrocinio(j.club.categoria, j.stats.seguidores);
         if(tier === 'nacional') return "Una jugada polémica se convierte en el tema del día, y los micrófonos te esperan nada más pisar el túnel de vestuarios.";
         if(tier === 'regional') return "Una jugada polémica da que hablar, y algún medio local te llama esa misma tarde para que la comentes.";
         return "Una jugada polémica da que hablar en las gradas, y hasta el bar de después del partido llegan comentarios sobre ella.";
@@ -6373,7 +6408,7 @@ const ANIMO_MARCA = {
   enfadado: { texto:'La marca está molesta. Un paso en falso y puede retirar la oferta' }
 };
 
-const NICE_STAT = {forma:"Forma",reputacion:"Reputación",salud:"Salud",dinero:"Dinero",popularidad:"Popularidad",valorMercado:"Valor de mercado",felicidadPareja:"Pareja",vestuario:"Vestuario",carinoAficion:"Cariño de la afición",confianza:"Confianza"};
+const NICE_STAT = {forma:"Forma",reputacion:"Reputación",salud:"Salud",dinero:"Dinero",popularidad:"Popularidad",valorMercado:"Valor de mercado",felicidadPareja:"Pareja",vestuario:"Vestuario",carinoAficion:"Cariño de la afición",confianza:"Confianza",seguidores:"Seguidores"};
 const CLAVES_STAT_INMEDIATA = ['forma','reputacion','dinero'];
 const NICE_TODO = Object.assign({}, NICE_ATTR, NICE_STAT, {tecnica:"Técnica"});
 
@@ -7091,7 +7126,9 @@ function textoCambioStat(clave, delta){
 function formatearNumero(valor, decimales){
   return valor.toFixed(decimales===undefined?1:decimales).replace('.', ',');
 }
-function formatearDinero(valor){
+// Abreviatura compartida en K/M (1,2K · 3,4M), estilo red social/cifra de negocio — la usan tanto
+// el dinero (con el € añadido aparte) como los seguidores.
+function abreviarNumero(valor){
   const neg = valor < 0;
   const abs = Math.abs(valor);
   let texto;
@@ -7100,14 +7137,23 @@ function formatearDinero(valor){
   } else if(abs >= 1000){
     texto = (abs/1000).toFixed(1).replace('.0','').replace('.',',') + 'K';
   } else {
-    texto = abs.toLocaleString('es-ES');
+    texto = Math.round(abs).toLocaleString('es-ES');
   }
-  return (neg?'-':'') + texto + ' €';
+  return (neg?'-':'') + texto;
+}
+function formatearDinero(valor){
+  return abreviarNumero(valor) + ' €';
+}
+function formatearSeguidores(valor){
+  return abreviarNumero(valor);
 }
 function formatearDelta(clave, delta){
   const signo = delta>=0 ? '+' : '';
   if(clave==='dinero' || clave==='valorMercado'){
     return `${signo}${formatearDinero(delta)}`;
+  }
+  if(clave==='seguidores'){
+    return `${signo}${formatearSeguidores(delta)}`;
   }
   return `${signo}${delta}`;
 }
@@ -7705,6 +7751,10 @@ function migrarJugadorGuardado(j){
   if(j.objetos.rachaGoleador === undefined) j.objetos.rachaGoleador = 0;
   if(j.esCapitan === undefined) j.esCapitan = false;
   if(j.stats.vestuario === undefined) j.stats.vestuario = 55;
+  // Seguidores: partida vieja sin este campo — se estima un punto de partida razonable a partir
+  // de la popularidad actual (nunca se puede reconstruir el histórico real), y a partir de aquí
+  // ya evoluciona solo con actualizarSeguidores() en cada fin de temporada.
+  if(j.stats.seguidores === undefined) j.stats.seguidores = Math.round(100 + Math.pow((j.stats.popularidad||0)/50, 2.2) * 8000);
   if(j.sancionActiva === undefined) j.sancionActiva = false;
   if(j.motoActual === undefined) j.motoActual = 0;
   if(j.hitosLogro === undefined) j.hitosLogro = {};
@@ -7816,7 +7866,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia,estiloId
     provincia: provincia || '',
     club:{ nombre: club.nombre, categoria:"Tercera RFEF", colores: club.colores },
     contrato:{ sueldoAnual:900, duracionTemporadas:2, duracionOriginal:2 },
-    stats:{ forma:60, reputacion:5, salud:100, dinero:40, popularidad:2, valorMercado:5000, confianza:55, felicidadPareja:0, vestuario:45 },
+    stats:{ forma:60, reputacion:5, salud:100, dinero:40, popularidad:2, valorMercado:5000, confianza:55, felicidadPareja:0, vestuario:45, seguidores:60 },
     estadoMental:'normal',
     rachaResultados:0,
     promesasActivas:[],
@@ -8753,6 +8803,27 @@ function categoriaFilialDe(categoriaClub){
   const idx = CATEGORIAS.indexOf(categoriaClub);
   return CATEGORIAS[Math.max(0, idx-2)];
 }
+// Seguidores: a diferencia de la popularidad (sube y baja cada semana con lo que te vaya
+// pasando), los seguidores son casi siempre un número que solo crece a lo largo de la carrera,
+// como pasaría de verdad en redes. El crecimiento de esta temporada depende de lo popular que
+// hayas sido en ella, con efecto bola de nieve: con el mismo nivel de popularidad, una cuenta ya
+// grande gana más seguidores en términos absolutos que una pequeña, igual que en redes de verdad.
+const HITOS_SEGUIDORES = [1000, 10000, 50000, 100000, 500000, 1000000, 5000000, 10000000, 50000000];
+function actualizarSeguidores(j){
+  const pop = j.stats.popularidad || 0;
+  const actuales = j.stats.seguidores || 0;
+  const factorFama = Math.pow(pop/45, 2.5);
+  const crecimientoBase = 350 * factorFama;
+  const crecimientoProporcional = actuales * Math.min(0.85, factorFama*0.32);
+  const azar = 0.8 + Math.random()*0.5;
+  const ganados = Math.max(0, Math.round((crecimientoBase + crecimientoProporcional) * azar));
+  const nuevos = actuales + ganados;
+  const hitosCruzados = HITOS_SEGUIDORES.filter(h => actuales < h && nuevos >= h);
+  j.stats.seguidores = nuevos;
+  if(hitosCruzados.length){
+    mostrarNotificacion(`${iconoInline('comunicacion',15)}¡Superas los ${formatearSeguidores(hitosCruzados[hitosCruzados.length-1])} seguidores!`, 'atributo');
+  }
+}
 function procesarFinTemporada(j, ascensoPlayoff){
   if(j.rival && j.rival.compartiendoVestuario){
     j.rival.temporadasCompartiendo = (j.rival.temporadasCompartiendo || 0) + 1;
@@ -8760,6 +8831,7 @@ function procesarFinTemporada(j, ascensoPlayoff){
   evolucionarRival(j);
   evolucionarProtegido(j);
   evolucionarCompaneros(j);
+  actualizarSeguidores(j);
   S.temporadaResumen = calcularResumenTemporada(j, ascensoPlayoff);
   if(j.objetos && j.objetos.rachaGoleador > 0) j.objetos.rachaGoleador--; // se consume, la haya usado calcularResumenTemporada o no
   // Confianza del entrenador (ver calcularRolTemporada y los eventos "pelea por la titularidad"):
@@ -9358,10 +9430,17 @@ function iniciarFichaje(j, nuevoClub, nuevoContrato, pantallaSiguiente){
   S.ultimoEventoFueTitulo = false; // evita que la celebración de un título del club anterior se cuele en el nuevo
   S.screen = esRegreso ? 'regresoClub' : 'ruedaPrensa';
 }
-function tierPatrocinio(categoria){
-  if(categoria === "LaLiga") return 'nacional';
-  if(categoria === "LaLiga2") return 'regional';
-  return 'local';
+// El tier de patrocinio ya no depende solo de la categoría del club — antes un delantero viral
+// con millones de seguidores jugando en Segunda RFEF nunca podía optar a una marca nacional, y un
+// tier de LaLiga sin apenas seguidores siempre la tenía asegurada. Los seguidores solo pueden
+// SUBIR el tier que ya te da la categoría (nunca bajarlo): una cuenta grande abre puertas, pero
+// jugar arriba sigue garantizando el tier de casa aunque de momento no seas viral.
+function tierPatrocinio(categoria, seguidores){
+  const porCategoria = categoria === "LaLiga" ? 2 : (categoria === "LaLiga2" ? 1 : 0);
+  const seg = seguidores || 0;
+  const porSeguidores = seg >= 800000 ? 2 : (seg >= 150000 ? 1 : 0);
+  const nivel = Math.max(porCategoria, porSeguidores);
+  return nivel === 2 ? 'nacional' : (nivel === 1 ? 'regional' : 'local');
 }
 function evaluarObjetivo(tipo, r){
   if(tipo === 'campeon') return !!r.campeon;
@@ -11142,6 +11221,10 @@ function seccionEstado(j){
     gridEstado.appendChild(estadoItemConBarra(nicelabel.reputacion, estadoReputacion(j.stats.reputacion)));
     gridEstado.appendChild(estadoItem('Carácter', { texto: `${j.mentalidad}<span class="valor-max">/${ATRIBUTO_MAX}</span>`, clase:'' }));
     gridEstado.appendChild(estadoItemConBarra(nicelabel.popularidad, estadoPopularidad(j.stats.popularidad)));
+    // A diferencia de la popularidad (deliberadamente sin cifra, solo nivel), los seguidores SÍ
+    // muestran el número tal cual — es justo la gracia de una cuenta de redes: verla crecer de
+    // verdad, no solo un nivel cualitativo.
+    gridEstado.appendChild(estadoItem('Seguidores', { texto: formatearSeguidores(j.stats.seguidores||0), clase:'' }));
     secEstado.appendChild(gridEstado);
     if(j.tienePareja){
       const gridPareja = el('div','stat-grid-3');
@@ -18849,7 +18932,7 @@ SCREENS.final = function(){
   const pb = el('div','press-body');
   const valorMaximoReal = Math.max(j.carrera.valorMercadoMaximo||0, j.stats.valorMercado);
   const dineroGanadoReal = Math.max(j.carrera.dineroGanado||0, j.stats.dinero);
-  pb.appendChild(el('p',null,`Se retira con ${j.edad} años, habiendo llegado hasta ${categoriaCorta(j.club)}, con un valor de mercado máximo de ${formatearDinero(valorMaximoReal)} en su mejor momento. En toda su carrera ganó ${formatearDinero(dineroGanadoReal)}, de los que le quedan ${formatearDinero(j.stats.dinero)} ahorrados.`));
+  pb.appendChild(el('p',null,`Se retira con ${j.edad} años, habiendo llegado hasta ${categoriaCorta(j.club)}, con un valor de mercado máximo de ${formatearDinero(valorMaximoReal)} en su mejor momento. En toda su carrera ganó ${formatearDinero(dineroGanadoReal)}, de los que le quedan ${formatearDinero(j.stats.dinero)} ahorrados, y se despide de las redes con ${formatearSeguidores(j.stats.seguidores||0)} seguidores.`));
 
   const historial = j.historialTemporadas || [];
   const mejorTemporada = historial.filter(h=>h.nota!=null).sort((a,b)=>b.nota-a.nota)[0];
