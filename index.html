@@ -21,7 +21,7 @@
 <script defer src="https://cloud.umami.is/script.js" data-website-id="6e7ce3b3-ac14-47d3-be2a-c06ea52fd502"></script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=PT+Serif:wght@700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=PT+Serif:wght@700&family=Space+Grotesk:wght@400;500;600;700&family=Oxanium:wght@600;700;800&display=swap');
 
 :root{
   --bg: #14161F;
@@ -410,6 +410,27 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 
 /* ---- eventos ---- */
 .event-text{ font-family:'Space Grotesk',sans-serif; font-weight:400; font-size:16px; line-height:1.55; margin-bottom:20px; color:var(--ink); }
+/* Contexto de partido (solo encargos tácticos): competición/rival/jornada + marcador tipo placa
+   LED de estadio. Ver candidatasContextoPartido()/renderContextoPartido() en el JS. */
+.contexto-partido{ border:1px solid var(--line); border-radius:12px; padding:14px 14px 16px; margin-bottom:16px; }
+.contexto-cab{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
+.contexto-comp{ display:flex; align-items:center; gap:7px; font-family:'Space Grotesk',sans-serif; font-size:11.5px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.03em; }
+.contexto-comp svg,.contexto-comp img{ width:15px; height:15px; flex-shrink:0; }
+.contexto-fase{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); text-align:right; }
+.marcador-panel{
+  background:#0a0a0a; border-radius:8px; padding:12px 10px;
+  border:1px solid rgba(255,255,255,0.16);
+  box-shadow: inset 0 0 14px rgba(0,0,0,0.85), 0 1px 0 rgba(255,255,255,0.06);
+}
+.marcador-fila{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; }
+.marcador-celda{ display:flex; flex-direction:column; align-items:center; gap:5px; min-width:0; }
+.marcador-equipo{ display:flex; flex-direction:column; align-items:center; gap:3px; width:100%; }
+.marcador-equipo svg,.marcador-equipo img{ display:block; flex-shrink:0; }
+.marcador-nombre{ font-family:'Space Grotesk',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.02em; color:#8b96a0; text-align:center; line-height:1.2; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.marcador-num{ font-family:'Oxanium',monospace; font-weight:800; font-size:32px; line-height:1; color:#3ce06a; text-shadow:0 0 6px rgba(60,224,106,0.85), 0 0 14px rgba(60,224,106,0.4); }
+.marcador-centro{ text-align:center; padding:0 2px; }
+.marcador-reloj{ font-family:'Oxanium',monospace; font-weight:800; font-size:21px; letter-spacing:.02em; color:#ef4b4b; text-shadow:0 0 6px rgba(239,75,75,0.85), 0 0 14px rgba(239,75,75,0.4); white-space:nowrap; }
+.marcador-periodo-linea{ font-family:'Oxanium',monospace; font-weight:700; font-size:10.5px; letter-spacing:.06em; color:#f0c93c; text-shadow:0 0 5px rgba(240,201,60,0.7); margin-top:3px; white-space:nowrap; }
 .opt{
   display:block; width:100%; text-align:left; padding:13px 40px 13px 14px; margin-bottom:10px;
   border:1px solid var(--line); border-radius:10px; background:var(--bg2); cursor:pointer;
@@ -4738,11 +4759,19 @@ const LORE_ENTRENAMIENTO = {
   mitad: club => `Estamos a mitad de temporada. Las piernas ya conocen el ritmo de la competición en ${articuloClub(club)} ${club}, pero todavía hay margen para pulir algo antes de la recta final.`,
   final: club => `Quedan las últimas semanas del curso en ${articuloClub(club)} ${club}. Es tu última oportunidad de dejar huella en tu preparación antes del parón.`
 };
-const VERSION_JUEGO = 'v1.5.5';
+const VERSION_JUEGO = 'v1.5.6';
 // Historial resumido de versiones, más reciente primero. Cada entrada: version, título corto
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.5.6', titulo:'Contexto de partido en los encargos tácticos y competición europea al fichar', cambios:[
+    'Los encargos tácticos del entrenador muestran ahora un marcador con la competición, el rival, la jornada o ronda y si juegas en casa o fuera — sorteado cada vez entre lo que de verdad esté en juego esa semana (liga siempre, y copa/competición continental solo en las rondas previas a la semifinal real, que sigue jugándose aparte en su propia pantalla).',
+    'Corregido un fallo real: fichar por un club nuevo nunca concedía plaza en competición europea el primer año, aunque el club fuera de los que juegan Champions/Europa/Conference de verdad — ahora se sortea con probabilidades según el prestigio del club, como el resto de clubes de esa categoría.',
+    'Actualizada la Champions League, la Europa League y la Conference League (y su equivalente asiático) al formato real de fase de liga + play-offs vigente desde hace varias temporadas — ya no aparece "Fase de grupos", que dejó de existir.',
+    'Estadísticas → Clubes: logo personalizado por competición, orden de temporada más reciente a más antigua, club y año completo en vez de liga y año corto, y los títulos ganados aparecen por su nombre junto al contador.',
+    'La nota de cada competición ya no sale calcada entre sí — cada una tiene su propia variación, como pasaría de verdad.',
+    'Nuevo hueco para la selección Sub-23 y los Juegos Olímpicos, y un aviso de "en el radar de la selección" para cuando todavía no te han convocado pero tus números ya se acercan.'
+  ]},
   { version:'v1.5.5', titulo:'Ajustes rediseñado y estadísticas por competición', cambios:[
     'La barra superior usa ahora el mismo logo "FICHAJE 10" del menú principal (con el mismo grosor de trazo y el 10 en blanco), manteniendo su altura de siempre.',
     'Ajustes, durante la partida, rediseñado con el mismo estilo de tarjetas del menú principal; se ha quitado de ahí la lista de partidas guardadas (ya vive en "Continuar carrera") y se ha añadido un botón para volver al menú principal sin perder la partida.',
@@ -15358,6 +15387,88 @@ SCREENS.lesionReveal = function(){
   app.appendChild(c);
 };
 
+// ---- Contexto de partido (solo encargos tácticos, id "encargo_tactico_N") ----
+// Un encargo táctico, por construcción, nunca puede coincidir con el pasoIndex real de una
+// semifinal de Copa/continental (TORNEOS_CONFIG: copa_rey en S.pasoIndex===3, las continentales
+// en ===4) — iniciarTorneoEliminatorio se adelanta por completo a elegirEvento ese paso. Así que
+// el contexto de un encargo táctico solo puede ser: liga (siempre), o una ronda PREVIA a esa
+// semifinal (nunca la semifinal/final en sí, que siempre se resuelve en sus propias pantallas).
+// A partir del índice de la semifinal real, esa competición deja de aparecer aquí.
+const RONDA_COPA_POR_PASO = [null, 'Dieciseisavos de final', 'Octavos de final', null, null, null];
+const RONDA_CONTINENTAL_POR_PASO = [null, 'Fase de liga', 'Play-offs', 'Octavos de final', null, null];
+const TORNEO_CONTINENTAL_POR_NIVEL = {
+  champions:'copa_europa', europa:'europa_league', conference:'conference_league',
+  libertadores:'copa_libertadores', concacaf:'concacaf_champions_cup', afc:'afc_champions_league'
+};
+function candidatasContextoPartido(j){
+  const categoriaEfectiva = j.club.categoria;
+  const nombreLiga = j.club.extranjero ? j.club.liga : categoriaEfectiva;
+  const poolLiga = j.club.extranjero
+    ? CLUBES_EXTRANJERO.filter(c => c.liga === j.club.liga && c.nombre !== j.club.nombre)
+    : (CLUBES_POR_CATEGORIA[categoriaEfectiva]||[]).filter(c => c.nombre !== j.club.nombre && !primerEquipoDeFilial(c.nombre));
+  const totalPartidos = PARTIDOS_POR_CATEGORIA[categoriaEfectiva] || 38;
+  const pasos = SECUENCIA_TEMPORADA.length;
+  const pasoActual = S.pasoIndex || 0;
+  const jornadaMin = Math.max(1, Math.round((pasoActual/pasos) * totalPartidos) + 1);
+  const jornadaMax = Math.max(jornadaMin, Math.round(((pasoActual+1)/pasos) * totalPartidos));
+  const jornada = jornadaMin + Math.floor(Math.random()*(jornadaMax-jornadaMin+1));
+
+  const candidatas = [];
+  if(poolLiga.length){
+    const rivalLiga = poolLiga[Math.floor(Math.random()*poolLiga.length)];
+    candidatas.push({ tipo:'liga', nombreCompeticion: nombreLiga, rival: rivalLiga, fase:`Jornada ${jornada}` });
+  }
+  const rondaCopa = RONDA_COPA_POR_PASO[pasoActual];
+  if(rondaCopa && CATEGORIAS.indexOf(categoriaEfectiva) >= 2 && !j.club.extranjero && !primerEquipoDeFilial(j.club.nombre)){
+    const cfgCopa = TORNEOS_CONFIG.find(c => c.id==='copa_rey');
+    if(cfgCopa) candidatas.push({ tipo:'copa', nombreCompeticion:'Copa del Rey', rival: rivalClubTorneo(cfgCopa), fase: rondaCopa });
+  }
+  const rondaContinental = RONDA_CONTINENTAL_POR_PASO[pasoActual];
+  if(rondaContinental && j.club.nivelEuropeo){
+    const idCfg = TORNEO_CONTINENTAL_POR_NIVEL[j.club.nivelEuropeo];
+    const cfgContinental = idCfg && TORNEOS_CONFIG.find(c => c.id===idCfg);
+    if(cfgContinental) candidatas.push({ tipo:'continental', nombreCompeticion: cfgContinental.nombreCompeticion, rival: rivalClubTorneo(cfgContinental), fase: rondaContinental });
+  }
+  return candidatas;
+}
+function renderContextoPartido(j){
+  const candidatas = candidatasContextoPartido(j);
+  if(!candidatas.length) return '';
+  const cand = candidatas[Math.floor(Math.random()*candidatas.length)];
+  const equipoJ = { nombre: j.club.nombre, colores: j.club.colores };
+  const jugadorLocal = Math.random() < 0.5;
+  const local = jugadorLocal ? equipoJ : cand.rival;
+  const visitante = jugadorLocal ? cand.rival : equipoJ;
+  const golesLocal = Math.floor(Math.random()*3);
+  const golesVisitante = Math.floor(Math.random()*3);
+  const minuto = 1 + Math.floor(Math.random()*90);
+  const segundos = Math.floor(Math.random()*60);
+  const badge = cand.tipo === 'liga'
+    ? logoFilaCompeticion({tipo:'liga', nombre:cand.nombreCompeticion}, 15)
+    : logoTitulo(cand.nombreCompeticion, 15);
+  return `<div class="contexto-partido">
+    <div class="contexto-cab">
+      <div class="contexto-comp">${badge}${cand.nombreCompeticion}</div>
+      <div class="contexto-fase">${cand.fase}</div>
+    </div>
+    <div class="marcador-panel">
+      <div class="marcador-fila">
+        <div class="marcador-celda">
+          <div class="marcador-equipo">${escudoSVG(local.nombre, 24, local.colores)}<span class="marcador-nombre">${local.nombre}</span></div>
+          <div class="marcador-num">${String(golesLocal).padStart(2,'0')}</div>
+        </div>
+        <div class="marcador-centro">
+          <div class="marcador-reloj">${minuto}:${String(segundos).padStart(2,'0')}</div>
+          <div class="marcador-periodo-linea">PERIODO 2</div>
+        </div>
+        <div class="marcador-celda">
+          <div class="marcador-equipo">${escudoSVG(visitante.nombre, 24, visitante.colores)}<span class="marcador-nombre">${visitante.nombre}</span></div>
+          <div class="marcador-num">${String(golesVisitante).padStart(2,'0')}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
 SCREENS.evento = function(){
   topbar("Suceso de la semana");
   const j = S.jugador;
@@ -15369,6 +15480,10 @@ SCREENS.evento = function(){
     ? resolverTexto(ev.variantes[Math.floor(Math.random()*ev.variantes.length)], j)
     : resolverTexto(ev.texto, j);
   c.appendChild(el('div','event-text', textoMostrado));
+  if(ev.id && ev.id.indexOf('encargo_tactico_') === 0){
+    const contextoHTML = renderContextoPartido(j);
+    if(contextoHTML) c.appendChild(el('div', null, contextoHTML));
+  }
 
   let respondiendo = false; // evita que un doble toque resuelva el mismo suceso dos veces (260ms de transición)
   // ev.opciones normalmente es un array fijo, pero también admite j=>array para sucesos cuyas
