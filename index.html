@@ -5120,6 +5120,54 @@ const PREGUNTAS_RUEDA_PRENSA = [
           resultado:"Fría pero sincera. No todo el mundo necesita un discurso épico para cada movimiento.",
           efectos:{mental:2,popularidad:-2} }
       ]
+    },
+    // ---- Variantes contextuales: solo entran en el sorteo si el contexto real las justifica
+    // (ver contextoRuedaPrensa/elegirVarianteHueco) — las de arriba, sin `condicion`, son las de
+    // reserva para cuando nada especial está pasando.
+    {
+      condicion: (j,ctx) => ctx.esFichajeRival,
+      pregunta: j => `Fichas ${articuloClub(j.club.nombre)==='la'?'por la':'por el'} ${j.club.nombre}, el rival directo de tu anterior equipo. ¿Qué le dices a la afición que dejas atrás?`,
+      opciones:[
+        { texto:"Entiendo que les duela, pero es una decisión de futbolista",
+          resultado:"Una respuesta respetuosa que no evita el enfado de tu antigua afición, pero tampoco lo alimenta.",
+          efectos:{reputacion:4,popularidad:-4} },
+        { texto:"El fútbol es así, no hay nada personal en esto",
+          resultado:"Un tono frío que no convence a quien se siente traicionado, pero corta cualquier polémica de raíz.",
+          efectos:{mental:2,popularidad:-3} },
+        { texto:"No tengo que darle explicaciones a nadie sobre mi carrera",
+          resultado:"Suena a excusa para no dar la cara, y así lo interpreta buena parte de la prensa.",
+          efectos:{reputacion:-2,mental:4} }
+      ]
+    },
+    {
+      condicion: (j,ctx) => ctx.fichajeGrande,
+      pregunta: j => `Firmas ${articuloClub(j.club.nombre)==='la'?'por la':'por el'} ${j.club.nombre}, uno de los grandes. ¿Sientes la presión de un fichaje de este calibre?`,
+      opciones:[
+        { texto:"La presión es un privilegio, para eso he trabajado toda mi vida",
+          resultado:"Una frase con gancho que la afición recibe encantada.",
+          efectos:{popularidad:8,mental:-2} },
+        { texto:"Prefiero no pensar en las expectativas y centrarme en el día a día",
+          resultado:"Una respuesta serena que rebaja la temperatura de la presentación.",
+          efectos:{mental:3} },
+        { texto:"Si no aguantara la presión, no habría fichado aquí",
+          resultado:"Una declaración de confianza que sube el listón todavía más sobre tus propios hombros.",
+          efectos:{reputacion:5,mental:-3,valorMercado:10000} }
+      ]
+    },
+    {
+      condicion: (j,ctx) => ctx.veniaSinEquipo,
+      pregunta:"Llevabas tiempo sin equipo. ¿Qué sientes al volver a tener un club de nuevo?",
+      opciones:[
+        { texto:"Un alivio enorme, esos meses fueron muy duros",
+          resultado:"La sinceridad emociona a los presentes, que agradecen la naturalidad de la respuesta.",
+          efectos:{mental:4,popularidad:3} },
+        { texto:"Nunca dejé de prepararme para este momento",
+          resultado:"Una respuesta de profesional que deja claro que no te habías rendido en ningún momento.",
+          efectos:{reputacion:3} },
+        { texto:"Ya lo tenía asumido, no iba a durar mucho más así",
+          resultado:"Un tono resignado que no entusiasma demasiado, aunque tampoco genera ninguna duda.",
+          efectos:{mental:2,popularidad:-2} }
+      ]
     }
   ],
   [
@@ -5163,6 +5211,36 @@ const PREGUNTAS_RUEDA_PRENSA = [
         { texto:"Prefiero no entrar en detalles de esa conversación",
           resultado:"Mantienes la discreción. Nadie insiste más en el tema.",
           efectos:{mental:1} }
+      ]
+    },
+    {
+      condicion: (j,ctx) => ctx.veniaDeTitulo,
+      pregunta:"Te vas justo después de ganar un título con tu anterior equipo. ¿No te parece un mal momento para marcharte?",
+      opciones:[
+        { texto:"Al contrario, mejor irse arriba que de capa caída",
+          resultado:"Una respuesta segura de sí misma que deja claro que te vas por ambición, no por necesidad.",
+          efectos:{reputacion:5,popularidad:-2} },
+        { texto:"Ese título va a quedar siempre conmigo, pase lo que pase ahora",
+          resultado:"Un guiño de cariño hacia tu etapa anterior que no pasa desapercibido.",
+          efectos:{mental:3,popularidad:4} },
+        { texto:"Las decisiones de carrera no siempre coinciden con el calendario deportivo",
+          resultado:"Una respuesta pragmática, casi fría, que no acaba de encajar con la euforia del título recién ganado.",
+          efectos:{mental:2,reputacion:-1} }
+      ]
+    },
+    {
+      condicion: (j,ctx) => ctx.esVeterano,
+      pregunta:"A tu edad, ¿qué te hizo dar el paso de cambiar de aires?",
+      opciones:[
+        { texto:"Todavía me quedan cosas que demostrar",
+          resultado:"Una respuesta con orgullo que deja claro que no te consideras un jugador de salida.",
+          efectos:{reputacion:4,mental:-2} },
+        { texto:"Un futbolista sabe cuándo necesita un cambio de escenario",
+          resultado:"Una respuesta serena, la de alguien que ya ha vivido unas cuantas ruedas de prensa como esta.",
+          efectos:{mental:3} },
+        { texto:"No pienso en la edad, solo en seguir compitiendo al máximo nivel",
+          resultado:"Una declaración que gusta a la grada, aunque también invita a que se te juzgue con esa misma vara.",
+          efectos:{popularidad:4,mental:-1} }
       ]
     }
   ],
@@ -5208,8 +5286,160 @@ const PREGUNTAS_RUEDA_PRENSA = [
           resultado:"Una declaración de seguridad en uno mismo que a algunos les parece confianza y a otros, arrogancia.",
           efectosFn: j => j.stats.reputacion < 50 ? {mental:3,popularidad:-3,vestuario:-5} : {mental:3,popularidad:-3,vestuario:1} }
       ]
+    },
+    {
+      condicion: (j,ctx) => ctx.fichajeEstrella,
+      pregunta: j => `Llegas para ser titular indiscutible ${articuloClub(j.club.nombre)==='la'?'en la':'en el'} ${j.club.nombre} desde el primer día. ¿Cómo llevas esa responsabilidad?`,
+      opciones:[
+        { texto:"Vengo a liderar este equipo, no tengo miedo a esa responsabilidad",
+          resultado:"Una declaración ambiciosa que entusiasma a la grada, aunque a algún veterano del vestuario no le sienta del todo bien que el recién llegado hable ya de liderar.",
+          efectos:{reputacion:6,mental:-2,vestuario:-3} },
+        { texto:"Prefiero ganarme el vestuario poco a poco, aunque llegue con ese cartel",
+          resultado:"Una respuesta humilde que cae muy bien entre tus nuevos compañeros.",
+          efectos:{vestuario:5,popularidad:2} },
+        { texto:"Los títulos no los gana un nombre en la camiseta, se ganan entre todos",
+          resultado:"Una respuesta coral que reparte el foco sin renunciar a la ambición.",
+          efectos:{reputacion:3,vestuario:4} }
+      ]
+    },
+    {
+      condicion: (j,ctx) => ctx.fichajeExtranjero,
+      pregunta: j => `Das el salto a ${j.club.pais || 'un país nuevo'}, una liga totalmente distinta. ¿Qué es lo que más te preocupa de la adaptación?`,
+      opciones:[
+        { texto:"El idioma, seguramente. El fútbol es el mismo en todas partes",
+          resultado:"Una respuesta con humor que rompe el hielo con la prensa local.",
+          efectos:{mental:2,popularidad:3} },
+        { texto:"Nada me preocupa demasiado, me adapto rápido a cualquier sitio",
+          resultado:"Una declaración de confianza que deja buena impresión entre los presentes.",
+          efectos:{reputacion:3,mental:-1} },
+        { texto:"El estilo de juego, es bastante distinto a lo que vengo jugando",
+          resultado:"Una respuesta honesta que rebaja expectativas de entrada, pero que se agradece por realista.",
+          efectos:{mental:2} }
+      ]
     }
   ]
+];
+// Contexto real del fichaje que acaba de producirse — decide qué variantes contextuales entran
+// en el sorteo de cada hueco (ver elegirVarianteHueco) y qué preguntas trampa pueden aparecer.
+// Se calcula UNA vez, al entrar en la rueda de prensa (idx===0), con los datos que deja
+// iniciarFichaje() recién ejecutado (S.ruedaPrensaClubAnterior, S.esFichajeRival...).
+function contextoRuedaPrensa(j){
+  const clubAnterior = S.ruedaPrensaClubAnterior;
+  const etapaAnterior = clubAnterior
+    ? (j.trayectoria||[]).slice().reverse().find(e => e.club === clubAnterior && e.temporadaFin === S.temporada)
+    : null;
+  return {
+    veniaSinEquipo: clubAnterior === 'Sin equipo',
+    fichajeGrande: esClubGrande(j.club.nombre),
+    fichajeExtranjero: !!j.club.extranjero,
+    fichajeEstrella: !!j.club.fichajeEstrella,
+    esFichajeRival: !!S.esFichajeRival,
+    esVeterano: j.edad >= 33,
+    veniaDeTitulo: !!(etapaAnterior && (etapaAnterior.titulos||[]).some(t => t.temporada === S.temporada))
+  };
+}
+// Si alguna variante del hueco tiene una `condicion` que se cumple con el contexto real, se
+// sortea SOLO entre esas (para que el contexto se note de verdad, no se diluya entre las 3
+// genéricas de siempre); si ninguna aplica, se sortea entre las genéricas (sin `condicion`), que
+// son la red de seguridad para cuando no hay nada especial que contar.
+function elegirVarianteHueco(variantes, j, ctx){
+  const contextuales = variantes.filter(v => v.condicion && v.condicion(j, ctx));
+  const pool = contextuales.length ? contextuales : variantes.filter(v => !v.condicion);
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+// Preguntas trampa: a diferencia del resto de la rueda de prensa (3 tonos distintos sin una
+// opción claramente mala), aquí una respuesta tentadora sale mal de verdad — como el resto de
+// opciones sin tirada del juego, no se avisa de antemano, el efecto solo se ve tras elegir.
+// PROBABILIDAD_PREGUNTA_TRAMPA decide si una de estas sustituye a una pregunta normal esa rueda.
+const PROBABILIDAD_PREGUNTA_TRAMPA = 0.35;
+const PREGUNTAS_TRAMPA_RUEDA_PRENSA = [
+  {
+    pregunta:"Se ha filtrado la cifra de tu nuevo contrato. ¿Qué opinas de quien critica lo que vas a cobrar?",
+    opciones:[
+      { texto:"Me lo he ganado con años de sacrificio, no tengo que justificarme ante nadie",
+        resultado:"La frase se recorta y se repite en todos lados como ejemplo de soberbia. No era eso lo que querías transmitir, pero ya es tarde.",
+        efectos:{popularidad:-9,reputacion:-3} },
+      { texto:"Entiendo que genere debate, pero esas cifras las decide el club, no yo",
+        resultado:"Una respuesta prudente que no da pie a ningún titular incómodo.",
+        efectos:{mental:2} },
+      { texto:"Prefiero que hablemos de fútbol, del dinero que hablen otros",
+        resultado:"Cortas el tema con elegancia sin sonar a la defensiva.",
+        efectos:{popularidad:2,mental:1} }
+    ]
+  },
+  {
+    pregunta:"Hay quien dice que has fichado aquí solo por el dinero, no por el proyecto deportivo. ¿Qué les dices?",
+    opciones:[
+      { texto:"¿Y qué problema hay? Todos jugamos también por dinero, no nos engañemos",
+        resultado:"La sinceridad se vuelve en tu contra: la afición esperaba algo de épica, no un titular tan frío sobre por qué has fichado.",
+        efectos:{popularidad:-10,reputacion:-2} },
+      { texto:"El dinero pesa, como en cualquier trabajo, pero el proyecto deportivo también cuenta y mucho",
+        resultado:"Una respuesta equilibrada que no esconde la realidad sin sonar cínica.",
+        efectos:{reputacion:2} },
+      { texto:"Me ofende un poco la pregunta, la verdad",
+        resultado:"Tu tono molesto no ayuda: parece que has tocado un tema sensible de verdad.",
+        efectos:{mental:-2,popularidad:1} }
+    ]
+  },
+  {
+    pregunta: j => `Un excompañero ha dicho en la prensa que no vas a aguantar la presión ${articuloClub(j.club.nombre)==='la'?'de la':'del'} ${j.club.nombre}. ¿Qué le respondes?`,
+    opciones:[
+      { texto:"Que se calle y hable el campo, ya nos veremos las caras",
+        resultado:"El pique se hace viral y la prensa rival lo alimenta durante días. La presión sobre ti, lejos de bajar, sube todavía más.",
+        efectos:{mental:-6,popularidad:-5} },
+      { texto:"Cada uno puede opinar lo que quiera, yo a lo mío",
+        resultado:"Zanjas el tema sin darle más importancia de la que tiene.",
+        efectos:{mental:2} },
+      { texto:"Prefiero no entrar en provocaciones antes de haber jugado ni un minuto aquí",
+        resultado:"Una respuesta madura que deja bien claro que no vas a morder el anzuelo.",
+        efectos:{reputacion:3} }
+    ]
+  },
+  {
+    condicion: (j,ctx) => !ctx.veniaSinEquipo,
+    pregunta: j => `¿Es verdad que no te llevabas nada bien con el entrenador ${articuloClub(S.ruedaPrensaClubAnterior)==='la'?'de la':'del'} ${S.ruedaPrensaClubAnterior}?`,
+    opciones:[
+      { texto:"La verdad, nunca conecté con él y ya puedo decirlo abiertamente",
+        resultado:"El titular incendia las redes de tu antiguo club y quema cualquier puente que pudiera quedar con esa etapa.",
+        efectos:{reputacion:-6,popularidad:-4} },
+      { texto:"Prefiero no hablar de una etapa que ya está cerrada",
+        resultado:"Discreción por delante. Nadie insiste más en el tema.",
+        efectos:{mental:1} },
+      { texto:"Tuvimos nuestras diferencias, como en cualquier vestuario, nada más",
+        resultado:"Una respuesta comedida que no da pie a más preguntas incómodas.",
+        efectos:{reputacion:1} }
+    ]
+  },
+  {
+    condicion: (j,ctx) => ctx.esFichajeRival,
+    pregunta: j => `La afición ${articuloClub(S.ruedaPrensaClubAnterior)==='la'?'de la':'del'} ${S.ruedaPrensaClubAnterior} ya te está silbando en redes por fichar por su rival. ¿Tienes algo que decirles?`,
+    opciones:[
+      { texto:"Que se acostumbren, porque pienso disfrutar cada partido contra ellos",
+        resultado:"Echas más leña al fuego justo cuando más te convenía apagarlo. El ambiente para tu regreso a ese estadio ya está garantizado, y no para bien.",
+        efectos:{popularidad:-8,mental:-4} },
+      { texto:"Entiendo su enfado, yo en su lugar también estaría dolido",
+        resultado:"Una respuesta empática que no arregla del todo las cosas, pero tampoco las empeora.",
+        efectos:{mental:2} },
+      { texto:"Fue una decisión de carrera, nada tiene que ver con faltarles al respeto",
+        resultado:"Explicas tu postura sin sonar desafiante. No convences a todos, pero rebajas la tensión.",
+        efectos:{reputacion:2} }
+    ]
+  },
+  {
+    condicion: (j,ctx) => ctx.fichajeGrande,
+    pregunta: j => `Con el fichaje ${articuloClub(j.club.nombre)==='la'?'por la':'por el'} ${j.club.nombre} ya puedes vivir tranquilo el resto de tu carrera. ¿Es esto la meta que buscabas?`,
+    opciones:[
+      { texto:"Sinceramente, sí. Ya tengo el futuro resuelto",
+        resultado:"La frase se interpreta como que has dejado de tener hambre competitiva justo el día de tu presentación — no era la imagen que la afición esperaba de su gran fichaje.",
+        efectos:{reputacion:-7,popularidad:-3} },
+      { texto:"Esto es solo el principio, todavía quiero ganarlo todo",
+        resultado:"Una respuesta ambiciosa que encaja perfecta con lo que se espera de un fichaje de este nivel.",
+        efectos:{reputacion:4,popularidad:3} },
+      { texto:"Prefiero no hablar de metas personales el día de mi presentación",
+        resultado:"Una respuesta prudente que no da pie a titulares incómodos.",
+        efectos:{mental:1} }
+    ]
+  }
 ];
 
 /* ============ OFERTAS DE FICHAJE (pretemporada) ============ */
@@ -14119,11 +14349,17 @@ SCREENS.regresoClub = function(){
 SCREENS.ruedaPrensa = function(){
   const j = S.jugador;
   const idx = S.ruedaPrensaPreguntaIndex;
-  if(idx === 0){
-    Sonido.fichaje();
-    S.ruedaPrensaSeleccion = PREGUNTAS_RUEDA_PRENSA.map(variantes => variantes[Math.floor(Math.random()*variantes.length)]);
+  // Elige las 3 preguntas de esta rueda: variantes contextuales si el fichaje real las justifica
+  // (fichaje al rival, club grande, venías sin equipo...), genéricas si no; y con
+  // PROBABILIDAD_PREGUNTA_TRAMPA sustituye una de ellas (nunca la de "regreso a casa", si aplica)
+  // por una pregunta trampa. Misma función tanto al entrar (idx===0) como en la red de seguridad
+  // de abajo (S.ruedaPrensaSeleccion perdido tras recargar a mitad, funciones no sobreviven el
+  // JSON.stringify de guardarPartida()).
+  function sortearRuedaPrensa(){
+    const ctx = contextoRuedaPrensa(j);
+    const seleccion = PREGUNTAS_RUEDA_PRENSA.map(variantes => elegirVarianteHueco(variantes, j, ctx));
     if(S.esRegresoClub){
-      S.ruedaPrensaSeleccion[0] = {
+      seleccion[0] = {
         pregunta: j => `Vuelves ${articuloClub(j.club.nombre)==='la'?'a la':'al'} ${j.club.nombre}, un club que ya conoces bien. ¿Qué significa este regreso para ti?`,
         opciones:[
           { texto:"Es volver a casa, aquí me hice futbolista",
@@ -14138,9 +14374,23 @@ SCREENS.ruedaPrensa = function(){
         ]
       };
     }
+    if(Math.random() < PROBABILIDAD_PREGUNTA_TRAMPA){
+      const candidatasTrampa = PREGUNTAS_TRAMPA_RUEDA_PRENSA.filter(p => !p.condicion || p.condicion(j, ctx));
+      if(candidatasTrampa.length){
+        const elegidaTrampa = candidatasTrampa[Math.floor(Math.random()*candidatasTrampa.length)];
+        const indicesValidos = S.esRegresoClub ? [1,2] : [0,1,2];
+        const slotTrampa = indicesValidos[Math.floor(Math.random()*indicesValidos.length)];
+        seleccion[slotTrampa] = elegidaTrampa;
+      }
+    }
+    return seleccion;
+  }
+  if(idx === 0){
+    Sonido.fichaje();
+    S.ruedaPrensaSeleccion = sortearRuedaPrensa();
   }
   if(!S.ruedaPrensaSeleccion){
-    S.ruedaPrensaSeleccion = PREGUNTAS_RUEDA_PRENSA.map(variantes => variantes[Math.floor(Math.random()*variantes.length)]);
+    S.ruedaPrensaSeleccion = sortearRuedaPrensa();
   }
   const pregunta = S.ruedaPrensaSeleccion[idx];
   topbar("Rueda de prensa");
