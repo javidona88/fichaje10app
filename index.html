@@ -206,6 +206,9 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:19px; letter-spacing:.01em;
   color:var(--ink); margin-left:4px;
 }
+/* Versión más grande del logo, solo para la barra superior: la camiseta crece algo más que las
+   letras (queda como protagonista), en vez de escalar ambas piezas por igual. */
+.logo-wrap-lg .logo-text .top, .logo-wrap-lg .logo-text .main{ font-size:22px; }
 .card{
   background: var(--panel);
   color: var(--ink);
@@ -1264,7 +1267,7 @@ const TERCERA_RFEF_GRUPOS = [
   { grupo:'X', provincias:['Sevilla','Cádiz','Huelva','Córdoba','Ceuta'], clubes:[
     "Atlético Central","Atlético Onubense","Bollullos CF","Cádiz CF Mirandilla","Castilleja CF","Chiclana CF",
     "AD Ceuta FC B","CD Ciudad de Lucena","Conil CF","Córdoba CF B","Coria CF","Dos Hermanas CF 1971",
-    "RB Linense","CD Pozoblanco","CD San Roque de Lepe","Sevilla FC C","UD Tomares","CD Utrera"
+    "RB Linense","CD Pozoblanco","CD San Roque de Lepe","Sevilla FC C","UD Tomares","CD Utrera","Xerez Deportivo FC"
   ]},
   { grupo:'XI', provincias:['Baleares'], clubes:[
     "UD Alcudia","CD Binisalem","CD Cardassar","UD Collerense","CD Constancia","CD Felanitx","SD Formentera",
@@ -1337,7 +1340,7 @@ const CLUBES_POR_CATEGORIA = {
   "Segunda RFEF": conColores([
     // Grupo 1: Galicia, Asturias, Cantabria, Castilla y León
     "Atlético Astorga","Burgos CF Promesas","CD Numancia","Gimnástica Segoviana","Real Ávila","Valladolid Promesas","Salamanca UDS",
-    "Bergantiños","Deportivo Fabril","Coruxo FC","UD Ourense","CD Sarriana",
+    "Bergantiños","Deportivo Fabril","Coruxo FC","Ourense CF","CD Sarriana",
     "CD Lealtad","Marino de Luanco","CD Langreo","Real Oviedo Vetusta",
     "Rayo Cantabria","UD Sámano",
     // Grupo 2: País Vasco, Navarra, La Rioja, Aragón
@@ -1350,14 +1353,14 @@ const CLUBES_POR_CATEGORIA = {
     "UE Sant Andreu","Club Lleida Esportiu","UE Porreres","RCD Espanyol B","Torrent CF","Terrassa FC","Valencia Mestalla","FC Barcelona Atlètic","UE Olot","CE Andratx",
     // Grupo 4: Andalucía, Región de Murcia, Melilla, Extremadura
     "UCAM Murcia CF","Águilas FC","FC La Unión Atlético","CD Minera","Yeclano Deportivo","CF Lorca Deportiva","UD Almería B",
-    "Linares Deportivo","Real Jaén CF","Salerm Puente Genil","CD Estepona","Atlético Malagueño","Atlético Antoniano","Xerez CD","Xerez Deportivo FC","RC Recreativo de Huelva","CD Extremadura","UD Melilla",
+    "Linares Deportivo","Real Jaén CF","Salerm Puente Genil","CD Estepona","Atlético Malagueño","Atlético Antoniano","Xerez CD","RC Recreativo de Huelva","CD Extremadura","UD Melilla",
     // Grupo 5: Comunidad de Madrid, Canarias, Castilla-La Mancha, Extremadura, Comunidad Valenciana
-    "Colonia Moscardó","CF Navalcarnero","Rayo Vallecano B","Real Madrid C","CD Alcalá","San Sebastián de los Reyes","Getafe CF B","CF Fuenlabrada","Rayo Majadahonda",
-    "CD Coria","CF Intercity","Elche CF Ilicitano","Orihuela CF","CD Tenerife B","UD Las Palmas Atlético","Quintanar del Rey CF","CD Socuéllamos","CD Conquense"
+    "Colonia Moscardó","CDA Navalcarnero","Rayo Vallecano B","Real Madrid C","RSD Alcalá","San Sebastián de los Reyes","Getafe CF B","CF Fuenlabrada","Rayo Majadahonda",
+    "CD Coria","CF Intercity","Elche CF Ilicitano","Orihuela CF","CD Tenerife B","UD Las Palmas Atlético","Quintanar del Rey CF","CD Socuéllamos","UB Conquense"
   ], 0),
   "Primera RFEF": [
     ...conColores([
-      "Racing de Ferrol","Deportivo Fabril","Pontevedra CF","CD Ourense","CD Lugo",
+      "Racing de Ferrol","Deportivo Fabril","Pontevedra CF","UD Ourense","CD Lugo",
       "SD Ponferradina","Real Avilés","Cultural Leonesa","Zamora CF","Unionistas de Salamanca",
       "CP Cacereño","AD Coria","CD Extremadura","AD Mérida","CD Mirandés",
       "UD Logroñés","Barakaldo CF","Bilbao Athletic","Arenas de Getxo","Real Unión de Irún"
@@ -1434,7 +1437,7 @@ const PRESTIGIO_CLUB = {
   "Paris Saint-Germain":4, "Olympique de Marsella":3, "Olympique de Lyon":3, "AS Mónaco":3, "LOSC Lille":3,
   "RC Lens":2, "Stade Rennais":2, "RC Estrasburgo":2, "Toulouse FC":2, "Stade Brestois":2, "AJ Auxerre":2, "Angers SCO":2, "FC Lorient":2, "OGC Nice":2,
   "Le Havre AC":1, "Le Mans FC":1, "Paris FC":1, "ES Troyes":1,
-  // Portugal — Primeira Liga
+  // Portugal — Liga Portugal
   "FC Oporto":3, "SL Benfica":3, "Sporting CP":3,
   "SC Braga":2, "Vitória de Guimarães":2, "Rio Ave FC":2, "FC Famalicão":2, "Gil Vicente FC":2, "Moreirense FC":2, "CD Santa Clara":2, "CD Nacional":2, "FC Arouca":2,
   "FC Alverca":1, "Casa Pia AC":1, "Estoril Praia":1, "Estrela da Amadora":1, "CS Marítimo":1, "Académico de Viseu":1,
@@ -1449,7 +1452,7 @@ const PRESTIGIO_CLUB = {
   // Turquía — Süper Lig
   "Galatasaray":3, "Fenerbahçe":3,
   "Beşiktaş":2, "Trabzonspor":2, "Başakşehir FK":2, "Konyaspor":2, "Samsunspor":2, "Alanyaspor":2,
-  "Çaykur Rizespor":1, "Gaziantep FK":1, "Kasımpaşa":1, "Göztepe":1, "Eyüpspor":1, "Kocaelispor":1, "Gençlerbirliği":1, "Erzurumspor FK":1, "Amedspor":1, "Çorum FK":1,
+  "Çaykur Rizespor":1, "Gaziantep FK":1, "Kasımpaşa":1, "Göztepe":1, "Eyüpspor":1, "Kocaelispor":1, "Gençlerbirliği":1, "Erzurumspor FK":1, "Amed SK":1, "Çorum FK":1,
   // Brasil — Brasileirão
   "Flamengo":3, "Palmeiras":3,
   "São Paulo FC":2, "Corinthians":2, "Grêmio":2, "Fluminense":2, "Botafogo":2, "Internacional":2, "Atlético Mineiro":2, "Cruzeiro":2, "EC Bahia":2,
@@ -1474,7 +1477,7 @@ const PRESTIGIO_CLUB = {
   // Croacia — HNL
   "GNK Dinamo Zagreb":3, "HNK Hajduk Split":2,
   "HNK Rijeka":2, "NK Osijek":1, "NK Istra 1961":1, "HNK Gorica":1, "NK Varaždin":1, "NK Slaven Belupo":1, "NK Rudeš":1, "NK Lokomotiva Zagreb":1,
-  // Suiza — Super League
+  // Suiza — Swiss Football League
   "BSC Young Boys":3, "FC Basel":2, "FC Zürich":2, "FC Thun":2,
   "Servette FC":1, "FC Lugano":1, "FC St. Gallen":1, "FC Luzern":1, "FC Sion":1, "Grasshopper Club Zürich":1, "Lausanne-Sport":1, "FC Vaduz":1,
   // Grecia — Super League Greece
@@ -1496,7 +1499,7 @@ const PRESTIGIO_CLUB = {
   "Birmingham City":1, "Wrexham AFC":1, "Southampton FC":1, "Stoke City":1, "Swansea City":1, "Cardiff City":1,
   "Hertha BSC":1, "Hannover 96":1, "Karlsruher SC":1, "Greuther Fürth":1, "Darmstadt 98":1, "Eintracht Braunschweig":1,
   "Arminia Bielefeld":1, "VfL Bochum":1, "Energie Cottbus":1, "Dynamo Dresden":1, "1. FC Heidenheim":1, "VfL Osnabrück":1, "FC St. Pauli":1, "VfL Wolfsburg":1, "1. FC Magdeburgo":1, "1. FC Kaiserslautern":1, "1. FC Núremberg":1, "Holstein Kiel":1,
-  "UC Sampdoria":1, "US Palermo":1, "SS Cesena FC":1, "Modena FC":1, "US Cremonese":1,
+  "UC Sampdoria":1, "Palermo FC":1, "SS Cesena FC":1, "Modena FC":1, "US Cremonese":1,
   "Hellas Verona FC":1, "Pisa Sporting Club":1, "Empoli FC":1, "US Catanzaro":1, "FC Südtirol":1, "US Avellino 1912":1, "LR Vicenza":1,
   "Venezia FC":1, "Frosinone Calcio":1, "AC Monza":1,
   // Japón — J1 League
@@ -1505,14 +1508,14 @@ const PRESTIGIO_CLUB = {
   // Corea del Sur — K League 1
   "Jeonbuk Hyundai Motors":2, "Ulsan HD":2,
   "FC Seoul":1, "Pohang Steelers":1, "Gwangju FC":1, "Gangwon FC":1, "Daejeon Hana Citizen":1, "FC Anyang":1, "Gimcheon Sangmu":1, "Bucheon FC 1995":1, "Incheon United":1, "Jeju SK":1,
-  // Ucrania — Premier Liha
+  // Ucrania — Premier League
   "Shakhtar Donetsk":3, "Dynamo Kyiv":3,
-  "Dnipro-1":1, "Zorya Luhansk":1, "Kryvbas Kryvyi Rih":1, "Kolos Kovalivka":1, "Polissya Zhytomyr":1, "Chornomorets Odesa":1, "LNZ Cherkasy":1,
+  "Zorya Luhansk":1, "Kryvbas Kryvyi Rih":1, "Kolos Kovalivka":1, "Polissya Zhytomyr":1, "Chornomorets Odesa":1, "LNZ Cherkasy":1,
   // Chile — Primera División de Chile
   "Colo-Colo":3,
   "Universidad de Chile":2, "Universidad Católica":2,
   "Palestino":1, "Huachipato":1, "O'Higgins":1, "Everton de Viña del Mar":1,
-  // República Checa — Fortuna Liga
+  // República Checa — Chance Liga
   "Sparta Praga":2, "Slavia Praga":2,
   "Viktoria Plzeň":1, "Baník Ostrava":1, "Sigma Olomouc":1, "Slovácko":1, "Jablonec":1, "Bohemians Praga 1905":1, "Hradec Králové":1, "Zbrojovka Brno":1
 };
@@ -1536,7 +1539,7 @@ const FILIAL_DE_CLUB = {
   "Deportivo Alavés": "Deportivo Alavés B",
   "Levante UD": "Levante UD B",
   "Elche CF": "Elche CF Ilicitano",
-  "Real Racing Club": "Racing de Santander B",
+  "Real Racing Club": "Rayo Cantabria",
   "RC Deportivo": "Deportivo Fabril",
   "Málaga CF": "Atlético Malagueño",
   "Girona FC": "Girona FC B",
@@ -1545,7 +1548,9 @@ const FILIAL_DE_CLUB = {
   "UD Almería": "UD Almería B",
   "CD Tenerife": "CD Tenerife B",
   "Real Zaragoza": "Real Zaragoza Deportivo Aragón",
-  "Real Valladolid CF": "Valladolid Promesas"
+  "Real Valladolid CF": "Valladolid Promesas",
+  "Real Oviedo": "Real Oviedo Vetusta",
+  "UD Las Palmas": "UD Las Palmas Atlético"
 };
 function primerEquipoDeFilial(nombreClub){
   const directo = Object.keys(FILIAL_DE_CLUB).find(primero => FILIAL_DE_CLUB[primero] === nombreClub);
@@ -4843,6 +4848,14 @@ const VERSION_JUEGO = 'v1.5.7';
 // y una lista de cambios en una frase cada uno. Se muestra en SCREENS.changelog (Ajustes →
 // Novedades). Al publicar una versión nueva, añadir aquí un bloque nuevo arriba del todo.
 const CHANGELOG_JUEGO = [
+  { version:'v1.5.7', titulo:'Repaso a clubes y ligas reales, y varios detalles pequeños', cambios:[
+    'Revisión a fondo de las ligas y clubes extranjeros: equipos descendidos/ascendidos actualizados en Brasileirão, Süper Lig, Super League Greece, K League 1 y muchas más, y varias ligas ampliadas a su tamaño real (2. Bundesliga, Ekstraklasa, Championship, Serie B...).',
+    'Varios nombres de liga corregidos a como se llaman de verdad hoy: Chance Liga (República Checa), Liga Portugal, Swiss Football League, Premier League (Ucrania), y algunos clubes con nombre desactualizado (Palermo FC, Amed SK...).',
+    'Corregidos varios clubes de cantera españoles con nombre o categoría equivocada (Ourense CF/UD Ourense, RSD Alcalá, UB Conquense, CDA Navalcarnero, Xerez Deportivo FC) y tres filiales que no estaban bien enlazados con su primer equipo (Rayo Cantabria, Real Oviedo Vetusta, UD Las Palmas Atlético).',
+    'Corregido un titular de fin de temporada que exageraba el nivel de un jugador con muy pocos partidos disputados ("decisivo una semana tras otra" con solo 6 partidos) — los titulares más rimbombantes ahora exigen además haber jugado buena parte de la temporada.',
+    'Si usas Confianza ciega, ahora se ve su icono en la propia pantalla de consecuencia, no solo en el aviso que pasa volando.',
+    'Pequeño sonido de bienvenida al entrar en el menú principal, y su logo un poco más grande en la barra superior (con la camiseta destacando algo más que las letras).'
+  ]},
   { version:'v1.5.6', titulo:'Contexto de partido en los encargos tácticos y competición europea al fichar', cambios:[
     'Los encargos tácticos del entrenador muestran ahora un marcador con la competición, el rival, la jornada o ronda y si juegas en casa o fuera — sorteado cada vez entre lo que de verdad esté en juego esa semana (liga siempre, y copa/competición continental solo en las rondas previas a la semifinal real, que sigue jugándose aparte en su propia pantalla).',
     'Corregido un fallo real: fichar por un club nuevo nunca concedía plaza en competición europea el primer año, aunque el club fuera de los que juegan Champions/Europa/Conference de verdad — ahora se sortea con probabilidades según el prestigio del club, como el resto de clubes de esa categoría.',
@@ -5532,13 +5545,20 @@ const PREGUNTAS_TRAMPA_RUEDA_PRENSA = [
 const SUELDO_BASE_POR_CATEGORIA = { "Tercera RFEF":1500, "Segunda RFEF":3500, "Primera RFEF":9000, "LaLiga2":24000, "LaLiga":60000, "Extranjero":75000, "Grande":95000 };
 const MULTIPLICADOR_SUELDO_LIGA = {
   "Premier League":1.65, "Saudi Pro League":1.45, "Bundesliga":1.15, "Serie A":1.1, "Ligue 1":1.0,
-  "Primeira Liga":0.55, "Eredivisie":0.55, "Süper Lig":0.5, "MLS":0.5, "Pro League":0.5,
+  "Liga Portugal":0.55, "Eredivisie":0.55, "Süper Lig":0.5, "MLS":0.5, "Pro League":0.5,
   "Brasileirão":0.4, "Scottish Premiership":0.4, "Liga MX":0.4, "Super League Greece":0.35,
-  "Primera División":0.3, "HNL":0.28, "Primera División Uruguay":0.25, "Super League":0.35,
+  "Primera División":0.3, "HNL":0.28, "Primera División Uruguay":0.25, "Swiss Football League":0.35,
   "Ekstraklasa":0.3, "Bundesliga Austria":0.4, "Superliga":0.45,
   "Championship":0.32, "2. Bundesliga":0.35, "Serie B":0.3,
-  "J1 League":0.35, "K League 1":0.3, "Premier Liha":0.25, "Primera División de Chile":0.28, "Fortuna Liga":0.3
+  "J1 League":0.35, "K League 1":0.3, "Primera División de Chile":0.28, "Chance Liga":0.3,
+  // Clave compuesta "país|liga": para ligas cuyo nombre real coincide con el de otra ya listada
+  // (la Premier League de Ucrania se llama igual que la inglesa) — multiplicadorSueldoLiga()
+  // mira primero esta clave compuesta antes de caer en el nombre de liga a secas.
+  "Ucrania|Premier League":0.25
 };
+function multiplicadorSueldoLiga(pais, liga){
+  return MULTIPLICADOR_SUELDO_LIGA[pais+'|'+liga] ?? MULTIPLICADOR_SUELDO_LIGA[liga] ?? 0.5;
+}
 // Marcas de patrocinio inventadas (no reales, para no usar nombres comerciales protegidos), escaladas por nivel
 // Marcas reales, ajustadas al nivel real de patrocinio en el fútbol español: en 3ª/2ª RFEF
 // los patrocinadores de verdad son pequeños negocios locales sin marca reconocible (de ahí que
@@ -5784,25 +5804,25 @@ const CLUBES_EXTRANJERO = [
   { nombre:"Paris FC", pais:"Francia", liga:"Ligue 1", colores:['#004A93','#C8102E'] },
   { nombre:"ES Troyes", pais:"Francia", liga:"Ligue 1", colores:['#0033A0','#87CEEB'] },
   { nombre:"OGC Nice", pais:"Francia", liga:"Ligue 1", colores:['#ED1C24','#000000'] },
-  // Portugal — Primeira Liga (18)
-  { nombre:"FC Oporto", pais:"Portugal", liga:"Primeira Liga", colores:['#003399','#FFFFFF'] },
-  { nombre:"SL Benfica", pais:"Portugal", liga:"Primeira Liga", colores:['#E5111E','#FFFFFF'] },
-  { nombre:"Sporting CP", pais:"Portugal", liga:"Primeira Liga", colores:['#008542','#FFFFFF'] },
-  { nombre:"SC Braga", pais:"Portugal", liga:"Primeira Liga", colores:['#CE1126','#FFFFFF'] },
-  { nombre:"Vitória de Guimarães", pais:"Portugal", liga:"Primeira Liga", colores:['#FFFFFF','#000000'] },
-  { nombre:"Rio Ave FC", pais:"Portugal", liga:"Primeira Liga", colores:['#00A650','#FFFFFF'] },
-  { nombre:"FC Famalicão", pais:"Portugal", liga:"Primeira Liga", colores:['#FFFFFF','#000000'] },
-  { nombre:"CD Nacional", pais:"Portugal", liga:"Primeira Liga", colores:['#000000','#FFD500'] },
-  { nombre:"CD Santa Clara", pais:"Portugal", liga:"Primeira Liga", colores:['#00963F','#FFFFFF'] },
-  { nombre:"Gil Vicente FC", pais:"Portugal", liga:"Primeira Liga", colores:['#FFFFFF','#C8102E'] },
-  { nombre:"Moreirense FC", pais:"Portugal", liga:"Primeira Liga", colores:['#00A94F','#FFFFFF'] },
-  { nombre:"FC Arouca", pais:"Portugal", liga:"Primeira Liga", colores:['#FFD500','#000000'] },
-  { nombre:"FC Alverca", pais:"Portugal", liga:"Primeira Liga", colores:['#FFFFFF','#004B87'] },
-  { nombre:"Casa Pia AC", pais:"Portugal", liga:"Primeira Liga", colores:['#00963F','#000000'] },
-  { nombre:"Estoril Praia", pais:"Portugal", liga:"Primeira Liga", colores:['#FFD500','#004B87'] },
-  { nombre:"Estrela da Amadora", pais:"Portugal", liga:"Primeira Liga", colores:['#00963F','#FFFFFF'] },
-  { nombre:"CS Marítimo", pais:"Portugal", liga:"Primeira Liga", colores:['#00A650','#C8102E'] },
-  { nombre:"Académico de Viseu", pais:"Portugal", liga:"Primeira Liga", colores:['#000000','#FFFFFF'] },
+  // Portugal — Liga Portugal (18)
+  { nombre:"FC Oporto", pais:"Portugal", liga:"Liga Portugal", colores:['#003399','#FFFFFF'] },
+  { nombre:"SL Benfica", pais:"Portugal", liga:"Liga Portugal", colores:['#E5111E','#FFFFFF'] },
+  { nombre:"Sporting CP", pais:"Portugal", liga:"Liga Portugal", colores:['#008542','#FFFFFF'] },
+  { nombre:"SC Braga", pais:"Portugal", liga:"Liga Portugal", colores:['#CE1126','#FFFFFF'] },
+  { nombre:"Vitória de Guimarães", pais:"Portugal", liga:"Liga Portugal", colores:['#FFFFFF','#000000'] },
+  { nombre:"Rio Ave FC", pais:"Portugal", liga:"Liga Portugal", colores:['#00A650','#FFFFFF'] },
+  { nombre:"FC Famalicão", pais:"Portugal", liga:"Liga Portugal", colores:['#FFFFFF','#000000'] },
+  { nombre:"CD Nacional", pais:"Portugal", liga:"Liga Portugal", colores:['#000000','#FFD500'] },
+  { nombre:"CD Santa Clara", pais:"Portugal", liga:"Liga Portugal", colores:['#00963F','#FFFFFF'] },
+  { nombre:"Gil Vicente FC", pais:"Portugal", liga:"Liga Portugal", colores:['#FFFFFF','#C8102E'] },
+  { nombre:"Moreirense FC", pais:"Portugal", liga:"Liga Portugal", colores:['#00A94F','#FFFFFF'] },
+  { nombre:"FC Arouca", pais:"Portugal", liga:"Liga Portugal", colores:['#FFD500','#000000'] },
+  { nombre:"FC Alverca", pais:"Portugal", liga:"Liga Portugal", colores:['#FFFFFF','#004B87'] },
+  { nombre:"Casa Pia AC", pais:"Portugal", liga:"Liga Portugal", colores:['#00963F','#000000'] },
+  { nombre:"Estoril Praia", pais:"Portugal", liga:"Liga Portugal", colores:['#FFD500','#004B87'] },
+  { nombre:"Estrela da Amadora", pais:"Portugal", liga:"Liga Portugal", colores:['#00963F','#FFFFFF'] },
+  { nombre:"CS Marítimo", pais:"Portugal", liga:"Liga Portugal", colores:['#00A650','#C8102E'] },
+  { nombre:"Académico de Viseu", pais:"Portugal", liga:"Liga Portugal", colores:['#000000','#FFFFFF'] },
   // Países Bajos — Eredivisie (18)
   { nombre:"Ajax de Ámsterdam", pais:"Países Bajos", liga:"Eredivisie", colores:['#D2122E','#FFFFFF'] },
   { nombre:"PSV Eindhoven", pais:"Países Bajos", liga:"Eredivisie", colores:['#ED1C24','#FFFFFF'] },
@@ -5858,7 +5878,7 @@ const CLUBES_EXTRANJERO = [
   { nombre:"Kocaelispor", pais:"Turquía", liga:"Süper Lig", colores:['#00963F','#000000'] },
   { nombre:"Gençlerbirliği", pais:"Turquía", liga:"Süper Lig", colores:['#000000','#FFD500'] },
   { nombre:"Erzurumspor FK", pais:"Turquía", liga:"Süper Lig", colores:['#0033A0','#FFFFFF'] },
-  { nombre:"Amedspor", pais:"Turquía", liga:"Süper Lig", colores:['#C8102E','#FFFFFF'] },
+  { nombre:"Amed SK", pais:"Turquía", liga:"Süper Lig", colores:['#C8102E','#FFFFFF'] },
   { nombre:"Çorum FK", pais:"Turquía", liga:"Süper Lig", colores:['#C8102E','#000000'] },
   // Brasil — Brasileirão (20)
   { nombre:"Flamengo", pais:"Brasil", liga:"Brasileirão", colores:['#C8102E','#000000'] },
@@ -5961,19 +5981,19 @@ const CLUBES_EXTRANJERO = [
   { nombre:"NK Slaven Belupo", pais:"Croacia", liga:"HNL", colores:['#FFFFFF','#000000'] },
   { nombre:"NK Lokomotiva Zagreb", pais:"Croacia", liga:"HNL", colores:['#00A651','#FFFFFF'] },
   { nombre:"NK Rudeš", pais:"Croacia", liga:"HNL", colores:['#EE2523','#2760B5'] },
-  // Suiza — Super League (12)
-  { nombre:"BSC Young Boys", pais:"Suiza", liga:"Super League", colores:['#FFD700','#000000'] },
-  { nombre:"FC Basel", pais:"Suiza", liga:"Super League", colores:['#003399','#D0021B'] },
-  { nombre:"FC Zürich", pais:"Suiza", liga:"Super League", colores:['#003399','#FFFFFF'] },
-  { nombre:"Servette FC", pais:"Suiza", liga:"Super League", colores:['#7B0C2E','#FFFFFF'] },
-  { nombre:"FC Lugano", pais:"Suiza", liga:"Super League", colores:['#000000','#D0021B'] },
-  { nombre:"FC St. Gallen", pais:"Suiza", liga:"Super League", colores:['#00963F','#FFFFFF'] },
-  { nombre:"FC Luzern", pais:"Suiza", liga:"Super League", colores:['#003399','#FFFFFF'] },
-  { nombre:"FC Sion", pais:"Suiza", liga:"Super League", colores:['#D0021B','#FFFFFF'] },
-  { nombre:"Grasshopper Club Zürich", pais:"Suiza", liga:"Super League", colores:['#003399','#FFFFFF'] },
-  { nombre:"Lausanne-Sport", pais:"Suiza", liga:"Super League", colores:['#003399','#FFFFFF'] },
-  { nombre:"FC Thun", pais:"Suiza", liga:"Super League", colores:['#D0021B','#FFFFFF'] },
-  { nombre:"FC Vaduz", pais:"Suiza", liga:"Super League", colores:['#E51B24','#FFFFFF'] },
+  // Suiza — Swiss Football League (12)
+  { nombre:"BSC Young Boys", pais:"Suiza", liga:"Swiss Football League", colores:['#FFD700','#000000'] },
+  { nombre:"FC Basel", pais:"Suiza", liga:"Swiss Football League", colores:['#003399','#D0021B'] },
+  { nombre:"FC Zürich", pais:"Suiza", liga:"Swiss Football League", colores:['#003399','#FFFFFF'] },
+  { nombre:"Servette FC", pais:"Suiza", liga:"Swiss Football League", colores:['#7B0C2E','#FFFFFF'] },
+  { nombre:"FC Lugano", pais:"Suiza", liga:"Swiss Football League", colores:['#000000','#D0021B'] },
+  { nombre:"FC St. Gallen", pais:"Suiza", liga:"Swiss Football League", colores:['#00963F','#FFFFFF'] },
+  { nombre:"FC Luzern", pais:"Suiza", liga:"Swiss Football League", colores:['#003399','#FFFFFF'] },
+  { nombre:"FC Sion", pais:"Suiza", liga:"Swiss Football League", colores:['#D0021B','#FFFFFF'] },
+  { nombre:"Grasshopper Club Zürich", pais:"Suiza", liga:"Swiss Football League", colores:['#003399','#FFFFFF'] },
+  { nombre:"Lausanne-Sport", pais:"Suiza", liga:"Swiss Football League", colores:['#003399','#FFFFFF'] },
+  { nombre:"FC Thun", pais:"Suiza", liga:"Swiss Football League", colores:['#D0021B','#FFFFFF'] },
+  { nombre:"FC Vaduz", pais:"Suiza", liga:"Swiss Football League", colores:['#E51B24','#FFFFFF'] },
   // Grecia — Super League Greece (14)
   { nombre:"Olympiacos FC", pais:"Grecia", liga:"Super League Greece", colores:['#D0021B','#FFFFFF'] },
   { nombre:"Panathinaikos FC", pais:"Grecia", liga:"Super League Greece", colores:['#00A651','#FFFFFF'] },
@@ -6087,7 +6107,7 @@ const CLUBES_EXTRANJERO = [
   { nombre:"Holstein Kiel", pais:"Alemania", liga:"2. Bundesliga", colores:['#003399','#FFFFFF'] },
   // Italia — Serie B (2ª división) (12)
   { nombre:"UC Sampdoria", pais:"Italia", liga:"Serie B", colores:['#002E62','#FFFFFF'] },
-  { nombre:"US Palermo", pais:"Italia", liga:"Serie B", colores:['#FFD700','#8B0000'] },
+  { nombre:"Palermo FC", pais:"Italia", liga:"Serie B", colores:['#FFD700','#8B0000'] },
   { nombre:"SS Cesena FC", pais:"Italia", liga:"Serie B", colores:['#000000','#FFFFFF'] },
   { nombre:"Modena FC", pais:"Italia", liga:"Serie B", colores:['#FFD700','#003399'] },
   { nombre:"US Cremonese", pais:"Italia", liga:"Serie B", colores:['#DA291C','#FFFFFF'] },
@@ -6122,16 +6142,15 @@ const CLUBES_EXTRANJERO = [
   { nombre:"Bucheon FC 1995", pais:"Corea del Sur", liga:"K League 1", colores:['#00A0E3','#FFFFFF'] },
   { nombre:"Incheon United", pais:"Corea del Sur", liga:"K League 1", colores:['#0F3057','#000000'] },
   { nombre:"Jeju SK", pais:"Corea del Sur", liga:"K League 1", colores:['#FF6600','#FFFFFF'] },
-  // Ucrania — Premier Liha (9)
-  { nombre:"Shakhtar Donetsk", pais:"Ucrania", liga:"Premier Liha", colores:['#FF7300','#000000'] },
-  { nombre:"Dynamo Kyiv", pais:"Ucrania", liga:"Premier Liha", colores:['#003399','#FFFFFF'] },
-  { nombre:"Dnipro-1", pais:"Ucrania", liga:"Premier Liha", colores:['#0072BC','#FFFFFF'] },
-  { nombre:"Zorya Luhansk", pais:"Ucrania", liga:"Premier Liha", colores:['#000000','#F58220'] },
-  { nombre:"Kryvbas Kryvyi Rih", pais:"Ucrania", liga:"Premier Liha", colores:['#0057B7','#FFFFFF'] },
-  { nombre:"Kolos Kovalivka", pais:"Ucrania", liga:"Premier Liha", colores:['#2E8B57','#FFFFFF'] },
-  { nombre:"Polissya Zhytomyr", pais:"Ucrania", liga:"Premier Liha", colores:['#006633','#FFD700'] },
-  { nombre:"Chornomorets Odesa", pais:"Ucrania", liga:"Premier Liha", colores:['#00A9E0','#FFFFFF'] },
-  { nombre:"LNZ Cherkasy", pais:"Ucrania", liga:"Premier Liha", colores:['#4CAF50','#FFFFFF'] },
+  // Ucrania — Premier League (8)
+  { nombre:"Shakhtar Donetsk", pais:"Ucrania", liga:"Premier League", colores:['#FF7300','#000000'] },
+  { nombre:"Dynamo Kyiv", pais:"Ucrania", liga:"Premier League", colores:['#003399','#FFFFFF'] },
+  { nombre:"Zorya Luhansk", pais:"Ucrania", liga:"Premier League", colores:['#000000','#F58220'] },
+  { nombre:"Kryvbas Kryvyi Rih", pais:"Ucrania", liga:"Premier League", colores:['#0057B7','#FFFFFF'] },
+  { nombre:"Kolos Kovalivka", pais:"Ucrania", liga:"Premier League", colores:['#2E8B57','#FFFFFF'] },
+  { nombre:"Polissya Zhytomyr", pais:"Ucrania", liga:"Premier League", colores:['#006633','#FFD700'] },
+  { nombre:"Chornomorets Odesa", pais:"Ucrania", liga:"Premier League", colores:['#00A9E0','#FFFFFF'] },
+  { nombre:"LNZ Cherkasy", pais:"Ucrania", liga:"Premier League", colores:['#4CAF50','#FFFFFF'] },
   // Chile — Primera División de Chile (7)
   { nombre:"Colo-Colo", pais:"Chile", liga:"Primera División de Chile", colores:['#000000','#FFFFFF'] },
   { nombre:"Universidad de Chile", pais:"Chile", liga:"Primera División de Chile", colores:['#0033A0','#D2122E'] },
@@ -6140,17 +6159,17 @@ const CLUBES_EXTRANJERO = [
   { nombre:"Huachipato", pais:"Chile", liga:"Primera División de Chile", colores:['#000000','#FFFFFF'] },
   { nombre:"O'Higgins", pais:"Chile", liga:"Primera División de Chile", colores:['#47B5FF','#FFFFFF'] },
   { nombre:"Everton de Viña del Mar", pais:"Chile", liga:"Primera División de Chile", colores:['#FFD100','#001489'] },
-  // República Checa — Fortuna Liga (10)
-  { nombre:"Sparta Praga", pais:"República Checa", liga:"Fortuna Liga", colores:['#A6192E','#000000'] },
-  { nombre:"Slavia Praga", pais:"República Checa", liga:"Fortuna Liga", colores:['#DC241F','#FFFFFF'] },
-  { nombre:"Viktoria Plzeň", pais:"República Checa", liga:"Fortuna Liga", colores:['#002F6C','#FFFFFF'] },
-  { nombre:"Baník Ostrava", pais:"República Checa", liga:"Fortuna Liga", colores:['#002F6C','#FFD700'] },
-  { nombre:"Sigma Olomouc", pais:"República Checa", liga:"Fortuna Liga", colores:['#FFD700','#002F6C'] },
-  { nombre:"Slovácko", pais:"República Checa", liga:"Fortuna Liga", colores:['#003DA5','#E2001A'] },
-  { nombre:"Jablonec", pais:"República Checa", liga:"Fortuna Liga", colores:['#43A047','#FFFFFF'] },
-  { nombre:"Bohemians Praga 1905", pais:"República Checa", liga:"Fortuna Liga", colores:['#1B5E20','#FFFFFF'] },
-  { nombre:"Hradec Králové", pais:"República Checa", liga:"Fortuna Liga", colores:['#FFFFFF','#003DA5'] },
-  { nombre:"Zbrojovka Brno", pais:"República Checa", liga:"Fortuna Liga", colores:['#E2001A','#00205B'] }
+  // República Checa — Chance Liga (10)
+  { nombre:"Sparta Praga", pais:"República Checa", liga:"Chance Liga", colores:['#A6192E','#000000'] },
+  { nombre:"Slavia Praga", pais:"República Checa", liga:"Chance Liga", colores:['#DC241F','#FFFFFF'] },
+  { nombre:"Viktoria Plzeň", pais:"República Checa", liga:"Chance Liga", colores:['#002F6C','#FFFFFF'] },
+  { nombre:"Baník Ostrava", pais:"República Checa", liga:"Chance Liga", colores:['#002F6C','#FFD700'] },
+  { nombre:"Sigma Olomouc", pais:"República Checa", liga:"Chance Liga", colores:['#FFD700','#002F6C'] },
+  { nombre:"Slovácko", pais:"República Checa", liga:"Chance Liga", colores:['#003DA5','#E2001A'] },
+  { nombre:"Jablonec", pais:"República Checa", liga:"Chance Liga", colores:['#43A047','#FFFFFF'] },
+  { nombre:"Bohemians Praga 1905", pais:"República Checa", liga:"Chance Liga", colores:['#1B5E20','#FFFFFF'] },
+  { nombre:"Hradec Králové", pais:"República Checa", liga:"Chance Liga", colores:['#FFFFFF','#003DA5'] },
+  { nombre:"Zbrojovka Brno", pais:"República Checa", liga:"Chance Liga", colores:['#E2001A','#00205B'] }
 ];
 const PAISES_HISPANOHABLANTES = ["Argentina", "México", "Uruguay", "Chile"];
 const IDIOMA_POR_PAIS = {
@@ -6522,7 +6541,7 @@ const LOGOS_COMPETICION = {
   "Serie A": { color:"#008FD7", letra:"SA" },
   "Bundesliga": { color:"#D3010C", letra:"BL" },
   "Ligue 1": { color:"#091C3E", letra:"L1" },
-  "Primeira Liga": { color:"#006600", letra:"PT" },
+  "Liga Portugal": { color:"#006600", letra:"PT" },
   "Eredivisie": { color:"#FF6600", letra:"ERE" },
   "Pro League": { color:"#000000", letra:"BE" },
   "Süper Lig": { color:"#E30A17", letra:"TR" },
@@ -6533,7 +6552,7 @@ const LOGOS_COMPETICION = {
   "Saudi Pro League": { color:"#006C35", letra:"KSA" },
   "Scottish Premiership": { color:"#003399", letra:"SCO" },
   "HNL": { color:"#FF0000", letra:"CRO" },
-  "Super League": { color:"#D0021B", letra:"SUI" },
+  "Swiss Football League": { color:"#D0021B", letra:"SUI" },
   "Super League Greece": { color:"#003399", letra:"GRE" },
   "Primera División Uruguay": { color:"#75AADB", letra:"URU" }
 };
@@ -7770,6 +7789,7 @@ function usarConfianzaCiegaSiHay(j, efectosNormales, efectosProtegidos){
   if(j.objetos.confianzaCiega > 0){
     j.objetos.confianzaCiega--;
     mostrarNotificacion(`${iconoInline('confianzaCiega',15)}Confianza ciega: te has ido a tu bola sin que el vestuario lo pague`, 'objeto');
+    S._confianzaCiegaUsadaEnResultado = true;
     return efectosProtegidos;
   }
   return efectosNormales;
@@ -8147,7 +8167,7 @@ function procesarBanderasFichaje(j, rama){
     Object.assign(nuevoClubObj, nivelEuropeoAlFichar(nuevoClubObj));
     ofertaConstruida = {
       club: nuevoClubObj,
-      sueldo: esGrandeExt ? calcularSueldoOferta(j, "Grande") : calcularSueldoOferta(j, "Extranjero", clubExt.nombre, MULTIPLICADOR_SUELDO_LIGA[clubExt.liga] || 0.5),
+      sueldo: esGrandeExt ? calcularSueldoOferta(j, "Grande") : calcularSueldoOferta(j, "Extranjero", clubExt.nombre, multiplicadorSueldoLiga(clubExt.pais, clubExt.liga)),
       duracion: calcularDuracionContrato(j)
     };
   }
@@ -8389,6 +8409,13 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   const bonusNotaFases = fasesCompeticiones.reduce((s,f)=> s + (BONUS_NOTA_FASE[f.fase]||0), 0);
 
   const ratioGoles = goles / partidos;
+  // Cuántos partidos jugaste de verdad frente a lo que da de sí la temporada entera (por rol,
+  // no por lesión — la lesión ya se cubre aparte arriba): jugar pocos partidos, aunque salgan muy
+  // bien, no es "decisivo una semana tras otra" — así que 'historico'/'estelar' (los tonos más
+  // exagerados, que dan por hecho que jugaste casi toda la temporada) exigen además haber estado
+  // presente al menos la mitad de los partidos posibles; si no, el ratio de gol igual de bueno cae
+  // como mucho a 'notable'.
+  const ratioPresencia = partidos / (partidosBase || partidos);
   const nombresTitulosGanados = [];
   if(campeon) nombresTitulosGanados.push(j.club.extranjero ? j.club.liga : (TIER_CATEGORIA[categoriaEfectiva] || categoriaEfectiva));
   fasesCompeticiones.forEach(f=>{ if(f.fase === 'Campeón') nombresTitulosGanados.push(f.nombre); });
@@ -8404,8 +8431,8 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   // grande (título, ascenso, Europa, pelea por el descenso) — antes el titular ignoraba la
   // lesión por completo y hablaba solo del rendimiento en los pocos partidos que sí jugaste.
   else if(semanasLesion >= (SEMANAS_POR_PASO * SECUENCIA_TEMPORADA.length) / 2) tier = 'temporada_lesion';
-  else if(ratioGoles >= 0.75) tier = 'historico';
-  else if(ratioGoles >= 0.45) tier = 'estelar';
+  else if(ratioGoles >= 0.75 && ratioPresencia >= 0.5) tier = 'historico';
+  else if(ratioGoles >= 0.45 && ratioPresencia >= 0.5) tier = 'estelar';
   else if(ratioGoles >= 0.25) tier = 'notable';
   else if(ratioGoles >= 0.1) tier = 'discreto';
   else tier = 'flojo';
@@ -10297,7 +10324,7 @@ function generarOfertas(j){
       ofertas.push({
         nombre: clubExt.nombre, pais: clubExt.pais, liga: clubExt.liga, colores: clubExt.colores,
         categoria:"LaLiga", ascenso:ascensoExt, duracion, extranjero:true, grande: esGrandeExt || undefined, rivalDirecto: esRivalDirecto(j.club.nombre, clubExt.nombre) || undefined,
-        sueldo: esGrandeExt ? calcularSueldoOferta(j, "Grande") : calcularSueldoOferta(j, "Extranjero", clubExt.nombre, MULTIPLICADOR_SUELDO_LIGA[clubExt.liga] || 0.5),
+        sueldo: esGrandeExt ? calcularSueldoOferta(j, "Grande") : calcularSueldoOferta(j, "Extranjero", clubExt.nombre, multiplicadorSueldoLiga(clubExt.pais, clubExt.liga)),
         objetivo: objetivoExt ? objetivoExt.texto : OBJETIVOS_POR_CATEGORIA["Extranjero"][Math.floor(Math.random()*OBJETIVOS_POR_CATEGORIA["Extranjero"].length)],
         minutos: expectativaMinutos(j, true)
       });
@@ -10470,6 +10497,9 @@ const Sonido = (function(){
   }
   return {
     click(){ sfx(500, .05, 'square', .035); },
+    // Pequeño arpegio de bienvenida al entrar en el menú principal (no en cada repintado, solo
+    // al llegar de verdad — ver el chequeo de mismaPantalla en pintar()).
+    menu(){ sfx(392,.10,'triangle',.045); setTimeout(()=>sfx(494,.10,'triangle',.045),100); setTimeout(()=>sfx(587,.18,'triangle',.05),200); },
     tick(){ sfx(280 + Math.random()*220, .035, 'square', .025); },
     exito(){ sfx(660,.09,'triangle',.06); setTimeout(()=>sfx(880,.13,'triangle',.06), 90); },
     fallo(){ sfx(190,.22,'sawtooth',.05); },
@@ -10846,6 +10876,7 @@ function pintar(){
   if(S.jugador && !S.enFaseCreacion && !bloqueadaParaPantallaBase && !PANTALLAS_CREACION.has(S.screen) && !excluirDePantallaBase){
     S.pantallaBase = S.screen;
   }
+  if(!mismaPantalla && S.screen === 'menu') Sonido.menu();
   if(S.jugador) comprobarLogros(S.jugador);
   // Red de seguridad general: si aun así el render de la pantalla falla (cualquier excepción
   // inesperada), no se deja la partida en una pantalla en blanco — se recupera a un sitio seguro
@@ -11113,9 +11144,9 @@ function topbar(titulo){
   const left = el('div');
   left.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;';
 
-  const logoWrap = el('div','logo-wrap');
+  const logoWrap = el('div','logo-wrap logo-wrap-lg');
   const badge = el('div','logo-badge');
-  badge.innerHTML = logoCamisetaCompacta(19);
+  badge.innerHTML = logoCamisetaCompacta(27);
   logoWrap.appendChild(badge);
   const logoText = el('div','logo-text');
   logoText.appendChild(el('div','top','FICHAJE'));
@@ -16337,6 +16368,10 @@ SCREENS.resultado = function(){
   }
   if(r.roll && r.roll.natural1){
     box.appendChild(el('div','badge risk', '¡1 natural! Tu próxima tirada saldrá con penalización'));
+  }
+  if(S._confianzaCiegaUsadaEnResultado){
+    box.appendChild(el('div','badge token', `${iconoInline('confianzaCiega',15)}Confianza ciega: el vestuario no lo ha pagado`));
+    S._confianzaCiegaUsadaEnResultado = false;
   }
   c.appendChild(box);
 
