@@ -54,6 +54,7 @@ body{
 .wrap{ max-width: 760px; margin: 0 auto; }
 body.con-tabbar{ padding-bottom: 92px; }
 body.con-barra-entreno{ padding-bottom: 168px; }
+body.con-tel-peek{ padding-bottom: 208px; }
 body.sin-topbar{ padding-top: calc(24px + env(safe-area-inset-top,0px)); }
 #tabbar-root{ position:fixed; left:0; right:0; bottom:0; z-index:50; display:flex; flex-direction:column; }
 .tabbar{
@@ -1108,9 +1109,56 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 
 /* ============ EL MÓVIL (prueba de concepto) ============
    Prefijo tel- en todo para no chocar con clases ya existentes (.card, .avatar, .badge...).
-   Sin notch/bisel/barra de estado propia a propósito: en un móvil real (o la PWA instalada)
-   ese chrome ya lo pone el sistema operativo — dibujar uno falso encima sería un móvil dentro
-   de otro móvil. Esto vive dentro del mismo #app de siempre, bajo el topbar real del juego. */
+   Con su propio marco/notch/barra inferior (`.tel-device`) — es un objeto que "sacas" desde el
+   asomo fijo del fondo de pantalla (`.tel-peek-dock`, ver pintarTabbar), no la pantalla nativa
+   del dispositivo real. */
+.tel-device-wrap{ display:flex; justify-content:center; padding:2px 0 6px; }
+.tel-device{
+  width:min(380px, 92vw); aspect-ratio:380/800; position:relative;
+  background:linear-gradient(155deg,#2b2f3d,#17181f 55%);
+  border-radius:44px; padding:12px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5), inset 0 0 0 1.5px rgba(255,255,255,0.06);
+}
+.tel-notch{
+  position:absolute; top:12px; left:50%; transform:translateX(-50%);
+  width:34%; height:20px; background:#000; border-radius:0 0 14px 14px; z-index:5;
+}
+.tel-screen{
+  position:relative; height:100%; background:var(--bg2); border-radius:32px;
+  overflow-y:auto; overflow-x:hidden; padding:38px 20px 30px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05);
+}
+.tel-home-indicator{
+  position:absolute; bottom:9px; left:50%; transform:translateX(-50%);
+  width:32%; height:4px; border-radius:3px; background:rgba(255,255,255,0.5); z-index:5;
+}
+.tel-icon-badge{
+  position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 3px;
+  border-radius:8px; background:var(--gold); color:#1a1408; font-family:'Space Grotesk',sans-serif;
+  font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 1px 4px rgba(0,0,0,0.4); z-index:3;
+}
+/* Asomo del móvil, fijo al fondo de la pantalla justo debajo de la tabbar (ver pintarTabbar):
+   solo se ve la parte de arriba del aparato, como si estuviera "guardado" bajo el borde
+   inferior — tocarlo lo saca entero (SCREENS.movil). */
+.tel-peek-dock{
+  display:flex; justify-content:center; cursor:pointer; position:relative;
+  background:rgba(20,22,31,0.96); backdrop-filter:blur(10px);
+  padding-top:4px; padding-bottom:calc(4px + env(safe-area-inset-bottom,0px));
+}
+.tel-peek-top{
+  width:132px; height:36px; position:relative; flex-shrink:0;
+  background:linear-gradient(155deg,#2b2f3d,#17181f 55%);
+  border-radius:20px 20px 0 0;
+  box-shadow:0 -4px 14px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.07);
+  transition:transform .15s ease;
+}
+.tel-peek-top::after{
+  content:''; position:absolute; top:7px; left:50%; transform:translateX(-50%);
+  width:36%; height:9px; background:#000; border-radius:0 0 8px 8px;
+}
+.tel-peek-dock:active .tel-peek-top{ transform:translateY(3px); }
+.tel-peek-dock.deshabilitado{ opacity:.32; pointer-events:none; }
 .tel-fame-pill{
   margin:0 auto 16px; width:fit-content; display:flex; align-items:center; gap:6px;
   background:var(--panel2); border:1px solid var(--gold-dim); border-radius:999px; padding:6px 14px 6px 10px;
@@ -10817,6 +10865,7 @@ function pintarTabbar(){
   if(!S.jugador || S.enFaseCreacion || PANTALLAS_CREACION.has(pantallaEfectiva)){
     document.body.classList.remove('con-tabbar');
     document.body.classList.remove('con-barra-entreno');
+    document.body.classList.remove('con-tel-peek');
     raiz.innerHTML = '';
     return;
   }
@@ -10855,22 +10904,13 @@ function pintarTabbar(){
   const bar = el('div','tabbar'+(deshabilitada?' deshabilitada':''));
   const tabs = [
     { id:'jugador', icono:'tabFicha', label:'Jugador', pantalla:'tabJugador' },
-    { id:'club', icono:'tabClub', label:'Club', pantalla:'tabClub' },
     { id:'avanzar', icono:'tabAvanzar', label:'Avanzar', pantalla:null, destacado:true },
-    { id:'estadisticas', icono:'tabInversiones', label:'Estadísticas', pantalla:'tabEstadisticas' },
-    { id:'economia', icono:'tabEconomia', label:'Economía', pantalla:'tabEconomia' }
+    { id:'estadisticas', icono:'tabInversiones', label:'Estadísticas', pantalla:'tabEstadisticas' }
   ];
   tabs.forEach(t=>{
     const activo = t.pantalla ? S.screen === t.pantalla : S.screen === S.pantallaBase;
     const btn = el('div','tabbar-btn'+(activo && !deshabilitada?' activo':'')+(t.destacado?' destacado':''));
     btn.innerHTML = `${ICONOS_SVG[t.icono]}<span>${t.label}</span>`;
-    if(t.id === 'economia'){
-      const numCompras = contarComprasDisponibles(S.jugador);
-      if(numCompras > 0){
-        const badge = el('div','tabbar-badge', numCompras);
-        btn.appendChild(badge);
-      }
-    }
     if(t.id === 'jugador' && S.objetosNuevosSinVer > 0){
       btn.appendChild(el('div','tabbar-badge', S.objetosNuevosSinVer));
     }
@@ -10903,6 +10943,31 @@ function pintarTabbar(){
     bar.appendChild(btn);
   });
   raiz.appendChild(bar);
+
+  // El móvil (Club/Banca/Compras/Casino/Cromos/WhatsApp) ya no vive en la tabbar principal:
+  // se saca desde este asomo fijo al fondo de pantalla (ver notas de diseño junto a .tel-peek-dock
+  // en el CSS). No se muestra estando ya dentro del propio móvil.
+  const dentroDelMovil = S.screen === 'movil';
+  document.body.classList.toggle('con-tel-peek', !dentroDelMovil);
+  if(!dentroDelMovil){
+    const peekDock = el('div','tel-peek-dock'+(deshabilitada?' deshabilitado':''));
+    const peekTop = el('div','tel-peek-top');
+    const numPendientes = contarComprasDisponibles(S.jugador) + telContactosDe(S.jugador).filter(c=>!(S.movilRespuestas && S.movilRespuestas[c.id]!==undefined)).length;
+    if(numPendientes > 0){
+      peekTop.appendChild(el('div','tel-icon-badge', numPendientes));
+    }
+    peekDock.title = 'Tu móvil';
+    peekDock.appendChild(peekTop);
+    if(!deshabilitada){
+      peekDock.onclick = ()=>{
+        S.pantallaAnteriorMovil = S.pantallaBase || S.screen;
+        S.movilVista = 'home';
+        S.screen = 'movil';
+        render();
+      };
+    }
+    raiz.appendChild(peekDock);
+  }
 }
 let _pantallaPintadaPrevia = null;
 function pintar(){
@@ -11232,17 +11297,9 @@ function topbar(titulo){
     };
     botonesDcha.appendChild(logrosBtn);
 
-    const movilBtn = document.createElement('button');
-    movilBtn.innerHTML = ICONOS_SVG.movil;
-    movilBtn.title = 'Tu móvil';
-    movilBtn.style.cssText = 'background:none;border:1px solid var(--line);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex-shrink:0;';
-    movilBtn.onclick = ()=>{
-      S.pantallaAnteriorMovil = S.pantallaBase || S.screen;
-      S.movilVista = 'home';
-      S.screen = 'movil';
-      render();
-    };
-    botonesDcha.appendChild(movilBtn);
+    // El botón de "Tu móvil" en la topbar se retiró: ahora se saca desde el asomo fijo al fondo
+    // de pantalla (.tel-peek-dock, ver pintarTabbar) — un único sitio para entrar, siempre visible
+    // junto a Jugador/Avanzar/Estadísticas.
 
     const ajustesBtn = document.createElement('button');
     ajustesBtn.innerHTML = ICONOS_SVG.ajustes;
@@ -13282,7 +13339,13 @@ function telChipsEfecto(cambios){
 SCREENS.movil = function(){
   topbar("Tu móvil");
   const j = S.jugador;
-  const c = el('div','card');
+  const deviceWrap = el('div','tel-device-wrap');
+  const device = el('div','tel-device');
+  device.appendChild(el('div','tel-notch'));
+  const c = el('div','tel-screen');
+  device.appendChild(c);
+  device.appendChild(el('div','tel-home-indicator'));
+  deviceWrap.appendChild(device);
   const vista = S.movilVista || 'home';
 
   if(vista === 'home'){
@@ -13398,7 +13461,7 @@ SCREENS.movil = function(){
     }
   }
 
-  app.appendChild(c);
+  app.appendChild(deviceWrap);
 };
 
 SCREENS.changelog = function(){
