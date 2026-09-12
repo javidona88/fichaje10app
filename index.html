@@ -1105,6 +1105,64 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 }
 .slot-btn-borrar:active{ transform:scale(0.95); }
 .slot.borrando{ opacity:.4; pointer-events:none; }
+
+/* ============ EL MÓVIL (prueba de concepto) ============
+   Prefijo tel- en todo para no chocar con clases ya existentes (.card, .avatar, .badge...).
+   Sin notch/bisel/barra de estado propia a propósito: en un móvil real (o la PWA instalada)
+   ese chrome ya lo pone el sistema operativo — dibujar uno falso encima sería un móvil dentro
+   de otro móvil. Esto vive dentro del mismo #app de siempre, bajo el topbar real del juego. */
+.tel-fame-pill{
+  margin:0 auto 16px; width:fit-content; display:flex; align-items:center; gap:6px;
+  background:var(--panel2); border:1px solid var(--gold-dim); border-radius:999px; padding:6px 14px 6px 10px;
+  font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink);
+}
+.tel-fame-pill svg{ width:14px; height:14px; color:var(--gold); flex-shrink:0; }
+.tel-fame-pill b{ color:var(--gold); font-weight:700; }
+.tel-app-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px 10px; padding:4px 6px 8px; }
+.tel-app{ background:none; border:none; color:inherit; font-family:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; padding:0; }
+.tel-app .tel-icon{ width:54px; height:54px; border-radius:15px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; transition:filter .5s ease; }
+.tel-app .tel-icon svg{ width:26px; height:26px; }
+.tel-app .tel-label{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); text-align:center; }
+.tel-app:active .tel-icon{ transform:scale(.94); }
+.tel-app.locked .tel-icon{ filter:grayscale(1) brightness(.55); }
+.tel-lock-badge{ position:absolute; bottom:-2px; right:-2px; width:18px; height:18px; border-radius:50%; background:var(--bg2); border:1.5px solid var(--panel); display:flex; align-items:center; justify-content:center; color:var(--ink-soft); }
+.tel-lock-badge svg{ width:9px; height:9px; }
+.tel-icon.whatsapp{ background:linear-gradient(150deg,#3fce6e,#1f9e4c); }
+.tel-icon.banca{ background:linear-gradient(150deg,#3f6fce,#233f80); }
+.tel-icon.compras{ background:linear-gradient(150deg,#e0932e,#8a531a); }
+.tel-icon.casino{ background:linear-gradient(150deg,#7b2d8e,#341042); }
+.tel-icon.cromos{ background:linear-gradient(150deg,#4CAF6D,#1d5c37); }
+.tel-icon.club{ background:linear-gradient(150deg,#7c8494,#464c59); }
+.tel-icon.ajustes{ background:linear-gradient(150deg,#7c8494,#464c59); }
+
+.tel-app-header{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.tel-back-btn{ background:none; border:1px solid var(--line); border-radius:8px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); cursor:pointer; flex-shrink:0; }
+.tel-app-header .tel-title{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
+
+.tel-contact{ width:100%; background:none; border:none; color:inherit; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:12px; padding:11px 4px; text-align:left; border-bottom:1px solid var(--line); }
+.tel-contact:last-child{ border-bottom:none; }
+.tel-contact:active{ background:rgba(255,255,255,0.04); }
+.tel-avatar{ width:44px; height:44px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:15px; color:#14161F; }
+.tel-contact-body{ flex:1; min-width:0; }
+.tel-contact-top{ display:flex; justify-content:space-between; gap:8px; }
+.tel-contact-name{ font-weight:600; font-size:14px; color:var(--ink); }
+.tel-contact-sub{ font-size:11px; color:var(--ink-soft); }
+.tel-contact-preview{ font-size:12px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+.tel-contact-answered{ flex-shrink:0; color:#8fe3ab; }
+.tel-contact-answered svg{ width:16px; height:16px; }
+
+.tel-thread{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.tel-bubble-row{ display:flex; }
+.tel-bubble-row.mine{ justify-content:flex-end; }
+.tel-bubble{ max-width:78%; padding:9px 13px; border-radius:14px; font-size:13.5px; line-height:1.42; color:var(--ink); }
+.tel-bubble-row:not(.mine) .tel-bubble{ background:var(--panel2); border-bottom-left-radius:4px; }
+.tel-bubble-row.mine .tel-bubble{ background:rgba(76,175,109,0.22); border:1px solid rgba(76,175,109,0.4); border-bottom-right-radius:4px; }
+.tel-effects-row{ display:flex; flex-wrap:wrap; gap:6px; padding:2px 2px 0; }
+.tel-choices{ display:flex; flex-direction:column; gap:8px; }
+.tel-choices-label{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 2px; }
+.tel-choice-btn{ text-align:left; background:var(--panel2); border:1px solid var(--line); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:13px; padding:11px 13px; border-radius:12px; cursor:pointer; }
+.tel-choice-btn:active{ background:#2e3446; border-color:var(--gold-dim); }
+.tel-done-note{ font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink-soft); text-align:center; padding:4px 0; }
 </style>
 </head>
 <body>
@@ -1621,6 +1679,7 @@ const ICONOS_SVG = {
   seleccionTitulo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2l6.5 2.3v4.7c0 4.3-2.8 7.2-6.5 8.6-3.7-1.4-6.5-4.3-6.5-8.6V5.5z"/><path d="M12 8.3l1.1 2.2 2.4.35-1.75 1.7.4 2.45-2.15-1.15-2.15 1.15.4-2.45-1.75-1.7 2.4-.35z" fill="currentColor" stroke="none"/></svg>',
   camiseta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3l4 2 4-2 4 4-3 3v11H7V10L4 7z"/></svg>',
   confianzaCiega: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3v5.5c0 5-3.2 8.7-7.5 10.5-4.3-1.8-7.5-5.5-7.5-10.5V5.5z"/><path d="M8.5 12l2.3 2.3 4.7-4.7"/></svg>',
+  movil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.3" width="10" height="19.4" rx="2"/><path d="M11 18.4h2"/></svg>',
   fichaSuerte: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="9" stroke-dasharray="1.8 3.4"/><circle cx="12" cy="12" r="3.6"/></svg>',
   rachaGoleador: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="13.5" r="7"/><path d="M10 9l1.3 2.7 3 .4-2.2 2 .6 2.9-2.7-1.4-2.7 1.4.6-2.9-2.2-2 3-.4z"/><path d="M17.3 4c1 .9 1.4 1.9 1.1 3-.25 .9-1.1 1.4-1.1 2.4 0 .8.5 1.3 1.2 1.4"/></svg>',
   lupa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-5-5"/></svg>',
@@ -6398,7 +6457,7 @@ const PAISES_CROMO = [
     curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.','El Estadio Centenario de Montevideo, sede de la primera final de un Mundial en 1930, fue declarado Monumento Histórico por la FIFA.','Peñarol y Nacional protagonizan el Clásico uruguayo, uno de los derbis más antiguos de Sudamérica.'] }
 ];
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','sancionReveal','changelog','rankings','logros','escudosPersonalizados',
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','sancionReveal','changelog','rankings','logros','escudosPersonalizados','movil',
   // Todo el Mundial es una secuencia sin cortes: mientras dura, no tiene sentido poder escaparse
   // al menú, a la tienda o al plan de entreno — como en las demás secuencias "de un tirón" de
   // esta misma lista (rueda de prensa, reveals de título...). Se reactiva solo al terminar
@@ -11173,6 +11232,18 @@ function topbar(titulo){
     };
     botonesDcha.appendChild(logrosBtn);
 
+    const movilBtn = document.createElement('button');
+    movilBtn.innerHTML = ICONOS_SVG.movil;
+    movilBtn.title = 'Tu móvil';
+    movilBtn.style.cssText = 'background:none;border:1px solid var(--line);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex-shrink:0;';
+    movilBtn.onclick = ()=>{
+      S.pantallaAnteriorMovil = S.pantallaBase || S.screen;
+      S.movilVista = 'home';
+      S.screen = 'movil';
+      render();
+    };
+    botonesDcha.appendChild(movilBtn);
+
     const ajustesBtn = document.createElement('button');
     ajustesBtn.innerHTML = ICONOS_SVG.ajustes;
     ajustesBtn.title = 'Ajustes';
@@ -13097,6 +13168,237 @@ SCREENS.ajustes = function(){
   const version = el('div', null, `Fichaje 10 · ${VERSION_JUEGO}`);
   version.style.cssText = 'text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-soft);opacity:.6;margin-top:20px;';
   app.appendChild(version);
+};
+
+/* ============ EL MÓVIL (prueba de concepto — ver notas de diseño en el CSS "tel-") ============
+   Apps que ya tienen pantalla real (Banca→tabEconomia, Club→tabClub, Compras→gastos,
+   Casino→casino, Cromos→logros, Ajustes→ajustes) navegan directas ahí con datos de verdad — no
+   se reimplementan. WhatsApp es la única app nueva de verdad: habla con tus subtramas reales
+   (representante, pareja, compañeros de cantera que sigan contigo) y la respuesta que elijas
+   aplica un efecto real (aplicarEfectos + relación), exactamente como una rama de suceso normal. */
+const TEL_ICONO_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const TEL_ICONO_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+const TEL_ICONO_WHATSAPP = '<svg viewBox="0 0 24 24" fill="none" stroke="#0c2013" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a8 8 0 0 0-6.9 12L4 21l6.2-1.1A8 8 0 1 0 12 3z"/><path d="M8.5 8.7c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5s.6 1.5.6 1.6c.1.1.1.3 0 .4-.1.2-.2.3-.3.5-.2.2-.3.3-.1.6.6 1 1.3 1.6 2.3 2 .2.1.4.1.5-.1.2-.2.5-.6.7-.8.2-.2.3-.2.5-.1.2.1 1.4.7 1.6.8.2.1.4.2.4.3.1.2.1.9-.2 1.4s-1.3.9-1.8.9c-.5 0-.9.1-3-.8-2.5-1.1-4-3.7-4.2-3.9-.1-.2-1-1.3-1-2.5 0-1.2.6-1.7.8-2z" fill="#0c2013" stroke="none"/></svg>';
+const TEL_ICONO_COMPRAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
+const TEL_ICONO_CASINO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="12" cy="12" r="1" fill="#fff" stroke="none"/><circle cx="9" cy="14.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="14.5" r="1" fill="#fff" stroke="none"/></svg>';
+const TEL_ICONO_CROMOS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>';
+// Umbrales reales: los mismos NIVELES_POPULARIDAD que usa el resto del juego (Conocido/Popular/Ídolo).
+const TEL_APPS_BLOQUEADAS = [
+  { id:'compras', nombre:'Compras', nivelMin:10, clase:'compras', icono:TEL_ICONO_COMPRAS, destino:'gastos' },
+  { id:'casino', nombre:'Casino', nivelMin:25, clase:'casino', icono:TEL_ICONO_CASINO, destino:'casino' },
+  { id:'cromos', nombre:'Cromos', nivelMin:65, clase:'cromos', icono:TEL_ICONO_CROMOS, destino:'logros', antesDeIr:()=>{ S.logrosVistaActiva = 'cromos'; } }
+];
+const TEL_PLANTILLAS_COMPANERO = {
+  bromista: {
+    mensajes:['Ey crack, ¿nos vemos esta noche? 🍻', 'Un par de cervezas y para casa, lo prometo 😏'],
+    opciones:[
+      { texto:'¡Claro, allí estaré!', respuesta:'Así me gusta 😎', efectos:{forma:-3}, relDelta:8 },
+      { texto:'Esta noche paso, mañana toca entrenar', respuesta:'Eres un profesional de cuidado 😂', efectos:{forma:3}, relDelta:1 },
+      { texto:'Depende, ¿vais a liarla mucho?', respuesta:'Tranqui, nada salvaje.', efectos:{vestuario:4}, relDelta:3 }
+    ]
+  },
+  lider: {
+    mensajes:['¿Cómo lo ves para el finde? Nos jugamos mucho.', 'Prefiero hablarlo contigo antes que con nadie más.'],
+    opciones:[
+      { texto:'Lo veo bien, vamos a por ello', respuesta:'Así me gusta, contigo dentro esto va sobre ruedas.', efectos:{vestuario:5}, relDelta:6 },
+      { texto:'Un poco nervioso, la verdad', respuesta:'Normal, pero para eso estamos el grupo.', efectos:{confianza:3}, relDelta:3 },
+      { texto:'Tú tranquilo, que lo tenemos controlado', respuesta:'Eso me gusta oírlo.', efectos:{reputacion:2}, relDelta:2 }
+    ]
+  },
+  ambicioso: {
+    mensajes:['Oye, ¿tú también sueñas con dar el salto grande?', 'A mí me pica mucho la ambición este año.'],
+    opciones:[
+      { texto:'Claro, no me conformo con esto', respuesta:'¡Eso es! Vamos a comernos el mundo.', efectos:{confianza:4}, relDelta:6 },
+      { texto:'Prefiero ir paso a paso', respuesta:'Respeto, aunque yo no puedo evitar querer más.', efectos:{mental:2}, relDelta:1 },
+      { texto:'Depende del año que hagamos', respuesta:'Justo por eso hay que apretar ya.', efectos:{forma:2}, relDelta:2 }
+    ]
+  }
+};
+// Contactos reales de WhatsApp: solo aparece quien de verdad existe en esta partida (agente,
+// pareja, compañeros que sigan jugando contigo — un compañero que fichó fuera no sale aquí).
+function telContactosDe(j){
+  const lista = [];
+  if(j.representante && j.representante.agente){
+    const a = j.representante.agente;
+    lista.push({ id:'representante', nombre:a.apodo||a.nombre, sub:'tu agente', color:'#6E88A8',
+      mensajes:['Tenemos algo importante que hablar.', 'Ha llamado un club esta tarde preguntando por ti. Nada oficial todavía, pero quieren saber si estarías abierto a escuchar.'],
+      opciones:[
+        { texto:'Cuéntame más, tengo curiosidad', respuesta:'Así me gusta. Te aviso en cuanto se muevan de verdad.', efectos:{reputacion:3}, relDelta:2 },
+        { texto:'Ahora mismo estoy centrado aquí, mejor luego', respuesta:'Entendido, no les digo nada por ahora.', efectos:{carinoAficion:4}, relDelta:0 },
+        { texto:'¿En qué categoría juega ese club?', respuesta:'Todavía no puedo decir nombres, pero es un salto real.', efectos:{}, relDelta:1 }
+      ] });
+  }
+  if(j.tienePareja && j.pareja){
+    lista.push({ id:'pareja', nombre:j.pareja.apodo||j.pareja.nombre, sub:'tu pareja', color:'#D9495C',
+      mensajes:['Buena suerte esta semana ❤️', 'Sé que le has estado dando muchas vueltas a la temporada.'],
+      opciones:[
+        { texto:'Gracias amor, contigo esto es más fácil', respuesta:'No digas eso, que me haces llorar 🥹', efectos:{felicidadPareja:8} },
+        { texto:'Todo controlado, esta noche descanso pronto', respuesta:'Así se hace, profesional hasta para dormir 😌', efectos:{forma:4} },
+        { texto:'La verdad es que estoy nervioso', respuesta:'Es normal — se pasa en cuanto tocas el balón.', efectos:{felicidadPareja:5} }
+      ] });
+  }
+  (j.companeros||[]).filter(c=>c.juntosActualmente).forEach(c=>{
+    const plantilla = TEL_PLANTILLAS_COMPANERO[c.rasgo] || TEL_PLANTILLAS_COMPANERO.bromista;
+    lista.push({ id:'companero_'+c.id, nombre:c.apodo||c.nombre, sub:'compañero de cantera', color:'#D4AF37',
+      mensajes: plantilla.mensajes, opciones: plantilla.opciones, companeroId: c.id });
+  });
+  return lista;
+}
+function telIniciales(nombre){ return (nombre||'').slice(0,2).toUpperCase(); }
+function telAplicarRespuesta(contactoId, idx){
+  const j = S.jugador;
+  const contacto = telContactosDe(j).find(c=>c.id===contactoId);
+  if(!contacto) return;
+  S.movilRespuestas = S.movilRespuestas || {};
+  if(S.movilRespuestas[contactoId] !== undefined) return;
+  const op = contacto.opciones[idx];
+  const cambios = aplicarEfectos(j, op.efectos||{}, {notificar:false});
+  if(op.relDelta){
+    if(contacto.companeroId){
+      const c = j.companeros.find(x=>x.id===contacto.companeroId);
+      if(c){ c.relacion = Math.min(100, c.relacion + op.relDelta); cambios.push({ tipo:'relacion', texto:`Relación con ${c.apodo||c.nombre} ↑` }); }
+    } else if(contacto.id==='representante'){
+      j.representante.agente.relacion = Math.min(100, j.representante.agente.relacion + op.relDelta);
+      cambios.push({ tipo:'relacion', texto:'Relación con tu agente ↑' });
+    }
+  }
+  S.movilRespuestas[contactoId] = idx;
+  S.movilCambios = S.movilCambios || {};
+  S.movilCambios[contactoId] = cambios;
+  guardarPartida();
+  pintar();
+}
+function telChipsEfecto(cambios){
+  const wrap = el('div','tel-effects-row');
+  (cambios||[]).forEach(c2=>{
+    let texto;
+    if(c2.tipo==='relacion') texto = c2.texto;
+    else texto = `${NICE_TODO[c2.clave]||cap(c2.clave)} ${textoCambioStat(c2.clave, c2.delta)}`;
+    const pos = c2.tipo==='relacion' ? true : c2.delta >= 0;
+    wrap.appendChild(el('span','eff-chip '+(pos?'pos':'neg'), texto));
+  });
+  return wrap;
+}
+SCREENS.movil = function(){
+  topbar("Tu móvil");
+  const j = S.jugador;
+  const c = el('div','card');
+  const vista = S.movilVista || 'home';
+
+  if(vista === 'home'){
+    const btnVolver = document.createElement('button');
+    btnVolver.className = 'btn-secondary';
+    btnVolver.textContent = '← Volver';
+    btnVolver.style.cssText = 'margin-bottom:14px;';
+    btnVolver.onclick = ()=>{
+      S.screen = S.pantallaAnteriorMovil || 'tabJugador';
+      S.pantallaAnteriorMovil = null;
+      render();
+    };
+    c.appendChild(btnVolver);
+    const nivel = estadoPopularidad(j.stats.popularidad||0);
+    const pill = el('div','tel-fame-pill', `${ICONOS_SVG.estrella}${nivel.texto} <b>· ${Math.round(j.stats.popularidad||0)}</b>`);
+    c.appendChild(pill);
+    const grid = el('div','tel-app-grid');
+    const apps = [
+      { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, onclick:()=>{ S.movilVista='chatlist'; pintar(); } },
+      { id:'banca', nombre:'Banca', clase:'banca', icono:ICONOS_SVG.tabEconomia, onclick:()=>{ S.screen='tabEconomia'; render(); } },
+      { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ S.screen='tabClub'; render(); } },
+      { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ S.pantallaAnteriorAjustes = S.pantallaAnteriorMovil; S.screen='ajustes'; render(); } }
+    ];
+    apps.forEach(a=>{
+      const btn = document.createElement('button');
+      btn.className = 'tel-app';
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}</span><span class="tel-label">${a.nombre}</span>`;
+      btn.onclick = a.onclick;
+      grid.appendChild(btn);
+    });
+    TEL_APPS_BLOQUEADAS.forEach(a=>{
+      const desbloqueada = (j.stats.popularidad||0) >= a.nivelMin;
+      const btn = document.createElement('button');
+      btn.className = 'tel-app' + (desbloqueada?'':' locked');
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${desbloqueada?'':`<span class="tel-lock-badge">${TEL_ICONO_LOCK}</span>`}</span><span class="tel-label">${a.nombre}</span>`;
+      btn.onclick = ()=>{
+        if(desbloqueada){ if(a.antesDeIr) a.antesDeIr(); S.screen = a.destino; render(); }
+        else{ mostrarNotificacion(`${a.nombre} se desbloquea al llegar a "${estadoPopularidad(a.nivelMin).texto}" (${a.nivelMin} de popularidad)`, 'info'); }
+      };
+      grid.appendChild(btn);
+    });
+    c.appendChild(grid);
+  }
+
+  else if(vista === 'chatlist'){
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','WhatsApp'));
+    c.appendChild(header);
+    const contactos = telContactosDe(j);
+    if(!contactos.length){
+      c.appendChild(el('p',null,'Todavía no tienes a nadie con quien hablar aquí — hace falta representante, pareja o algún compañero de cantera que siga contigo.')).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);padding:10px 4px;";
+    }
+    contactos.forEach(ct=>{
+      const respondido = S.movilRespuestas && S.movilRespuestas[ct.id] !== undefined;
+      const btn = document.createElement('button');
+      btn.className = 'tel-contact';
+      btn.innerHTML = `
+        <span class="tel-avatar" style="background:${ct.color}">${telIniciales(ct.nombre)}</span>
+        <span class="tel-contact-body">
+          <span class="tel-contact-top"><span class="tel-contact-name">${ct.nombre}</span></span>
+          <span class="tel-contact-sub">${ct.sub}</span>
+          <span class="tel-contact-preview">${ct.mensajes[ct.mensajes.length-1]}</span>
+        </span>
+        ${respondido ? `<span class="tel-contact-answered">${ICONOS_SVG.check}</span>` : ''}`;
+      btn.onclick = ()=>{ S.movilContactoAbierto = ct.id; S.movilVista='thread'; pintar(); };
+      c.appendChild(btn);
+    });
+  }
+
+  else if(vista === 'thread'){
+    const contacto = telContactosDe(j).find(x=>x.id===S.movilContactoAbierto);
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='chatlist'; pintar(); };
+    header.appendChild(back);
+    if(contacto){
+      header.appendChild(el('span','tel-avatar', telIniciales(contacto.nombre))).style.cssText = `width:32px;height:32px;font-size:12px;background:${contacto.color};flex-shrink:0;`;
+      const titWrap = el('div');
+      titWrap.appendChild(el('div','tel-title', contacto.nombre));
+      titWrap.appendChild(el('div',null, contacto.sub)).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);";
+      header.appendChild(titWrap);
+    }
+    c.appendChild(header);
+    if(contacto){
+      const thread = el('div','tel-thread');
+      contacto.mensajes.forEach(m=> thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${m}</div>`)));
+      const idxRespondido = S.movilRespuestas && S.movilRespuestas[contacto.id];
+      if(idxRespondido !== undefined){
+        const op = contacto.opciones[idxRespondido];
+        thread.appendChild(el('div','tel-bubble-row mine', `<div class="tel-bubble">${op.texto}</div>`));
+        thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${op.respuesta}</div>`));
+        const cambios = (S.movilCambios && S.movilCambios[contacto.id]) || [];
+        if(cambios.length) thread.appendChild(telChipsEfecto(cambios));
+      }
+      c.appendChild(thread);
+      const choices = el('div','tel-choices');
+      if(idxRespondido !== undefined){
+        choices.appendChild(el('p','tel-done-note','Ya has respondido'));
+      } else {
+        choices.appendChild(el('p','tel-choices-label','Tu respuesta'));
+        contacto.opciones.forEach((op,idx)=>{
+          const btn = document.createElement('button');
+          btn.className = 'tel-choice-btn';
+          btn.textContent = op.texto;
+          btn.onclick = ()=> telAplicarRespuesta(contacto.id, idx);
+          choices.appendChild(btn);
+        });
+      }
+      c.appendChild(choices);
+    }
+  }
+
+  app.appendChild(c);
 };
 
 SCREENS.changelog = function(){
