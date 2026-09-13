@@ -1177,6 +1177,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-lock-badge{ position:absolute; bottom:-2px; right:-2px; width:18px; height:18px; border-radius:50%; background:var(--bg2); border:1.5px solid var(--panel); display:flex; align-items:center; justify-content:center; color:var(--ink-soft); }
 .tel-lock-badge svg{ width:9px; height:9px; }
 .tel-icon.whatsapp{ background:linear-gradient(150deg,#3fce6e,#1f9e4c); }
+.tel-icon.email{ background:linear-gradient(150deg,#5a8fd6,#2c4d84); }
 .tel-icon.banca{ background:linear-gradient(150deg,#3f6fce,#233f80); }
 .tel-icon.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
 .tel-icon.casino{ background:linear-gradient(150deg,#7b2d8e,#341042); }
@@ -1260,6 +1261,12 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-choice-btn{ text-align:left; background:var(--panel2); border:1px solid var(--line); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:13px; padding:11px 13px; border-radius:12px; cursor:pointer; }
 .tel-choice-btn:active{ background:#2e3446; border-color:var(--gold-dim); }
 .tel-done-note{ font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink-soft); text-align:center; padding:4px 0; }
+.tel-email-unread{ width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0; align-self:center; }
+.tel-email-meta{ padding-bottom:12px; margin-bottom:14px; border-bottom:1px solid var(--line); }
+.tel-email-asunto{ font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; color:var(--ink); margin-bottom:6px; }
+.tel-email-de{ font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink-soft); }
+.tel-email-de b{ color:var(--ink); font-weight:600; }
+.tel-email-cuerpo{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; line-height:1.65; color:var(--ink); }
 </style>
 </head>
 <body>
@@ -13360,6 +13367,7 @@ SCREENS.ajustes = function(){
 const TEL_ICONO_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 const TEL_ICONO_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
 const TEL_ICONO_WHATSAPP = '<svg viewBox="0 0 24 24" fill="none" stroke="#0c2013" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a8 8 0 0 0-6.9 12L4 21l6.2-1.1A8 8 0 1 0 12 3z"/><path d="M8.5 8.7c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5s.6 1.5.6 1.6c.1.1.1.3 0 .4-.1.2-.2.3-.3.5-.2.2-.3.3-.1.6.6 1 1.3 1.6 2.3 2 .2.1.4.1.5-.1.2-.2.5-.6.7-.8.2-.2.3-.2.5-.1.2.1 1.4.7 1.6.8.2.1.4.2.4.3.1.2.1.9-.2 1.4s-1.3.9-1.8.9c-.5 0-.9.1-3-.8-2.5-1.1-4-3.7-4.2-3.9-.1-.2-1-1.3-1-2.5 0-1.2.6-1.7.8-2z" fill="#0c2013" stroke="none"/></svg>';
+const TEL_ICONO_EMAIL = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="1.8"/><path d="M4.5 7l7.5 6 7.5-6"/></svg>';
 const TEL_ICONO_COMPRAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
 const TEL_ICONO_CASINO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="12" cy="12" r="1" fill="#fff" stroke="none"/><circle cx="9" cy="14.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="14.5" r="1" fill="#fff" stroke="none"/></svg>';
 const TEL_ICONO_CROMOS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>';
@@ -13436,6 +13444,55 @@ function telContactosDe(j){
   return lista;
 }
 function telIniciales(nombre){ return (nombre||'').slice(0,2).toUpperCase(); }
+// Bandeja de Email: correspondencia formal/administrativa con datos reales de la partida — a
+// diferencia de WhatsApp, aquí no hay opciones ni efectos (es correo informativo, no una
+// subtrama de relación), así que la única interacción es abrir y leer. Cada correo solo aparece
+// si el hecho real que lo origina existe en esta partida.
+function telEmailsDe(j){
+  const lista = [];
+  const nombrePila = (j.nombre||'').split(' ')[0];
+  const plural = (n, palabra) => `${n} ${palabra}${n===1?'':'s'}`;
+  lista.push({ id:'contrato', remitente:`Secretaría Técnica · ${j.club.nombre}`, color:'#6E88A8',
+    asunto:'Confirmación de tu contrato',
+    preview:`${plural(j.contrato.duracionTemporadas,'temporada')} · ${formatearEuros(j.contrato.sueldoAnual)}/año`,
+    cuerpo:`Estimado ${nombrePila}:<br><br>Confirmamos por escrito los términos de tu vinculación con ${j.club.nombre} (${j.club.categoria}):<br><br>`
+      + `· Duración: ${plural(j.contrato.duracionTemporadas,'temporada')}<br>`
+      + `· Sueldo anual: ${formatearEuros(j.contrato.sueldoAnual)}<br><br>`
+      + `Bienvenido al club.<br><br>Secretaría Técnica` });
+  if(j.representante){
+    const pctComision = Math.round(j.representante.comision*100);
+    lista.push({ id:'representante', remitente:j.representante.nombre, color:'#A9862B',
+      asunto:'Resumen de tu representación',
+      preview:`Comisión del ${pctComision}% · agente ${j.representante.agente.apodo||j.representante.agente.nombre}`,
+      cuerpo:`Hola ${nombrePila},<br><br>Un resumen rápido de cómo te representamos:<br><br>`
+        + `· Comisión: ${pctComision}% de tu sueldo<br>`
+        + `· Agente asignado: ${j.representante.agente.nombre}<br><br>`
+        + `Cualquier cosa, ya sabes dónde encontrarnos.<br><br>${j.representante.nombre}` });
+  }
+  if(j.patrocinio){
+    const duracion = j.patrocinio.duracionTemporadas || 1;
+    lista.push({ id:'patrocinio', remitente:j.patrocinio.marca, color:'#4CAF6D',
+      asunto:'Acuerdo de patrocinio',
+      preview:`${formatearEuros(j.patrocinio.cantidadAnual)}/año · ${plural(duracion,'temporada')}`,
+      cuerpo:`Enhorabuena por el acuerdo alcanzado.<br><br>`
+        + `· Cantidad anual: ${formatearEuros(j.patrocinio.cantidadAnual)}<br>`
+        + `· Duración: ${plural(duracion,'temporada')}<br><br>`
+        + `Un saludo,<br>${j.patrocinio.marca}` });
+  }
+  if(j.historialTemporadas && j.historialTemporadas.length){
+    const u = j.historialTemporadas[j.historialTemporadas.length-1];
+    lista.push({ id:'resumen_temporada', remitente:`Comunicación · ${u.club}`, color:'#D9495C',
+      asunto:`Resumen de tu temporada ${temporadaAAnoCompleto(u.temporada)}`,
+      preview:`${plural(u.partidos,'partido')} · ${plural(u.goles,'gol')} · ${plural(u.asistencias,'asistencia')}`,
+      cuerpo:`Buen trabajo esta temporada.<br><br>`
+        + `· Partidos: ${u.partidos}<br>`
+        + `· Goles: ${u.goles}<br>`
+        + `· Asistencias: ${u.asistencias}<br>`
+        + `· Nota media: ${u.nota}<br><br>`
+        + `Departamento de comunicación<br>${u.club}` });
+  }
+  return lista;
+}
 function telAplicarRespuesta(contactoId, idx){
   const j = S.jugador;
   const contacto = telContactosDe(j).find(c=>c.id===contactoId);
@@ -13530,6 +13587,7 @@ function renderMovilContenido(c, j){
     const grid = el('div','tel-app-grid');
     const apps = [
       { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, onclick:()=>{ S.movilVista='chatlist'; pintar(); } },
+      { id:'email', nombre:'Email', clase:'email', icono:TEL_ICONO_EMAIL, onclick:()=>{ S.movilVista='emailLista'; pintar(); } },
       { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ S.movilAbierto=false; S.screen='tabClub'; render(); } },
       { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ S.pantallaAnteriorAjustes = S.pantallaBase || S.screen; S.movilAbierto=false; S.screen='ajustes'; render(); } }
     ];
@@ -13751,6 +13809,54 @@ function renderMovilContenido(c, j){
         });
       }
       c.appendChild(choices);
+    }
+  }
+
+  else if(vista === 'emailLista'){
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','Email'));
+    c.appendChild(header);
+    const correos = telEmailsDe(j);
+    correos.forEach(co=>{
+      const leido = S.telEmailsLeidos && S.telEmailsLeidos[co.id];
+      const btn = document.createElement('button');
+      btn.className = 'tel-contact';
+      btn.innerHTML = `
+        <span class="tel-avatar" style="background:${co.color}">${telIniciales(co.remitente)}</span>
+        <span class="tel-contact-body">
+          <span class="tel-contact-top"><span class="tel-contact-name"${leido?' style="font-weight:500;"':''}>${co.remitente}</span></span>
+          <span class="tel-contact-sub">${co.asunto}</span>
+          <span class="tel-contact-preview">${co.preview}</span>
+        </span>
+        ${!leido ? `<span class="tel-email-unread"></span>` : ''}`;
+      btn.onclick = ()=>{
+        S.telEmailsLeidos = S.telEmailsLeidos || {};
+        S.telEmailsLeidos[co.id] = true;
+        S.movilCorreoAbierto = co.id;
+        S.movilVista='emailDetalle';
+        pintar();
+      };
+      c.appendChild(btn);
+    });
+  }
+
+  else if(vista === 'emailDetalle'){
+    const correo = telEmailsDe(j).find(x=>x.id===S.movilCorreoAbierto);
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='emailLista'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','Email'));
+    c.appendChild(header);
+    if(correo){
+      const meta = el('div','tel-email-meta');
+      meta.appendChild(el('div','tel-email-asunto', correo.asunto));
+      meta.appendChild(el('div','tel-email-de', `De: <b>${correo.remitente}</b>`));
+      c.appendChild(meta);
+      c.appendChild(el('div','tel-email-cuerpo', correo.cuerpo));
     }
   }
 }
