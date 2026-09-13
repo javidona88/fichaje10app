@@ -1199,6 +1199,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 }
 .tel-sheet.show{ transform:translateY(0); cursor:default; }
 .tel-sheet.deshabilitada{ opacity:.32; pointer-events:none; }
+/* Respaldo opaco detrás del asomo recogido: las esquinas superiores redondeadas del aparato
+   (.tel-device) dejan un recorte transparente en esos dos picos por los que, sin esto, se cuela
+   la pantalla real de detrás — un bar sólido del mismo ancho, justo detrás del móvil, tapa ese
+   hueco por más que la esquina sea curva. Solo se pinta con el móvil recogido (pintarMovilSheet). */
+.tel-dock{ position:absolute; left:0; right:0; bottom:0; height:calc(42px + env(safe-area-inset-bottom,0px)); background:#15161c; }
 /* Se asoma hasta justo debajo de la topbar real del juego (82px + su zona segura) cuando está
    abierto — el mismo elemento que en reposo solo enseña 42px (ver .tel-sheet arriba). */
 .tel-device{
@@ -1220,10 +1225,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-notif-ic svg{ width:9px; height:9px; }
 .tel-notif-ic.whatsapp{ background:linear-gradient(150deg,#3fce6e,#1f9e4c); }
 .tel-notif-ic.email{ background:linear-gradient(150deg,#5a8fd6,#2c4d84); }
+.tel-notif-ic.redes{ background:linear-gradient(150deg,#e0507a,#8a1f4a); }
 .tel-notif-ic.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
 .tel-screen{
   flex:1; min-height:0; position:relative; background:var(--bg2); border-radius:32px 32px 0 0;
-  overflow-y:auto; overflow-x:hidden; padding:14px 20px 24px;
+  overflow-y:auto; overflow-x:hidden; padding:14px 14px 24px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05);
 }
 .tel-icon-badge{
@@ -1257,6 +1263,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-icon.cromos{ background:linear-gradient(150deg,#4CAF6D,#1d5c37); }
 .tel-icon.club{ background:linear-gradient(150deg,#7c8494,#464c59); }
 .tel-icon.ajustes{ background:linear-gradient(150deg,#7c8494,#464c59); }
+.tel-icon.redes{ background:linear-gradient(150deg,#e0507a,#8a1f4a); }
+/* Puntito de "hay algo nuevo" sobre el icono de una app (WhatsApp/Email/Redes/Servicios) —
+   mismo lenguaje visual que el badge dorado de Logros en la topbar, pero aquí genérico (rojo,
+   como una notificación real) porque son varias apps distintas, no un solo contador. */
+.tel-app-dot{ position:absolute; top:-2px; right:-2px; width:12px; height:12px; border-radius:50%; background:#e0432e; border:2px solid var(--panel2); }
 /* Carpeta del móvil (estilo iOS): fondo translúcido con una previsualización 2x2 de los
    iconos que contiene — Economía agrupa Banca/Casino Online/Servicios/Compras, ver TEL_CARPETAS. */
 .tel-icon.carpeta{ background:rgba(255,255,255,0.09); display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(2,1fr); gap:4px; padding:8px; }
@@ -1312,6 +1323,12 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-app-header{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
 .tel-back-btn{ background:none; border:1px solid var(--line); border-radius:8px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); cursor:pointer; flex-shrink:0; }
 .tel-app-header .tel-title{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
+/* Pantallas reales incrustadas (Club/Ajustes/Casino/Servicios/Compras, ver telAbrirPantallaReal):
+   sin esto, la .card genérica del juego (pensada para una pantalla completa) metía una segunda
+   caja con su propio borde/sombra/relleno DENTRO del ya estrecho .tel-screen, dejando el
+   contenido de verdad (staff-card, tienda-card...) con menos de la mitad del ancho del móvil.
+   Se aplana aquí (sin tocar .card fuera del móvil) para que ese contenido use el ancho real. */
+.tel-screen .card{ background:none; border:none; box-shadow:none; padding:0; margin-bottom:16px; border-radius:0; }
 
 .tel-contact{ width:100%; background:none; border:none; color:inherit; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:12px; padding:11px 4px; text-align:left; border-bottom:1px solid var(--line); }
 .tel-contact:last-child{ border-bottom:none; }
@@ -1343,6 +1360,10 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-email-de{ font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink-soft); }
 .tel-email-de b{ color:var(--ink); font-weight:600; }
 .tel-email-cuerpo{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; line-height:1.65; color:var(--ink); }
+.tel-redes-perfil{ display:flex; align-items:center; gap:12px; padding-bottom:14px; margin-bottom:14px; border-bottom:1px solid var(--line); }
+.tel-redes-post{ background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px; }
+.tel-redes-post-txt{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; line-height:1.5; color:var(--ink); }
+.tel-redes-post-meta{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--gold); margin-top:8px; display:flex; align-items:center; gap:4px; }
 </style>
 </head>
 <body>
@@ -9451,6 +9472,7 @@ function avanzarPaso(j){
       j.sancionActiva = false;
     }
   }
+  generarNotificacionMovil(j);
   S.pasoIndex = (S.pasoIndex===undefined || S.pasoIndex===null) ? 0 : S.pasoIndex+1;
   if(S.pasoIndex >= SECUENCIA_TEMPORADA.length){
     const posicionFinal = Math.min(EQUIPOS_EN_LIGA, Math.max(1, S.posicionLiga || 10));
@@ -11136,6 +11158,17 @@ function abrirMovilSheet(){
   pintar();
 }
 function cerrarMovilSheet(){
+  // Si se cierra estando incrustada una pantalla real (Club/Ajustes/Casino/Servicios/Compras),
+  // restaura SIEMPRE la pantalla y la vista de antes de entrar — da igual si se cierra con este
+  // botón, con el atrás propio del móvil o de cualquier otra forma. Sin esto, cerrar el móvil
+  // desde dentro de (por ejemplo) Club dejaba S.screen="tabClub" colgado: el juego de detrás se
+  // quedaba en esa pantalla aunque el jugador no la hubiera elegido de verdad, y "Avanzar" (o
+  // simplemente seguir jugando) parecía "aparecer" esa misma pantalla de la nada más tarde.
+  if(S.movilVista === 'pantallaReal'){
+    S.screen = S.movilPantallaAnterior || S.pantallaBase || S.screen;
+    S.movilVista = S.movilVistaAnterior || 'home';
+    S.movilPantallaAnterior = null;
+  }
   const sheetVivo = document.querySelector('.tel-sheet.show');
   if(sheetVivo){
     sheetVivo.classList.remove('show');
@@ -11147,12 +11180,12 @@ function cerrarMovilSheet(){
 // Notificaciones reales pendientes, para el asomo con iconos de apps (como el status bar de un
 // móvil real) — solo lo que ya calculábamos en otros sitios del propio móvil, nada narrativo.
 function telNotificacionesPendientes(j){
+  const mapa = telAppsConPendiente(j);
   const lista = [];
-  const whatsappPend = telContactosDe(j).filter(c=>!(S.movilRespuestas && S.movilRespuestas[c.id]!==undefined)).length;
-  if(whatsappPend > 0) lista.push({ clase:'whatsapp', icono:TEL_ICONO_WHATSAPP });
-  const emailPend = telEmailsDe(j).filter(co=>!(S.telEmailsLeidos && S.telEmailsLeidos[co.id])).length;
-  if(emailPend > 0) lista.push({ clase:'email', icono:TEL_ICONO_EMAIL });
-  if(contarComprasDisponibles(j) > 0) lista.push({ clase:'servicios', icono:TEL_ICONO_COMPRAS });
+  if(mapa.whatsapp) lista.push({ clase:'whatsapp', icono:TEL_ICONO_WHATSAPP });
+  if(mapa.email) lista.push({ clase:'email', icono:TEL_ICONO_EMAIL });
+  if(mapa.redes) lista.push({ clase:'redes', icono:TEL_ICONO_REDES });
+  if(mapa.servicios) lista.push({ clase:'servicios', icono:TEL_ICONO_COMPRAS });
   return lista;
 }
 // El móvil vive en su propia capa (#movil-root), siempre por encima de la tabbar: un único
@@ -11163,9 +11196,9 @@ function telNotificacionesPendientes(j){
 function pintarMovilSheet(){
   const raiz = document.getElementById('movil-root');
   raiz.innerHTML = '';
-  if(!S.jugador || S.enFaseCreacion) return;
+  if(!S.jugador || S.enFaseCreacion){ raiz.style.pointerEvents = 'none'; document.body.style.overflow = ''; return; }
   const pantallaEfectiva = (S.screen === 'ajustes' && S.pantallaAnteriorAjustes) ? S.pantallaAnteriorAjustes : S.screen;
-  if(PANTALLAS_CREACION.has(pantallaEfectiva)) return;
+  if(PANTALLAS_CREACION.has(pantallaEfectiva)){ raiz.style.pointerEvents = 'none'; document.body.style.overflow = ''; return; }
   if(S.movilAbierto && S.movilVista === 'pantallaReal' && !TEL_PANTALLAS_EMBEBIBLES.has(S.screen)){
     // El usuario salió de la pantalla incrustada por su propio botón de "volver" (Servicios,
     // Compras, Ajustes...) hacia una pantalla normal del juego que ya no tiene sentido ver
@@ -11176,6 +11209,17 @@ function pintarMovilSheet(){
     S._movilVisible = false;
   }
   const deshabilitada = PANTALLAS_SIN_TABBAR.has(S.screen) && !S.movilAbierto;
+  // Con el móvil abierto, bloquea del todo lo de detrás: ni clics ni scroll de la pantalla real
+  // deben colarse por los márgenes laterales del aparato (un 8% de ancho a cada lado) ni por
+  // encima de él — con un móvil real tapando la pantalla no podrías ni scrollear ni tocar nada
+  // de lo que hay debajo. #movil-root cubre TODO el ancho (left:0;right:0), así que ponerlo en
+  // pointer-events:auto basta para tapar esos huecos; document.body.style.overflow bloquea el
+  // scroll de la página aunque la rueda/gesto se dispare sobre esa zona.
+  raiz.style.pointerEvents = S.movilAbierto ? 'auto' : 'none';
+  document.body.style.overflow = S.movilAbierto ? 'hidden' : '';
+  if(!S.movilAbierto && !deshabilitada){
+    raiz.appendChild(el('div','tel-dock'));
+  }
   const sheet = el('div','tel-sheet'+(deshabilitada?' deshabilitada':''));
   const device = el('div','tel-device');
 
@@ -13532,6 +13576,7 @@ const TEL_ICONO_SERVICIOS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" 
 const TEL_ICONO_COMPRAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
 const TEL_ICONO_CASINO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="12" cy="12" r="1" fill="#fff" stroke="none"/><circle cx="9" cy="14.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="14.5" r="1" fill="#fff" stroke="none"/></svg>';
 const TEL_ICONO_CROMOS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>';
+const TEL_ICONO_REDES = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.4 5.4 5.9.6-4.5 3.9 1.4 5.8L12 16.2l-5.2 3 1.4-5.8-4.5-3.9 5.9-.6z"/></svg>';
 // Umbrales reales: los mismos NIVELES_POPULARIDAD que usa el resto del juego (Conocido/Popular/Ídolo).
 // Carpeta "Economía" (estilo iOS): agrupa las 3 apps de dinero. Banca es la única con pantalla
 // propia dentro del móvil (S.movilVista='banca', ver más abajo); Casino Online y Servicios
@@ -13572,6 +13617,125 @@ function telAbrirPantallaReal(destino, antesDeIr){
   S.movilVista = 'pantallaReal';
   S.screen = destino;
   render();
+}
+// Plantillas de notificaciones "de vez en cuando" (WhatsApp/Email/Redes), ligadas al ESTADO
+// reciente del jugador (lesión, racha, crisis, forma, salto de popularidad) en vez de a un
+// suceso concreto — con más de un centenar de sucesos distintos en BANCO_EVENTOS, escribir un
+// mensaje a medida de cada uno no es viable; el estado resultante SÍ da contexto real y
+// reconocible ("te acabas de lesionar", "estás en racha") sin tener que engancharse a un id.
+const TEL_PLANTILLAS_NOTIF = {
+  lesion: {
+    whatsapp:['Me acabo de enterar de la lesión, ¿cómo lo llevas?', 'Cuídate mucho estos días — aquí estamos para lo que necesites.', '¿Sabes ya cuánto vas a estar parado?'],
+    email:{ remitente:'Departamento Médico', asunto:'Parte de evolución', cuerpoFn:j=>`Seguimos de cerca tu recuperación. Ánimo, ${primerNombre(j)} — de momento todo evoluciona según lo previsto.` },
+    redes:['Fuerza, campeón 💪 Te esperamos de vuelta pronto.', 'Toda la afición contigo en la recuperación ❤️', 'Se le echa de menos ya en el campo.']
+  },
+  crisis:{
+    whatsapp:['Sé que no está siendo un buen momento. Aquí me tienes para lo que sea.', 'No dejes que unos partidos malos te definan — esto se cambia con trabajo.'],
+    redes:['Los números no cuentan toda la historia. Confiamos en ti.', 'Toca apretar los dientes, esto es una racha y las rachas se cortan.']
+  },
+  racha:{
+    whatsapp:['¡Estás que te sales! No pares ahora.', 'Como sigas así te vas a comer el mundo esta temporada.'],
+    redes:['🔥🔥🔥 IMPARABLE. Así, así, así.', 'Este nivel no se sostiene… ¿o sí? 😳', 'Cada semana mejor. Qué manera de crecer.']
+  },
+  formaAlta:{
+    whatsapp:['Te veo en un momento de forma brutal, ¡a disfrutarlo!'],
+    redes:['Nunca lo había visto tan en forma. Qué animal.', 'Rindiendo a un nivel altísimo esta temporada — se nota.']
+  },
+  formaBaja:{
+    whatsapp:['Te veo un poco apagado últimamente, ¿todo bien?', '¿Necesitas desconectar unos días? Se te ve cansado.'],
+    redes:['Se le nota falto de piernas, necesita descanso.']
+  },
+  popularSube:{
+    email:{ remitente:'Departamento de Comunicación', asunto:'Tu perfil está creciendo', cuerpoFn:j=>`Enhorabuena, ${primerNombre(j)}. Tu popularidad ha dado un salto — se nota en redes y en el interés de los medios por ti.` },
+    redes:['🚀 Subiendo como la espuma, cada vez más gente habla de ti.', 'Empiezas a sonar en todas partes.']
+  },
+  generico:{
+    whatsapp:['¿Qué tal la semana? Aquí, dándole al día a día.', 'Oye, hace tiempo que no hablamos. ¿Todo en orden?', 'Cuéntame, ¿cómo va todo por el club?'],
+    redes:['Otra semana más dándolo todo. Vamos con esa. ⚽', 'El fútbol nunca duerme.', 'Entrenando duro, como siempre.']
+  }
+};
+function primerNombre(j){ return (j.nombre||'').split(' ')[0]; }
+// Cuántos seguidores "tendría" el jugador en redes — pura decoración derivada de stats reales
+// (popularidad + goles de carrera), no se guarda aparte ni se usa en ningún cálculo del juego.
+function telSeguidoresRedes(j){
+  return Math.round(300 + (j.stats.popularidad||0) * 90 + (j.carrera.goles||0) * 12);
+}
+function tiendaUnicaDisponible(items, nivelActual, j){
+  return (items||[]).some(info => info.nivel > nivelActual
+    && (!info.desbloqueo || info.desbloqueo(j))
+    && (j.stats.dinero||0) >= info.coste && (j.stats.dinero||0) >= 0);
+}
+function comprasDisponibles(j){
+  return tiendaUnicaDisponible(TIENDA_COCHES, j.cocheActual||0, j)
+      || tiendaUnicaDisponible(TIENDA_MOTOS, j.motoActual||0, j)
+      || tiendaUnicaDisponible(TIENDA_BOTAS, j.botasActual||0, j);
+}
+// Email real (telEmailsDe, fijo por hecho de la partida) + email generado con el avance de la
+// temporada (S.movilBandeja.email, ver generarNotificacionMovil) — los nuevos van arriba, como
+// en cualquier bandeja de entrada real; los fijos siempre están (mismo orden estructural de siempre).
+function telTodosLosCorreos(j){
+  return (S.movilBandeja && S.movilBandeja.email ? S.movilBandeja.email.slice().reverse() : []).concat(telEmailsDe(j));
+}
+// Mapa {appId:true} de qué apps tienen algo pendiente — una única fuente de verdad tanto para
+// los iconos del notch (telNotificacionesPendientes) como para el puntito sobre cada icono de
+// la rejilla/carpeta (ver renderMovilContenido).
+function telAppsConPendiente(j){
+  const mapa = {};
+  if(telContactosDe(j).some(c=>{
+    const sinResponder = !(S.movilRespuestas && S.movilRespuestas[c.id]!==undefined);
+    const extraSinLeer = (S.movilBandeja && S.movilBandeja.whatsapp || []).some(m=>m.contactoId===c.id && !(S.telMensajesLeidos && S.telMensajesLeidos[m.id]));
+    return sinResponder || extraSinLeer;
+  })) mapa.whatsapp = true;
+  if(telTodosLosCorreos(j).some(co=>!(S.telEmailsLeidos && S.telEmailsLeidos[co.id]))) mapa.email = true;
+  if((S.movilBandeja && S.movilBandeja.redes || []).some(p=>!p.leido)) mapa.redes = true;
+  if(contarComprasDisponibles(j) > 0) mapa.servicios = true;
+  if(comprasDisponibles(j)) mapa.compras = true;
+  return mapa;
+}
+// Genera, con probabilidad baja (no en cada paso — un móvil real no escribe cada semana sin
+// falta), UNA notificación nueva ligada al estado del jugador en ESTE momento de la temporada.
+// Llamada desde avanzarPaso(j): así cubre tanto los pasos con suceso normal como los de torneo,
+// sin tener que enganchar el generador a cada rama de BANCO_EVENTOS por separado.
+function generarNotificacionMovil(j){
+  if(Math.random() > 0.35) return;
+  S.movilBandeja = S.movilBandeja || { whatsapp:[], email:[], redes:[] };
+  const tierAntes = S._movilTierPopularidadVisto;
+  const tierAhora = estadoPopularidad(j.stats.popularidad||0).texto;
+  const subioPopularidad = !!tierAntes && tierAhora !== tierAntes;
+  S._movilTierPopularidadVisto = tierAhora;
+  let bucket;
+  if(j.lesionSemanas > 0) bucket = 'lesion';
+  else if(j.estadoMental === 'crisis') bucket = 'crisis';
+  else if(j.estadoMental === 'racha') bucket = 'racha';
+  else if(subioPopularidad) bucket = 'popularSube';
+  else if((j.stats.forma||0) >= 80) bucket = 'formaAlta';
+  else if((j.stats.forma||0) <= 25) bucket = 'formaBaja';
+  else bucket = 'generico';
+  const plantillas = TEL_PLANTILLAS_NOTIF[bucket] || TEL_PLANTILLAS_NOTIF.generico;
+  const contactos = telContactosDe(j);
+  const canales = [];
+  if(plantillas.whatsapp && contactos.length) canales.push('whatsapp');
+  if(plantillas.email) canales.push('email');
+  if(plantillas.redes) canales.push('redes');
+  if(!canales.length) return;
+  const canal = canales[Math.floor(Math.random()*canales.length)];
+  const id = 'notif_' + S.temporada + '_' + (S.pasoIndex||0) + '_' + Math.random().toString(36).slice(2,8);
+  if(canal === 'whatsapp'){
+    const ct = contactos[Math.floor(Math.random()*contactos.length)];
+    const texto = plantillas.whatsapp[Math.floor(Math.random()*plantillas.whatsapp.length)];
+    S.movilBandeja.whatsapp.push({ id, contactoId:ct.id, texto, temporada:S.temporada });
+  } else if(canal === 'email'){
+    const info = plantillas.email;
+    const cuerpo = info.cuerpoFn(j);
+    S.movilBandeja.email.push({ id, remitente:info.remitente, color:'#8a6dd6', asunto:info.asunto,
+      preview: cuerpo.replace(/<[^>]+>/g,'').slice(0,64)+'…', cuerpo, temporada:S.temporada });
+  } else {
+    const texto = plantillas.redes[Math.floor(Math.random()*plantillas.redes.length)];
+    S.movilBandeja.redes.push({ id, texto, temporada:S.temporada, leido:false });
+  }
+  ['whatsapp','email','redes'].forEach(k=>{
+    if(S.movilBandeja[k].length > 40) S.movilBandeja[k].splice(0, S.movilBandeja[k].length-40);
+  });
 }
 const TEL_PLANTILLAS_COMPANERO = {
   bromista: {
@@ -13780,16 +13944,18 @@ function renderMovilContenido(c, j){
     const pill = el('div','tel-fame-pill', `${ICONOS_SVG.estrella}${nivel.texto} <b>· ${Math.round(j.stats.popularidad||0)}</b>`);
     c.appendChild(pill);
     const grid = el('div','tel-app-grid');
+    const pendientes = telAppsConPendiente(j);
     const apps = [
       { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, onclick:()=>{ S.movilVista='chatlist'; pintar(); } },
       { id:'email', nombre:'Email', clase:'email', icono:TEL_ICONO_EMAIL, onclick:()=>{ S.movilVista='emailLista'; pintar(); } },
+      { id:'redes', nombre:'Redes', clase:'redes', icono:TEL_ICONO_REDES, onclick:()=>{ S.movilVista='redes'; pintar(); } },
       { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ telAbrirPantallaReal('tabClub'); } },
       { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ telAbrirPantallaReal('ajustes', ()=>{ S.pantallaAnteriorAjustes = S.pantallaBase || S.screen; }); } }
     ];
     apps.forEach(a=>{
       const btn = document.createElement('button');
       btn.className = 'tel-app';
-      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}</span><span class="tel-label">${a.nombre}</span>`;
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${pendientes[a.id]?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${a.nombre}</span>`;
       btn.onclick = a.onclick;
       grid.appendChild(btn);
     });
@@ -13799,7 +13965,8 @@ function renderMovilContenido(c, j){
     const btnFolder = document.createElement('button');
     btnFolder.className = 'tel-app';
     const miniHtml = folder.apps.slice(0,4).map(a=>`<span class="mini ${a.clase}">${a.icono}</span>`).join('') + (folder.apps.length < 4 ? '<span class="mini vacio"></span>' : '');
-    btnFolder.innerHTML = `<span class="tel-icon carpeta">${miniHtml}</span><span class="tel-label">${folder.nombre}</span>`;
+    const hayPendienteEnCarpeta = folder.apps.some(a=>pendientes[a.id]);
+    btnFolder.innerHTML = `<span class="tel-icon carpeta">${miniHtml}${hayPendienteEnCarpeta?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${folder.nombre}</span>`;
     btnFolder.onclick = ()=>{ S.movilVista='carpeta_economia'; pintar(); };
     grid.insertBefore(btnFolder, grid.children[1] || null);
     TEL_APPS_BLOQUEADAS.forEach(a=>{
@@ -13825,11 +13992,12 @@ function renderMovilContenido(c, j){
     header.appendChild(el('span','tel-title', folder.nombre));
     c.appendChild(header);
     const grid = el('div','tel-app-grid');
+    const pendientes = telAppsConPendiente(j);
     folder.apps.forEach(a=>{
       const desbloqueada = telAppDesbloqueada(a.nivelMin);
       const btn = document.createElement('button');
       btn.className = 'tel-app' + (desbloqueada?'':' locked');
-      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${desbloqueada?'':`<span class="tel-lock-badge">${TEL_ICONO_LOCK}</span>`}</span><span class="tel-label">${a.nombre}</span>`;
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${desbloqueada?'':`<span class="tel-lock-badge">${TEL_ICONO_LOCK}</span>`}${desbloqueada&&pendientes[a.id]?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${a.nombre}</span>`;
       btn.onclick = ()=>{
         if(!desbloqueada){ mostrarNotificacion(`${a.nombre} se desbloquea al llegar a "${estadoPopularidad(a.nivelMin).texto}" (${a.nivelMin} de popularidad)`, 'info'); return; }
         if(a.esInterna){ S.movilVista = a.id; S.telBancoTab = S.telBancoTab || 'resumen'; pintar(); return; }
@@ -13962,6 +14130,9 @@ function renderMovilContenido(c, j){
     }
     contactos.forEach(ct=>{
       const respondido = S.movilRespuestas && S.movilRespuestas[ct.id] !== undefined;
+      const extras = (S.movilBandeja && S.movilBandeja.whatsapp || []).filter(m=>m.contactoId===ct.id);
+      const hayExtraSinLeer = extras.some(m=>!(S.telMensajesLeidos && S.telMensajesLeidos[m.id]));
+      const previewTexto = extras.length ? extras[extras.length-1].texto : ct.mensajes[ct.mensajes.length-1];
       const btn = document.createElement('button');
       btn.className = 'tel-contact';
       btn.innerHTML = `
@@ -13969,10 +14140,15 @@ function renderMovilContenido(c, j){
         <span class="tel-contact-body">
           <span class="tel-contact-top"><span class="tel-contact-name">${ct.nombre}</span></span>
           <span class="tel-contact-sub">${ct.sub}</span>
-          <span class="tel-contact-preview">${ct.mensajes[ct.mensajes.length-1]}</span>
+          <span class="tel-contact-preview">${previewTexto}</span>
         </span>
-        ${respondido ? `<span class="tel-contact-answered">${ICONOS_SVG.check}</span>` : ''}`;
-      btn.onclick = ()=>{ S.movilContactoAbierto = ct.id; S.movilVista='thread'; pintar(); };
+        ${hayExtraSinLeer ? `<span class="tel-email-unread"></span>` : (respondido ? `<span class="tel-contact-answered">${ICONOS_SVG.check}</span>` : '')}`;
+      btn.onclick = ()=>{
+        S.movilContactoAbierto = ct.id; S.movilVista='thread';
+        S.telMensajesLeidos = S.telMensajesLeidos || {};
+        extras.forEach(m=> S.telMensajesLeidos[m.id]=true);
+        pintar();
+      };
       c.appendChild(btn);
     });
   }
@@ -14002,6 +14178,10 @@ function renderMovilContenido(c, j){
         const cambios = (S.movilCambios && S.movilCambios[contacto.id]) || [];
         if(cambios.length) thread.appendChild(telChipsEfecto(cambios));
       }
+      // Mensajes nuevos que fueron llegando con el avance de temporada (generarNotificacionMovil)
+      // — se muestran después del intercambio fijo inicial, en el orden en que se generaron.
+      (S.movilBandeja && S.movilBandeja.whatsapp || []).filter(m=>m.contactoId===contacto.id)
+        .forEach(m=> thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${m.texto}</div>`)));
       c.appendChild(thread);
       const choices = el('div','tel-choices');
       if(idxRespondido !== undefined){
@@ -14027,7 +14207,7 @@ function renderMovilContenido(c, j){
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Email'));
     c.appendChild(header);
-    const correos = telEmailsDe(j);
+    const correos = telTodosLosCorreos(j);
     correos.forEach(co=>{
       const leido = S.telEmailsLeidos && S.telEmailsLeidos[co.id];
       const btn = document.createElement('button');
@@ -14052,7 +14232,7 @@ function renderMovilContenido(c, j){
   }
 
   else if(vista === 'emailDetalle'){
-    const correo = telEmailsDe(j).find(x=>x.id===S.movilCorreoAbierto);
+    const correo = telTodosLosCorreos(j).find(x=>x.id===S.movilCorreoAbierto);
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
     back.onclick = ()=>{ S.movilVista='emailLista'; pintar(); };
@@ -14066,6 +14246,35 @@ function renderMovilContenido(c, j){
       c.appendChild(meta);
       c.appendChild(el('div','tel-email-cuerpo', correo.cuerpo));
     }
+  }
+
+  else if(vista === 'redes'){
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','Redes'));
+    c.appendChild(header);
+    // Al entrar se marca todo como visto — es un feed, no hay detalle propio por post que abrir.
+    (S.movilBandeja && S.movilBandeja.redes || []).forEach(p=> p.leido = true);
+    const perfil = el('div','tel-redes-perfil');
+    perfil.appendChild(el('span','tel-avatar', telIniciales(j.nombre))).style.cssText = `width:40px;height:40px;font-size:14px;background:#8a1f4a;flex-shrink:0;`;
+    const perfilBody = el('div');
+    perfilBody.appendChild(el('div','tel-title', capitalizarNombre(j.nombre)));
+    perfilBody.appendChild(el('div',null, `${telSeguidoresRedes(j).toLocaleString('es-ES')} seguidores`)).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:11.5px;color:var(--gold);";
+    perfil.appendChild(perfilBody);
+    c.appendChild(perfil);
+    const posts = (S.movilBandeja && S.movilBandeja.redes || []).slice().reverse();
+    if(!posts.length){
+      c.appendChild(el('p',null,'Todavía no se habla mucho de ti por aquí — según vayas jugando, la cosa se anima.')).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);padding:10px 4px;";
+    }
+    posts.forEach(p=>{
+      const card = el('div','tel-redes-post');
+      card.appendChild(el('div','tel-redes-post-txt', p.texto));
+      const likes = Math.round(20 + (j.stats.popularidad||0) * 3 + Math.random()*30);
+      card.appendChild(el('div','tel-redes-post-meta', `${iconoInline('estrella',11)} ${likes} · Temp. ${temporadaAAnoCompleto(p.temporada)}`));
+      c.appendChild(card);
+    });
   }
 }
 
