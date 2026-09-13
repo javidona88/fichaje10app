@@ -11099,27 +11099,31 @@ function pintarTabbar(){
     if(!deshabilitada){
       btn.onclick = ()=>{
         if(t.id === 'avanzar'){
-          // Red de seguridad: "Avanzar" tiene que llevarte SIEMPRE a alguna parte. Si
-          // S.pantallaBase hubiera quedado apuntando a la propia pestaña activa (un camino
-          // excepcional, no el habitual — p. ej. un flujo de fichaje abandonado a medias por un
-          // bug ya corregido, pero cuya partida guardada quedó así) caía a tabJugador como último
-          // recurso, y si AÚN así coincidía con la pantalla actual, se quedaba sin hacer nada —
-          // exactamente igual que si el botón hubiera dejado de funcionar. Ahora, en ese caso
-          // límite, se hace avanzar la temporada de verdad (avanzarPaso): cualquier fichaje o
-          // evento que hubiera quedado a medias ya se aplicó en su momento, así que no hay nada
-          // que perder por seguir adelante, y el jugador nunca se queda sin ningún botón que
-          // le mueva la partida.
-          let destino = S.pantallaBase || 'tabJugador';
-          if(destino === S.screen) destino = 'tabJugador';
+          // "Avanzar" tiene que llevarte SIEMPRE a alguna parte. Si S.pantallaBase apunta a
+          // otra pantalla (p. ej. un suceso de la semana ya generado, viendo otra pestaña),
+          // te devuelve a ella. Si ya ESTÁS en tu pantalla base, solo tiene sentido avanzar la
+          // temporada de verdad (avanzarPaso) cuando esa base es una pestaña normal
+          // (tabJugador y compañía — nunca debería serlo, salvo una partida guardada rara de
+          // un flujo abandonado a medias: red de seguridad para que el botón nunca se quede
+          // "muerto"). Si es una pantalla de flujo real (p. ej. el propio suceso en pantalla),
+          // no se hace nada — se resuelve con sus propios botones, no con "Avanzar"; forzar
+          // avanzarPaso() ahí abandonaría el suceso a medias y duplicaría el paso de temporada
+          // (bug real: antes esto te devolvía a Jugador en vez de dejarte resolver el suceso).
+          const destino = S.pantallaBase || 'tabJugador';
           if(destino === S.screen){
-            if(S.jugador){ avanzarPaso(S.jugador); guardarPartida(); }
+            if(PANTALLAS_TAB.has(destino) && S.jugador){
+              avanzarPaso(S.jugador);
+              guardarPartida();
+              render();
+            }
           } else {
             S.screen = destino;
+            render();
           }
         } else {
           S.screen = t.pantalla || S.pantallaBase || S.screen;
+          render();
         }
-        render();
       };
     }
     bar.appendChild(btn);
@@ -11162,6 +11166,15 @@ function pintarMovilSheet(){
   if(!S.jugador || S.enFaseCreacion) return;
   const pantallaEfectiva = (S.screen === 'ajustes' && S.pantallaAnteriorAjustes) ? S.pantallaAnteriorAjustes : S.screen;
   if(PANTALLAS_CREACION.has(pantallaEfectiva)) return;
+  if(S.movilAbierto && S.movilVista === 'pantallaReal' && !TEL_PANTALLAS_EMBEBIBLES.has(S.screen)){
+    // El usuario salió de la pantalla incrustada por su propio botón de "volver" (Servicios,
+    // Compras, Ajustes...) hacia una pantalla normal del juego que ya no tiene sentido ver
+    // dentro del móvil — se cierra solo (sin animación de bajada: la pantalla de detrás ya es
+    // la real, no hay nada que "revelar" bajando el móvil).
+    S.movilAbierto = false;
+    S.movilVista = 'home';
+    S._movilVisible = false;
+  }
   const deshabilitada = PANTALLAS_SIN_TABBAR.has(S.screen) && !S.movilAbierto;
   const sheet = el('div','tel-sheet'+(deshabilitada?' deshabilitada':''));
   const device = el('div','tel-device');
@@ -11182,7 +11195,37 @@ function pintarMovilSheet(){
   sheet.appendChild(device);
 
   if(S.movilAbierto){
-    renderMovilContenido(pantalla, S.jugador);
+    if(S.movilVista === 'pantallaReal'){
+      // Pantalla real (Club/Ajustes/Casino Online/Servicios/Compras/Logros) incrustada dentro
+      // del móvil: pintar() ya la dejó pintada de verdad en #app (el flujo normal del juego, sin
+      // tocar) — aquí solo se le pone una cabecera propia del móvil (con su título real, ver
+      // S._ultimoTituloTopbar en topbar()) y se MUEVE ese contenido dentro de .tel-screen
+      // (appendChild reubica los nodos ya existentes, no los duplica ni los recrea).
+      const headerReal = el('div','tel-app-header');
+      const backReal = document.createElement('button'); backReal.className='tel-back-btn'; backReal.innerHTML=TEL_ICONO_BACK;
+      backReal.onclick = ()=>{
+        // Restaura también la pantalla real de detrás (S.screen), no solo la vista del móvil —
+        // si no, al cerrar el móvil después de "volver" te encontrarías la última pantalla
+        // incrustada (p. ej. Club) en vez de donde estabas de verdad antes de abrir esa app.
+        S.screen = S.movilPantallaAnterior || S.pantallaBase || 'tabJugador';
+        S.movilVista = S.movilVistaAnterior || 'home';
+        pintar();
+      };
+      headerReal.appendChild(backReal);
+      headerReal.appendChild(el('span','tel-title', S._ultimoTituloTopbar || ''));
+      pantalla.appendChild(headerReal);
+      while(app.firstChild){ pantalla.appendChild(app.firstChild); }
+      // Si lo primero que trae la pantalla real es justo su propia tarjeta "← Volver" (Ajustes,
+      // Servicios, Compras...), se retira: la cabecera del móvil de arriba ya cumple esa función
+      // aquí dentro, y las dos juntas son ruido visual sin ningún control extra de verdad.
+      const primerBloque = pantalla.children[1];
+      if(primerBloque && primerBloque.classList.contains('card')){
+        const botones = primerBloque.querySelectorAll('button');
+        if(botones.length === 1 && botones[0].textContent.trim() === '← Volver') primerBloque.remove();
+      }
+    } else {
+      renderMovilContenido(pantalla, S.jugador);
+    }
     header.onclick = (e)=>{ e.stopPropagation(); cerrarMovilSheet(); };
   } else if(!deshabilitada){
     sheet.title = 'Tu móvil';
@@ -11275,8 +11318,12 @@ function pintar(){
       }
     }
   }
-  pintarTabbar();
+  // pintarMovilSheet() va PRIMERO: puede decidir que el móvil se cierra solo (p. ej. tras
+  // "volver" desde una pantalla incrustada hacia una pantalla normal, ver TEL_PANTALLAS_EMBEBIBLES)
+  // y pintarTabbar() necesita ver ese S.movilAbierto ya actualizado para no dejarse la tabbar
+  // escondida (bug real: tras el auto-cierre, la tabbar no volvía hasta el siguiente repintado).
   pintarMovilSheet();
+  pintarTabbar();
   procesarAvisosLogros();
   document.getElementById('panel-entreno-root').innerHTML = '';
   if(S.mostrandoPanelEntreno && S.jugador){
@@ -11566,6 +11613,11 @@ function topbar(titulo){
     raiz.appendChild(progresoWrap);
   }
   tituloPaginaPendiente = titulo || null;
+  // El móvil necesita el título de la pantalla real que incrusta (ver pintarMovilSheet), pero
+  // tituloPaginaPendiente se consume (se pone a null) en cuanto la propia pantalla llama a
+  // crearEyebrow() — para cuando pintarMovilSheet() se ejecuta ya sería tarde para leerlo. Se
+  // guarda aparte, sin que nada más lo borre, así siempre refleja el último topbar() real.
+  S._ultimoTituloTopbar = titulo || null;
 }
 function crearEyebrow(texto){
   const pagina = tituloPaginaPendiente;
@@ -13499,6 +13551,28 @@ const TEL_CARPETA_ECONOMIA = {
 const TEL_APPS_BLOQUEADAS = [
   { id:'cromos', nombre:'Cromos', nivelMin:65, clase:'cromos', icono:TEL_ICONO_CROMOS, destino:'logros', antesDeIr:()=>{ S.logrosVistaActiva = 'cromos'; } }
 ];
+// Pantallas REALES del juego que se pueden ver incrustadas dentro del móvil (Club, Ajustes,
+// todo el grupo del Casino Online, Servicios, Compras, Logros/Cromos) — a diferencia de antes,
+// que cerraban el móvil y navegaban a pantalla completa por detrás. Mientras S.screen esté en
+// este set y el móvil siga abierto en vista 'pantallaReal', pintarMovilSheet() mueve el propio
+// #app (ya pintado por el pintar() normal) dentro de .tel-screen en vez de cerrar el móvil.
+const TEL_PANTALLAS_EMBEBIBLES = new Set(['tabClub','ajustes','casino','ruleta','tragaperras','blackjack','servicios','compras','logros']);
+// Abre una pantalla real DENTRO del móvil (sin cerrarlo). S.movilVistaAnterior guarda a qué
+// vista del móvil volver (home o carpeta_economia) cuando el usuario toque el botón atrás propio
+// del móvil — así Casino/Servicios/Compras vuelven a la carpeta y Club/Ajustes/Cromos a home.
+function telAbrirPantallaReal(destino, antesDeIr){
+  if(antesDeIr) antesDeIr();
+  if(S.movilVista !== 'pantallaReal'){
+    // Solo se guarda al ENTRAR (no en cada toque, si ya estuviéramos incrustados) — de dónde
+    // volver cuando se pulse el botón atrás propio del móvil: a la vista (home/carpeta) y a la
+    // pantalla real (S.screen) que hubiera de verdad detrás en ese momento.
+    S.movilVistaAnterior = S.movilVista;
+    S.movilPantallaAnterior = S.screen;
+  }
+  S.movilVista = 'pantallaReal';
+  S.screen = destino;
+  render();
+}
 const TEL_PLANTILLAS_COMPANERO = {
   bromista: {
     mensajes:['Ey crack, ¿nos vemos esta noche? 🍻', 'Un par de cervezas y para casa, lo prometo 😏'],
@@ -13709,8 +13783,8 @@ function renderMovilContenido(c, j){
     const apps = [
       { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, onclick:()=>{ S.movilVista='chatlist'; pintar(); } },
       { id:'email', nombre:'Email', clase:'email', icono:TEL_ICONO_EMAIL, onclick:()=>{ S.movilVista='emailLista'; pintar(); } },
-      { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ S.movilAbierto=false; S.screen='tabClub'; render(); } },
-      { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ S.pantallaAnteriorAjustes = S.pantallaBase || S.screen; S.movilAbierto=false; S.screen='ajustes'; render(); } }
+      { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ telAbrirPantallaReal('tabClub'); } },
+      { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ telAbrirPantallaReal('ajustes', ()=>{ S.pantallaAnteriorAjustes = S.pantallaBase || S.screen; }); } }
     ];
     apps.forEach(a=>{
       const btn = document.createElement('button');
@@ -13734,7 +13808,7 @@ function renderMovilContenido(c, j){
       btn.className = 'tel-app' + (desbloqueada?'':' locked');
       btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${desbloqueada?'':`<span class="tel-lock-badge">${TEL_ICONO_LOCK}</span>`}</span><span class="tel-label">${a.nombre}</span>`;
       btn.onclick = ()=>{
-        if(desbloqueada){ if(a.antesDeIr) a.antesDeIr(); S.movilAbierto=false; S.screen = a.destino; render(); }
+        if(desbloqueada){ telAbrirPantallaReal(a.destino, a.antesDeIr); }
         else{ mostrarNotificacion(`${a.nombre} se desbloquea al llegar a "${estadoPopularidad(a.nivelMin).texto}" (${a.nivelMin} de popularidad)`, 'info'); }
       };
       grid.appendChild(btn);
@@ -13759,10 +13833,7 @@ function renderMovilContenido(c, j){
       btn.onclick = ()=>{
         if(!desbloqueada){ mostrarNotificacion(`${a.nombre} se desbloquea al llegar a "${estadoPopularidad(a.nivelMin).texto}" (${a.nivelMin} de popularidad)`, 'info'); return; }
         if(a.esInterna){ S.movilVista = a.id; S.telBancoTab = S.telBancoTab || 'resumen'; pintar(); return; }
-        if(a.antesDeIr) a.antesDeIr();
-        S.movilAbierto = false;
-        S.screen = a.destino;
-        render();
+        telAbrirPantallaReal(a.destino, a.antesDeIr);
       };
       grid.appendChild(btn);
     });
