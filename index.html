@@ -52,11 +52,16 @@ body{
   padding: calc(82px + env(safe-area-inset-top,0px)) 16px 60px;
 }
 .wrap{ max-width: 760px; margin: 0 auto; }
-body.con-tabbar{ padding-bottom: 92px; }
-body.con-barra-entreno{ padding-bottom: 168px; }
-body.con-tel-peek{ padding-bottom: 208px; }
+/* +42px de sitio permanente para el asomo del móvil (ver #movil-root/.tel-sheet más abajo):
+   el asomo vive en su propia capa fija, pegada al fondo de página, así que #tabbar-root se
+   levanta ese margen para no solaparse con él. */
+body.con-tabbar{ padding-bottom: 134px; }
+body.con-barra-entreno{ padding-bottom: 210px; }
 body.sin-topbar{ padding-top: calc(24px + env(safe-area-inset-top,0px)); }
-#tabbar-root{ position:fixed; left:0; right:0; bottom:0; z-index:50; display:flex; flex-direction:column; }
+#tabbar-root{ position:fixed; left:0; right:0; bottom:42px; z-index:50; display:flex; flex-direction:column; }
+/* Por encima de la tabbar (ver más abajo el porqué de los 42px): el asomo del móvil vive aquí
+   siempre que hay partida en curso (pintarMovilSheet), tape lo que tape debajo. */
+#movil-root{ position:fixed; left:0; right:0; bottom:0; z-index:60; display:flex; justify-content:center; pointer-events:none; }
 .tabbar{
   display:flex; justify-content:space-around; align-items:stretch;
   background:rgba(20,22,31,0.96); backdrop-filter:blur(10px);
@@ -1109,22 +1114,30 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 
 /* ============ EL MÓVIL (prueba de concepto) ============
    Prefijo tel- en todo para no chocar con clases ya existentes (.card, .avatar, .badge...).
-   Con su propio marco/notch/barra inferior (`.tel-device`) — es un objeto que "sacas" desde el
-   asomo fijo del fondo de pantalla (`.tel-peek-dock`, ver pintarTabbar), no la pantalla nativa
-   del dispositivo real. */
-.tel-device-wrap{ display:flex; justify-content:center; padding:2px 0 6px; }
+   Vive en su propia capa fija (#movil-root, pintarMovilSheet) por encima del resto del juego:
+   un único elemento (.tel-sheet) que hace de asomo Y de móvil abierto a la vez, animando su
+   propia posición vertical entre los dos estados — nunca dos piezas distintas. Casi todo el
+   ancho de pantalla en ambos estados (ver .tel-sheet), como se ve un móvil real en la mano. */
+.tel-sheet{
+  width:92%; max-width:460px; position:relative; cursor:pointer;
+  transform:translateY(calc(100% - 42px));
+  transition:transform .34s cubic-bezier(.25,.8,.35,1);
+  pointer-events:auto;
+}
+.tel-sheet.show{ transform:translateY(0); cursor:default; }
+.tel-sheet.deshabilitada{ opacity:.32; pointer-events:none; }
 .tel-device{
-  width:min(380px, 92vw); aspect-ratio:380/800; position:relative;
+  width:100%; height:min(80vh, 720px); position:relative;
   background:linear-gradient(155deg,#2b2f3d,#17181f 55%);
-  border-radius:44px; padding:12px;
-  box-shadow:0 20px 50px rgba(0,0,0,0.5), inset 0 0 0 1.5px rgba(255,255,255,0.06);
+  border-radius:44px 44px 0 0; padding:12px;
+  box-shadow:0 -10px 40px rgba(0,0,0,0.5), inset 0 0 0 1.5px rgba(255,255,255,0.06);
 }
 .tel-notch{
   position:absolute; top:12px; left:50%; transform:translateX(-50%);
   width:34%; height:20px; background:#000; border-radius:0 0 14px 14px; z-index:5;
 }
 .tel-screen{
-  position:relative; height:100%; background:var(--bg2); border-radius:32px;
+  position:relative; height:100%; background:var(--bg2); border-radius:32px 32px 0 0;
   overflow-y:auto; overflow-x:hidden; padding:38px 20px 30px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05);
 }
@@ -1138,27 +1151,15 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
   box-shadow:0 1px 4px rgba(0,0,0,0.4); z-index:3;
 }
-/* Asomo del móvil, fijo al fondo de la pantalla justo debajo de la tabbar (ver pintarTabbar):
-   solo se ve la parte de arriba del aparato, como si estuviera "guardado" bajo el borde
-   inferior — tocarlo lo saca entero (SCREENS.movil). */
-.tel-peek-dock{
-  display:flex; justify-content:center; cursor:pointer; position:relative;
-  background:rgba(20,22,31,0.96); backdrop-filter:blur(10px);
-  padding-top:4px; padding-bottom:calc(4px + env(safe-area-inset-bottom,0px));
+/* Flechita para volver a esconder el móvil abierto — cuelga del borde inferior del aparato,
+   fuera de .tel-screen (así nunca se confunde con contenido de una app). */
+.tel-collapse-btn{
+  position:absolute; left:50%; bottom:0; transform:translate(-50%, 50%);
+  width:36px; height:36px; border-radius:50%; z-index:6;
+  background:var(--panel2); border:1px solid var(--line); box-shadow:0 4px 12px rgba(0,0,0,0.45);
+  display:flex; align-items:center; justify-content:center; color:var(--ink-soft); cursor:pointer;
 }
-.tel-peek-top{
-  width:132px; height:36px; position:relative; flex-shrink:0;
-  background:linear-gradient(155deg,#2b2f3d,#17181f 55%);
-  border-radius:20px 20px 0 0;
-  box-shadow:0 -4px 14px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.07);
-  transition:transform .15s ease;
-}
-.tel-peek-top::after{
-  content:''; position:absolute; top:7px; left:50%; transform:translateX(-50%);
-  width:36%; height:9px; background:#000; border-radius:0 0 8px 8px;
-}
-.tel-peek-dock:active .tel-peek-top{ transform:translateY(3px); }
-.tel-peek-dock.deshabilitado{ opacity:.32; pointer-events:none; }
+.tel-collapse-btn svg{ width:18px; height:18px; }
 .tel-fame-pill{
   margin:0 auto 16px; width:fit-content; display:flex; align-items:center; gap:6px;
   background:var(--panel2); border:1px solid var(--gold-dim); border-radius:999px; padding:6px 14px 6px 10px;
@@ -1270,6 +1271,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 <div id="topbar-root"></div>
 <div class="wrap" id="app"></div>
 <div id="tabbar-root"></div>
+<div id="movil-root"></div>
 <div id="panel-entreno-root"></div>
 <div id="logro-aviso-root"></div>
 
@@ -6553,7 +6555,7 @@ const PAISES_CROMO = [
     curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.','El Estadio Centenario de Montevideo, sede de la primera final de un Mundial en 1930, fue declarado Monumento Histórico por la FIFA.','Peñarol y Nacional protagonizan el Clásico uruguayo, uno de los derbis más antiguos de Sudamérica.'] }
 ];
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','sancionReveal','changelog','rankings','logros','escudosPersonalizados','movil',
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','sancionReveal','changelog','rankings','logros','escudosPersonalizados',
   // Todo el Mundial es una secuencia sin cortes: mientras dura, no tiene sentido poder escaparse
   // al menú, a la tienda o al plan de entreno — como en las demás secuencias "de un tirón" de
   // esta misma lista (rueda de prensa, reveals de título...). Se reactiva solo al terminar
@@ -10944,13 +10946,14 @@ function pintarTabbar(){
   if(!S.jugador || S.enFaseCreacion || PANTALLAS_CREACION.has(pantallaEfectiva)){
     document.body.classList.remove('con-tabbar');
     document.body.classList.remove('con-barra-entreno');
-    document.body.classList.remove('con-tel-peek');
     raiz.innerHTML = '';
     return;
   }
   document.body.classList.add('con-tabbar');
   document.body.classList.add('con-barra-entreno');
   raiz.innerHTML = '';
+  // El móvil abierto tapa esto entero (ver pintarMovilSheet) — nada que pintar aquí debajo.
+  if(S.movilAbierto) return;
   // Red de seguridad: lo que retira un aviso a los 5s es un setTimeout en memoria, que NO
   // sobrevive a una recarga de página (recargar el navegador, o el móvil descargando la pestaña
   // en segundo plano) — pero S.notificaciones sí, porque guardarPartida() serializa S entero. Sin
@@ -11022,30 +11025,63 @@ function pintarTabbar(){
     bar.appendChild(btn);
   });
   raiz.appendChild(bar);
+}
+const TEL_ICONO_CHEVRON_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+function abrirMovilSheet(){
+  S.movilAbierto = true;
+  S.movilVista = S.movilVista || 'home';
+  pintar();
+}
+function cerrarMovilSheet(){
+  const sheetVivo = document.querySelector('.tel-sheet.show');
+  if(sheetVivo){
+    sheetVivo.classList.remove('show');
+    setTimeout(()=>{ S.movilAbierto = false; S._movilVisible = false; pintar(); }, 320);
+  } else {
+    S.movilAbierto = false; S._movilVisible = false; pintar();
+  }
+}
+// El móvil vive en su propia capa (#movil-root), siempre por encima de la tabbar: un único
+// elemento (.tel-sheet) hace de asomo (abajo del todo, casi todo el ancho de pantalla) y de
+// móvil abierto a la vez, animando su propia posición vertical entre los dos estados — nunca
+// dos piezas distintas que haya que sincronizar. Mismo patrón de "no repetir la animación de
+// apertura en cada repintado" que pintarPanelEntreno (ver S._movilVisible / S._panelEntrenoVisible).
+function pintarMovilSheet(){
+  const raiz = document.getElementById('movil-root');
+  raiz.innerHTML = '';
+  if(!S.jugador || S.enFaseCreacion) return;
+  const pantallaEfectiva = (S.screen === 'ajustes' && S.pantallaAnteriorAjustes) ? S.pantallaAnteriorAjustes : S.screen;
+  if(PANTALLAS_CREACION.has(pantallaEfectiva)) return;
+  const deshabilitada = PANTALLAS_SIN_TABBAR.has(S.screen) && !S.movilAbierto;
+  const sheet = el('div','tel-sheet'+(deshabilitada?' deshabilitada':''));
+  const device = el('div','tel-device');
+  device.appendChild(el('div','tel-notch'));
+  const pantalla = el('div','tel-screen');
+  device.appendChild(pantalla);
+  device.appendChild(el('div','tel-home-indicator'));
+  sheet.appendChild(device);
 
-  // El móvil (Club/Banca/Compras/Casino/Cromos/WhatsApp) ya no vive en la tabbar principal:
-  // se saca desde este asomo fijo al fondo de pantalla (ver notas de diseño junto a .tel-peek-dock
-  // en el CSS). No se muestra estando ya dentro del propio móvil.
-  const dentroDelMovil = S.screen === 'movil';
-  document.body.classList.toggle('con-tel-peek', !dentroDelMovil);
-  if(!dentroDelMovil){
-    const peekDock = el('div','tel-peek-dock'+(deshabilitada?' deshabilitado':''));
-    const peekTop = el('div','tel-peek-top');
-    const numPendientes = contarComprasDisponibles(S.jugador) + telContactosDe(S.jugador).filter(c=>!(S.movilRespuestas && S.movilRespuestas[c.id]!==undefined)).length;
-    if(numPendientes > 0){
-      peekTop.appendChild(el('div','tel-icon-badge', numPendientes));
+  if(S.movilAbierto){
+    renderMovilContenido(pantalla, S.jugador);
+    const arrow = document.createElement('button');
+    arrow.className = 'tel-collapse-btn';
+    arrow.title = 'Guardar el móvil';
+    arrow.innerHTML = TEL_ICONO_CHEVRON_DOWN;
+    arrow.onclick = (e)=>{ e.stopPropagation(); cerrarMovilSheet(); };
+    sheet.appendChild(arrow);
+  } else if(!deshabilitada){
+    sheet.title = 'Tu móvil';
+    sheet.onclick = abrirMovilSheet;
+  }
+
+  raiz.appendChild(sheet);
+  if(S.movilAbierto){
+    if(S._movilVisible){
+      sheet.classList.add('show');
+    } else {
+      S._movilVisible = true;
+      requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ sheet.classList.add('show'); }); });
     }
-    peekDock.title = 'Tu móvil';
-    peekDock.appendChild(peekTop);
-    if(!deshabilitada){
-      peekDock.onclick = ()=>{
-        S.pantallaAnteriorMovil = S.pantallaBase || S.screen;
-        S.movilVista = 'home';
-        S.screen = 'movil';
-        render();
-      };
-    }
-    raiz.appendChild(peekDock);
   }
 }
 let _pantallaPintadaPrevia = null;
@@ -11125,6 +11161,7 @@ function pintar(){
     }
   }
   pintarTabbar();
+  pintarMovilSheet();
   procesarAvisosLogros();
   document.getElementById('panel-entreno-root').innerHTML = '';
   if(S.mostrandoPanelEntreno && S.jugador){
@@ -13472,37 +13509,29 @@ function telSvgSparkline(serie){
     <circle cx="${puntos[puntos.length-1][0]}" cy="${puntos[puntos.length-1][1]}" r="2.6" fill="#4CAF6D"/>
   </svg>`;
 }
-SCREENS.movil = function(){
-  topbar("Tu móvil");
-  const j = S.jugador;
-  const deviceWrap = el('div','tel-device-wrap');
-  const device = el('div','tel-device');
-  device.appendChild(el('div','tel-notch'));
-  const c = el('div','tel-screen');
-  device.appendChild(c);
-  device.appendChild(el('div','tel-home-indicator'));
-  deviceWrap.appendChild(device);
+// TEMPORAL: para poder probar todas las apps del móvil sin tener que subir de popularidad de
+// verdad todavía. Volver a `false` (o quitar el atajo) cuando el sistema de progresión por
+// niveles de fama esté cerrado de verdad.
+const TEL_DEBUG_TODO_DESBLOQUEADO = true;
+function telAppDesbloqueada(nivelMin){
+  return TEL_DEBUG_TODO_DESBLOQUEADO || ((S.jugador.stats.popularidad||0) >= nivelMin);
+}
+// Contenido del móvil (home/carpeta/banca/whatsapp): lo pinta pintarMovilSheet() dentro de la
+// pantalla del aparato (`c`, el mismo elemento .tel-screen tanto si el móvil vive en su propia
+// capa fija como si en algún momento volviera a vivir dentro de #app). Ya no es una SCREENS.x —
+// el móvil no cambia S.screen, es una capa encima de lo que sea que haya debajo.
+function renderMovilContenido(c, j){
   const vista = S.movilVista || 'home';
 
   if(vista === 'home'){
-    const btnVolver = document.createElement('button');
-    btnVolver.className = 'btn-secondary';
-    btnVolver.textContent = '← Volver';
-    btnVolver.style.cssText = 'margin-bottom:14px;';
-    btnVolver.onclick = ()=>{
-      S.screen = S.pantallaAnteriorMovil || 'tabJugador';
-      S.pantallaAnteriorMovil = null;
-      render();
-    };
-    c.appendChild(btnVolver);
     const nivel = estadoPopularidad(j.stats.popularidad||0);
     const pill = el('div','tel-fame-pill', `${ICONOS_SVG.estrella}${nivel.texto} <b>· ${Math.round(j.stats.popularidad||0)}</b>`);
     c.appendChild(pill);
     const grid = el('div','tel-app-grid');
     const apps = [
       { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, onclick:()=>{ S.movilVista='chatlist'; pintar(); } },
-      { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ S.screen='tabClub'; render(); } },
-      { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ S.pantallaAnteriorAjustes = S.pantallaAnteriorMovil; S.screen='ajustes'; render(); } }
+      { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ S.movilAbierto=false; S.screen='tabClub'; render(); } },
+      { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ S.pantallaAnteriorAjustes = S.pantallaBase || S.screen; S.movilAbierto=false; S.screen='ajustes'; render(); } }
     ];
     apps.forEach(a=>{
       const btn = document.createElement('button');
@@ -13521,12 +13550,12 @@ SCREENS.movil = function(){
     btnFolder.onclick = ()=>{ S.movilVista='carpeta_economia'; pintar(); };
     grid.insertBefore(btnFolder, grid.children[1] || null);
     TEL_APPS_BLOQUEADAS.forEach(a=>{
-      const desbloqueada = (j.stats.popularidad||0) >= a.nivelMin;
+      const desbloqueada = telAppDesbloqueada(a.nivelMin);
       const btn = document.createElement('button');
       btn.className = 'tel-app' + (desbloqueada?'':' locked');
       btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${desbloqueada?'':`<span class="tel-lock-badge">${TEL_ICONO_LOCK}</span>`}</span><span class="tel-label">${a.nombre}</span>`;
       btn.onclick = ()=>{
-        if(desbloqueada){ if(a.antesDeIr) a.antesDeIr(); S.screen = a.destino; render(); }
+        if(desbloqueada){ if(a.antesDeIr) a.antesDeIr(); S.movilAbierto=false; S.screen = a.destino; render(); }
         else{ mostrarNotificacion(`${a.nombre} se desbloquea al llegar a "${estadoPopularidad(a.nivelMin).texto}" (${a.nivelMin} de popularidad)`, 'info'); }
       };
       grid.appendChild(btn);
@@ -13544,7 +13573,7 @@ SCREENS.movil = function(){
     c.appendChild(header);
     const grid = el('div','tel-app-grid');
     folder.apps.forEach(a=>{
-      const desbloqueada = (j.stats.popularidad||0) >= a.nivelMin;
+      const desbloqueada = telAppDesbloqueada(a.nivelMin);
       const btn = document.createElement('button');
       btn.className = 'tel-app' + (desbloqueada?'':' locked');
       btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${desbloqueada?'':`<span class="tel-lock-badge">${TEL_ICONO_LOCK}</span>`}</span><span class="tel-label">${a.nombre}</span>`;
@@ -13552,6 +13581,7 @@ SCREENS.movil = function(){
         if(!desbloqueada){ mostrarNotificacion(`${a.nombre} se desbloquea al llegar a "${estadoPopularidad(a.nivelMin).texto}" (${a.nivelMin} de popularidad)`, 'info'); return; }
         if(a.esInterna){ S.movilVista = a.id; S.telBancoTab = S.telBancoTab || 'resumen'; pintar(); return; }
         if(a.antesDeIr) a.antesDeIr();
+        S.movilAbierto = false;
         S.screen = a.destino;
         render();
       };
@@ -13723,9 +13753,7 @@ SCREENS.movil = function(){
       c.appendChild(choices);
     }
   }
-
-  app.appendChild(deviceWrap);
-};
+}
 
 SCREENS.changelog = function(){
   topbar("Historial de cambios");
