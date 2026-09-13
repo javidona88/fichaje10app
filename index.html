@@ -878,6 +878,37 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 }
 .tienda-card-cta button:disabled{ background:#3E4152; color:#787D8F; cursor:not-allowed; }
 .tienda-card-cta button.en-uso{ background:rgba(76,175,109,0.18); color:#8fe3ab; }
+
+/* ---------- Servicios: plantilla de personal (SCREENS.servicios) ---------- */
+.staff-resumen{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+  padding:10px 14px; margin-bottom:16px;
+}
+.staff-resumen .lbl{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); }
+.staff-resumen .val{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:18px; color:var(--gold); }
+.staff-dept{
+  display:flex; justify-content:space-between; align-items:center; width:100%;
+  padding:10px 14px; margin:14px 0 0; border-radius:10px; border:1px solid var(--line);
+  background:transparent; color:var(--ink); cursor:pointer;
+  font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+}
+.staff-dept.disponible{ border-color:var(--gold); background:rgba(212,175,55,0.08); }
+.staff-dept .num{ color:var(--gold); }
+.staff-dept .chev{ color:var(--ink-soft); font-size:12px; text-transform:none; }
+.staff-card{ display:flex; gap:12px; padding:14px; margin-top:10px; background:var(--panel); border:1px solid var(--line); border-radius:14px; }
+.staff-avatar{ width:46px; height:46px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.35); }
+.staff-avatar svg{ width:22px; height:22px; color:#fff; }
+.staff-body{ flex:1; min-width:0; }
+.staff-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.staff-nombre{ font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; color:var(--ink); }
+.staff-estado{
+  font-family:'Space Grotesk',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.03em;
+  padding:2px 8px; border-radius:999px; text-transform:uppercase; white-space:nowrap; flex-shrink:0;
+}
+.staff-estado.inactivo{ background:rgba(255,255,255,0.06); color:var(--ink-soft); }
+.staff-estado.activo{ background:rgba(76,175,109,0.16); color:#8fe3ab; }
+.staff-mejora{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--gold); margin:1px 0 9px; }
 .servicio-fila{ padding:12px 0; border-bottom:1px solid var(--line); }
 .servicio-fila:last-child{ border-bottom:none; }
 .servicio-cab{ display:flex; align-items:center; gap:9px; margin-bottom:9px; }
@@ -16543,6 +16574,122 @@ function renderizarServiciosProfesionales(j, contenedor){
     });
   });
 }
+// "Plantilla de personal" (SCREENS.servicios): mismos datos y misma lógica de contratación que
+// renderizarServiciosProfesionales (TIENDA_SERVICIOS, j.suscripciones, puedePagarServicio, el
+// sincronizado del representante) — solo cambia la presentación, a tarjetas de profesional por
+// departamento en vez de filas planas, para que SCREENS.gastos no se vea afectada. Cada
+// departamento (categoría) tiene su propio color de fondo para los avatares, a modo de "plantilla".
+const TEL_STAFF_COLORES = [
+  ['#4f7fd9','#233f80'], ['#d4af37','#8a6a1f'], ['#9b59b6','#4a2463'], ['#3f9e93','#1f5b53']
+];
+// La comisión del representante es un % del sueldo, no una cifra fija — para el resumen de
+// gasto anual se estima sobre el sueldo real actual, igual que pagarNomina la calcula de verdad.
+function telGastoAnualServicios(j){
+  let total = 0;
+  TIENDA_SERVICIOS.forEach(s=>{
+    const nivelActual = j.suscripciones[s.familia] || 0;
+    if(!nivelActual) return;
+    const info = s.niveles.find(n=>n.nivel===nivelActual);
+    if(!info) return;
+    total += s.esPorcentaje ? Math.round((j.contrato.sueldoAnual||0) * info.comisionPct) : (info.costeAnual||0);
+  });
+  return total;
+}
+// Acordeón propio (no comparte estado con el de SCREENS.gastos, para no desincronizar qué
+// categoría ves abierta en cada pantalla).
+function renderizarPlantillaServicios(j, contenedor){
+  const gastoAnual = telGastoAnualServicios(j);
+  const resumen = el('div','staff-resumen');
+  resumen.innerHTML = `<span class="lbl">Gasto anual en servicios</span><span class="val">${formatearEuros(gastoAnual)}</span>`;
+  contenedor.appendChild(resumen);
+
+  const categorias = {};
+  TIENDA_SERVICIOS.forEach(s=>{
+    categorias[s.categoria] = categorias[s.categoria] || [];
+    categorias[s.categoria].push(s);
+  });
+  if(S.staffCategoriaAbierta === undefined){
+    const conActivo = Object.entries(categorias).find(([,servicios])=> servicios.some(s=>(j.suscripciones[s.familia]||0) > 0));
+    S.staffCategoriaAbierta = conActivo ? conActivo[0] : Object.keys(categorias)[0];
+  }
+  Object.entries(categorias).forEach(([nombreCategoria, servicios], idx)=>{
+    const abierta = S.staffCategoriaAbierta === nombreCategoria;
+    const disponibles = serviciosDisponiblesEn(servicios, j);
+    const [colorClaro, colorOscuro] = TEL_STAFF_COLORES[idx % TEL_STAFF_COLORES.length];
+    const dept = document.createElement('button');
+    dept.className = 'staff-dept' + (disponibles ? ' disponible' : '');
+    dept.innerHTML = `<span>${nombreCategoria}${disponibles?` <span class="num">· ${disponibles}</span>`:''}</span><span class="chev">${abierta?'▾':'▸'}</span>`;
+    dept.onclick = ()=>{
+      const antes = dept.getBoundingClientRect().top;
+      S.staffCategoriaAbierta = abierta ? null : nombreCategoria;
+      pintar();
+      const nuevo = document.querySelectorAll('.staff-dept')[idx];
+      if(nuevo) window.scrollBy(0, nuevo.getBoundingClientRect().top - antes);
+    };
+    contenedor.appendChild(dept);
+    if(!abierta) return;
+
+    servicios.forEach(servicio=>{
+      if(servicio.esPorcentaje && !j.suscripciones[servicio.familia] && j.representante){
+        const cercano = servicio.niveles.reduce((mejor,n)=> Math.abs(n.comisionPct-j.representante.comision) < Math.abs(mejor.comisionPct-j.representante.comision) ? n : mejor);
+        j.suscripciones[servicio.familia] = cercano.nivel;
+      }
+      const nivelActual = j.suscripciones[servicio.familia] || 0;
+      const card = el('div','staff-card');
+      const avatar = el('div','staff-avatar');
+      avatar.style.background = `linear-gradient(150deg,${colorClaro},${colorOscuro})`;
+      avatar.innerHTML = ICONOS_SVG[servicio.icono] || '';
+      card.appendChild(avatar);
+
+      const body = el('div','staff-body');
+      const top = el('div','staff-top');
+      top.appendChild(el('span','staff-nombre', servicio.nombre));
+      top.appendChild(el('span','staff-estado '+(nivelActual>0?'activo':'inactivo'), nivelActual>0 ? `Nivel ${nivelActual}` : 'Sin contratar'));
+      body.appendChild(top);
+      const efectoBase = (servicio.niveles[0] || {}).efectoTemporada || {};
+      const mejoraTxt = Object.keys(efectoBase).map(k => NICE_ATTR[k] || NICE_STAT[k] || k).join(' · ');
+      if(mejoraTxt) body.appendChild(el('div','staff-mejora', `↑ ${mejoraTxt}`));
+
+      const niveles = el('div','servicio-niveles');
+      servicio.niveles.forEach(info=>{
+        const activo = nivelActual === info.nivel;
+        const desbloqueado = !info.desbloqueo || info.desbloqueo(j);
+        const asequible = !desbloqueado || activo || puedePagarServicio(j, servicio.familia, info.nivel);
+        const btn = el('div','servicio-nivel-btn'+(activo?' activo':'')+(!desbloqueado||!asequible?' inasequible':''));
+        const etiquetaCoste = servicio.esPorcentaje ? `${Math.round(info.comisionPct*100)}% del sueldo` : `${formatearDinero(info.costeAnual)}/año`;
+        btn.innerHTML = `<div class="n">Nivel ${info.nivel}</div><div class="c">${etiquetaCoste}</div>`;
+        if(!desbloqueado){
+          btn.title = info.etiquetaBloqueo || 'Todavía no disponible';
+        } else if(!asequible){
+          btn.title = (j.stats.dinero||0) < 0
+            ? 'No puedes activar ni subir de nivel servicios mientras tu cuenta esté en números rojos'
+            : 'Ni con tus ahorros puedes cubrir el déficit que dejaría este compromiso durante la temporada';
+        }
+        if(desbloqueado && asequible){
+          btn.onclick = ()=>{
+            const nuevoNivel = activo ? 0 : info.nivel;
+            j.suscripciones[servicio.familia] = nuevoNivel;
+            if(servicio.esPorcentaje){
+              j.representante = nuevoNivel ? { comision: info.comisionPct, nombre: (j.representante && j.representante.nombre) || elegirAgenciaRepresentacion(), agente: (j.representante && j.representante.agente) || generarNombreAgente() } : null;
+            }
+            pintar();
+          };
+        }
+        niveles.appendChild(btn);
+      });
+      body.appendChild(niveles);
+      const primerBloqueado = servicio.niveles.find(n => n.desbloqueo && !n.desbloqueo(j));
+      if(primerBloqueado && !nivelActual){
+        body.appendChild(el('div','servicio-desc', `🔒 Nivel ${primerBloqueado.nivel}: ${primerBloqueado.etiquetaBloqueo}`));
+      } else {
+        const infoDesc = servicio.niveles.find(n=>n.nivel === (nivelActual || 1));
+        body.appendChild(el('div','servicio-desc', infoDesc.desc));
+      }
+      card.appendChild(body);
+      contenedor.appendChild(card);
+    });
+  });
+}
 function renderizarCoches(j, contenedor){
   const tituloGaraje = el('div','stat-section-titulo','GARAJE · COCHE');
   contenedor.appendChild(tituloGaraje);
@@ -16825,8 +16972,8 @@ SCREENS.servicios = function(){
   app.appendChild(cVolver);
 
   const c = el('div','card');
-  c.appendChild(crearEyebrow('Contrataciones profesionales'));
-  renderizarServiciosProfesionales(j, c);
+  c.appendChild(crearEyebrow('Tu plantilla'));
+  renderizarPlantillaServicios(j, c);
   app.appendChild(c);
 };
 SCREENS.compras = function(){
