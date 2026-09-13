@@ -1126,24 +1126,32 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 }
 .tel-sheet.show{ transform:translateY(0); cursor:default; }
 .tel-sheet.deshabilitada{ opacity:.32; pointer-events:none; }
+/* Se asoma hasta justo debajo de la topbar real del juego (82px + su zona segura) cuando está
+   abierto — el mismo elemento que en reposo solo enseña 42px (ver .tel-sheet arriba). */
 .tel-device{
-  width:100%; height:min(80vh, 720px); position:relative;
+  width:100%; height:calc(100vh - 90px - env(safe-area-inset-top,0px));
+  display:flex; flex-direction:column;
   background:linear-gradient(155deg,#2b2f3d,#17181f 55%);
   border-radius:44px 44px 0 0; padding:12px;
   box-shadow:0 -10px 40px rgba(0,0,0,0.5), inset 0 0 0 1.5px rgba(255,255,255,0.06);
 }
+/* Notch + notificaciones: en reposo es lo único que asoma; abierto, tocarlo vuelve a esconder
+   el móvil (nada de flecha ni botón aparte — como pulsar la barra de estado de un móvil real). */
+.tel-header{ flex-shrink:0; height:34px; position:relative; cursor:pointer; display:flex; align-items:center; padding:0 20px; }
 .tel-notch{
-  position:absolute; top:12px; left:50%; transform:translateX(-50%);
-  width:34%; height:20px; background:#000; border-radius:0 0 14px 14px; z-index:5;
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:34%; height:20px; background:#000; border-radius:0 0 14px 14px;
 }
+.tel-notifs{ position:relative; z-index:2; display:flex; gap:5px; align-items:center; }
+.tel-notif-ic{ width:17px; height:17px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 1px 4px rgba(0,0,0,0.4); }
+.tel-notif-ic svg{ width:9px; height:9px; }
+.tel-notif-ic.whatsapp{ background:linear-gradient(150deg,#3fce6e,#1f9e4c); }
+.tel-notif-ic.email{ background:linear-gradient(150deg,#5a8fd6,#2c4d84); }
+.tel-notif-ic.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
 .tel-screen{
-  position:relative; height:100%; background:var(--bg2); border-radius:32px 32px 0 0;
-  overflow-y:auto; overflow-x:hidden; padding:38px 20px 30px;
+  flex:1; min-height:0; position:relative; background:var(--bg2); border-radius:32px 32px 0 0;
+  overflow-y:auto; overflow-x:hidden; padding:14px 20px 24px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05);
-}
-.tel-home-indicator{
-  position:absolute; bottom:9px; left:50%; transform:translateX(-50%);
-  width:32%; height:4px; border-radius:3px; background:rgba(255,255,255,0.5); z-index:5;
 }
 .tel-icon-badge{
   position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 3px;
@@ -1151,15 +1159,6 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
   box-shadow:0 1px 4px rgba(0,0,0,0.4); z-index:3;
 }
-/* Flechita para volver a esconder el móvil abierto — cuelga del borde inferior del aparato,
-   fuera de .tel-screen (así nunca se confunde con contenido de una app). */
-.tel-collapse-btn{
-  position:absolute; left:50%; bottom:0; transform:translate(-50%, 50%);
-  width:36px; height:36px; border-radius:50%; z-index:6;
-  background:var(--panel2); border:1px solid var(--line); box-shadow:0 4px 12px rgba(0,0,0,0.45);
-  display:flex; align-items:center; justify-content:center; color:var(--ink-soft); cursor:pointer;
-}
-.tel-collapse-btn svg{ width:18px; height:18px; }
 .tel-fame-pill{
   margin:0 auto 16px; width:fit-content; display:flex; align-items:center; gap:6px;
   background:var(--panel2); border:1px solid var(--gold-dim); border-radius:999px; padding:6px 14px 6px 10px;
@@ -1180,12 +1179,13 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-icon.email{ background:linear-gradient(150deg,#5a8fd6,#2c4d84); }
 .tel-icon.banca{ background:linear-gradient(150deg,#3f6fce,#233f80); }
 .tel-icon.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
+.tel-icon.compras{ background:linear-gradient(150deg,#3f9e93,#1f5b53); }
 .tel-icon.casino{ background:linear-gradient(150deg,#7b2d8e,#341042); }
 .tel-icon.cromos{ background:linear-gradient(150deg,#4CAF6D,#1d5c37); }
 .tel-icon.club{ background:linear-gradient(150deg,#7c8494,#464c59); }
 .tel-icon.ajustes{ background:linear-gradient(150deg,#7c8494,#464c59); }
 /* Carpeta del móvil (estilo iOS): fondo translúcido con una previsualización 2x2 de los
-   iconos que contiene — Economía agrupa Banca/Casino Online/Servicios, ver TEL_CARPETAS. */
+   iconos que contiene — Economía agrupa Banca/Casino Online/Servicios/Compras, ver TEL_CARPETAS. */
 .tel-icon.carpeta{ background:rgba(255,255,255,0.09); display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(2,1fr); gap:4px; padding:8px; }
 .tel-icon.carpeta .mini{ border-radius:6px; display:flex; align-items:center; justify-content:center; }
 .tel-icon.carpeta .mini svg{ width:60%; height:60%; }
@@ -1193,6 +1193,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-icon.carpeta .mini.banca{ background:linear-gradient(150deg,#3f6fce,#233f80); }
 .tel-icon.carpeta .mini.casino{ background:linear-gradient(150deg,#7b2d8e,#341042); }
 .tel-icon.carpeta .mini.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
+.tel-icon.carpeta .mini.compras{ background:linear-gradient(150deg,#3f9e93,#1f5b53); }
 
 /* ---------- App Banca: extracto real (SCREENS.movil, vista 'banca') ---------- */
 .tel-bank-hero{ text-align:center; padding:6px 0 2px; }
@@ -1210,6 +1211,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-sparkline-figs .v{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
 .tel-sparkline-figs .t{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:#8fe3ab; font-weight:600; margin-top:1px; }
 .tel-bank-split{ display:flex; gap:10px; margin-bottom:12px; }
+.tel-bank-neto{ font-family:'Space Grotesk',sans-serif; font-size:11.5px; font-weight:600; text-align:center; margin:-4px 0 18px; }
+.tel-bank-neto.pos{ color:#8fe3ab; } .tel-bank-neto.neg{ color:#f0a5ac; }
 .tel-split-card{ flex:1; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
 .tel-split-card .lbl{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); }
 .tel-split-card .amt{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:17px; margin-top:2px; font-variant-numeric:tabular-nums; }
@@ -1766,6 +1769,7 @@ const ICONOS_SVG = {
   agente: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6a2 2 0 012-2h2a2 2 0 012 2v2"/><path d="M3 13.5h18"/></svg>',
   coche: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l1.2-3.6a2 2 0 011.9-1.4h11.8a2 2 0 011.9 1.4L21 16"/><path d="M8.5 11l.8-2h5.4l1.5 2"/><rect x="2.5" y="16" width="19" height="2.6" rx="1.2"/><circle cx="7" cy="19.8" r="1.4" fill="currentColor" stroke="none"/><circle cx="17" cy="19.8" r="1.4" fill="currentColor" stroke="none"/></svg>',
   moto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.3" cy="18" r="2.6"/><circle cx="18.2" cy="18" r="2.6"/><path d="M7.8 18h6.6l2-5.2h2.5"/><path d="M9.3 18l2-5.4h3.6l1.7-2.8h2.1"/><path d="M5.3 18l2.8-5.4"/></svg>',
+  botas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 4v7.2c0 1-.4 1.9-1.1 2.6L3 16.3c-.6.6-.9 1.3-.9 2.1V19a1 1 0 001 1h13.4a1 1 0 001-1v-1.6c0-1.9-1.2-3.6-3-4.3l-3-1.1a2.6 2.6 0 01-1.7-2.5V4z"/><path d="M6.5 4h6.8M21 19h-4.5M9 15.5l2.5 1.3"/></svg>',
   comunicacion: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 011 1v9a1 1 0 01-1 1H9l-4 3v-3H4a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M12 14c-2.5-1.3-3.5-2.6-3.5-3.9a1.9 1.9 0 013.5-1.1 1.9 1.9 0 013.5 1.1c0 1.3-1 2.6-3.5 3.9z" fill="currentColor" stroke="none"/></svg>',
   vivienda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10v9a1 1 0 001 1h10a1 1 0 001-1v-9"/><rect x="10" y="14" width="4" height="6" fill="currentColor" stroke="none"/></svg>',
   vacaciones: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3"/><path d="M12 1.3v1.6M12 11v1.6M6.3 7h1.6M16.1 7h1.6M8 3l1.1 1.1M15 3l-1.1 1.1M8 11l1.1-1.1M15 11l-1.1-1.1"/><path d="M3.5 20c3-6.5 14-6.5 17 0"/></svg>',
@@ -1893,6 +1897,18 @@ const TIENDA_MOTOS = [
   { nivel:2, nombre:'Naked de gama media', coste:16000, efecto:{confianza:2, popularidad:3}, desc:'Empiezas a disfrutar de verdad de las salidas en moto los días libres.', ...porCategoria(1) },
   { nivel:3, nombre:'Custom de alta gama', coste:65000, efecto:{confianza:2, popularidad:6}, desc:'Una moto con la que te paras a mirarla antes de arrancar. Se nota en cómo te miran también a ti.', ...porCategoria(3) },
   { nivel:4, nombre:'Superbike de edición limitada', coste:260000, efecto:{confianza:3, popularidad:11}, desc:'Pocas unidades en el mundo, y una de ellas es tuya. Cada vez que sales con ella es un pequeño espectáculo.', ...porCategoria(4) }
+];
+// A diferencia de coches/motos (de cara a la galería: confianza/popularidad), las botas son la
+// única compra única que da una ventaja de juego de verdad — atributos reales, no narrativa. El
+// progreso oculto de atributos divide el efecto bruto por DIVISOR_PROGRESO (8, ver
+// acumularProgresoAtributo), así que un efecto de 8 equivale a 1 punto entero de golpe con el
+// atributo todavía bajo (≤8, factorResistenciaAtributo aún no frena) — con el atributo ya alto
+// pesa menos, igual que cualquier otra subida del juego; nunca un atajo incondicional.
+const TIENDA_BOTAS = [
+  { nivel:1, nombre:'Botas de gama alta', coste:3000, efecto:{velocidad:8}, desc:'Ligeras y con buen agarre. Notas el cambio nada más calzártelas.' },
+  { nivel:2, nombre:'Botas de fibra de carbono', coste:18000, efecto:{velocidad:8, regate:8}, desc:'Suela rígida de competición: cada arrancada y cada cambio de ritmo salen un poco más limpios.', ...porCategoria(1) },
+  { nivel:3, nombre:'Botas de edición de profesional', coste:70000, efecto:{tiro:8, velocidad:8}, desc:'El mismo modelo que usan las estrellas de la categoría. El golpeo de balón gana precisión.', ...porCategoria(3) },
+  { nivel:4, nombre:'Prototipo exclusivo de la marca', coste:250000, efecto:{tiro:8, velocidad:8, regate:8}, desc:'Un diseño que ni siquiera está a la venta, hecho a medida de tu pisada. Se nota en todo tu juego.', ...porCategoria(4) }
 ];
 
 /* ============ LOGROS (colección de por vida, independiente de la partida) ============
@@ -6590,7 +6606,7 @@ const PANTALLAS_MUNDIAL_JUEGO = new Set(['mundialIntro','mundialBombos','mundial
 const PANTALLAS_FICHAJE_SEGURAS = new Set(['regresoClub','ruedaPrensa','ruedaPrensaResultado']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
-const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','ajustes','casino','ruleta','tragaperras','blackjack']);
+const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','servicios','compras','ajustes','casino','ruleta','tragaperras','blackjack']);
 
 const NICE_ATTR = {fisico:"Físico",velocidad:"Velocidad",tiro:"Tiro",regate:"Regate",pase:"Pase",desmarque:"Desmarque",mental:"Carácter",tecnica:"Técnica"};
 
@@ -8025,6 +8041,7 @@ function migrarJugadorGuardado(j){
   if(j.stats.seguidores === undefined) j.stats.seguidores = Math.round(100 + Math.pow((j.stats.popularidad||0)/50, 2.2) * 8000);
   if(j.sancionActiva === undefined) j.sancionActiva = false;
   if(j.motoActual === undefined) j.motoActual = 0;
+  if(j.botasActual === undefined) j.botasActual = 0;
   if(j.hitosLogro === undefined) j.hitosLogro = {};
   if(j.estadoMental === undefined) j.estadoMental = 'normal';
   if(j.rachaResultados === undefined) j.rachaResultados = 0;
@@ -8150,7 +8167,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia,estiloId
     filialProgreso:null,
     confianzaEntrenador:35,
     comprasUnicas:[],
-    cocheActual:0, motoActual:0,
+    cocheActual:0, motoActual:0, botasActual:0,
     lesionSemanas:0, sancionActiva:false,
     avisoBancoPendiente:false,
     carinoAficion:20,
@@ -8386,7 +8403,10 @@ function registrarMovimientoBanca(j, tipo, titulo, sub, monto){
   if(!monto) return;
   j.movimientosBanca = j.movimientosBanca || [];
   j.movimientosBanca.unshift({ tipo, titulo, sub, monto, temporada:S.temporada });
-  if(j.movimientosBanca.length > 30) j.movimientosBanca.length = 30;
+  // Tope generoso (no solo los últimos 30): el balance anual de Banca necesita poder sumar
+  // TODOS los movimientos de la temporada en curso (nómina sola ya deja ~24-30 en 6 pasos), así
+  // que un tope corto los iba dejando fuera antes de que acabara la temporada.
+  if(j.movimientosBanca.length > 80) j.movimientosBanca.length = 80;
 }
 function pagarNomina(j){
   const ingresoSueldo = Math.round(j.contrato.sueldoAnual / SECUENCIA_TEMPORADA.length);
@@ -11033,7 +11053,6 @@ function pintarTabbar(){
   });
   raiz.appendChild(bar);
 }
-const TEL_ICONO_CHEVRON_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 function abrirMovilSheet(){
   S.movilAbierto = true;
   S.movilVista = S.movilVista || 'home';
@@ -11047,6 +11066,17 @@ function cerrarMovilSheet(){
   } else {
     S.movilAbierto = false; S._movilVisible = false; pintar();
   }
+}
+// Notificaciones reales pendientes, para el asomo con iconos de apps (como el status bar de un
+// móvil real) — solo lo que ya calculábamos en otros sitios del propio móvil, nada narrativo.
+function telNotificacionesPendientes(j){
+  const lista = [];
+  const whatsappPend = telContactosDe(j).filter(c=>!(S.movilRespuestas && S.movilRespuestas[c.id]!==undefined)).length;
+  if(whatsappPend > 0) lista.push({ clase:'whatsapp', icono:TEL_ICONO_WHATSAPP });
+  const emailPend = telEmailsDe(j).filter(co=>!(S.telEmailsLeidos && S.telEmailsLeidos[co.id])).length;
+  if(emailPend > 0) lista.push({ clase:'email', icono:TEL_ICONO_EMAIL });
+  if(contarComprasDisponibles(j) > 0) lista.push({ clase:'servicios', icono:TEL_ICONO_COMPRAS });
+  return lista;
 }
 // El móvil vive en su propia capa (#movil-root), siempre por encima de la tabbar: un único
 // elemento (.tel-sheet) hace de asomo (abajo del todo, casi todo el ancho de pantalla) y de
@@ -11062,20 +11092,25 @@ function pintarMovilSheet(){
   const deshabilitada = PANTALLAS_SIN_TABBAR.has(S.screen) && !S.movilAbierto;
   const sheet = el('div','tel-sheet'+(deshabilitada?' deshabilitada':''));
   const device = el('div','tel-device');
-  device.appendChild(el('div','tel-notch'));
+
+  // Notch + notificaciones: en reposo es todo lo que asoma; abierto, tocarlo esconde el móvil
+  // de nuevo (sin flecha ni botón aparte).
+  const header = el('div','tel-header');
+  header.appendChild(el('div','tel-notch'));
+  const notifs = el('div','tel-notifs');
+  telNotificacionesPendientes(S.jugador).forEach(n=>{
+    notifs.appendChild(el('span','tel-notif-ic '+n.clase, n.icono));
+  });
+  header.appendChild(notifs);
+  device.appendChild(header);
+
   const pantalla = el('div','tel-screen');
   device.appendChild(pantalla);
-  device.appendChild(el('div','tel-home-indicator'));
   sheet.appendChild(device);
 
   if(S.movilAbierto){
     renderMovilContenido(pantalla, S.jugador);
-    const arrow = document.createElement('button');
-    arrow.className = 'tel-collapse-btn';
-    arrow.title = 'Guardar el móvil';
-    arrow.innerHTML = TEL_ICONO_CHEVRON_DOWN;
-    arrow.onclick = (e)=>{ e.stopPropagation(); cerrarMovilSheet(); };
-    sheet.appendChild(arrow);
+    header.onclick = (e)=>{ e.stopPropagation(); cerrarMovilSheet(); };
   } else if(!deshabilitada){
     sheet.title = 'Tu móvil';
     sheet.onclick = abrirMovilSheet;
@@ -13368,6 +13403,7 @@ const TEL_ICONO_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 const TEL_ICONO_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
 const TEL_ICONO_WHATSAPP = '<svg viewBox="0 0 24 24" fill="none" stroke="#0c2013" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a8 8 0 0 0-6.9 12L4 21l6.2-1.1A8 8 0 1 0 12 3z"/><path d="M8.5 8.7c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5s.6 1.5.6 1.6c.1.1.1.3 0 .4-.1.2-.2.3-.3.5-.2.2-.3.3-.1.6.6 1 1.3 1.6 2.3 2 .2.1.4.1.5-.1.2-.2.5-.6.7-.8.2-.2.3-.2.5-.1.2.1 1.4.7 1.6.8.2.1.4.2.4.3.1.2.1.9-.2 1.4s-1.3.9-1.8.9c-.5 0-.9.1-3-.8-2.5-1.1-4-3.7-4.2-3.9-.1-.2-1-1.3-1-2.5 0-1.2.6-1.7.8-2z" fill="#0c2013" stroke="none"/></svg>';
 const TEL_ICONO_EMAIL = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="1.8"/><path d="M4.5 7l7.5 6 7.5-6"/></svg>';
+const TEL_ICONO_SERVICIOS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="1.5"/><path d="M9 8h6M9 12h6M9 16h3.5"/></svg>';
 const TEL_ICONO_COMPRAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
 const TEL_ICONO_CASINO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="12" cy="12" r="1" fill="#fff" stroke="none"/><circle cx="9" cy="14.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="14.5" r="1" fill="#fff" stroke="none"/></svg>';
 const TEL_ICONO_CROMOS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>';
@@ -13381,7 +13417,10 @@ const TEL_CARPETA_ECONOMIA = {
   apps:[
     { id:'banca', nombre:'Banca', nivelMin:0, clase:'banca', icono:ICONOS_SVG.tabEconomia, esInterna:true },
     { id:'casino', nombre:'Casino Online', nivelMin:25, clase:'casino', icono:TEL_ICONO_CASINO, destino:'casino' },
-    { id:'servicios', nombre:'Servicios', nivelMin:10, clase:'servicios', icono:TEL_ICONO_COMPRAS, destino:'gastos' }
+    { id:'servicios', nombre:'Servicios', nivelMin:10, clase:'servicios', icono:TEL_ICONO_SERVICIOS, destino:'servicios',
+      antesDeIr:()=>{ S.pantallaAnteriorServicios = S.pantallaBase || S.screen; } },
+    { id:'compras', nombre:'Compras', nivelMin:10, clase:'compras', icono:TEL_ICONO_COMPRAS, destino:'compras',
+      antesDeIr:()=>{ S.pantallaAnteriorCompras = S.pantallaBase || S.screen; } }
   ]
 };
 const TEL_APPS_BLOQUEADAS = [
@@ -13546,6 +13585,15 @@ function telDesglosePasoActual(j){
   });
   return { ingresos, gastos, totalIn, totalOut };
 }
+// Balance de la temporada en curso: suma TODOS los movimientos reales con temporada===S.temporada
+// (no solo el último de cada categoría, como telDesglosePasoActual) — nómina, patrocinio, casino,
+// compras... todo lo que de verdad ha pasado por la cuenta este año.
+function telDesgloseAnual(j){
+  const delAnio = (j.movimientosBanca||[]).filter(m=>m.temporada===S.temporada);
+  let totalIn = 0, totalOut = 0;
+  delAnio.forEach(m=>{ if(m.tipo==='in') totalIn += m.monto; else totalOut += Math.abs(m.monto); });
+  return { totalIn, totalOut, neto: totalIn-totalOut, movimientos: delAnio };
+}
 function telSvgSparkline(serie){
   const W = 120, H = 46, PAD = 3;
   const min = Math.min(...serie), max = Math.max(...serie);
@@ -13603,7 +13651,7 @@ function renderMovilContenido(c, j){
     const folder = TEL_CARPETA_ECONOMIA;
     const btnFolder = document.createElement('button');
     btnFolder.className = 'tel-app';
-    const miniHtml = folder.apps.map(a=>`<span class="mini ${a.clase}">${a.icono}</span>`).join('') + '<span class="mini vacio"></span>';
+    const miniHtml = folder.apps.slice(0,4).map(a=>`<span class="mini ${a.clase}">${a.icono}</span>`).join('') + (folder.apps.length < 4 ? '<span class="mini vacio"></span>' : '');
     btnFolder.innerHTML = `<span class="tel-icon carpeta">${miniHtml}</span><span class="tel-label">${folder.nombre}</span>`;
     btnFolder.onclick = ()=>{ S.movilVista='carpeta_economia'; pintar(); };
     grid.insertBefore(btnFolder, grid.children[1] || null);
@@ -13694,6 +13742,22 @@ function renderMovilContenido(c, j){
       row.appendChild(svgWrap.firstElementChild);
       cardVM.appendChild(row);
       c.appendChild(cardVM);
+
+      const anual = telDesgloseAnual(j);
+      if(anual.movimientos.length){
+        c.appendChild(el('p','tel-bank-card-title', `Balance de la temporada ${temporadaAAnoCompleto(S.temporada)}`)).style.margin = '0 2px 8px';
+        const splitAnual = el('div','tel-bank-split');
+        const cardInA = el('div','ingresos tel-split-card');
+        cardInA.appendChild(el('div','lbl','Ingresos'));
+        cardInA.appendChild(el('div','amt', '+'+formatearEuros(anual.totalIn)));
+        const cardOutA = el('div','gastos tel-split-card');
+        cardOutA.appendChild(el('div','lbl','Gastos'));
+        cardOutA.appendChild(el('div','amt', '−'+formatearEuros(anual.totalOut)));
+        splitAnual.appendChild(cardInA); splitAnual.appendChild(cardOutA);
+        c.appendChild(splitAnual);
+        c.appendChild(el('p','tel-bank-neto '+(anual.neto>=0?'pos':'neg'),
+          `Balance neto de la temporada: ${anual.neto>=0?'+':''}${formatearEuros(anual.neto)}`));
+      }
 
       if(huboPaso){
         c.appendChild(el('p','tel-bank-card-title','Este paso')).style.margin = '0 2px 8px';
@@ -16534,6 +16598,54 @@ function renderizarMotos(j, contenedor){
   }
   contenedor.appendChild(fila);
 }
+function renderizarBotas(j, contenedor){
+  contenedor.appendChild(el('div','stat-section-titulo','BOTAS'));
+  const fila = el('div','servicio-fila');
+  const cab = el('div','servicio-cab');
+  const nombreActual = j.botasActual > 0 ? TIENDA_BOTAS.find(c=>c.nivel===j.botasActual).nombre : null;
+  const efectoBaseBotas = TIENDA_BOTAS[0].efecto || {};
+  const mejoraTxtBotas = Object.keys(efectoBaseBotas).map(k => NICE_ATTR[k] || NICE_STAT[k] || k).join(' · ');
+  const mejoraSpanBotas = mejoraTxtBotas ? ` <span class="servicio-mejora" style="font-weight:400;font-size:11px;color:var(--gold);white-space:nowrap;">↑ ${mejoraTxtBotas}</span>` : '';
+  cab.innerHTML = `${iconoInsignia('botas',26)}<span class="servicio-nombre">Botas</span>${mejoraSpanBotas}${nombreActual?`<span class="servicio-activo-tag">${nombreActual.toUpperCase()}</span>`:''}`;
+  fila.appendChild(cab);
+  const niveles = el('div','servicio-niveles');
+  TIENDA_BOTAS.forEach(info=>{
+    const yaComprado = j.botasActual === info.nivel;
+    const esInferior = j.botasActual > info.nivel;
+    const desbloqueado = !info.desbloqueo || info.desbloqueo(j);
+    const puedePagar = (j.stats.dinero||0) >= info.coste && (j.stats.dinero||0) >= 0;
+    const asequible = !desbloqueado || yaComprado || esInferior || puedePagar;
+    const btn = el('div','servicio-nivel-btn'+(yaComprado?' activo':'')+(!desbloqueado||!asequible||esInferior?' inasequible':''));
+    btn.innerHTML = `<div class="n">${info.nombre}</div><div class="c">${formatearDinero(info.coste)}</div>`;
+    if(!desbloqueado){
+      btn.title = info.etiquetaBloqueo || 'Todavía no disponible';
+    } else if(esInferior){
+      btn.title = 'Ya tienes unas botas mejores que estas';
+    } else if(!asequible && !yaComprado){
+      btn.title = (j.stats.dinero||0) < 0
+        ? 'No puedes comprar nada mientras tu cuenta esté en números rojos'
+        : `Te falta dinero para permitirte estas botas (${formatearDinero(info.coste)})`;
+    }
+    if(desbloqueado && asequible && !yaComprado && !esInferior){
+      btn.onclick = ()=>{
+        aplicarEfectos(j, { dinero:-info.coste, ...info.efecto });
+        registrarMovimientoBanca(j, 'out', 'Compra', info.nombre, -info.coste);
+        j.botasActual = info.nivel;
+        pintar();
+      };
+    }
+    niveles.appendChild(btn);
+  });
+  fila.appendChild(niveles);
+  const primerBloqueado = TIENDA_BOTAS.find(n => n.desbloqueo && !n.desbloqueo(j));
+  if(primerBloqueado && !j.botasActual){
+    fila.appendChild(el('div','servicio-desc', `🔒 ${primerBloqueado.nombre}: ${primerBloqueado.etiquetaBloqueo}`));
+  } else {
+    const infoDesc = TIENDA_BOTAS.find(n=>n.nivel === (j.botasActual || 1));
+    fila.appendChild(el('div','servicio-desc', infoDesc.desc));
+  }
+  contenedor.appendChild(fila);
+}
 function renderizarTienda(j, contenedor){
   renderizarServiciosProfesionales(j, contenedor);
   // Separador fuerte entre Servicios (compromiso anual, se paga cada temporada) y Compras (gasto
@@ -16544,6 +16656,7 @@ function renderizarTienda(j, contenedor){
   contenedor.appendChild(divisor);
   renderizarCoches(j, contenedor);
   renderizarMotos(j, contenedor);
+  renderizarBotas(j, contenedor);
 }
 
 SCREENS.gastos = function(){
@@ -16563,6 +16676,53 @@ SCREENS.gastos = function(){
     };
     c.appendChild(btn);
   }
+  app.appendChild(c);
+};
+
+// Servicios y Compras (garaje) por separado, cada una con su propia app real en el móvil —
+// antes ambas vivían juntas en SCREENS.gastos (que sigue existiendo tal cual, sin tocar: es la
+// parada obligatoria de "gasto personal" de siempre). Estas dos son solo un atajo de consulta,
+// por eso llevan "← Volver" en vez del "Continuar" que avanza la temporada.
+SCREENS.servicios = function(){
+  const j = S.jugador;
+  topbar("Servicios");
+  const cVolver = el('div','card');
+  const btnVolver = document.createElement('button');
+  btnVolver.className = 'btn-secondary';
+  btnVolver.textContent = '← Volver';
+  btnVolver.onclick = ()=>{
+    S.screen = S.pantallaAnteriorServicios || 'tabJugador';
+    S.pantallaAnteriorServicios = null;
+    render();
+  };
+  cVolver.appendChild(btnVolver);
+  app.appendChild(cVolver);
+
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Contrataciones profesionales'));
+  renderizarServiciosProfesionales(j, c);
+  app.appendChild(c);
+};
+SCREENS.compras = function(){
+  const j = S.jugador;
+  topbar("Compras");
+  const cVolver = el('div','card');
+  const btnVolver = document.createElement('button');
+  btnVolver.className = 'btn-secondary';
+  btnVolver.textContent = '← Volver';
+  btnVolver.onclick = ()=>{
+    S.screen = S.pantallaAnteriorCompras || 'tabJugador';
+    S.pantallaAnteriorCompras = null;
+    render();
+  };
+  cVolver.appendChild(btnVolver);
+  app.appendChild(cVolver);
+
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Inversiones personales'));
+  renderizarCoches(j, c);
+  renderizarMotos(j, c);
+  renderizarBotas(j, c);
   app.appendChild(c);
 };
 
