@@ -1177,11 +1177,59 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-lock-badge svg{ width:9px; height:9px; }
 .tel-icon.whatsapp{ background:linear-gradient(150deg,#3fce6e,#1f9e4c); }
 .tel-icon.banca{ background:linear-gradient(150deg,#3f6fce,#233f80); }
-.tel-icon.compras{ background:linear-gradient(150deg,#e0932e,#8a531a); }
+.tel-icon.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
 .tel-icon.casino{ background:linear-gradient(150deg,#7b2d8e,#341042); }
 .tel-icon.cromos{ background:linear-gradient(150deg,#4CAF6D,#1d5c37); }
 .tel-icon.club{ background:linear-gradient(150deg,#7c8494,#464c59); }
 .tel-icon.ajustes{ background:linear-gradient(150deg,#7c8494,#464c59); }
+/* Carpeta del móvil (estilo iOS): fondo translúcido con una previsualización 2x2 de los
+   iconos que contiene — Economía agrupa Banca/Casino Online/Servicios, ver TEL_CARPETAS. */
+.tel-icon.carpeta{ background:rgba(255,255,255,0.09); display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(2,1fr); gap:4px; padding:8px; }
+.tel-icon.carpeta .mini{ border-radius:6px; display:flex; align-items:center; justify-content:center; }
+.tel-icon.carpeta .mini svg{ width:60%; height:60%; }
+.tel-icon.carpeta .mini.vacio{ background:rgba(255,255,255,0.05); }
+.tel-icon.carpeta .mini.banca{ background:linear-gradient(150deg,#3f6fce,#233f80); }
+.tel-icon.carpeta .mini.casino{ background:linear-gradient(150deg,#7b2d8e,#341042); }
+.tel-icon.carpeta .mini.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
+
+/* ---------- App Banca: extracto real (SCREENS.movil, vista 'banca') ---------- */
+.tel-bank-hero{ text-align:center; padding:6px 0 2px; }
+.tel-bank-hero .k{ font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); }
+.tel-bank-hero .v{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:32px; font-variant-numeric:tabular-nums; margin:2px 0; color:var(--ink); }
+.tel-bank-hero .trend{ font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600; }
+.tel-bank-hero .trend.pos{ color:#8fe3ab; } .tel-bank-hero .trend.neg{ color:#f0a5ac; }
+.tel-bank-tabs{ display:flex; gap:6px; background:var(--panel2); border-radius:11px; padding:3px; margin:14px 0 12px; }
+.tel-bank-tab{ flex:1; background:none; border:none; color:var(--ink-soft); font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:600; padding:8px 0; border-radius:9px; cursor:pointer; }
+.tel-bank-tab.active{ background:var(--panel); color:var(--ink); }
+.tel-bank-card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px; }
+.tel-bank-card-title{ font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 10px; }
+.tel-sparkline-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:10px; }
+.tel-sparkline-row svg{ flex-shrink:0; }
+.tel-sparkline-figs .v{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
+.tel-sparkline-figs .t{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:#8fe3ab; font-weight:600; margin-top:1px; }
+.tel-bank-split{ display:flex; gap:10px; margin-bottom:12px; }
+.tel-split-card{ flex:1; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
+.tel-split-card .lbl{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); }
+.tel-split-card .amt{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:17px; margin-top:2px; font-variant-numeric:tabular-nums; }
+.tel-split-card.ingresos .amt{ color:#8fe3ab; }
+.tel-split-card.gastos .amt{ color:#f0a5ac; }
+.tel-split-card .lines{ margin-top:8px; display:flex; flex-direction:column; gap:4px; }
+.tel-split-card .lines div{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); display:flex; justify-content:space-between; gap:6px; }
+.tel-movements{ display:flex; flex-direction:column; }
+.tel-movement{ display:flex; align-items:center; gap:11px; padding:10px 2px; border-bottom:1px solid var(--line); }
+.tel-movement:last-child{ border-bottom:none; }
+.tel-mv-icon{ flex-shrink:0; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1.2px solid; }
+.tel-mv-icon svg{ width:16px; height:16px; }
+.tel-mv-icon.in{ color:#8fe3ab; border-color:rgba(76,175,109,0.5); background:rgba(76,175,109,0.1); }
+.tel-mv-icon.out{ color:#f0a5ac; border-color:rgba(217,73,92,0.5); background:rgba(217,73,92,0.1); }
+.tel-mv-body{ flex:1; min-width:0; }
+.tel-mv-title{ font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; color:var(--ink); }
+.tel-mv-sub{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); margin-top:1px; }
+.tel-mv-right{ text-align:right; flex-shrink:0; }
+.tel-mv-amt{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:700; font-variant-numeric:tabular-nums; }
+.tel-mv-amt.pos{ color:#8fe3ab; } .tel-mv-amt.neg{ color:#f0a5ac; }
+.tel-mv-date{ font-family:'Space Grotesk',sans-serif; font-size:10px; color:var(--ink-soft); margin-top:1px; }
+.tel-movements-vacio{ font-family:'Space Grotesk',sans-serif; font-size:13px; color:var(--ink-soft); text-align:center; padding:18px 4px; }
 
 .tel-app-header{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
 .tel-back-btn{ background:none; border:1px solid var(--line); border-radius:8px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); cursor:pointer; flex-shrink:0; }
@@ -7346,6 +7394,14 @@ function abreviarNumero(valor){
 function formatearDinero(valor){
   return abreviarNumero(valor) + ' €';
 }
+// Cifra completa con separador de miles, para sitios donde abreviar (1,2M/9,8K) no encaja —
+// como una lista de movimientos bancarios. No usa toLocaleString: algunos motores empaquetan
+// un ICU reducido sin datos de es-ES y devuelven el número sin separador sin avisar.
+function formatearEuros(valor){
+  const signo = valor < 0 ? '−' : '';
+  const conPuntos = Math.abs(Math.round(valor)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return signo + conPuntos + ' €';
+}
 function formatearSeguidores(valor){
   return abreviarNumero(valor);
 }
@@ -8029,6 +8085,7 @@ function migrarJugadorGuardado(j){
     if(j.rival.temporadasCompartiendo === undefined) j.rival.temporadasCompartiendo = 0;
     if(j.rival.yaCompartioVestuario === undefined) j.rival.yaCompartioVestuario = false;
   }
+  if(j.movimientosBanca === undefined) j.movimientosBanca = [];
 }
 function cargarPartida(slot){
   try{
@@ -8093,6 +8150,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia,estiloId
     historial:[],
     eventosVistos:[],
     historialTemporadas:[],
+    movimientosBanca:[],
     trayectoria:[{
       club: club.nombre, categoria:"Tercera RFEF", pais:"España", extranjero:false, colores: club.colores,
       temporadaInicio:1, temporadaFin:1, partidos:0, goles:0, asistencias:0, carino:20, titulos:[]
@@ -8310,18 +8368,39 @@ function procesarBanderasFichaje(j, rama){
   }
   return cambioDeClub;
 }
+// Extracto real de la app Banca del móvil (ver SCREENS.movil, vista 'banca'): un registro de
+// movimientos de verdad, no narrativo — se anota en los puntos donde el juego ya movía dinero
+// (nómina, casino, compras de garaje), nunca los mil pequeños efectos de "dinero" de sucesos
+// sueltos, para que la lista se lea como un extracto de banco y no como un log de depuración.
+// unshift + tope: el más reciente siempre en cabeza, sin dejar crecer la partida guardada sin límite.
+function registrarMovimientoBanca(j, tipo, titulo, sub, monto){
+  if(!monto) return;
+  j.movimientosBanca = j.movimientosBanca || [];
+  j.movimientosBanca.unshift({ tipo, titulo, sub, monto, temporada:S.temporada });
+  if(j.movimientosBanca.length > 30) j.movimientosBanca.length = 30;
+}
 function pagarNomina(j){
   const ingresoSueldo = Math.round(j.contrato.sueldoAnual / SECUENCIA_TEMPORADA.length);
   j.stats.dinero += ingresoSueldo;
   j.carrera.dineroGanado = (j.carrera.dineroGanado||0) + ingresoSueldo;
+  registrarMovimientoBanca(j, 'in', 'Nómina', j.club.nombre, ingresoSueldo);
   if(j.patrocinio){
     const ingresoPatrocinio = Math.round(j.patrocinio.cantidadAnual / SECUENCIA_TEMPORADA.length);
     j.stats.dinero += ingresoPatrocinio;
     j.carrera.dineroGanado = (j.carrera.dineroGanado||0) + ingresoPatrocinio;
+    registrarMovimientoBanca(j, 'in', 'Patrocinio', j.patrocinio.marca, ingresoPatrocinio);
   }
-  if(j.representante) j.stats.dinero -= Math.round((j.contrato.sueldoAnual / SECUENCIA_TEMPORADA.length) * j.representante.comision);
-  j.stats.dinero -= Math.round(costeAnualServicios(j) / SECUENCIA_TEMPORADA.length);
-  j.stats.dinero -= Math.round(costeVidaAnual(j) / SECUENCIA_TEMPORADA.length);
+  if(j.representante){
+    const comision = Math.round((j.contrato.sueldoAnual / SECUENCIA_TEMPORADA.length) * j.representante.comision);
+    j.stats.dinero -= comision;
+    registrarMovimientoBanca(j, 'out', 'Representante', 'Tu agente, '+(j.representante.agente.apodo||j.representante.agente.nombre), -comision);
+  }
+  const gastoServicios = Math.round(costeAnualServicios(j) / SECUENCIA_TEMPORADA.length);
+  j.stats.dinero -= gastoServicios;
+  registrarMovimientoBanca(j, 'out', 'Servicios', 'Suscripciones profesionales', -gastoServicios);
+  const gastoVida = Math.round(costeVidaAnual(j) / SECUENCIA_TEMPORADA.length);
+  j.stats.dinero -= gastoVida;
+  registrarMovimientoBanca(j, 'out', 'Nivel de vida', nivelDeVida(j.contrato.sueldoAnual).nombre, -gastoVida);
 }
 function elegirTitular(tier, datos){
   const pool = TITULARES[tier];
@@ -12171,6 +12250,7 @@ function generarGridTraga(){
 function cobrarBoteTraga(j){
   if(S.tragaBote > 0){
     aplicarEfectos(j, { dinero: S.tragaBote });
+    registrarMovimientoBanca(j, 'in', 'Casino Online', 'Tragaperras', S.tragaBote);
     if(S.tragaBote >= (S.tragaApuesta||10)*35) aplicarEfectos(j, { mental:3, confianza:3 });
     if(S.tragaBote >= 50000){ j.hitosLogro = j.hitosLogro || {}; j.hitosLogro.boteGrande = true; }
     resolverGiroRetoCasinoAmigo(j, S.tragaBote - (S.tragaApuesta||0));
@@ -12323,6 +12403,7 @@ SCREENS.tragaperras = function(){
     btnJugar.onclick = ()=>{
       const apuesta = S.tragaApuesta;
       aplicarEfectos(j, { dinero: -apuesta });
+      registrarMovimientoBanca(j, 'out', 'Casino Online', 'Tragaperras', -apuesta);
       S.tragaGirando = true; S.tragaMensaje = 'Girando…'; S.tragaComboGanador = null; pintar();
       Sonido.tragaGira();
       const cols = [0,1,2].map(()=> [0,1,2].map(()=> tiraSimboloTraga()));
@@ -12617,6 +12698,7 @@ SCREENS.ruleta = function(){
       const ganancia = gano ? apuesta*multiplicador : 0;
       const netoGiro = gano ? (ganancia-apuesta) : -apuesta;
       aplicarEfectos(j, { dinero: netoGiro });
+      registrarMovimientoBanca(j, netoGiro>=0?'in':'out', 'Casino Online', 'Ruleta', netoGiro);
       if(gano && multiplicador >= 36) aplicarEfectos(j, { mental:3, confianza:3 });
       if(!gano && apuesta >= j.stats.dinero + apuesta) aplicarEfectos(j, { mental:-2 });
       if(gano) Sonido.ruletaGana(); else Sonido.ruletaPierde();
@@ -12879,10 +12961,15 @@ function bjResolver(j, tipo, msg){
   let cambios = [];
   // Mismas reglas que la ruleta: un premio grande sube algo la confianza y el carácter;
   // jugarte todo lo que tenías y perderlo baja el carácter.
-  if(tipo === 'gana') cambios = aplicarEfectos(j, { dinero: S.bjApuesta });
-  else if(tipo === 'blackjack') cambios = aplicarEfectos(j, { dinero: Math.round(S.bjApuesta*1.5), mental:3, confianza:3 });
+  if(tipo === 'gana'){ cambios = aplicarEfectos(j, { dinero: S.bjApuesta }); registrarMovimientoBanca(j, 'in', 'Casino Online', 'Blackjack', S.bjApuesta); }
+  else if(tipo === 'blackjack'){
+    const premio = Math.round(S.bjApuesta*1.5);
+    cambios = aplicarEfectos(j, { dinero: premio, mental:3, confianza:3 });
+    registrarMovimientoBanca(j, 'in', 'Casino Online', 'Blackjack', premio);
+  }
   else if(tipo === 'pierde'){
     cambios = aplicarEfectos(j, { dinero: -S.bjApuesta });
+    registrarMovimientoBanca(j, 'out', 'Casino Online', 'Blackjack', -S.bjApuesta);
     if(S.bjApuesta >= dineroAntes) cambios = cambios.concat(aplicarEfectos(j, { mental:-2 }));
   }
   S.bjCambios = cambios;
@@ -13240,9 +13327,19 @@ const TEL_ICONO_COMPRAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" st
 const TEL_ICONO_CASINO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="12" cy="12" r="1" fill="#fff" stroke="none"/><circle cx="9" cy="14.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="14.5" r="1" fill="#fff" stroke="none"/></svg>';
 const TEL_ICONO_CROMOS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>';
 // Umbrales reales: los mismos NIVELES_POPULARIDAD que usa el resto del juego (Conocido/Popular/Ídolo).
+// Carpeta "Economía" (estilo iOS): agrupa las 3 apps de dinero. Banca es la única con pantalla
+// propia dentro del móvil (S.movilVista='banca', ver más abajo); Casino Online y Servicios
+// navegan a las pantallas reales de siempre (mismo casino/tienda, solo que se abren "desde el
+// móvil"). Cada app conserva su propio umbral de desbloqueo por popularidad.
+const TEL_CARPETA_ECONOMIA = {
+  id:'economia', nombre:'Economía', clase:'economia',
+  apps:[
+    { id:'banca', nombre:'Banca', nivelMin:0, clase:'banca', icono:ICONOS_SVG.tabEconomia, esInterna:true },
+    { id:'casino', nombre:'Casino Online', nivelMin:25, clase:'casino', icono:TEL_ICONO_CASINO, destino:'casino' },
+    { id:'servicios', nombre:'Servicios', nivelMin:10, clase:'servicios', icono:TEL_ICONO_COMPRAS, destino:'gastos' }
+  ]
+};
 const TEL_APPS_BLOQUEADAS = [
-  { id:'compras', nombre:'Compras', nivelMin:10, clase:'compras', icono:TEL_ICONO_COMPRAS, destino:'gastos' },
-  { id:'casino', nombre:'Casino', nivelMin:25, clase:'casino', icono:TEL_ICONO_CASINO, destino:'casino' },
   { id:'cromos', nombre:'Cromos', nivelMin:65, clase:'cromos', icono:TEL_ICONO_CROMOS, destino:'logros', antesDeIr:()=>{ S.logrosVistaActiva = 'cromos'; } }
 ];
 const TEL_PLANTILLAS_COMPANERO = {
@@ -13336,6 +13433,45 @@ function telChipsEfecto(cambios){
   });
   return wrap;
 }
+
+/* ---------- App Banca (real): extracto con datos de verdad de j.movimientosBanca ---------- */
+const TEL_ICONO_MV_IN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>';
+const TEL_ICONO_MV_OUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>';
+// El desglose "este paso" no recalcula fórmulas por su cuenta: lee el último movimiento real de
+// cada categoría recurrente en j.movimientosBanca (unshift = más reciente primero), así que
+// siempre coincide exactamente con lo que pagarNomina acaba de anotar — una sola fuente de verdad.
+const TEL_CATEGORIAS_PASO = ['Nómina','Patrocinio','Representante','Servicios','Nivel de vida'];
+function telDesglosePasoActual(j){
+  const ingresos = [], gastos = [];
+  let totalIn = 0, totalOut = 0;
+  TEL_CATEGORIAS_PASO.forEach(cat=>{
+    const mov = (j.movimientosBanca||[]).find(m=>m.titulo===cat);
+    if(!mov) return;
+    if(mov.tipo==='in'){ ingresos.push(mov); totalIn += mov.monto; }
+    else { gastos.push(mov); totalOut += Math.abs(mov.monto); }
+  });
+  return { ingresos, gastos, totalIn, totalOut };
+}
+function telSvgSparkline(serie){
+  const W = 120, H = 46, PAD = 3;
+  const min = Math.min(...serie), max = Math.max(...serie);
+  const puntos = serie.map((v,i)=>{
+    const x = PAD + (serie.length>1 ? (i/(serie.length-1)) * (W-PAD*2) : (W-PAD*2)/2);
+    const y = H-PAD - ((v-min)/(max-min || 1)) * (H-PAD*2);
+    return [x,y];
+  });
+  const linea = puntos.map(p=>p.join(',')).join(' ');
+  const area = `${PAD},${H-PAD} ${linea} ${W-PAD},${H-PAD}`;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    <defs><linearGradient id="tel-sgrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4CAF6D" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#4CAF6D" stop-opacity="0"/>
+    </linearGradient></defs>
+    <polygon points="${area}" fill="url(#tel-sgrad)"/>
+    <polyline points="${linea}" fill="none" stroke="#4CAF6D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${puntos[puntos.length-1][0]}" cy="${puntos[puntos.length-1][1]}" r="2.6" fill="#4CAF6D"/>
+  </svg>`;
+}
 SCREENS.movil = function(){
   topbar("Tu móvil");
   const j = S.jugador;
@@ -13365,7 +13501,6 @@ SCREENS.movil = function(){
     const grid = el('div','tel-app-grid');
     const apps = [
       { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, onclick:()=>{ S.movilVista='chatlist'; pintar(); } },
-      { id:'banca', nombre:'Banca', clase:'banca', icono:ICONOS_SVG.tabEconomia, onclick:()=>{ S.screen='tabEconomia'; render(); } },
       { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ S.screen='tabClub'; render(); } },
       { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ S.pantallaAnteriorAjustes = S.pantallaAnteriorMovil; S.screen='ajustes'; render(); } }
     ];
@@ -13376,6 +13511,15 @@ SCREENS.movil = function(){
       btn.onclick = a.onclick;
       grid.appendChild(btn);
     });
+    // Carpeta Economía (estilo iOS): un solo icono de "carpeta" con miniatura de las 3 apps que
+    // contiene; se coloca junto a WhatsApp, en el hueco que antes ocupaba Banca sola.
+    const folder = TEL_CARPETA_ECONOMIA;
+    const btnFolder = document.createElement('button');
+    btnFolder.className = 'tel-app';
+    const miniHtml = folder.apps.map(a=>`<span class="mini ${a.clase}">${a.icono}</span>`).join('') + '<span class="mini vacio"></span>';
+    btnFolder.innerHTML = `<span class="tel-icon carpeta">${miniHtml}</span><span class="tel-label">${folder.nombre}</span>`;
+    btnFolder.onclick = ()=>{ S.movilVista='carpeta_economia'; pintar(); };
+    grid.insertBefore(btnFolder, grid.children[1] || null);
     TEL_APPS_BLOQUEADAS.forEach(a=>{
       const desbloqueada = (j.stats.popularidad||0) >= a.nivelMin;
       const btn = document.createElement('button');
@@ -13388,6 +13532,125 @@ SCREENS.movil = function(){
       grid.appendChild(btn);
     });
     c.appendChild(grid);
+  }
+
+  else if(vista === 'carpeta_economia'){
+    const folder = TEL_CARPETA_ECONOMIA;
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title', folder.nombre));
+    c.appendChild(header);
+    const grid = el('div','tel-app-grid');
+    folder.apps.forEach(a=>{
+      const desbloqueada = (j.stats.popularidad||0) >= a.nivelMin;
+      const btn = document.createElement('button');
+      btn.className = 'tel-app' + (desbloqueada?'':' locked');
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${desbloqueada?'':`<span class="tel-lock-badge">${TEL_ICONO_LOCK}</span>`}</span><span class="tel-label">${a.nombre}</span>`;
+      btn.onclick = ()=>{
+        if(!desbloqueada){ mostrarNotificacion(`${a.nombre} se desbloquea al llegar a "${estadoPopularidad(a.nivelMin).texto}" (${a.nivelMin} de popularidad)`, 'info'); return; }
+        if(a.esInterna){ S.movilVista = a.id; S.telBancoTab = S.telBancoTab || 'resumen'; pintar(); return; }
+        if(a.antesDeIr) a.antesDeIr();
+        S.screen = a.destino;
+        render();
+      };
+      grid.appendChild(btn);
+    });
+    c.appendChild(grid);
+  }
+
+  else if(vista === 'banca'){
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='carpeta_economia'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','Banca'));
+    c.appendChild(header);
+
+    const desglose = telDesglosePasoActual(j);
+    const trendNeto = desglose.totalIn - desglose.totalOut;
+    const huboPaso = desglose.ingresos.length > 0 || desglose.gastos.length > 0;
+
+    const hero = el('div','tel-bank-hero');
+    hero.appendChild(el('p','k','Saldo actual'));
+    hero.appendChild(el('p','v', formatearEuros(j.stats.dinero||0)));
+    hero.appendChild(el('p','trend '+(trendNeto>=0?'pos':'neg'),
+      huboPaso ? `${trendNeto>=0?'+':''}${formatearEuros(trendNeto)} desde el último paso` : 'Todavía no ha llegado tu primera nómina'));
+    c.appendChild(hero);
+
+    const tabs = el('div','tel-bank-tabs');
+    const tabResumen = document.createElement('button'); tabResumen.className='tel-bank-tab'+(S.telBancoTab!=='movimientos'?' active':''); tabResumen.textContent='Resumen';
+    const tabMov = document.createElement('button'); tabMov.className='tel-bank-tab'+(S.telBancoTab==='movimientos'?' active':''); tabMov.textContent='Movimientos';
+    tabResumen.onclick = ()=>{ S.telBancoTab='resumen'; pintar(); };
+    tabMov.onclick = ()=>{ S.telBancoTab='movimientos'; pintar(); };
+    tabs.appendChild(tabResumen); tabs.appendChild(tabMov);
+    c.appendChild(tabs);
+
+    if(S.telBancoTab !== 'movimientos'){
+      // Valor de mercado: temporadas reales ya cerradas (j.historialTemporadas) + el valor actual,
+      // así el gráfico es un extracto real de tu progresión, no una serie inventada.
+      const serie = (j.historialTemporadas||[]).map(h=>h.valorMercado).concat([j.stats.valorMercado||0]).filter(v=>v>0);
+      if(!serie.length) serie.push(j.stats.valorMercado||0, j.stats.valorMercado||0);
+      const cardVM = el('div','tel-bank-card');
+      cardVM.appendChild(el('p','tel-bank-card-title','Valor de mercado'));
+      const row = el('div','tel-sparkline-row');
+      const figs = el('div','tel-sparkline-figs');
+      figs.appendChild(el('div','v', formatearDinero(j.stats.valorMercado||0)));
+      if(serie.length>1){
+        const delta = serie[serie.length-1] - serie[serie.length-2];
+        figs.appendChild(el('div','t', `${delta>=0?'+':''}${formatearDinero(delta)} última temporada`));
+      }
+      row.appendChild(figs);
+      const svgWrap = el('div'); svgWrap.innerHTML = telSvgSparkline(serie);
+      row.appendChild(svgWrap.firstElementChild);
+      cardVM.appendChild(row);
+      c.appendChild(cardVM);
+
+      if(huboPaso){
+        c.appendChild(el('p','tel-bank-card-title','Este paso')).style.margin = '0 2px 8px';
+        const split = el('div','tel-bank-split');
+        const cardIn = el('div','ingresos tel-split-card');
+        cardIn.appendChild(el('div','lbl','Ingresos'));
+        cardIn.appendChild(el('div','amt', '+'+formatearEuros(desglose.totalIn)));
+        const linesIn = el('div','lines');
+        desglose.ingresos.forEach(m=> linesIn.appendChild(el('div',null,`<span>${m.titulo}</span><span>${formatearEuros(m.monto)}</span>`)));
+        cardIn.appendChild(linesIn);
+        const cardOut = el('div','gastos tel-split-card');
+        cardOut.appendChild(el('div','lbl','Gastos'));
+        cardOut.appendChild(el('div','amt', '−'+formatearEuros(desglose.totalOut)));
+        const linesOut = el('div','lines');
+        desglose.gastos.forEach(m=> linesOut.appendChild(el('div',null,`<span>${m.titulo}</span><span>${formatearEuros(Math.abs(m.monto))}</span>`)));
+        cardOut.appendChild(linesOut);
+        split.appendChild(cardIn); split.appendChild(cardOut);
+        c.appendChild(split);
+      }
+    } else {
+      const cardMov = el('div','tel-bank-card');
+      cardMov.style.padding = '4px 14px';
+      const lista = j.movimientosBanca || [];
+      if(!lista.length){
+        cardMov.appendChild(el('p','tel-movements-vacio','Todavía no hay movimientos — aparecerán aquí en cuanto cobres tu primera nómina.'));
+      } else {
+        const box = el('div','tel-movements');
+        lista.forEach(m=>{
+          const row = el('div','tel-movement');
+          row.innerHTML = `
+            <span class="tel-mv-icon ${m.tipo}">${m.tipo==='in' ? TEL_ICONO_MV_IN : TEL_ICONO_MV_OUT}</span>
+            <span class="tel-mv-body">
+              <div class="tel-mv-title">${m.titulo}</div>
+              <div class="tel-mv-sub">${m.sub||''}</div>
+            </span>
+            <span class="tel-mv-right">
+              <div class="tel-mv-amt ${m.monto>=0?'pos':'neg'}">${formatearEuros(m.monto)}</div>
+              <div class="tel-mv-date">Temp. ${temporadaAAnoCompleto(m.temporada)}</div>
+            </span>`;
+          box.appendChild(row);
+        });
+        cardMov.appendChild(box);
+      }
+      c.appendChild(cardMov);
+    }
   }
 
   else if(vista === 'chatlist'){
@@ -16072,6 +16335,7 @@ function renderizarCoches(j, contenedor){
     if(desbloqueado && asequible && !yaComprado && !esInferior){
       btn.onclick = ()=>{
         aplicarEfectos(j, { dinero:-info.coste, ...info.efecto });
+        registrarMovimientoBanca(j, 'out', 'Compra', info.nombre, -info.coste);
         j.cocheActual = info.nivel;
         pintar();
       };
@@ -16119,6 +16383,7 @@ function renderizarMotos(j, contenedor){
     if(desbloqueado && asequible && !yaComprado && !esInferior){
       btn.onclick = ()=>{
         aplicarEfectos(j, { dinero:-info.coste, ...info.efecto });
+        registrarMovimientoBanca(j, 'out', 'Compra', info.nombre, -info.coste);
         j.motoActual = info.nivel;
         pintar();
       };
