@@ -1295,10 +1295,9 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-icon.x{ background:linear-gradient(150deg,#3a3d44,#111214); }
 .tel-icon.calendario{ background:linear-gradient(150deg,#e0432e,#8a1f14); }
 .tel-icon.appstore{ background:linear-gradient(150deg,#5a8fd6,#1f3a63); }
-.tel-icon.ritmo{ background:linear-gradient(150deg,#4CAF6D,#1d5c37); }
-.tel-icon.notas{ background:linear-gradient(150deg,#e0a83e,#8a5f14); }
-.tel-icon.mapas{ background:linear-gradient(150deg,#3fce9e,#1f8a63); }
-.tel-icon.clima{ background:linear-gradient(150deg,#5ab8e0,#1f6a8a); }
+.tel-icon.prensa{ background:linear-gradient(150deg,#c94b3f,#6e1f18); }
+.tel-icon.scout{ background:linear-gradient(150deg,#3fce9e,#1f6a4c); }
+.tel-icon.rendimiento{ background:linear-gradient(150deg,#e0a83e,#8a5f14); }
 /* Puntito de "hay algo nuevo" sobre el icono de una app (WhatsApp/Email/Redes/Servicios) —
    mismo lenguaje visual que el badge dorado de Logros en la topbar, pero aquí genérico (rojo,
    como una notificación real) porque son varias apps distintas, no un solo contador. */
@@ -1460,51 +1459,30 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-store-progreso{ position:relative; height:20px; background:var(--panel2); border-radius:999px; overflow:hidden; }
 .tel-store-progreso .fill{ height:100%; background:linear-gradient(90deg,#5a8fd6,#3f6fce); transition:width .18s ease; }
 .tel-store-progreso .pct{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; font-size:9.5px; font-weight:700; color:#fff; }
-/* Ritmo (música) */
-.tel-ritmo-player{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:10px 0 22px; }
-.tel-ritmo-disco{ width:110px; height:110px; border-radius:50%; background:linear-gradient(150deg,#4CAF6D,#1d5c37); display:flex; align-items:center; justify-content:center; box-shadow:0 10px 26px rgba(0,0,0,0.4); margin-bottom:16px; }
-.tel-ritmo-disco svg{ width:40px; height:40px; }
-.tel-ritmo-disco.girando{ animation:telRitmoGiro 3.5s linear infinite; }
-@keyframes telRitmoGiro{ from{ transform:rotate(0); } to{ transform:rotate(360deg); } }
-.tel-ritmo-titulo{ font-family:'Inter',sans-serif; font-size:15px; font-weight:700; color:var(--ink); }
-.tel-ritmo-artista{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); margin-top:2px; }
-.tel-ritmo-barra{ width:100%; height:4px; background:var(--panel2); border-radius:999px; margin-top:16px; overflow:hidden; }
-.tel-ritmo-barra .fill{ height:100%; width:35%; background:#4CAF6D; }
-.tel-ritmo-barra .fill.animando{ animation:telRitmoBarra 8s linear infinite; }
-@keyframes telRitmoBarra{ from{ width:0%; } to{ width:100%; } }
-.tel-ritmo-controles{ display:flex; align-items:center; gap:22px; margin-top:18px; }
-.tel-ritmo-controles button{ background:none; border:none; color:var(--ink); font-size:18px; cursor:pointer; }
-.tel-ritmo-controles button.play{ width:46px; height:46px; border-radius:50%; background:var(--gold); color:#1a1408; display:flex; align-items:center; justify-content:center; font-size:16px; }
-.tel-ritmo-lista{ display:flex; flex-direction:column; }
-.tel-ritmo-fila{ display:flex; justify-content:space-between; padding:10px 4px; border-bottom:1px solid var(--line); font-family:'Inter',sans-serif; font-size:12.5px; color:var(--ink-soft); cursor:pointer; }
-.tel-ritmo-fila:last-child{ border-bottom:none; }
-.tel-ritmo-fila.activa{ color:var(--gold); font-weight:600; }
-.tel-ritmo-fila .artista{ color:var(--ink-soft); opacity:.7; }
-/* Notas */
-.tel-notas-nueva{ margin-bottom:18px; }
-.tel-notas-input{ width:100%; box-sizing:border-box; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:11px 13px; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink); resize:vertical; margin-bottom:8px; }
-.tel-notas-input:focus{ outline:none; border-color:var(--gold-dim); }
-.tel-nota-item{ background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px; }
-.tel-nota-txt{ font-family:'Inter',sans-serif; font-size:13px; line-height:1.5; color:var(--ink); white-space:pre-wrap; }
-.tel-nota-meta{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-family:'Inter',sans-serif; font-size:10.5px; color:var(--ink-soft); }
-.tel-nota-meta button{ background:none; border:none; color:#e0432e; font-family:'Inter',sans-serif; font-size:10.5px; cursor:pointer; text-decoration:underline; }
-/* Mapas */
-.tel-mapas-svg{ border-radius:12px; overflow:hidden; margin-bottom:14px; }
-.tel-mapas-info{ margin-bottom:16px; }
-.tel-mapas-lugar{ font-family:'Inter',sans-serif; font-size:16px; font-weight:700; color:var(--ink); }
-.tel-mapas-sub{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); margin-top:2px; }
-.tel-mapas-lista{ display:flex; flex-direction:column; }
-.tel-mapas-fila{ display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--line); font-family:'Inter',sans-serif; font-size:12.5px; color:var(--ink); }
-.tel-mapas-fila:last-child{ border-bottom:none; }
-/* Clima */
-.tel-clima-hero{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:10px 0 22px; }
-.tel-clima-icono{ font-size:52px; line-height:1; margin-bottom:8px; }
-.tel-clima-temp{ font-family:'Big Shoulders Display',sans-serif; font-size:44px; font-weight:800; color:var(--ink); line-height:1; }
-.tel-clima-cond{ font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-soft); margin-top:4px; }
-.tel-clima-lugar{ font-family:'Inter',sans-serif; font-size:11.5px; color:var(--ink-soft); opacity:.7; margin-top:8px; }
-.tel-clima-lista{ display:flex; flex-direction:column; }
-.tel-clima-fila{ display:flex; justify-content:space-between; align-items:center; padding:11px 4px; border-bottom:1px solid var(--line); font-family:'Inter',sans-serif; font-size:13px; color:var(--ink); }
-.tel-clima-fila:last-child{ border-bottom:none; }
+/* Prensa */
+.tel-prensa-item{ background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:13px 14px; margin-bottom:10px; }
+.tel-prensa-eyebrow{ font-family:'Inter',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.08em; color:var(--gold); text-transform:uppercase; margin-bottom:4px; }
+.tel-prensa-tit{ font-family:'Inter',sans-serif; font-size:14px; font-weight:700; color:var(--ink); line-height:1.35; }
+.tel-prensa-cuerpo{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); line-height:1.5; margin-top:5px; }
+/* Scout */
+.tel-scout-hero{ background:var(--panel2); border:1px solid var(--line); border-radius:14px; padding:18px; text-align:center; margin-bottom:16px; }
+.tel-scout-valor{ font-family:'Big Shoulders Display',sans-serif; font-size:36px; font-weight:800; color:var(--gold); line-height:1; }
+.tel-scout-label{ font-family:'Inter',sans-serif; font-size:10.5px; letter-spacing:.06em; color:var(--ink-soft); text-transform:uppercase; margin-top:4px; }
+.tel-scout-sub{ font-family:'Inter',sans-serif; font-size:11.5px; color:var(--ink-soft); margin-top:8px; }
+.tel-scout-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); }
+.tel-scout-row:last-child{ border-bottom:none; }
+.tel-scout-row .ic{ width:20px; height:20px; flex-shrink:0; display:flex; }
+.tel-scout-row .nombre{ font-family:'Inter',sans-serif; font-size:12.5px; color:var(--ink); width:72px; flex-shrink:0; }
+.tel-scout-barra{ flex:1; height:6px; background:var(--panel2); border-radius:999px; overflow:hidden; }
+.tel-scout-barra .fill{ height:100%; background:linear-gradient(90deg,#3fce9e,#1f6a4c); }
+.tel-scout-row .num{ font-family:'Inter',sans-serif; font-size:12px; font-weight:700; color:var(--ink); width:22px; text-align:right; flex-shrink:0; }
+/* Rendimiento */
+.tel-rend-card{ display:flex; align-items:center; justify-content:space-between; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin-bottom:10px; }
+.tel-rend-card .nombre{ font-family:'Inter',sans-serif; font-size:13px; color:var(--ink); }
+.tel-rend-card .estado{ font-family:'Inter',sans-serif; font-size:12.5px; font-weight:700; }
+.tel-rend-card .estado.ok{ color:#3fce9e; }
+.tel-rend-card .estado.warn{ color:#e0a83e; }
+.tel-rend-card .estado.bad{ color:#e0432e; }
 </style>
 </head>
 <body>
@@ -13744,10 +13722,9 @@ const TEL_ICONO_CALENDARIO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff"
 const TEL_ICONO_LAPIZ = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
 const TEL_ICONO_CHECK_MINI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l6 6L20 6"/></svg>';
 const TEL_ICONO_APPSTORE = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 5.9L20 11l-5.8 2.1L12 19l-2.2-5.9L4 11l5.8-2.1z"/></svg>';
-const TEL_ICONO_RITMO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>';
-const TEL_ICONO_MAPAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5L4 6.5v13l5-2 6 2 5-2v-13l-5 2-6-2z"/><path d="M9 4.5v13M15 6.5v13"/></svg>';
-const TEL_ICONO_NOTAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3.5" width="15" height="17" rx="2"/><path d="M8 8.5h8M8 12.5h8M8 16.5h5"/></svg>';
-const TEL_ICONO_CLIMA = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3.5"/><path d="M9 1.5v2M9 14.5v2M2.5 9h2M13.5 9h2M4.3 4.3l1.4 1.4M12.3 4.3l-1.4 1.4"/><path d="M13 15a3.5 3.5 0 0 0 0-7 4.5 4.5 0 0 0-8.7 1.4A3 3 0 0 0 5 15z" fill="rgba(255,255,255,0.15)"/></svg>';
+const TEL_ICONO_PRENSA = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h13a2 2 0 0 1 2 2V18a1.5 1.5 0 0 1-1.5 1.5H6A2 2 0 0 1 4 17.5z"/><path d="M4 17.5V5.5M8 9h7M8 12.5h7M8 16h4"/></svg>';
+const TEL_ICONO_SCOUT = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3L21 21"/><path d="M7.5 10.5l2 2 3.5-4"/></svg>';
+const TEL_ICONO_RENDIMIENTO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>';
 // Umbrales reales: los mismos NIVELES_POPULARIDAD que usa el resto del juego (Conocido/Popular/Ídolo).
 // Carpeta "Economía" (estilo iOS): agrupa las 3 apps de dinero. Banca es la única con pantalla
 // propia dentro del móvil (S.movilVista='banca', ver más abajo); Casino Online y Servicios
@@ -13767,14 +13744,14 @@ const TEL_CARPETA_ECONOMIA = {
 const TEL_APPS_BLOQUEADAS = [
   { id:'cromos', nombre:'Cromos', nivelMin:65, clase:'cromos', icono:TEL_ICONO_CROMOS, destino:'logros', antesDeIr:()=>{ S.logrosVistaActiva = 'cromos'; } }
 ];
-// Catálogo de la App Store: apps normales de cualquier móvil, con nombre propio (no marcas
-// reales) para no reproducir ningún logo/identidad de una app de verdad — solo la idea general
-// (música, mapas, notas, clima). Cada una tiene su propia vista nativa una vez instalada.
+// Catálogo de la App Store: a diferencia de una primera versión con apps de móvil genéricas
+// (música/notas/mapas/clima, sin relación con la partida), estas tres leen datos REALES de `j`/`S`
+// y presentan algo que ya existe en el juego desde un ángulo distinto — igual que Banca es un
+// envoltorio de Economía. Nombre propio (no marcas reales). Cada una tiene su vista nativa.
 const TEL_APP_STORE_CATALOGO = [
-  { id:'ritmo', nombre:'Ritmo', clase:'ritmo', icono:TEL_ICONO_RITMO, desc:'Música para antes del partido', tamano:'38 MB', vista:'ritmo' },
-  { id:'notas', nombre:'Notas', clase:'notas', icono:TEL_ICONO_NOTAS, desc:'Apuntes rápidos, siempre a mano', tamano:'9 MB', vista:'notas' },
-  { id:'mapas', nombre:'Mapas', clase:'mapas', icono:TEL_ICONO_MAPAS, desc:'Dónde entrenas, dónde juegas', tamano:'52 MB', vista:'mapas' },
-  { id:'clima', nombre:'Clima', clase:'clima', icono:TEL_ICONO_CLIMA, desc:'La previsión para el próximo partido', tamano:'14 MB', vista:'clima' }
+  { id:'prensa', nombre:'Prensa', clase:'prensa', icono:TEL_ICONO_PRENSA, desc:'Titulares y rumores sobre tu carrera', tamano:'22 MB', vista:'prensa' },
+  { id:'scout', nombre:'Scout', clase:'scout', icono:TEL_ICONO_SCOUT, desc:'Tu valor de mercado y tu ficha técnica', tamano:'31 MB', vista:'scout' },
+  { id:'rendimiento', nombre:'Rendimiento', clase:'rendimiento', icono:TEL_ICONO_RENDIMIENTO, desc:'Forma, confianza y salud, de un vistazo', tamano:'17 MB', vista:'rendimiento' }
 ];
 // Pantallas REALES del juego que se pueden ver incrustadas dentro del móvil (Club, Ajustes,
 // todo el grupo del Casino Online, Servicios, Compras, Logros/Cromos) — a diferencia de antes,
@@ -13849,6 +13826,46 @@ const TEL_PLANTILLAS_NOTIF = {
   }
 };
 function primerNombre(j){ return (j.nombre||'').split(' ')[0]; }
+// Titulares de la app Prensa: no hay redacción real detrás, se generan a partir del estado
+// ACTUAL del jugador (forma, popularidad, rival, patrocinio, objetivo de temporada) — igual que
+// las plantillas de TEL_PLANTILLAS_NOTIF, pero en formato de portada de prensa deportiva en vez
+// de mensaje directo. Cada condición añade como mucho un titular; se recorta a 5.
+function telGenerarTitulares(j){
+  const posibles = [];
+  if(j.estadoMental === 'racha'){
+    posibles.push({ tit:`${primerNombre(j)} atraviesa su mejor momento de la temporada`, cuerpo:`Encadena buenas actuaciones con el ${j.club.nombre} y la confianza se nota dentro y fuera del campo.` });
+  } else if(j.estadoMental === 'crisis'){
+    posibles.push({ tit:`Dudas sobre el rendimiento de ${primerNombre(j)}`, cuerpo:`Los últimos resultados no acompañan y empiezan a sonar las preguntas en la grada del ${j.club.nombre}.` });
+  } else {
+    const formaInfo = estadoForma(j.stats.forma);
+    if(formaInfo.clase === 'ok'){
+      posibles.push({ tit:`${primerNombre(j)}, a gran nivel con el ${j.club.nombre}`, cuerpo:`"${formaInfo.texto}" es la palabra que más se repite entre quienes lo siguen de cerca.` });
+    } else if(formaInfo.clase === 'bad'){
+      posibles.push({ tit:`Semanas complicadas para ${primerNombre(j)}`, cuerpo:`El bajón de forma empieza a notarse y el entorno del club está pendiente de una reacción.` });
+    }
+  }
+  const popInfo = estadoPopularidad(j.stats.popularidad||0);
+  if(popInfo.texto === 'Superestrella' || popInfo.texto === 'Ídolo'){
+    posibles.push({ tit:`${primerNombre(j)} ya es ${popInfo.texto.toLowerCase()} en ${j.club.nombre}`, cuerpo:'Su nombre suena cada vez más fuerte, también fuera de las fronteras del club.' });
+  }
+  if(j.rival && j.rival.club){
+    const tier = tierRelacionRival(j.rival.relacion||0);
+    const apodoRival = j.rival.apodo || j.rival.nombre;
+    if(tier === 'toxica'){
+      posibles.push({ tit:`La rivalidad con ${apodoRival} no da tregua`, cuerpo:'Ambos siguen mirándose de reojo cada vez que hay resultados sobre la mesa.' });
+    } else if(tier === 'reconciliacion'){
+      posibles.push({ tit:`De rivales a algo parecido a amigos`, cuerpo:`La relación entre ${primerNombre(j)} y ${apodoRival} ha cambiado mucho desde sus inicios.` });
+    }
+  }
+  if(j.patrocinio){
+    posibles.push({ tit:`${j.patrocinio.marca} sigue apostando por ${primerNombre(j)}`, cuerpo:'El acuerdo de patrocinio continúa reforzando su imagen fuera del terreno de juego.' });
+  }
+  if(j.club && j.club.objetivoActual && j.club.objetivoActual.texto){
+    posibles.push({ tit:`El objetivo del ${j.club.nombre} esta temporada: ${j.club.objetivoActual.texto.toLowerCase()}`, cuerpo:'Todo el entorno del club rema en la misma dirección.' });
+  }
+  posibles.push({ tit:`${primerNombre(j)} sigue su andadura en ${j.club.categoria}`, cuerpo:`Con el ${j.club.nombre}, la temporada continúa su curso.` });
+  return posibles.slice(0,5);
+}
 // Simula una descarga/instalación real: progreso irregular (no un contador lineal perfecto,
 // como se ve al instalar de verdad) con pequeñas pausas entre "paquetes". S._telInstalando
 // guarda el % en curso (transitorio, no se persiste); al llegar a 100 pasa a
@@ -15035,154 +15052,73 @@ function renderMovilContenido(c, j){
     });
   }
 
-  else if(vista === 'ritmo'){
+  else if(vista === 'prensa'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
     back.onclick = ()=>{ S.movilVista='home'; pintar(); };
     header.appendChild(back);
-    header.appendChild(el('span','tel-title','Ritmo'));
+    header.appendChild(el('span','tel-title','Prensa'));
     c.appendChild(header);
-    const playlist = [
-      { titulo:'Antes del pitido', artista:'Vestuario FC' },
-      { titulo:'Cabeza fría', artista:'Los Suplentes' },
-      { titulo:'Noventa minutos', artista:'La Grada' },
-      { titulo:'Vuelta a los vestuarios', artista:'Bajo Palo' },
-      { titulo:'Otra semana más', artista:'Concentración' }
-    ];
-    const idx = Math.min(playlist.length-1, Math.max(0, S.telRitmoIndice||0));
-    const track = playlist[idx];
-    const reproduciendo = !!S.telRitmoReproduciendo;
-    const player = el('div','tel-ritmo-player');
-    const disco = el('div','tel-ritmo-disco'+(reproduciendo?' girando':''));
-    disco.innerHTML = TEL_ICONO_RITMO;
-    player.appendChild(disco);
-    player.appendChild(el('div','tel-ritmo-titulo', track.titulo));
-    player.appendChild(el('div','tel-ritmo-artista', track.artista));
-    const barra = el('div','tel-ritmo-barra'); barra.appendChild(el('div','fill'+(reproduciendo?' animando':'')));
-    player.appendChild(barra);
-    const controles = el('div','tel-ritmo-controles');
-    const btnPrev = document.createElement('button'); btnPrev.innerHTML = '⏮'; btnPrev.onclick = ()=>{ S.telRitmoIndice = (idx-1+playlist.length)%playlist.length; pintar(); };
-    const btnPlay = document.createElement('button'); btnPlay.className='play'; btnPlay.innerHTML = reproduciendo?'⏸':'▶'; btnPlay.onclick = ()=>{ S.telRitmoReproduciendo = !reproduciendo; pintar(); };
-    const btnNext = document.createElement('button'); btnNext.innerHTML = '⏭'; btnNext.onclick = ()=>{ S.telRitmoIndice = (idx+1)%playlist.length; pintar(); };
-    controles.appendChild(btnPrev); controles.appendChild(btnPlay); controles.appendChild(btnNext);
-    player.appendChild(controles);
-    c.appendChild(player);
-    const lista = el('div','tel-ritmo-lista');
-    playlist.forEach((t,i)=>{
-      const fila = el('div','tel-ritmo-fila'+(i===idx?' activa':''));
-      fila.innerHTML = `<span>${t.titulo}</span><span class="artista">${t.artista}</span>`;
-      fila.onclick = ()=>{ S.telRitmoIndice = i; pintar(); };
-      lista.appendChild(fila);
+    telGenerarTitulares(j).forEach(t=>{
+      const item = el('div','tel-prensa-item');
+      item.appendChild(el('div','tel-prensa-eyebrow','PRENSA DEPORTIVA'));
+      item.appendChild(el('div','tel-prensa-tit', t.tit));
+      item.appendChild(el('div','tel-prensa-cuerpo', t.cuerpo));
+      c.appendChild(item);
     });
-    c.appendChild(lista);
   }
 
-  else if(vista === 'notas'){
+  else if(vista === 'scout'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
     back.onclick = ()=>{ S.movilVista='home'; pintar(); };
     header.appendChild(back);
-    header.appendChild(el('span','tel-title','Notas'));
+    header.appendChild(el('span','tel-title','Scout'));
     c.appendChild(header);
-    const nueva = el('div','tel-notas-nueva');
-    const input = document.createElement('textarea');
-    input.className = 'tel-notas-input';
-    input.placeholder = 'Escribe algo…';
-    input.rows = 2;
-    nueva.appendChild(input);
-    const btnAnadir = document.createElement('button');
-    btnAnadir.className = 'btn-main';
-    btnAnadir.textContent = 'Añadir nota';
-    btnAnadir.onclick = ()=>{
-      const texto = input.value.trim();
-      if(!texto) return;
-      S.telNotas = S.telNotas || [];
-      S.telNotas.unshift({ id:'nota_'+Date.now(), texto, temporada:S.temporada });
-      guardarPartida();
-      pintar();
-    };
-    nueva.appendChild(btnAnadir);
-    c.appendChild(nueva);
-    const notas = S.telNotas || [];
-    if(!notas.length){
-      c.appendChild(el('p',null,'Todavía no has apuntado nada.')).style.cssText = "font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-soft);padding:10px 4px;";
-    }
-    notas.forEach(n=>{
-      const fila = el('div','tel-nota-item');
-      fila.appendChild(el('div','tel-nota-txt', n.texto));
-      const meta = el('div','tel-nota-meta');
-      meta.appendChild(el('span',null, `Temp. ${temporadaAAnoCompleto(n.temporada)}`));
-      const btnBorrar = document.createElement('button');
-      btnBorrar.textContent = 'Eliminar';
-      btnBorrar.onclick = ()=>{ S.telNotas = (S.telNotas||[]).filter(x=>x.id!==n.id); guardarPartida(); pintar(); };
-      meta.appendChild(btnBorrar);
-      fila.appendChild(meta);
+    const hero = el('div','tel-scout-hero');
+    hero.appendChild(el('div','tel-scout-valor', formatearDinero(j.stats.valorMercado||0)));
+    hero.appendChild(el('div','tel-scout-label','Valor de mercado estimado'));
+    const maximo = (j.carrera && j.carrera.valorMercadoMaximo) || 0;
+    if(maximo > (j.stats.valorMercado||0)) hero.appendChild(el('div','tel-scout-sub', `Máximo alcanzado: ${formatearDinero(maximo)}`));
+    else if(maximo > 0) hero.appendChild(el('div','tel-scout-sub','Tu máximo histórico'));
+    c.appendChild(hero);
+    const filas = [
+      ['fisico', j.atributos.fisico], ['velocidad', j.atributos.velocidad], ['tiro', j.atributos.tiro],
+      ['regate', j.atributos.regate], ['pase', j.atributos.pase], ['desmarque', j.atributos.desmarque],
+      ['mental', j.mentalidad]
+    ];
+    filas.forEach(([clave,valor])=>{
+      const fila = el('div','tel-scout-row');
+      fila.appendChild(el('span','ic', iconoInsignia(clave,20)));
+      fila.appendChild(el('span','nombre', NICE_ATTR[clave]));
+      const barra = el('div','tel-scout-barra'); const fill = el('div','fill'); fill.style.width = Math.round(valor/ATRIBUTO_MAX*100)+'%'; barra.appendChild(fill);
+      fila.appendChild(barra);
+      fila.appendChild(el('span','num', valor));
       c.appendChild(fila);
     });
   }
 
-  else if(vista === 'mapas'){
+  else if(vista === 'rendimiento'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
     back.onclick = ()=>{ S.movilVista='home'; pintar(); };
     header.appendChild(back);
-    header.appendChild(el('span','tel-title','Mapas'));
+    header.appendChild(el('span','tel-title','Rendimiento'));
     c.appendChild(header);
-    const mapa = el('div','tel-mapas-svg');
-    mapa.innerHTML = `<svg viewBox="0 0 200 140" width="100%" height="140">
-      <rect width="200" height="140" fill="#1c2334"/>
-      <path d="M0 40h200M0 90h200M40 0v140M120 0v140M170 0v140" stroke="#2d3650" stroke-width="3"/>
-      <path d="M0 65h200M80 0v140" stroke="#242c44" stroke-width="1.5"/>
-      <circle cx="95" cy="60" r="9" fill="#e0432e"/>
-      <circle cx="95" cy="60" r="15" fill="none" stroke="#e0432e" stroke-width="1.5" opacity=".5"/>
-    </svg>`;
-    c.appendChild(mapa);
-    const info = el('div','tel-mapas-info');
-    info.appendChild(el('div','tel-mapas-lugar', j.club && j.club.extranjero ? `${j.club.nombre}, ${j.club.pais}` : (j.localidad || j.club.nombre || 'Tu ciudad')));
-    info.appendChild(el('div','tel-mapas-sub', j.club.extranjero ? 'Tu nueva ciudad' : `Localidad de origen — juegas en ${j.club.nombre}`));
-    c.appendChild(info);
     const filas = [
-      { icono:'🏟️', texto:`Campo de entrenamiento — ${j.club.nombre}` },
-      { icono:'🏠', texto:'Tu casa — 12 min en coche' },
-      { icono:'✈️', texto:'Aeropuerto — para los partidos fuera' }
+      ['Forma', estadoForma(j.stats.forma)],
+      ['Confianza', estadoConfianza(j.stats.confianza)],
+      ['Salud', estadoSalud(j.stats.salud)]
     ];
-    const lista = el('div','tel-mapas-lista');
-    filas.forEach(f=> lista.appendChild(el('div','tel-mapas-fila', `<span>${f.icono}</span><span>${f.texto}</span>`)));
-    c.appendChild(lista);
-  }
-
-  else if(vista === 'clima'){
-    const header = el('div','tel-app-header');
-    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
-    header.appendChild(back);
-    header.appendChild(el('span','tel-title','Clima'));
-    c.appendChild(header);
-    const condiciones = [
-      { texto:'Despejado', icono:'☀️', tempBase:22 },
-      { texto:'Parcialmente nublado', icono:'⛅', tempBase:17 },
-      { texto:'Nublado', icono:'☁️', tempBase:14 },
-      { texto:'Lluvia ligera', icono:'🌦️', tempBase:11 },
-      { texto:'Lluvia', icono:'🌧️', tempBase:9 }
-    ];
-    // Estable mientras no cambie la temporada/paso — nada de aleatorio en cada repintado.
-    const semilla = (S.temporada||0)*10 + (S.pasoIndex||0);
-    const cond = condiciones[semilla % condiciones.length];
-    const temp = cond.tempBase + (semilla*7 % 6);
-    const hero = el('div','tel-clima-hero');
-    hero.appendChild(el('div','tel-clima-icono', cond.icono));
-    hero.appendChild(el('div','tel-clima-temp', temp+'°'));
-    hero.appendChild(el('div','tel-clima-cond', cond.texto));
-    hero.appendChild(el('div','tel-clima-lugar', j.club && j.club.extranjero ? j.club.pais : (j.localidad||j.club.nombre)));
-    c.appendChild(hero);
-    const dias = ['Hoy','Mañana','Pasado'];
-    const lista = el('div','tel-clima-lista');
-    dias.forEach((d,i)=>{
-      const c2 = condiciones[(semilla+i) % condiciones.length];
-      const t2 = c2.tempBase + ((semilla+i)*7 % 6);
-      lista.appendChild(el('div','tel-clima-fila', `<span>${d}</span><span>${c2.icono}</span><span>${t2}°</span>`));
+    if(j.lesionSemanas > 0){
+      filas.push([j.sancionActiva?'Sanción':'Lesión', { texto:`${j.sancionActiva?'Sancionado':'Lesionado'} (${j.lesionSemanas} sem.)`, clase:'bad' }]);
+    }
+    filas.forEach(([nombre,info])=>{
+      const card = el('div','tel-rend-card');
+      card.appendChild(el('span','nombre', nombre));
+      card.appendChild(el('span','estado '+info.clase, info.texto));
+      c.appendChild(card);
     });
-    c.appendChild(lista);
   }
 }
 
