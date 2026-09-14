@@ -21,7 +21,7 @@
 <script defer src="https://cloud.umami.is/script.js" data-website-id="6e7ce3b3-ac14-47d3-be2a-c06ea52fd502"></script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=PT+Serif:wght@700&family=Space+Grotesk:wght@400;500;600;700&family=Oxanium:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=PT+Serif:wght@700&family=Space+Grotesk:wght@400;500;600;700&family=Oxanium:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root{
   --bg: #14161F;
@@ -1213,19 +1213,22 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    abierto — el mismo elemento que en reposo solo enseña 42px (ver .tel-sheet arriba). */
 .tel-device{
   width:100%; height:calc(100vh - 90px - env(safe-area-inset-top,0px));
-  display:flex; flex-direction:column;
+  display:flex; flex-direction:column; position:relative;
   background:linear-gradient(155deg,#2b2f3d,#17181f 55%);
   border-radius:44px 44px 0 0; padding:12px;
   box-shadow:0 -10px 40px rgba(0,0,0,0.5), inset 0 0 0 1.5px rgba(255,255,255,0.06);
 }
-/* Notch + notificaciones: en reposo es lo único que asoma; abierto, tocarlo vuelve a esconder
-   el móvil (nada de flecha ni botón aparte — como pulsar la barra de estado de un móvil real). */
-.tel-header{ flex-shrink:0; height:34px; position:relative; cursor:pointer; display:flex; align-items:center; padding:0 20px; }
-.tel-notch{
-  position:absolute; top:0; left:50%; transform:translateX(-50%);
-  width:34%; height:20px; background:#000; border-radius:0 0 14px 14px;
+/* Notch + notificaciones: FLOTAN sobre la propia pantalla (.tel-screen), no en una franja aparte
+   por encima — como en un móvil actual, donde la pantalla llega hasta arriba y el recorte de la
+   cámara/isla dinámica y los iconos de estado se ven DENTRO del propio display, no sobre un
+   marco negro separado. En reposo es lo único que asoma; abierto, tocarlo vuelve a esconder el
+   móvil (nada de flecha ni botón aparte — como pulsar la barra de estado de un móvil real). */
+.tel-header{
+  position:absolute; top:12px; left:12px; right:12px; height:38px; z-index:6;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
 }
-.tel-notifs{ position:relative; z-index:2; display:flex; gap:5px; align-items:center; }
+.tel-notch{ width:88px; height:24px; background:#000; border-radius:13px; }
+.tel-notifs{ position:absolute; top:50%; right:14px; transform:translateY(-50%); z-index:2; display:flex; gap:5px; align-items:center; }
 .tel-notif-ic{ width:17px; height:17px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 1px 4px rgba(0,0,0,0.4); }
 .tel-notif-ic svg{ width:9px; height:9px; }
 .tel-notif-ic.whatsapp{ background:linear-gradient(150deg,#3fce6e,#1f9e4c); }
@@ -1234,20 +1237,20 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-notif-ic.x{ background:linear-gradient(150deg,#3a3d44,#111214); }
 .tel-notif-ic.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
 .tel-screen{
-  flex:1; min-height:0; position:relative; background:var(--bg2); border-radius:32px 32px 0 0;
-  overflow-y:auto; overflow-x:hidden; padding:14px 14px 24px;
+  flex:1; min-height:0; position:relative; background:var(--bg2); border-radius:44px 44px 0 0;
+  overflow-y:auto; overflow-x:hidden; padding:46px 14px 24px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05);
 }
 .tel-icon-badge{
   position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 3px;
-  border-radius:8px; background:var(--gold); color:#1a1408; font-family:'Space Grotesk',sans-serif;
+  border-radius:8px; background:var(--gold); color:#1a1408; font-family:'Inter',sans-serif;
   font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
   box-shadow:0 1px 4px rgba(0,0,0,0.4); z-index:3;
 }
 .tel-fame-pill{
   margin:0 auto 16px; width:fit-content; display:flex; align-items:center; gap:6px;
   background:var(--panel2); border:1px solid var(--gold-dim); border-radius:999px; padding:6px 14px 6px 10px;
-  font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink);
+  font-family:'Inter',sans-serif; font-size:12px; color:var(--ink);
 }
 .tel-fame-pill svg{ width:14px; height:14px; color:var(--gold); flex-shrink:0; }
 .tel-fame-pill b{ color:var(--gold); font-weight:700; }
@@ -1255,7 +1258,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-app{ background:none; border:none; color:inherit; font-family:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; padding:0; }
 .tel-app .tel-icon{ width:54px; height:54px; border-radius:15px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; transition:filter .5s ease; }
 .tel-app .tel-icon svg{ width:26px; height:26px; }
-.tel-app .tel-label{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); text-align:center; }
+.tel-app .tel-label{ font-family:'Inter',sans-serif; font-size:10.5px; color:var(--ink-soft); text-align:center; }
 .tel-app:active .tel-icon{ transform:scale(.94); }
 .tel-app.locked .tel-icon{ filter:grayscale(1) brightness(.55); }
 .tel-lock-badge{ position:absolute; bottom:-2px; right:-2px; width:18px; height:18px; border-radius:50%; background:var(--bg2); border:1.5px solid var(--panel); display:flex; align-items:center; justify-content:center; color:var(--ink-soft); }
@@ -1289,29 +1292,29 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 
 /* ---------- App Banca: extracto real (SCREENS.movil, vista 'banca') ---------- */
 .tel-bank-hero{ text-align:center; padding:6px 0 2px; }
-.tel-bank-hero .k{ font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); }
-.tel-bank-hero .v{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:32px; font-variant-numeric:tabular-nums; margin:2px 0; color:var(--ink); }
-.tel-bank-hero .trend{ font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600; }
+.tel-bank-hero .k{ font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); }
+.tel-bank-hero .v{ font-family:'Inter',sans-serif; font-weight:800; font-size:32px; font-variant-numeric:tabular-nums; margin:2px 0; color:var(--ink); }
+.tel-bank-hero .trend{ font-family:'Inter',sans-serif; font-size:12px; font-weight:600; }
 .tel-bank-hero .trend.pos{ color:#8fe3ab; } .tel-bank-hero .trend.neg{ color:#f0a5ac; }
 .tel-bank-tabs{ display:flex; gap:6px; background:var(--panel2); border-radius:11px; padding:3px; margin:14px 0 12px; }
-.tel-bank-tab{ flex:1; background:none; border:none; color:var(--ink-soft); font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:600; padding:8px 0; border-radius:9px; cursor:pointer; }
+.tel-bank-tab{ flex:1; background:none; border:none; color:var(--ink-soft); font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; padding:8px 0; border-radius:9px; cursor:pointer; }
 .tel-bank-tab.active{ background:var(--panel); color:var(--ink); }
 .tel-bank-card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px; }
-.tel-bank-card-title{ font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 10px; }
+.tel-bank-card-title{ font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 10px; }
 .tel-sparkline-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:10px; }
 .tel-sparkline-row svg{ flex-shrink:0; }
-.tel-sparkline-figs .v{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
-.tel-sparkline-figs .t{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:#8fe3ab; font-weight:600; margin-top:1px; }
+.tel-sparkline-figs .v{ font-family:'Inter',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
+.tel-sparkline-figs .t{ font-family:'Inter',sans-serif; font-size:11px; color:#8fe3ab; font-weight:600; margin-top:1px; }
 .tel-bank-split{ display:flex; gap:10px; margin-bottom:12px; }
-.tel-bank-neto{ font-family:'Space Grotesk',sans-serif; font-size:11.5px; font-weight:600; text-align:center; margin:-4px 0 18px; }
+.tel-bank-neto{ font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; text-align:center; margin:-4px 0 18px; }
 .tel-bank-neto.pos{ color:#8fe3ab; } .tel-bank-neto.neg{ color:#f0a5ac; }
 .tel-split-card{ flex:1; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
-.tel-split-card .lbl{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); }
-.tel-split-card .amt{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:17px; margin-top:2px; font-variant-numeric:tabular-nums; }
+.tel-split-card .lbl{ font-family:'Inter',sans-serif; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); }
+.tel-split-card .amt{ font-family:'Inter',sans-serif; font-weight:800; font-size:17px; margin-top:2px; font-variant-numeric:tabular-nums; }
 .tel-split-card.ingresos .amt{ color:#8fe3ab; }
 .tel-split-card.gastos .amt{ color:#f0a5ac; }
 .tel-split-card .lines{ margin-top:8px; display:flex; flex-direction:column; gap:4px; }
-.tel-split-card .lines div{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); display:flex; justify-content:space-between; gap:6px; }
+.tel-split-card .lines div{ font-family:'Inter',sans-serif; font-size:11px; color:var(--ink-soft); display:flex; justify-content:space-between; gap:6px; }
 .tel-movements{ display:flex; flex-direction:column; }
 .tel-movement{ display:flex; align-items:center; gap:11px; padding:10px 2px; border-bottom:1px solid var(--line); }
 .tel-movement:last-child{ border-bottom:none; }
@@ -1320,17 +1323,17 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-mv-icon.in{ color:#8fe3ab; border-color:rgba(76,175,109,0.5); background:rgba(76,175,109,0.1); }
 .tel-mv-icon.out{ color:#f0a5ac; border-color:rgba(217,73,92,0.5); background:rgba(217,73,92,0.1); }
 .tel-mv-body{ flex:1; min-width:0; }
-.tel-mv-title{ font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; color:var(--ink); }
-.tel-mv-sub{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); margin-top:1px; }
+.tel-mv-title{ font-family:'Inter',sans-serif; font-size:13px; font-weight:600; color:var(--ink); }
+.tel-mv-sub{ font-family:'Inter',sans-serif; font-size:11px; color:var(--ink-soft); margin-top:1px; }
 .tel-mv-right{ text-align:right; flex-shrink:0; }
-.tel-mv-amt{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:700; font-variant-numeric:tabular-nums; }
+.tel-mv-amt{ font-family:'Inter',sans-serif; font-size:13.5px; font-weight:700; font-variant-numeric:tabular-nums; }
 .tel-mv-amt.pos{ color:#8fe3ab; } .tel-mv-amt.neg{ color:#f0a5ac; }
-.tel-mv-date{ font-family:'Space Grotesk',sans-serif; font-size:10px; color:var(--ink-soft); margin-top:1px; }
-.tel-movements-vacio{ font-family:'Space Grotesk',sans-serif; font-size:13px; color:var(--ink-soft); text-align:center; padding:18px 4px; }
+.tel-mv-date{ font-family:'Inter',sans-serif; font-size:10px; color:var(--ink-soft); margin-top:1px; }
+.tel-movements-vacio{ font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-soft); text-align:center; padding:18px 4px; }
 
 .tel-app-header{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
 .tel-back-btn{ background:none; border:1px solid var(--line); border-radius:8px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); cursor:pointer; flex-shrink:0; }
-.tel-app-header .tel-title{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
+.tel-app-header .tel-title{ font-family:'Inter',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
 /* Pantallas reales incrustadas (Club/Ajustes/Casino/Servicios/Compras, ver telAbrirPantallaReal):
    sin esto, la .card genérica del juego (pensada para una pantalla completa) metía una segunda
    caja con su propio borde/sombra/relleno DENTRO del ya estrecho .tel-screen, dejando el
@@ -1341,7 +1344,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-contact{ width:100%; background:none; border:none; color:inherit; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:12px; padding:11px 10px 11px 4px; text-align:left; border-bottom:1px solid var(--line); }
 .tel-contact:last-child{ border-bottom:none; }
 .tel-contact:active{ background:rgba(255,255,255,0.04); }
-.tel-avatar{ width:44px; height:44px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:15px; color:#14161F; }
+.tel-avatar{ width:44px; height:44px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; font-weight:800; font-size:15px; color:#14161F; }
 .tel-contact-body{ flex:1; min-width:0; }
 .tel-contact-top{ display:flex; justify-content:space-between; gap:8px; }
 .tel-contact-name{ font-weight:600; font-size:14px; color:var(--ink); }
@@ -1356,54 +1359,63 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-bubble{ max-width:78%; padding:9px 13px; border-radius:14px; font-size:13.5px; line-height:1.42; color:var(--ink); }
 .tel-bubble-row:not(.mine) .tel-bubble{ background:var(--panel2); border-bottom-left-radius:4px; }
 .tel-bubble-row.mine .tel-bubble{ background:rgba(76,175,109,0.22); border:1px solid rgba(76,175,109,0.4); border-bottom-right-radius:4px; }
-.tel-bubble-autor{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; font-weight:700; color:var(--gold); margin-bottom:2px; display:block; }
+.tel-bubble-autor{ font-family:'Inter',sans-serif; font-size:10.5px; font-weight:700; color:var(--gold); margin-bottom:2px; display:block; }
+/* Indicador de "escribiendo…": tres puntos que rebotan, mismo bocadillo gris de un mensaje
+   recibido — se muestra en vez del mensaje real mientras telProgramarRevelado hace su cadena. */
+.tel-bubble.tel-typing{ display:flex; gap:4px; align-items:center; padding:12px 15px; }
+.tel-bubble.tel-typing span{ width:6px; height:6px; border-radius:50%; background:var(--ink-soft); animation:telTypingBounce 1.1s infinite ease-in-out; }
+.tel-bubble.tel-typing span:nth-child(2){ animation-delay:.15s; }
+.tel-bubble.tel-typing span:nth-child(3){ animation-delay:.3s; }
+@keyframes telTypingBounce{ 0%,60%,100%{ transform:translateY(0); opacity:.5; } 30%{ transform:translateY(-4px); opacity:1; } }
 .tel-effects-row{ display:flex; flex-wrap:wrap; gap:6px; padding:2px 2px 0; }
 .tel-choices{ display:flex; flex-direction:column; gap:8px; }
-.tel-choices-label{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 2px; }
-.tel-choice-btn{ text-align:left; background:var(--panel2); border:1px solid var(--line); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:13px; padding:11px 13px; border-radius:12px; cursor:pointer; }
-.tel-choice-btn:active{ background:#2e3446; border-color:var(--gold-dim); }
-.tel-done-note{ font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink-soft); text-align:center; padding:4px 0; }
+.tel-choices-label{ font-family:'Inter',sans-serif; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 2px; }
+/* Azul, distinto del gris de los mensajes recibidos y del verde de los ya enviados — para que
+   se note a simple vista que esto son opciones para elegir, no bocadillos de la conversación. */
+.tel-choice-btn{ text-align:left; background:rgba(90,143,214,0.14); border:1px solid rgba(90,143,214,0.4); color:#bcd4f2; font-family:'Inter',sans-serif; font-size:13px; padding:11px 13px; border-radius:12px; cursor:pointer; }
+.tel-choice-btn:active{ background:rgba(90,143,214,0.26); border-color:#5a8fd6; }
+.tel-done-note{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); text-align:center; padding:4px 0; }
 .tel-email-unread{ width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0; align-self:center; }
 .tel-email-meta{ padding-bottom:12px; margin-bottom:14px; border-bottom:1px solid var(--line); }
-.tel-email-asunto{ font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; color:var(--ink); margin-bottom:6px; }
-.tel-email-de{ font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink-soft); }
+.tel-email-asunto{ font-family:'Inter',sans-serif; font-size:16px; font-weight:700; color:var(--ink); margin-bottom:6px; }
+.tel-email-de{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); }
 .tel-email-de b{ color:var(--ink); font-weight:600; }
-.tel-email-cuerpo{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; line-height:1.65; color:var(--ink); }
+.tel-email-cuerpo{ font-family:'Inter',sans-serif; font-size:13.5px; line-height:1.65; color:var(--ink); }
 /* Instagram */
 .tel-ig-perfil{ display:flex; align-items:center; gap:18px; padding-bottom:12px; }
 .tel-ig-avatar{ width:64px; height:64px; font-size:20px; flex-shrink:0; background:linear-gradient(150deg,#e0507a,#8a1f4a); }
 .tel-ig-stats{ display:flex; gap:18px; flex:1; }
-.tel-ig-stat{ font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink-soft); display:flex; flex-direction:column; align-items:center; gap:2px; }
-.tel-ig-stat b{ font-family:'Big Shoulders Display',sans-serif; font-size:18px; color:var(--ink); font-weight:800; }
-.tel-ig-usuario{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:700; color:var(--ink); margin-top:2px; }
-.tel-ig-bio{ font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink-soft); margin:2px 0 16px; }
+.tel-ig-stat{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); display:flex; flex-direction:column; align-items:center; gap:2px; }
+.tel-ig-stat b{ font-family:'Inter',sans-serif; font-size:18px; color:var(--ink); font-weight:800; }
+.tel-ig-usuario{ font-family:'Inter',sans-serif; font-size:13.5px; font-weight:700; color:var(--ink); margin-top:2px; }
+.tel-ig-bio{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); margin:2px 0 16px; }
 .tel-ig-post{ margin-bottom:18px; }
 .tel-ig-post-foto{ width:100%; aspect-ratio:1; border-radius:12px; display:flex; align-items:center; justify-content:center; }
 .tel-ig-post-foto svg{ width:38px; height:38px; color:rgba(255,255,255,0.85); }
-.tel-ig-post-meta{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-family:'Space Grotesk',sans-serif; font-size:11.5px; }
+.tel-ig-post-meta{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-family:'Inter',sans-serif; font-size:11.5px; }
 .tel-ig-post-likes{ font-weight:700; color:var(--ink); }
 .tel-ig-post-temp{ color:var(--ink-soft); }
-.tel-ig-post-txt{ font-family:'Space Grotesk',sans-serif; font-size:13px; line-height:1.5; color:var(--ink); margin-top:5px; }
+.tel-ig-post-txt{ font-family:'Inter',sans-serif; font-size:13px; line-height:1.5; color:var(--ink); margin-top:5px; }
 .tel-ig-post-txt b{ font-weight:700; }
 /* X */
 .tel-x-post{ border-bottom:1px solid var(--line); padding:12px 0; }
 .tel-x-post-cab{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-.tel-x-post-txt{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; line-height:1.5; color:var(--ink); }
-.tel-x-post-meta{ font-family:'Space Grotesk',sans-serif; font-size:11.5px; color:var(--ink-soft); margin-top:8px; display:flex; gap:14px; }
+.tel-x-post-txt{ font-family:'Inter',sans-serif; font-size:13.5px; line-height:1.5; color:var(--ink); }
+.tel-x-post-meta{ font-family:'Inter',sans-serif; font-size:11.5px; color:var(--ink-soft); margin-top:8px; display:flex; gap:14px; }
 /* Calendario */
-.tel-cal-temporada{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:19px; color:var(--ink); margin-bottom:14px; }
+.tel-cal-temporada{ font-family:'Inter',sans-serif; font-weight:800; font-size:19px; color:var(--ink); margin-bottom:14px; }
 .tel-cal-lista{ display:flex; flex-direction:column; gap:2px; margin-bottom:18px; }
 .tel-cal-item{ display:flex; align-items:center; gap:12px; padding:9px 8px; border-radius:10px; opacity:.55; }
 .tel-cal-item.pasado{ opacity:.35; }
 .tel-cal-item.actual{ opacity:1; background:rgba(212,175,55,0.12); border:1px solid var(--gold-dim); }
-.tel-cal-num{ width:26px; height:26px; border-radius:50%; background:var(--panel2); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:700; color:var(--ink-soft); flex-shrink:0; }
+.tel-cal-num{ width:26px; height:26px; border-radius:50%; background:var(--panel2); display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; font-size:12px; font-weight:700; color:var(--ink-soft); flex-shrink:0; }
 .tel-cal-item.actual .tel-cal-num{ background:var(--gold); color:#1a1408; }
-.tel-cal-nombre{ font-family:'Space Grotesk',sans-serif; font-size:13px; color:var(--ink); }
-.tel-cal-hitos-tit{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
-.tel-cal-hito{ font-family:'Space Grotesk',sans-serif; font-size:12.5px; color:var(--ink); padding:8px 0; border-bottom:1px solid var(--line); }
+.tel-cal-nombre{ font-family:'Inter',sans-serif; font-size:13px; color:var(--ink); }
+.tel-cal-hitos-tit{ font-family:'Inter',sans-serif; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+.tel-cal-hito{ font-family:'Inter',sans-serif; font-size:12.5px; color:var(--ink); padding:8px 0; border-bottom:1px solid var(--line); }
 .tel-cal-hito:last-child{ border-bottom:none; }
 /* Ajustes del móvil */
-.tel-ajustes-tit{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin:18px 0 10px; }
+.tel-ajustes-tit{ font-family:'Inter',sans-serif; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin:18px 0 10px; }
 .tel-ajustes-swatches{ display:flex; gap:10px; }
 .tel-swatch{ width:36px; height:36px; border-radius:50%; border:2px solid var(--line); cursor:pointer; }
 .tel-swatch.activo{ border-color:var(--gold); box-shadow:0 0 0 2px rgba(212,175,55,0.3); }
@@ -13798,8 +13810,17 @@ function telAppsConPendiente(j){
 const TEL_RESPUESTAS_GENERICAS = [
   { texto:'Todo bien, gracias por preguntar 🙂', respuesta:'Me alegro, cuídate.', relDelta:2 },
   { texto:'La verdad es que ha sido una semana rara', respuesta:'Lo que necesites, aquí estoy.', relDelta:1 },
-  { texto:'Ahora mismo no puedo hablar mucho, luego te cuento', respuesta:'Sin prisa, hablamos luego.', relDelta:0 }
+  { texto:'Ahora mismo no puedo hablar mucho, luego te cuento', respuesta:'Sin prisa, hablamos luego.', relDelta:0 },
+  { texto:'Mejor de lo que esperaba, la verdad', respuesta:'Eso me gusta oírlo 😄', relDelta:2 },
+  { texto:'Un poco liado, pero bien', respuesta:'No te agobies, tú a tu ritmo.', relDelta:1 }
 ];
+// Segundo mensaje que a veces manda la MISMA persona justo detrás del primero (como cuando
+// alguien "dobla texto" en un chat real) — no necesita respuesta propia, solo alarga la
+// conversación antes de que te toque contestar.
+const TEL_SEGUIMIENTOS_WHATSAPP = ['¿Me has leído? 😅', 'Bueno, cuando puedas me dices', 'Perdona el rollo jaja', '¿Sigues ahí?', 'En fin, ya sabes dónde estoy'];
+// Réplica genérica de OTRO miembro del grupo reaccionando al primer mensaje — así el grupo
+// "habla solo" un poco aunque tú no digas nada, como pasaría de verdad.
+const TEL_RESPUESTAS_GRUPO_GENERICAS = ['jajajaja', 'Totalmente de acuerdo', 'Eso digo yo', '¿Tú qué opinas de esto?', 'Así es 💯', 'Ojalá', 'Qué fuerte', 'Ni que lo digas'];
 function telResponderExtra(msgId, idx, contacto){
   S.movilRespuestasExtra = S.movilRespuestasExtra || {};
   if(S.movilRespuestasExtra[msgId] !== undefined) return;
@@ -13816,6 +13837,26 @@ function telResponderExtra(msgId, idx, contacto){
   S.movilRespuestasExtra[msgId] = idx;
   guardarPartida();
   pintar();
+}
+// Revela en cadena, uno a uno, los mensajes nuevos de un hilo (con "escribiendo…" delante de
+// cada uno) — para que lleguen como llegarían de alguien tecleando de verdad, no todos de golpe
+// al abrir el chat. Se programa una sola vez por hilo (S._movilRevelando) para no duplicar
+// temporizadores si pintar() se repite por cualquier otra razón mientras tanto.
+function telProgramarRevelado(claveHilo, ocultos){
+  if(!ocultos.length) return;
+  S._movilRevelando = S._movilRevelando || {};
+  if(S._movilRevelando[claveHilo]) return;
+  S._movilRevelando[claveHilo] = true;
+  const revelarSiguiente = (idx)=>{
+    if(idx >= ocultos.length){ S._movilRevelando[claveHilo] = false; return; }
+    setTimeout(()=>{
+      ocultos[idx].revelado = true;
+      Sonido.movilNotif();
+      pintar();
+      setTimeout(()=> revelarSiguiente(idx+1), 500);
+    }, 1000 + Math.random()*600);
+  };
+  revelarSiguiente(0);
 }
 // Genera, con probabilidad baja (no en cada paso — un móvil real no escribe cada semana sin
 // falta), UNA notificación nueva ligada al estado del jugador en ESTE momento de la temporada.
@@ -13848,35 +13889,54 @@ function generarNotificacionMovil(j){
   if(plantillas.grupo && grupos.length) canales.push('grupo');
   if(!canales.length) return;
   const canal = canales[Math.floor(Math.random()*canales.length)];
-  const id = 'notif_' + S.temporada + '_' + (S.pasoIndex||0) + '_' + Math.random().toString(36).slice(2,8);
+  const paso = S.pasoIndex||0;
+  const idBase = 'notif_' + S.temporada + '_' + paso + '_' + Math.random().toString(36).slice(2,8);
   if(canal === 'whatsapp'){
     const ct = contactos[Math.floor(Math.random()*contactos.length)];
     const texto = plantillas.whatsapp[Math.floor(Math.random()*plantillas.whatsapp.length)];
-    S.movilBandeja.whatsapp.push({ id, contactoId:ct.id, texto, temporada:S.temporada });
+    S.movilBandeja.whatsapp.push({ id:idBase, contactoId:ct.id, texto, temporada:S.temporada, pasoIndex:paso, revelado:false });
+    // A veces la misma persona "dobla texto" justo detrás — conversaciones más largas y más
+    // naturales que un único mensaje suelto cada vez.
+    if(Math.random() < 0.45){
+      const seguimiento = TEL_SEGUIMIENTOS_WHATSAPP[Math.floor(Math.random()*TEL_SEGUIMIENTOS_WHATSAPP.length)];
+      S.movilBandeja.whatsapp.push({ id:idBase+'_b', contactoId:ct.id, texto:seguimiento, temporada:S.temporada, pasoIndex:paso, revelado:false });
+    }
   } else if(canal === 'email'){
     const info = plantillas.email;
     const cuerpo = info.cuerpoFn(j);
-    S.movilBandeja.email.push({ id, remitente:info.remitente, color:'#8a6dd6', asunto:info.asunto,
-      preview: cuerpo.replace(/<[^>]+>/g,'').slice(0,64)+'…', cuerpo, temporada:S.temporada });
+    S.movilBandeja.email.push({ id:idBase, remitente:info.remitente, color:'#8a6dd6', asunto:info.asunto,
+      preview: cuerpo.replace(/<[^>]+>/g,'').slice(0,64)+'…', cuerpo, temporada:S.temporada, pasoIndex:paso });
   } else if(canal === 'x'){
     const texto = plantillas.x[Math.floor(Math.random()*plantillas.x.length)];
-    S.movilBandeja.x.push({ id, texto, temporada:S.temporada, leido:false });
+    S.movilBandeja.x.push({ id:idBase, texto, temporada:S.temporada, pasoIndex:paso, leido:false });
   } else if(canal === 'grupo'){
     const grupo = grupos[Math.floor(Math.random()*grupos.length)];
     const texto = plantillas.grupo[Math.floor(Math.random()*plantillas.grupo.length)];
-    let autor = 'Compañero';
-    if(grupo.id === 'grupo_pandilla' && (j.companeros||[]).length){
-      const c = j.companeros[Math.floor(Math.random()*j.companeros.length)];
-      autor = c.apodo || c.nombre;
-    } else if(grupo.id === 'grupo_vestuario'){
-      const enClub = (j.companeros||[]).filter(c=>c.juntosActualmente);
-      if(enClub.length) autor = enClub[Math.floor(Math.random()*enClub.length)].apodo || enClub[0].nombre;
-    }
+    const elegirAutor = (excluir)=>{
+      if(grupo.id === 'grupo_pandilla' && (j.companeros||[]).length){
+        const pool = j.companeros.filter(c=>!excluir || (c.apodo||c.nombre)!==excluir);
+        const c = (pool.length?pool:j.companeros)[Math.floor(Math.random()*(pool.length?pool.length:j.companeros.length))];
+        return c.apodo || c.nombre;
+      }
+      if(grupo.id === 'grupo_vestuario'){
+        const enClub = (j.companeros||[]).filter(c=>c.juntosActualmente && (!excluir || (c.apodo||c.nombre)!==excluir));
+        if(enClub.length) return enClub[Math.floor(Math.random()*enClub.length)].apodo || enClub[0].nombre;
+      }
+      return 'Compañero';
+    };
+    const autor = elegirAutor(null);
     S.movilBandeja.grupos[grupo.id] = S.movilBandeja.grupos[grupo.id] || [];
-    S.movilBandeja.grupos[grupo.id].push({ id, autor, texto, temporada:S.temporada, leido:false });
+    S.movilBandeja.grupos[grupo.id].push({ id:idBase, autor, texto, temporada:S.temporada, pasoIndex:paso, leido:false, revelado:false });
+    // El grupo "habla solo": con bastante probabilidad, otro miembro reacciona al primer mensaje
+    // aunque tú no digas nada — así se nota que la conversación sigue sin ti.
+    if(Math.random() < 0.55){
+      const autor2 = elegirAutor(autor);
+      const respuesta = TEL_RESPUESTAS_GRUPO_GENERICAS[Math.floor(Math.random()*TEL_RESPUESTAS_GRUPO_GENERICAS.length)];
+      S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_b', autor:autor2, texto:respuesta, temporada:S.temporada, pasoIndex:paso, leido:false, revelado:false });
+    }
   } else {
     const texto = plantillas.instagram[Math.floor(Math.random()*plantillas.instagram.length)];
-    S.movilBandeja.instagram.push({ id, texto, temporada:S.temporada, leido:false });
+    S.movilBandeja.instagram.push({ id:idBase, texto, temporada:S.temporada, pasoIndex:paso, leido:false });
   }
   ['whatsapp','email','instagram','x'].forEach(k=>{
     if(S.movilBandeja[k].length > 40) S.movilBandeja[k].splice(0, S.movilBandeja[k].length-40);
@@ -14034,6 +14094,8 @@ function telAplicarRespuesta(contactoId, idx){
     }
   }
   S.movilRespuestas[contactoId] = idx;
+  S.movilRespuestasTiempo = S.movilRespuestasTiempo || {};
+  S.movilRespuestasTiempo[contactoId] = { temporada:S.temporada, pasoIndex:S.pasoIndex||0 };
   S.movilCambios = S.movilCambios || {};
   S.movilCambios[contactoId] = cambios;
   guardarPartida();
@@ -14306,46 +14368,61 @@ function renderMovilContenido(c, j){
     if(!contactos.length && !grupos.length){
       c.appendChild(el('p',null,'Todavía no tienes a nadie con quien hablar aquí — hace falta representante, pareja o algún compañero de cantera que siga contigo.')).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);padding:10px 4px;";
     }
+    // Orden por actividad más reciente primero (como cualquier WhatsApp real) — clave numérica
+    // temporada*10+paso; sin ningún mensaje real todavía (solo la invitación de siempre, sin
+    // responder) se manda al fondo con -1, ya que no tiene una fecha de verdad que ordenar.
+    const clave = (temporada, pasoIndex)=> (temporada||0)*10 + (pasoIndex||0);
+    const filas = [];
     grupos.forEach(g=>{
       const dinamicos = (S.movilBandeja && S.movilBandeja.grupos && S.movilBandeja.grupos[g.id]) || [];
       const hayNuevo = dinamicos.some(m=>!m.leido);
       const ultimo = dinamicos.length ? dinamicos[dinamicos.length-1] : g.mensajesSemilla[g.mensajesSemilla.length-1];
-      const btn = document.createElement('button');
-      btn.className = 'tel-contact';
-      btn.innerHTML = `
-        <span class="tel-avatar" style="background:${g.color}">${ICONOS_SVG.grupo||'👥'}</span>
-        <span class="tel-contact-body">
-          <span class="tel-contact-top"><span class="tel-contact-name">${g.nombre}</span></span>
-          <span class="tel-contact-sub">${g.sub}</span>
-          <span class="tel-contact-preview"><b>${ultimo.autor}:</b> ${ultimo.texto}</span>
-        </span>
-        ${hayNuevo ? `<span class="tel-email-unread"></span>` : ''}`;
-      btn.onclick = ()=>{
-        S.movilGrupoAbierto = g.id; S.movilVista='grupo';
-        dinamicos.forEach(m=> m.leido = true);
-        pintar();
-      };
-      c.appendChild(btn);
+      filas.push({ tipo:'grupo', g, ultimo, hayNuevo, orden: dinamicos.length ? clave(ultimo.temporada, ultimo.pasoIndex) : -1 });
     });
     contactos.forEach(ct=>{
       const pendiente = telContactoPendiente(ct);
       const extras = (S.movilBandeja && S.movilBandeja.whatsapp || []).filter(m=>m.contactoId===ct.id);
       const respondidoOriginal = S.movilRespuestas && S.movilRespuestas[ct.id] !== undefined;
-      let previewTexto;
-      if(extras.length) previewTexto = extras[extras.length-1].texto;
-      else if(respondidoOriginal) previewTexto = ct.opciones[S.movilRespuestas[ct.id]].respuesta;
-      else previewTexto = ct.mensajes[ct.mensajes.length-1];
+      let previewTexto, orden;
+      if(extras.length){ previewTexto = extras[extras.length-1].texto; orden = clave(extras[extras.length-1].temporada, extras[extras.length-1].pasoIndex); }
+      else if(respondidoOriginal){
+        previewTexto = ct.opciones[S.movilRespuestas[ct.id]].respuesta;
+        const t = S.movilRespuestasTiempo && S.movilRespuestasTiempo[ct.id];
+        orden = t ? clave(t.temporada, t.pasoIndex) : 0;
+      } else { previewTexto = ct.mensajes[ct.mensajes.length-1]; orden = -1; }
+      filas.push({ tipo:'contacto', ct, previewTexto, pendiente, orden });
+    });
+    filas.sort((a,b)=> b.orden - a.orden);
+    filas.forEach(fila=>{
       const btn = document.createElement('button');
       btn.className = 'tel-contact';
-      btn.innerHTML = `
-        <span class="tel-avatar" style="background:${ct.color}">${telIniciales(ct.nombre)}</span>
-        <span class="tel-contact-body">
-          <span class="tel-contact-top"><span class="tel-contact-name">${ct.nombre}</span></span>
-          <span class="tel-contact-sub">${ct.sub}</span>
-          <span class="tel-contact-preview">${previewTexto}</span>
-        </span>
-        ${pendiente ? `<span class="tel-email-unread"></span>` : `<span class="tel-contact-answered">${ICONOS_SVG.check}</span>`}`;
-      btn.onclick = ()=>{ S.movilContactoAbierto = ct.id; S.movilVista='thread'; pintar(); };
+      if(fila.tipo === 'grupo'){
+        const g = fila.g, ultimo = fila.ultimo;
+        btn.innerHTML = `
+          <span class="tel-avatar" style="background:${g.color}">${ICONOS_SVG.grupo||'👥'}</span>
+          <span class="tel-contact-body">
+            <span class="tel-contact-top"><span class="tel-contact-name">${g.nombre}</span></span>
+            <span class="tel-contact-sub">${g.sub}</span>
+            <span class="tel-contact-preview"><b>${ultimo.autor}:</b> ${ultimo.texto}</span>
+          </span>
+          ${fila.hayNuevo ? `<span class="tel-email-unread"></span>` : ''}`;
+        btn.onclick = ()=>{
+          S.movilGrupoAbierto = g.id; S.movilVista='grupo';
+          ((S.movilBandeja && S.movilBandeja.grupos && S.movilBandeja.grupos[g.id]) || []).forEach(m=> m.leido = true);
+          pintar();
+        };
+      } else {
+        const ct = fila.ct;
+        btn.innerHTML = `
+          <span class="tel-avatar" style="background:${ct.color}">${telIniciales(ct.nombre)}</span>
+          <span class="tel-contact-body">
+            <span class="tel-contact-top"><span class="tel-contact-name">${ct.nombre}</span></span>
+            <span class="tel-contact-sub">${ct.sub}</span>
+            <span class="tel-contact-preview">${fila.previewTexto}</span>
+          </span>
+          ${fila.pendiente ? `<span class="tel-email-unread"></span>` : `<span class="tel-contact-answered">${ICONOS_SVG.check}</span>`}`;
+        btn.onclick = ()=>{ S.movilContactoAbierto = ct.id; S.movilVista='thread'; pintar(); };
+      }
       c.appendChild(btn);
     });
   }
@@ -14360,14 +14437,21 @@ function renderMovilContenido(c, j){
       header.appendChild(el('span','tel-avatar', ICONOS_SVG.grupo||'👥')).style.cssText = `width:32px;height:32px;font-size:12px;background:${grupo.color};flex-shrink:0;`;
       const titWrap = el('div');
       titWrap.appendChild(el('div','tel-title', grupo.nombre));
-      titWrap.appendChild(el('div',null, grupo.sub)).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);";
+      titWrap.appendChild(el('div',null, grupo.sub)).style.cssText = "font-family:'Inter',sans-serif;font-size:10.5px;color:var(--ink-soft);";
       header.appendChild(titWrap);
     }
     c.appendChild(header);
     if(grupo){
+      const dinamicos = (S.movilBandeja && S.movilBandeja.grupos && S.movilBandeja.grupos[grupo.id]) || [];
+      const visibles = dinamicos.filter(m=>m.revelado!==false);
+      const ocultos = dinamicos.filter(m=>m.revelado===false);
       const thread = el('div','tel-thread');
-      const todos = grupo.mensajesSemilla.concat((S.movilBandeja && S.movilBandeja.grupos && S.movilBandeja.grupos[grupo.id]) || []);
+      const todos = grupo.mensajesSemilla.concat(visibles);
       todos.forEach(m=> thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble"><span class="tel-bubble-autor">${m.autor}</span>${m.texto}</div>`)));
+      if(ocultos.length){
+        thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble tel-typing"><span></span><span></span><span></span></div>`));
+        telProgramarRevelado('grupo_'+grupo.id, ocultos);
+      }
       c.appendChild(thread);
     }
   }
@@ -14400,8 +14484,12 @@ function renderMovilContenido(c, j){
       }
       // Mensajes nuevos que fueron llegando con el avance de temporada (generarNotificacionMovil)
       // — se muestran después del intercambio fijo inicial, cada uno con su propia respuesta si
-      // ya se contestó (ver TEL_RESPUESTAS_GENERICAS/telResponderExtra).
-      const extras = (S.movilBandeja && S.movilBandeja.whatsapp || []).filter(m=>m.contactoId===contacto.id);
+      // ya se contestó (ver TEL_RESPUESTAS_GENERICAS/telResponderExtra). Los que aún no se han
+      // "revelado" (revelado:false — recién generados, primera vez que se abre el hilo desde
+      // entonces) se sustituyen por el indicador de "escribiendo…" y se revelan solos en cadena.
+      const todosLosExtras = (S.movilBandeja && S.movilBandeja.whatsapp || []).filter(m=>m.contactoId===contacto.id);
+      const extras = todosLosExtras.filter(m=>m.revelado!==false);
+      const extrasOcultos = todosLosExtras.filter(m=>m.revelado===false);
       extras.forEach(m=>{
         thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${m.texto}</div>`));
         const respId = S.movilRespuestasExtra && S.movilRespuestasExtra[m.id];
@@ -14410,11 +14498,16 @@ function renderMovilContenido(c, j){
           thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${TEL_RESPUESTAS_GENERICAS[respId].respuesta}</div>`));
         }
       });
+      if(extrasOcultos.length){
+        thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble tel-typing"><span></span><span></span><span></span></div>`));
+        telProgramarRevelado('wa_'+contacto.id, extrasOcultos);
+      }
       c.appendChild(thread);
       // Solo hay UNA cosa pendiente de responder a la vez: el intercambio original si sigue sin
-      // contestar, o si no, el ÚLTIMO mensaje nuevo (los anteriores ya son historial cerrado) —
-      // antes esto se confundía con un único flag global y el juego decía "ya has respondido"
-      // aunque acabara de llegar un mensaje nuevo sin contestar (bug real, corregido).
+      // contestar, o si no, el ÚLTIMO mensaje YA REVELADO (los anteriores ya son historial
+      // cerrado, y uno todavía "escribiendo" no cuenta hasta que de verdad llega) — antes esto se
+      // confundía con un único flag global y el juego decía "ya has respondido" aunque acabara de
+      // llegar un mensaje nuevo sin contestar (bug real, corregido).
       const choices = el('div','tel-choices');
       if(!yaRespondioOriginal){
         choices.appendChild(el('p','tel-choices-label','Tu respuesta'));
@@ -14425,6 +14518,8 @@ function renderMovilContenido(c, j){
           btn.onclick = ()=> telAplicarRespuesta(contacto.id, idx);
           choices.appendChild(btn);
         });
+      } else if(extrasOcultos.length){
+        // Todavía "escribiendo" el último mensaje — no se ofrece responder hasta que llegue de verdad.
       } else {
         const ultimoExtra = extras[extras.length-1];
         const ultimoRespondido = ultimoExtra && S.movilRespuestasExtra && S.movilRespuestasExtra[ultimoExtra.id] !== undefined;
