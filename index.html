@@ -1247,13 +1247,32 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
   box-shadow:0 1px 4px rgba(0,0,0,0.4); z-index:3;
 }
+.tel-home-cabecera{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:16px; position:relative; }
 .tel-fame-pill{
-  margin:0 auto 16px; width:fit-content; display:flex; align-items:center; gap:6px;
+  width:fit-content; display:flex; align-items:center; gap:6px;
   background:var(--panel2); border:1px solid var(--gold-dim); border-radius:999px; padding:6px 14px 6px 10px;
   font-family:'Inter',sans-serif; font-size:12px; color:var(--ink);
 }
 .tel-fame-pill svg{ width:14px; height:14px; color:var(--gold); flex-shrink:0; }
 .tel-fame-pill b{ color:var(--gold); font-weight:700; }
+.tel-organizar-btn{ position:absolute; right:0; width:30px; height:30px; border-radius:50%; background:var(--panel2); border:1px solid var(--line); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.tel-organizar-btn svg{ width:14px; height:14px; }
+.tel-organizar-btn.activo{ background:rgba(212,175,55,0.18); border-color:var(--gold-dim); color:var(--gold); }
+/* Modo "organizar": el icono se atenúa un poco y aparece una marca de selección arriba a la
+   izquierda — pensado para poder elegir varias apps sin drag&drop (no hay gestos táctiles reales
+   en este entorno) y agruparlas en una carpeta nueva. */
+.tel-app.editando .tel-icon{ opacity:.85; }
+.tel-app-select{ position:absolute; top:-4px; left:-4px; width:20px; height:20px; border-radius:50%; background:var(--panel); border:2px solid var(--ink-soft); z-index:4; display:flex; align-items:center; justify-content:center; }
+.tel-app-select svg{ width:11px; height:11px; color:transparent; }
+.tel-app.seleccionada .tel-app-select{ background:var(--gold); border-color:var(--gold); }
+.tel-app.seleccionada .tel-app-select svg{ color:#1a1408; }
+.tel-organizar-barra{ display:flex; gap:8px; margin-top:16px; }
+.tel-organizar-barra button{ flex:1; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; padding:11px; border-radius:12px; cursor:pointer; }
+.tel-organizar-barra .crear{ background:var(--gold); border:none; color:#1a1408; }
+.tel-organizar-barra .crear:disabled{ background:var(--panel2); color:var(--ink-soft); cursor:not-allowed; }
+.tel-organizar-barra .cancelar{ background:none; border:1px solid var(--line); color:var(--ink-soft); }
+.tel-nombre-carpeta{ width:100%; box-sizing:border-box; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-family:'Inter',sans-serif; font-size:15px; color:var(--ink); margin-bottom:16px; }
+.tel-nombre-carpeta:focus{ outline:none; border-color:var(--gold-dim); }
 .tel-app-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px 10px; padding:4px 6px 8px; }
 .tel-app{ background:none; border:none; color:inherit; font-family:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; padding:0; }
 .tel-app .tel-icon{ width:54px; height:54px; border-radius:15px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; transition:filter .5s ease; }
@@ -1275,6 +1294,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-icon.redes{ background:linear-gradient(150deg,#e0507a,#8a1f4a); }
 .tel-icon.x{ background:linear-gradient(150deg,#3a3d44,#111214); }
 .tel-icon.calendario{ background:linear-gradient(150deg,#e0432e,#8a1f14); }
+.tel-icon.appstore{ background:linear-gradient(150deg,#5a8fd6,#1f3a63); }
+.tel-icon.ritmo{ background:linear-gradient(150deg,#4CAF6D,#1d5c37); }
+.tel-icon.notas{ background:linear-gradient(150deg,#e0a83e,#8a5f14); }
+.tel-icon.mapas{ background:linear-gradient(150deg,#3fce9e,#1f8a63); }
+.tel-icon.clima{ background:linear-gradient(150deg,#5ab8e0,#1f6a8a); }
 /* Puntito de "hay algo nuevo" sobre el icono de una app (WhatsApp/Email/Redes/Servicios) —
    mismo lenguaje visual que el badge dorado de Logros en la topbar, pero aquí genérico (rojo,
    como una notificación real) porque son varias apps distintas, no un solo contador. */
@@ -1419,6 +1443,68 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-ajustes-swatches{ display:flex; gap:10px; }
 .tel-swatch{ width:36px; height:36px; border-radius:50%; border:2px solid var(--line); cursor:pointer; }
 .tel-swatch.activo{ border-color:var(--gold); box-shadow:0 0 0 2px rgba(212,175,55,0.3); }
+/* App Store */
+.tel-store-item{ display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); }
+.tel-store-item:last-child{ border-bottom:none; }
+.tel-store-icon{ width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 10px rgba(0,0,0,0.35); }
+.tel-store-icon svg{ width:22px; height:22px; }
+.tel-store-body{ flex:1; min-width:0; }
+.tel-store-nombre{ font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600; color:var(--ink); }
+.tel-store-desc{ font-family:'Inter',sans-serif; font-size:11.5px; color:var(--ink-soft); margin-top:1px; }
+.tel-store-tamano{ font-family:'Inter',sans-serif; font-size:10.5px; color:var(--ink-soft); opacity:.7; margin-top:2px; }
+.tel-store-btn{ font-family:'Inter',sans-serif; font-size:12px; font-weight:700; color:#5a8fd6; background:rgba(90,143,214,0.14); border:1px solid rgba(90,143,214,0.4); border-radius:999px; padding:7px 16px; cursor:pointer; flex-shrink:0; }
+.tel-store-btn.instalada{ color:var(--ink); background:var(--panel2); border-color:var(--line); }
+.tel-store-acciones{ display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+.tel-store-quitar{ font-family:'Inter',sans-serif; font-size:10px; color:var(--ink-soft); background:none; border:none; cursor:pointer; text-decoration:underline; }
+.tel-store-progreso{ flex-shrink:0; width:78px; }
+.tel-store-progreso{ position:relative; height:20px; background:var(--panel2); border-radius:999px; overflow:hidden; }
+.tel-store-progreso .fill{ height:100%; background:linear-gradient(90deg,#5a8fd6,#3f6fce); transition:width .18s ease; }
+.tel-store-progreso .pct{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; font-size:9.5px; font-weight:700; color:#fff; }
+/* Ritmo (música) */
+.tel-ritmo-player{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:10px 0 22px; }
+.tel-ritmo-disco{ width:110px; height:110px; border-radius:50%; background:linear-gradient(150deg,#4CAF6D,#1d5c37); display:flex; align-items:center; justify-content:center; box-shadow:0 10px 26px rgba(0,0,0,0.4); margin-bottom:16px; }
+.tel-ritmo-disco svg{ width:40px; height:40px; }
+.tel-ritmo-disco.girando{ animation:telRitmoGiro 3.5s linear infinite; }
+@keyframes telRitmoGiro{ from{ transform:rotate(0); } to{ transform:rotate(360deg); } }
+.tel-ritmo-titulo{ font-family:'Inter',sans-serif; font-size:15px; font-weight:700; color:var(--ink); }
+.tel-ritmo-artista{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); margin-top:2px; }
+.tel-ritmo-barra{ width:100%; height:4px; background:var(--panel2); border-radius:999px; margin-top:16px; overflow:hidden; }
+.tel-ritmo-barra .fill{ height:100%; width:35%; background:#4CAF6D; }
+.tel-ritmo-barra .fill.animando{ animation:telRitmoBarra 8s linear infinite; }
+@keyframes telRitmoBarra{ from{ width:0%; } to{ width:100%; } }
+.tel-ritmo-controles{ display:flex; align-items:center; gap:22px; margin-top:18px; }
+.tel-ritmo-controles button{ background:none; border:none; color:var(--ink); font-size:18px; cursor:pointer; }
+.tel-ritmo-controles button.play{ width:46px; height:46px; border-radius:50%; background:var(--gold); color:#1a1408; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.tel-ritmo-lista{ display:flex; flex-direction:column; }
+.tel-ritmo-fila{ display:flex; justify-content:space-between; padding:10px 4px; border-bottom:1px solid var(--line); font-family:'Inter',sans-serif; font-size:12.5px; color:var(--ink-soft); cursor:pointer; }
+.tel-ritmo-fila:last-child{ border-bottom:none; }
+.tel-ritmo-fila.activa{ color:var(--gold); font-weight:600; }
+.tel-ritmo-fila .artista{ color:var(--ink-soft); opacity:.7; }
+/* Notas */
+.tel-notas-nueva{ margin-bottom:18px; }
+.tel-notas-input{ width:100%; box-sizing:border-box; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:11px 13px; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink); resize:vertical; margin-bottom:8px; }
+.tel-notas-input:focus{ outline:none; border-color:var(--gold-dim); }
+.tel-nota-item{ background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px; }
+.tel-nota-txt{ font-family:'Inter',sans-serif; font-size:13px; line-height:1.5; color:var(--ink); white-space:pre-wrap; }
+.tel-nota-meta{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-family:'Inter',sans-serif; font-size:10.5px; color:var(--ink-soft); }
+.tel-nota-meta button{ background:none; border:none; color:#e0432e; font-family:'Inter',sans-serif; font-size:10.5px; cursor:pointer; text-decoration:underline; }
+/* Mapas */
+.tel-mapas-svg{ border-radius:12px; overflow:hidden; margin-bottom:14px; }
+.tel-mapas-info{ margin-bottom:16px; }
+.tel-mapas-lugar{ font-family:'Inter',sans-serif; font-size:16px; font-weight:700; color:var(--ink); }
+.tel-mapas-sub{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); margin-top:2px; }
+.tel-mapas-lista{ display:flex; flex-direction:column; }
+.tel-mapas-fila{ display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--line); font-family:'Inter',sans-serif; font-size:12.5px; color:var(--ink); }
+.tel-mapas-fila:last-child{ border-bottom:none; }
+/* Clima */
+.tel-clima-hero{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:10px 0 22px; }
+.tel-clima-icono{ font-size:52px; line-height:1; margin-bottom:8px; }
+.tel-clima-temp{ font-family:'Big Shoulders Display',sans-serif; font-size:44px; font-weight:800; color:var(--ink); line-height:1; }
+.tel-clima-cond{ font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-soft); margin-top:4px; }
+.tel-clima-lugar{ font-family:'Inter',sans-serif; font-size:11.5px; color:var(--ink-soft); opacity:.7; margin-top:8px; }
+.tel-clima-lista{ display:flex; flex-direction:column; }
+.tel-clima-fila{ display:flex; justify-content:space-between; align-items:center; padding:11px 4px; border-bottom:1px solid var(--line); font-family:'Inter',sans-serif; font-size:13px; color:var(--ink); }
+.tel-clima-fila:last-child{ border-bottom:none; }
 </style>
 </head>
 <body>
@@ -13655,6 +13741,13 @@ const TEL_ICONO_CROMOS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" str
 const TEL_ICONO_REDES = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="16.6" cy="7.4" r="1" fill="#fff" stroke="none"/></svg>';
 const TEL_ICONO_X = '<svg viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M13.7 10.6L20 3.5h-2.3l-5.5 6.2-4.4-6.2H3l6.6 9.3-6.9 7.7h2.3l5.8-6.5 4.6 6.5H21z"/></svg>';
 const TEL_ICONO_CALENDARIO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>';
+const TEL_ICONO_LAPIZ = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+const TEL_ICONO_CHECK_MINI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l6 6L20 6"/></svg>';
+const TEL_ICONO_APPSTORE = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 5.9L20 11l-5.8 2.1L12 19l-2.2-5.9L4 11l5.8-2.1z"/></svg>';
+const TEL_ICONO_RITMO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>';
+const TEL_ICONO_MAPAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5L4 6.5v13l5-2 6 2 5-2v-13l-5 2-6-2z"/><path d="M9 4.5v13M15 6.5v13"/></svg>';
+const TEL_ICONO_NOTAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3.5" width="15" height="17" rx="2"/><path d="M8 8.5h8M8 12.5h8M8 16.5h5"/></svg>';
+const TEL_ICONO_CLIMA = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3.5"/><path d="M9 1.5v2M9 14.5v2M2.5 9h2M13.5 9h2M4.3 4.3l1.4 1.4M12.3 4.3l-1.4 1.4"/><path d="M13 15a3.5 3.5 0 0 0 0-7 4.5 4.5 0 0 0-8.7 1.4A3 3 0 0 0 5 15z" fill="rgba(255,255,255,0.15)"/></svg>';
 // Umbrales reales: los mismos NIVELES_POPULARIDAD que usa el resto del juego (Conocido/Popular/Ídolo).
 // Carpeta "Economía" (estilo iOS): agrupa las 3 apps de dinero. Banca es la única con pantalla
 // propia dentro del móvil (S.movilVista='banca', ver más abajo); Casino Online y Servicios
@@ -13673,6 +13766,15 @@ const TEL_CARPETA_ECONOMIA = {
 };
 const TEL_APPS_BLOQUEADAS = [
   { id:'cromos', nombre:'Cromos', nivelMin:65, clase:'cromos', icono:TEL_ICONO_CROMOS, destino:'logros', antesDeIr:()=>{ S.logrosVistaActiva = 'cromos'; } }
+];
+// Catálogo de la App Store: apps normales de cualquier móvil, con nombre propio (no marcas
+// reales) para no reproducir ningún logo/identidad de una app de verdad — solo la idea general
+// (música, mapas, notas, clima). Cada una tiene su propia vista nativa una vez instalada.
+const TEL_APP_STORE_CATALOGO = [
+  { id:'ritmo', nombre:'Ritmo', clase:'ritmo', icono:TEL_ICONO_RITMO, desc:'Música para antes del partido', tamano:'38 MB', vista:'ritmo' },
+  { id:'notas', nombre:'Notas', clase:'notas', icono:TEL_ICONO_NOTAS, desc:'Apuntes rápidos, siempre a mano', tamano:'9 MB', vista:'notas' },
+  { id:'mapas', nombre:'Mapas', clase:'mapas', icono:TEL_ICONO_MAPAS, desc:'Dónde entrenas, dónde juegas', tamano:'52 MB', vista:'mapas' },
+  { id:'clima', nombre:'Clima', clase:'clima', icono:TEL_ICONO_CLIMA, desc:'La previsión para el próximo partido', tamano:'14 MB', vista:'clima' }
 ];
 // Pantallas REALES del juego que se pueden ver incrustadas dentro del móvil (Club, Ajustes,
 // todo el grupo del Casino Online, Servicios, Compras, Logros/Cromos) — a diferencia de antes,
@@ -13747,6 +13849,38 @@ const TEL_PLANTILLAS_NOTIF = {
   }
 };
 function primerNombre(j){ return (j.nombre||'').split(' ')[0]; }
+// Simula una descarga/instalación real: progreso irregular (no un contador lineal perfecto,
+// como se ve al instalar de verdad) con pequeñas pausas entre "paquetes". S._telInstalando
+// guarda el % en curso (transitorio, no se persiste); al llegar a 100 pasa a
+// S.telAppsInstaladas (eso sí persistente) y desaparece de la lista de "instalando".
+function telInstalarApp(appId){
+  S._telInstalando = S._telInstalando || {};
+  S.telAppsInstaladas = S.telAppsInstaladas || {};
+  if(S._telInstalando[appId] !== undefined || S.telAppsInstaladas[appId]) return;
+  S._telInstalando[appId] = 0;
+  pintar();
+  const avanzar = ()=>{
+    if(S._telInstalando[appId] === undefined) return; // se canceló (pantalla cambiada, etc.)
+    S._telInstalando[appId] = Math.min(100, S._telInstalando[appId] + 7 + Math.random()*16);
+    if(S._telInstalando[appId] >= 100){
+      delete S._telInstalando[appId];
+      S.telAppsInstaladas[appId] = true;
+      guardarPartida();
+      Sonido.movilNotif();
+      pintar();
+      return;
+    }
+    pintar();
+    setTimeout(avanzar, 180 + Math.random()*200);
+  };
+  setTimeout(avanzar, 220);
+}
+function telDesinstalarApp(appId){
+  if(S.telAppsInstaladas) delete S.telAppsInstaladas[appId];
+  (S.telCarpetasUsuario||[]).forEach(cp=>{ cp.appIds = cp.appIds.filter(id=>id!==appId); });
+  guardarPartida();
+  pintar();
+}
 // Ajustes del PROPIO móvil (fondo, tamaño de letra) — nada que ver con S.jugador ni con los
 // ajustes reales del juego; por eso viven sueltos en S, no en j, y se guardan con guardarPartida()
 // igual que cualquier otro S.movil* (persisten con la partida, pero son gustos del aparato).
@@ -13782,12 +13916,20 @@ function telBandejaVacia(){ return { whatsapp:[], email:[], instagram:[], x:[], 
 // ¿Le queda algo pendiente de responder a este contacto? El original (si aún no se respondió) o,
 // si no, el ÚLTIMO mensaje nuevo que le haya llegado (ver TEL_RESPUESTAS_GENERICAS/telResponderExtra)
 // — todo lo anterior a eso ya es historial cerrado, así que nunca debería contar como pendiente.
+// Estado de un turno de conversación sin pintar nada: 'pendiente' (toca responder), 'esperando'
+// (ya respondiste, está "escribiendo") o 'cerrado' (ya se vio su respuesta).
+function telEstadoTurno(id, mapa){
+  if(!mapa || mapa[id] === undefined) return 'pendiente';
+  if(!(S.movilRespuestasVistas && S.movilRespuestasVistas[id])) return 'esperando';
+  return 'cerrado';
+}
 function telContactoPendiente(c){
-  const sinResponderOriginal = !(S.movilRespuestas && S.movilRespuestas[c.id]!==undefined);
-  if(sinResponderOriginal) return true;
   const extras = (S.movilBandeja && S.movilBandeja.whatsapp || []).filter(m=>m.contactoId===c.id);
-  const ultimo = extras[extras.length-1];
-  return !!ultimo && !(S.movilRespuestasExtra && S.movilRespuestasExtra[ultimo.id]!==undefined);
+  const ultimoId = extras.length ? extras[extras.length-1].id : c.id;
+  const mapaR1 = extras.length ? S.movilRespuestasExtra : S.movilRespuestas;
+  const estado1 = telEstadoTurno(ultimoId, mapaR1);
+  if(estado1 !== 'cerrado') return estado1 === 'pendiente';
+  return telEstadoTurno(ultimoId+'_r2', S.movilRespuestasExtra) === 'pendiente';
 }
 // Mapa {appId:true} de qué apps tienen algo pendiente — una única fuente de verdad tanto para
 // los iconos del notch (telNotificacionesPendientes) como para el puntito sobre cada icono de
@@ -13807,12 +13949,17 @@ function telAppsConPendiente(j){
 // Respuestas genéricas para los mensajes nuevos que van llegando con el avance de temporada
 // (a diferencia del primer intercambio de cada contacto, que sí tiene opciones a medida) — no
 // necesitan efecto de juego, solo dejar contestar de verdad en vez de dejar el mensaje "colgado".
+// RONDA 1: primera respuesta a un mensaje nuevo. RONDA 2: continuación tras la suya — así una
+// conversación no se cierra en un único intercambio, sigue un segundo turno antes de acabar.
 const TEL_RESPUESTAS_GENERICAS = [
   { texto:'Todo bien, gracias por preguntar 🙂', respuesta:'Me alegro, cuídate.', relDelta:2 },
-  { texto:'La verdad es que ha sido una semana rara', respuesta:'Lo que necesites, aquí estoy.', relDelta:1 },
-  { texto:'Ahora mismo no puedo hablar mucho, luego te cuento', respuesta:'Sin prisa, hablamos luego.', relDelta:0 },
-  { texto:'Mejor de lo que esperaba, la verdad', respuesta:'Eso me gusta oírlo 😄', relDelta:2 },
-  { texto:'Un poco liado, pero bien', respuesta:'No te agobies, tú a tu ritmo.', relDelta:1 }
+  { texto:'La verdad es que ha sido una semana rara', respuesta:'¿Qué ha pasado? Cuéntame.', relDelta:1 },
+  { texto:'Ahora mismo no puedo hablar mucho, luego te cuento', respuesta:'Sin prisa, hablamos luego.', relDelta:0 }
+];
+const TEL_RESPUESTAS_GENERICAS_R2 = [
+  { texto:'Nada grave, cosas del día a día', respuesta:'Menos mal, me habías preocupado 😅', relDelta:1 },
+  { texto:'Oye, ¿y tú qué tal todo?', respuesta:'Yo tirando, como siempre. Nos vemos pronto.', relDelta:2 },
+  { texto:'Bueno, te dejo que sigo liado', respuesta:'Vale, hablamos 👋', relDelta:0 }
 ];
 // Segundo mensaje que a veces manda la MISMA persona justo detrás del primero (como cuando
 // alguien "dobla texto" en un chat real) — no necesita respuesta propia, solo alarga la
@@ -13821,42 +13968,53 @@ const TEL_SEGUIMIENTOS_WHATSAPP = ['¿Me has leído? 😅', 'Bueno, cuando pueda
 // Réplica genérica de OTRO miembro del grupo reaccionando al primer mensaje — así el grupo
 // "habla solo" un poco aunque tú no digas nada, como pasaría de verdad.
 const TEL_RESPUESTAS_GRUPO_GENERICAS = ['jajajaja', 'Totalmente de acuerdo', 'Eso digo yo', '¿Tú qué opinas de esto?', 'Así es 💯', 'Ojalá', 'Qué fuerte', 'Ni que lo digas'];
-function telResponderExtra(msgId, idx, contacto){
-  S.movilRespuestasExtra = S.movilRespuestasExtra || {};
-  if(S.movilRespuestasExtra[msgId] !== undefined) return;
-  const op = TEL_RESPUESTAS_GENERICAS[idx];
-  if(op.relDelta && contacto){
-    const j = S.jugador;
-    if(contacto.companeroId){
-      const c = (j.companeros||[]).find(x=>x.id===contacto.companeroId);
-      if(c) c.relacion = Math.min(100, c.relacion + op.relDelta);
-    } else if(contacto.id==='representante' && j.representante){
-      j.representante.agente.relacion = Math.min(100, j.representante.agente.relacion + op.relDelta);
-    }
-  }
-  S.movilRespuestasExtra[msgId] = idx;
+// Aplica una respuesta tuya con "escribiendo…" de por medio antes de que llegue la suya — el
+// mensaje tuyo se ve al instante (como al enviar de verdad), pero la respuesta del otro lado
+// tarda un momento y se anuncia con los tres puntos, igual que en un chat real. `id` identifica
+// el turno de forma única (contactoId para la conversación original, msgId/msgId+'_r2' para los
+// mensajes nuevos) dentro de `mapa` (S.movilRespuestas o S.movilRespuestasExtra).
+function telResponderConTyping(mapa, id, idx, pool, aplicarEfectosFn){
+  if(mapa[id] !== undefined) return;
+  mapa[id] = idx;
+  S.movilRespuestasVistas = S.movilRespuestasVistas || {};
+  S.movilRespuestasVistas[id] = false;
+  if(aplicarEfectosFn) aplicarEfectosFn(pool[idx]);
   guardarPartida();
   pintar();
+  setTimeout(()=>{
+    S.movilRespuestasVistas[id] = true;
+    Sonido.movilNotif();
+    pintar();
+  }, 1000 + Math.random()*700);
 }
-// Revela en cadena, uno a uno, los mensajes nuevos de un hilo (con "escribiendo…" delante de
-// cada uno) — para que lleguen como llegarían de alguien tecleando de verdad, no todos de golpe
-// al abrir el chat. Se programa una sola vez por hilo (S._movilRevelando) para no duplicar
-// temporizadores si pintar() se repite por cualquier otra razón mientras tanto.
-function telProgramarRevelado(claveHilo, ocultos){
-  if(!ocultos.length) return;
-  S._movilRevelando = S._movilRevelando || {};
-  if(S._movilRevelando[claveHilo]) return;
-  S._movilRevelando[claveHilo] = true;
-  const revelarSiguiente = (idx)=>{
-    if(idx >= ocultos.length){ S._movilRevelando[claveHilo] = false; return; }
-    setTimeout(()=>{
-      ocultos[idx].revelado = true;
-      Sonido.movilNotif();
-      pintar();
-      setTimeout(()=> revelarSiguiente(idx+1), 500);
-    }, 1000 + Math.random()*600);
-  };
-  revelarSiguiente(0);
+function telAplicarEfectoRelacion(contacto, op){
+  if(!op.relDelta || !contacto) return;
+  const j = S.jugador;
+  if(contacto.companeroId){
+    const c = (j.companeros||[]).find(x=>x.id===contacto.companeroId);
+    if(c) c.relacion = Math.min(100, c.relacion + op.relDelta);
+  } else if(contacto.id==='representante' && j.representante){
+    j.representante.agente.relacion = Math.min(100, j.representante.agente.relacion + op.relDelta);
+  }
+}
+function telResponderExtra(msgId, idx, contacto, pool){
+  S.movilRespuestasExtra = S.movilRespuestasExtra || {};
+  telResponderConTyping(S.movilRespuestasExtra, msgId, idx, pool||TEL_RESPUESTAS_GENERICAS, op=>telAplicarEfectoRelacion(contacto, op));
+}
+// Pinta un turno de conversación dentro de un hilo: si todavía no has elegido respuesta, no
+// pinta nada y devuelve 'pendiente' (toca ofrecer botones); si ya elegiste, pinta tu bocadillo
+// al instante y, mientras esperas la suya, un indicador de "escribiendo…" (estado 'esperando');
+// en cuanto se revela, pinta también su respuesta y devuelve 'cerrado'.
+function telPintarIntercambio(thread, id, mapa, pool){
+  const idx = mapa[id];
+  if(idx === undefined) return 'pendiente';
+  thread.appendChild(el('div','tel-bubble-row mine', `<div class="tel-bubble">${pool[idx].texto}</div>`));
+  if(!(S.movilRespuestasVistas && S.movilRespuestasVistas[id])){
+    thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble tel-typing"><span></span><span></span><span></span></div>`));
+    return 'esperando';
+  }
+  thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${pool[idx].respuesta}</div>`));
+  return 'cerrado';
 }
 // Genera, con probabilidad baja (no en cada paso — un móvil real no escribe cada semana sin
 // falta), UNA notificación nueva ligada al estado del jugador en ESTE momento de la temporada.
@@ -13894,12 +14052,14 @@ function generarNotificacionMovil(j){
   if(canal === 'whatsapp'){
     const ct = contactos[Math.floor(Math.random()*contactos.length)];
     const texto = plantillas.whatsapp[Math.floor(Math.random()*plantillas.whatsapp.length)];
-    S.movilBandeja.whatsapp.push({ id:idBase, contactoId:ct.id, texto, temporada:S.temporada, pasoIndex:paso, revelado:false });
+    S.movilBandeja.whatsapp.push({ id:idBase, contactoId:ct.id, texto, temporada:S.temporada, pasoIndex:paso });
     // A veces la misma persona "dobla texto" justo detrás — conversaciones más largas y más
-    // naturales que un único mensaje suelto cada vez.
+    // naturales que un único mensaje suelto cada vez. Llegan ya escritos (con su notificación
+    // correspondiente): el "escribiendo…" es solo para cuando ESPERAS su respuesta, no para
+    // mensajes que ya te avisaron que habían llegado.
     if(Math.random() < 0.45){
       const seguimiento = TEL_SEGUIMIENTOS_WHATSAPP[Math.floor(Math.random()*TEL_SEGUIMIENTOS_WHATSAPP.length)];
-      S.movilBandeja.whatsapp.push({ id:idBase+'_b', contactoId:ct.id, texto:seguimiento, temporada:S.temporada, pasoIndex:paso, revelado:false });
+      S.movilBandeja.whatsapp.push({ id:idBase+'_b', contactoId:ct.id, texto:seguimiento, temporada:S.temporada, pasoIndex:paso });
     }
   } else if(canal === 'email'){
     const info = plantillas.email;
@@ -13926,13 +14086,13 @@ function generarNotificacionMovil(j){
     };
     const autor = elegirAutor(null);
     S.movilBandeja.grupos[grupo.id] = S.movilBandeja.grupos[grupo.id] || [];
-    S.movilBandeja.grupos[grupo.id].push({ id:idBase, autor, texto, temporada:S.temporada, pasoIndex:paso, leido:false, revelado:false });
+    S.movilBandeja.grupos[grupo.id].push({ id:idBase, autor, texto, temporada:S.temporada, pasoIndex:paso, leido:false });
     // El grupo "habla solo": con bastante probabilidad, otro miembro reacciona al primer mensaje
     // aunque tú no digas nada — así se nota que la conversación sigue sin ti.
     if(Math.random() < 0.55){
       const autor2 = elegirAutor(autor);
       const respuesta = TEL_RESPUESTAS_GRUPO_GENERICAS[Math.floor(Math.random()*TEL_RESPUESTAS_GRUPO_GENERICAS.length)];
-      S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_b', autor:autor2, texto:respuesta, temporada:S.temporada, pasoIndex:paso, leido:false, revelado:false });
+      S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_b', autor:autor2, texto:respuesta, temporada:S.temporada, pasoIndex:paso, leido:false });
     }
   } else {
     const texto = plantillas.instagram[Math.floor(Math.random()*plantillas.instagram.length)];
@@ -14098,8 +14258,17 @@ function telAplicarRespuesta(contactoId, idx){
   S.movilRespuestasTiempo[contactoId] = { temporada:S.temporada, pasoIndex:S.pasoIndex||0 };
   S.movilCambios = S.movilCambios || {};
   S.movilCambios[contactoId] = cambios;
+  // Tu mensaje y sus efectos se aplican al instante (lo mandas tú); la respuesta del otro lado
+  // se anuncia con "escribiendo…" un momento antes de aparecer, como en un chat real.
+  S.movilRespuestasVistas = S.movilRespuestasVistas || {};
+  S.movilRespuestasVistas[contactoId] = false;
   guardarPartida();
   pintar();
+  setTimeout(()=>{
+    S.movilRespuestasVistas[contactoId] = true;
+    Sonido.movilNotif();
+    pintar();
+  }, 1000 + Math.random()*700);
 }
 function telChipsEfecto(cambios){
   const wrap = el('div','tel-effects-row');
@@ -14176,10 +14345,21 @@ function renderMovilContenido(c, j){
 
   if(vista === 'home'){
     const nivel = estadoPopularidad(j.stats.popularidad||0);
-    const pill = el('div','tel-fame-pill', `${ICONOS_SVG.estrella}${nivel.texto} <b>· ${Math.round(j.stats.popularidad||0)}</b>`);
-    c.appendChild(pill);
+    const cabecera = el('div','tel-home-cabecera');
+    cabecera.appendChild(el('div','tel-fame-pill', `${ICONOS_SVG.estrella}${nivel.texto} <b>· ${Math.round(j.stats.popularidad||0)}</b>`));
+    // Organizar apps: sin gestos táctiles de verdad en este entorno, la manera de "arrastrar
+    // iconos a una carpeta" es un modo de selección — se entra y se sale con este botón.
+    const btnOrganizar = document.createElement('button');
+    btnOrganizar.className = 'tel-organizar-btn'+(S.telModoOrganizar?' activo':'');
+    btnOrganizar.innerHTML = S.telModoOrganizar ? TEL_ICONO_CHECK_MINI : TEL_ICONO_LAPIZ;
+    btnOrganizar.title = S.telModoOrganizar ? 'Terminar' : 'Organizar apps';
+    btnOrganizar.onclick = ()=>{ S.telModoOrganizar = !S.telModoOrganizar; S._telSeleccionCarpeta = []; pintar(); };
+    cabecera.appendChild(btnOrganizar);
+    c.appendChild(cabecera);
+
     const grid = el('div','tel-app-grid');
     const pendientes = telAppsConPendiente(j);
+    const appsInstaladas = TEL_APP_STORE_CATALOGO.filter(a=>S.telAppsInstaladas && S.telAppsInstaladas[a.id]);
     const apps = [
       { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, onclick:()=>{ S.movilVista='chatlist'; pintar(); } },
       { id:'email', nombre:'Email', clase:'email', icono:TEL_ICONO_EMAIL, onclick:()=>{ S.movilVista='emailLista'; pintar(); } },
@@ -14189,17 +14369,32 @@ function renderMovilContenido(c, j){
       { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ telAbrirPantallaReal('tabClub'); } },
       // Los ajustes del propio MÓVIL (fondo, tamaño de letra) — no los del juego, que siguen
       // colgando del engranaje de la topbar real de siempre, sin tocar.
-      { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ S.movilVista='ajustesMovil'; pintar(); } }
+      { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ S.movilVista='ajustesMovil'; pintar(); } },
+      { id:'appstore', nombre:'App Store', clase:'appstore', icono:TEL_ICONO_APPSTORE, onclick:()=>{ S.movilVista='appstore'; pintar(); } },
+      ...appsInstaladas.map(a=>({ id:a.id, nombre:a.nombre, clase:a.clase, icono:a.icono, onclick:()=>{ S.movilVista=a.vista; pintar(); } }))
     ];
-    apps.forEach(a=>{
+    const carpetas = S.telCarpetasUsuario || [];
+    const enCarpetaUsuario = new Set(carpetas.flatMap(cp=>cp.appIds));
+    const seleccion = S._telSeleccionCarpeta = S._telSeleccionCarpeta || [];
+    const pintarBotonApp = (a)=>{
       const btn = document.createElement('button');
-      btn.className = 'tel-app';
-      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${pendientes[a.id]?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${a.nombre}</span>`;
-      btn.onclick = a.onclick;
+      const seleccionada = seleccion.includes(a.id);
+      btn.className = 'tel-app' + (S.telModoOrganizar?' editando':'') + (seleccionada?' seleccionada':'');
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${(pendientes[a.id]&&!S.telModoOrganizar)?'<span class="tel-app-dot"></span>':''}${S.telModoOrganizar?`<span class="tel-app-select">${TEL_ICONO_CHECK_MINI}</span>`:''}</span><span class="tel-label">${a.nombre}</span>`;
+      btn.onclick = ()=>{
+        if(S.telModoOrganizar){
+          const idx = seleccion.indexOf(a.id);
+          if(idx>=0) seleccion.splice(idx,1); else seleccion.push(a.id);
+          pintar();
+          return;
+        }
+        a.onclick();
+      };
       grid.appendChild(btn);
-    });
-    // Carpeta Economía (estilo iOS): un solo icono de "carpeta" con miniatura de las 3 apps que
-    // contiene; se coloca junto a WhatsApp, en el hueco que antes ocupaba Banca sola.
+    };
+    apps.filter(a=>!enCarpetaUsuario.has(a.id)).forEach(pintarBotonApp);
+    // Carpeta Economía (estilo iOS, fija): un solo icono de "carpeta" con miniatura de las apps
+    // que contiene; se coloca junto a WhatsApp, en el hueco que antes ocupaba Banca sola.
     const folder = TEL_CARPETA_ECONOMIA;
     const btnFolder = document.createElement('button');
     btnFolder.className = 'tel-app';
@@ -14208,6 +14403,18 @@ function renderMovilContenido(c, j){
     btnFolder.innerHTML = `<span class="tel-icon carpeta">${miniHtml}${hayPendienteEnCarpeta?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${folder.nombre}</span>`;
     btnFolder.onclick = ()=>{ S.movilVista='carpeta_economia'; pintar(); };
     grid.insertBefore(btnFolder, grid.children[1] || null);
+    // Carpetas creadas por el jugador — mismo patrón de icono con miniaturas.
+    carpetas.forEach(cp=>{
+      const appsDentro = apps.filter(a=>cp.appIds.includes(a.id));
+      if(!appsDentro.length) return;
+      const btnCp = document.createElement('button');
+      btnCp.className = 'tel-app';
+      const miniCp = appsDentro.slice(0,4).map(a=>`<span class="mini ${a.clase}">${a.icono}</span>`).join('') + (appsDentro.length < 4 ? '<span class="mini vacio"></span>' : '');
+      const hayPendCp = appsDentro.some(a=>pendientes[a.id]);
+      btnCp.innerHTML = `<span class="tel-icon carpeta">${miniCp}${hayPendCp?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${cp.nombre}</span>`;
+      btnCp.onclick = ()=>{ S.movilCarpetaUsuarioAbierta = cp.id; S.movilVista='carpeta_usuario'; pintar(); };
+      grid.appendChild(btnCp);
+    });
     TEL_APPS_BLOQUEADAS.forEach(a=>{
       const desbloqueada = telAppDesbloqueada(a.nivelMin);
       const btn = document.createElement('button');
@@ -14220,6 +14427,94 @@ function renderMovilContenido(c, j){
       grid.appendChild(btn);
     });
     c.appendChild(grid);
+    if(S.telModoOrganizar){
+      const barra = el('div','tel-organizar-barra');
+      const btnCancelar = document.createElement('button');
+      btnCancelar.className = 'cancelar';
+      btnCancelar.textContent = 'Vaciar selección';
+      btnCancelar.onclick = ()=>{ S._telSeleccionCarpeta = []; pintar(); };
+      const btnCrear = document.createElement('button');
+      btnCrear.className = 'crear';
+      btnCrear.textContent = `Crear carpeta (${seleccion.length})`;
+      btnCrear.disabled = seleccion.length < 2;
+      btnCrear.onclick = ()=>{ if(seleccion.length >= 2){ S.movilVista='nuevaCarpeta'; pintar(); } };
+      barra.appendChild(btnCancelar); barra.appendChild(btnCrear);
+      c.appendChild(barra);
+    }
+  }
+
+  else if(vista === 'nuevaCarpeta'){
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','Nueva carpeta'));
+    c.appendChild(header);
+    const input = document.createElement('input');
+    input.className = 'tel-nombre-carpeta';
+    input.placeholder = 'Nombre de la carpeta';
+    input.value = 'Carpeta nueva';
+    input.maxLength = 20;
+    c.appendChild(input);
+    setTimeout(()=>{ input.focus(); input.select(); }, 50);
+    const btnCrear = document.createElement('button');
+    btnCrear.className = 'btn-main';
+    btnCrear.textContent = 'Crear carpeta';
+    btnCrear.onclick = ()=>{
+      const nombre = input.value.trim() || 'Carpeta nueva';
+      S.telCarpetasUsuario = S.telCarpetasUsuario || [];
+      S.telCarpetasUsuario.push({ id:'carpeta_'+Date.now(), nombre, appIds:(S._telSeleccionCarpeta||[]).slice() });
+      S._telSeleccionCarpeta = [];
+      S.telModoOrganizar = false;
+      guardarPartida();
+      S.movilVista = 'home';
+      pintar();
+    };
+    c.appendChild(btnCrear);
+  }
+
+  else if(vista === 'carpeta_usuario'){
+    const carpeta = (S.telCarpetasUsuario||[]).find(cp=>cp.id===S.movilCarpetaUsuarioAbierta);
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title', carpeta ? carpeta.nombre : 'Carpeta'));
+    c.appendChild(header);
+    if(carpeta){
+      const appsInstaladas = TEL_APP_STORE_CATALOGO.filter(a=>S.telAppsInstaladas && S.telAppsInstaladas[a.id]);
+      const apps = [
+        { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, onclick:()=>{ S.movilVista='chatlist'; pintar(); } },
+        { id:'email', nombre:'Email', clase:'email', icono:TEL_ICONO_EMAIL, onclick:()=>{ S.movilVista='emailLista'; pintar(); } },
+        { id:'redes', nombre:'Instagram', clase:'redes', icono:TEL_ICONO_REDES, onclick:()=>{ S.movilVista='redes'; pintar(); } },
+        { id:'x', nombre:'X', clase:'x', icono:TEL_ICONO_X, onclick:()=>{ S.movilVista='x'; pintar(); } },
+        { id:'calendario', nombre:'Calendario', clase:'calendario', icono:TEL_ICONO_CALENDARIO, onclick:()=>{ S.movilVista='calendario'; pintar(); } },
+        { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ telAbrirPantallaReal('tabClub'); } },
+        { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ S.movilVista='ajustesMovil'; pintar(); } },
+        { id:'appstore', nombre:'App Store', clase:'appstore', icono:TEL_ICONO_APPSTORE, onclick:()=>{ S.movilVista='appstore'; pintar(); } },
+        ...appsInstaladas.map(a=>({ id:a.id, nombre:a.nombre, clase:a.clase, icono:a.icono, onclick:()=>{ S.movilVista=a.vista; pintar(); } }))
+      ];
+      const grid = el('div','tel-app-grid');
+      apps.filter(a=>carpeta.appIds.includes(a.id)).forEach(a=>{
+        const btn = document.createElement('button');
+        btn.className = 'tel-app';
+        btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}</span><span class="tel-label">${a.nombre}</span>`;
+        btn.onclick = a.onclick;
+        grid.appendChild(btn);
+      });
+      c.appendChild(grid);
+      const btnEliminar = document.createElement('button');
+      btnEliminar.className = 'btn-secondary';
+      btnEliminar.style.marginTop = '18px';
+      btnEliminar.textContent = 'Eliminar carpeta (las apps vuelven fuera)';
+      btnEliminar.onclick = ()=>{
+        S.telCarpetasUsuario = (S.telCarpetasUsuario||[]).filter(x=>x.id!==carpeta.id);
+        guardarPartida();
+        S.movilVista = 'home';
+        pintar();
+      };
+      c.appendChild(btnEliminar);
+    }
   }
 
   else if(vista === 'carpeta_economia'){
@@ -14443,15 +14738,9 @@ function renderMovilContenido(c, j){
     c.appendChild(header);
     if(grupo){
       const dinamicos = (S.movilBandeja && S.movilBandeja.grupos && S.movilBandeja.grupos[grupo.id]) || [];
-      const visibles = dinamicos.filter(m=>m.revelado!==false);
-      const ocultos = dinamicos.filter(m=>m.revelado===false);
       const thread = el('div','tel-thread');
-      const todos = grupo.mensajesSemilla.concat(visibles);
+      const todos = grupo.mensajesSemilla.concat(dinamicos);
       todos.forEach(m=> thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble"><span class="tel-bubble-autor">${m.autor}</span>${m.texto}</div>`)));
-      if(ocultos.length){
-        thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble tel-typing"><span></span><span></span><span></span></div>`));
-        telProgramarRevelado('grupo_'+grupo.id, ocultos);
-      }
       c.appendChild(thread);
     }
   }
@@ -14473,69 +14762,48 @@ function renderMovilContenido(c, j){
     if(contacto){
       const thread = el('div','tel-thread');
       contacto.mensajes.forEach(m=> thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${m}</div>`)));
-      const idxRespondido = S.movilRespuestas && S.movilRespuestas[contacto.id];
-      const yaRespondioOriginal = idxRespondido !== undefined;
-      if(yaRespondioOriginal){
-        const op = contacto.opciones[idxRespondido];
-        thread.appendChild(el('div','tel-bubble-row mine', `<div class="tel-bubble">${op.texto}</div>`));
-        thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${op.respuesta}</div>`));
-        const cambios = (S.movilCambios && S.movilCambios[contacto.id]) || [];
-        if(cambios.length) thread.appendChild(telChipsEfecto(cambios));
-      }
-      // Mensajes nuevos que fueron llegando con el avance de temporada (generarNotificacionMovil)
-      // — se muestran después del intercambio fijo inicial, cada uno con su propia respuesta si
-      // ya se contestó (ver TEL_RESPUESTAS_GENERICAS/telResponderExtra). Los que aún no se han
-      // "revelado" (revelado:false — recién generados, primera vez que se abre el hilo desde
-      // entonces) se sustituyen por el indicador de "escribiendo…" y se revelan solos en cadena.
-      const todosLosExtras = (S.movilBandeja && S.movilBandeja.whatsapp || []).filter(m=>m.contactoId===contacto.id);
-      const extras = todosLosExtras.filter(m=>m.revelado!==false);
-      const extrasOcultos = todosLosExtras.filter(m=>m.revelado===false);
-      extras.forEach(m=>{
-        thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${m.texto}</div>`));
-        const respId = S.movilRespuestasExtra && S.movilRespuestasExtra[m.id];
-        if(respId !== undefined){
-          thread.appendChild(el('div','tel-bubble-row mine', `<div class="tel-bubble">${TEL_RESPUESTAS_GENERICAS[respId].texto}</div>`));
-          thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${TEL_RESPUESTAS_GENERICAS[respId].respuesta}</div>`));
+      // Cada "turno" es un mensaje entrante con hasta 2 rondas de ida y vuelta (tu respuesta +
+      // la suya, y otra vez) — el primero es el intercambio fijo de cada contacto (ya mostrado
+      // arriba como mensajes), los demás son los que van llegando con el avance de temporada
+      // (generarNotificacionMovil). Solo el turno más reciente ofrece botones para responder;
+      // los anteriores son historial ya cerrado (los contestaras o no en su momento).
+      const extras = (S.movilBandeja && S.movilBandeja.whatsapp || []).filter(m=>m.contactoId===contacto.id);
+      S.movilRespuestas = S.movilRespuestas || {};
+      const turnos = [
+        { id: contacto.id, mapa: S.movilRespuestas, pool: contacto.opciones, aplicar:(idx)=>telAplicarRespuesta(contacto.id, idx) },
+        ...extras.map(m=>({ id: m.id, mapa: (S.movilRespuestasExtra=S.movilRespuestasExtra||{}), pool: TEL_RESPUESTAS_GENERICAS, entrante: m.texto, aplicar:(idx)=>telResponderExtra(m.id, idx, contacto, TEL_RESPUESTAS_GENERICAS) }))
+      ];
+      let activo = null;
+      turnos.forEach((t,i)=>{
+        if(t.entrante) thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${t.entrante}</div>`));
+        const estado1 = telPintarIntercambio(thread, t.id, t.mapa, t.pool);
+        activo = { estado:estado1, aplicar:t.aplicar, pool:t.pool };
+        if(estado1 === 'cerrado'){
+          if(t.id === contacto.id){
+            const cambios = (S.movilCambios && S.movilCambios[contacto.id]) || [];
+            if(cambios.length) thread.appendChild(telChipsEfecto(cambios));
+          }
+          const idR2 = t.id+'_r2';
+          S.movilRespuestasExtra = S.movilRespuestasExtra || {};
+          const estado2 = telPintarIntercambio(thread, idR2, S.movilRespuestasExtra, TEL_RESPUESTAS_GENERICAS_R2);
+          activo = { estado:estado2, aplicar:(idx)=>telResponderExtra(idR2, idx, contacto, TEL_RESPUESTAS_GENERICAS_R2), pool:TEL_RESPUESTAS_GENERICAS_R2 };
         }
       });
-      if(extrasOcultos.length){
-        thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble tel-typing"><span></span><span></span><span></span></div>`));
-        telProgramarRevelado('wa_'+contacto.id, extrasOcultos);
-      }
       c.appendChild(thread);
-      // Solo hay UNA cosa pendiente de responder a la vez: el intercambio original si sigue sin
-      // contestar, o si no, el ÚLTIMO mensaje YA REVELADO (los anteriores ya son historial
-      // cerrado, y uno todavía "escribiendo" no cuenta hasta que de verdad llega) — antes esto se
-      // confundía con un único flag global y el juego decía "ya has respondido" aunque acabara de
-      // llegar un mensaje nuevo sin contestar (bug real, corregido).
       const choices = el('div','tel-choices');
-      if(!yaRespondioOriginal){
+      if(activo.estado === 'pendiente'){
         choices.appendChild(el('p','tel-choices-label','Tu respuesta'));
-        contacto.opciones.forEach((op,idx)=>{
+        activo.pool.forEach((op,idx)=>{
           const btn = document.createElement('button');
           btn.className = 'tel-choice-btn';
           btn.textContent = op.texto;
-          btn.onclick = ()=> telAplicarRespuesta(contacto.id, idx);
+          btn.onclick = ()=> activo.aplicar(idx);
           choices.appendChild(btn);
         });
-      } else if(extrasOcultos.length){
-        // Todavía "escribiendo" el último mensaje — no se ofrece responder hasta que llegue de verdad.
-      } else {
-        const ultimoExtra = extras[extras.length-1];
-        const ultimoRespondido = ultimoExtra && S.movilRespuestasExtra && S.movilRespuestasExtra[ultimoExtra.id] !== undefined;
-        if(ultimoExtra && !ultimoRespondido){
-          choices.appendChild(el('p','tel-choices-label','Tu respuesta'));
-          TEL_RESPUESTAS_GENERICAS.forEach((op,idx)=>{
-            const btn = document.createElement('button');
-            btn.className = 'tel-choice-btn';
-            btn.textContent = op.texto;
-            btn.onclick = ()=> telResponderExtra(ultimoExtra.id, idx, contacto);
-            choices.appendChild(btn);
-          });
-        } else {
-          choices.appendChild(el('p','tel-done-note','Ya has respondido'));
-        }
+      } else if(activo.estado === 'cerrado'){
+        choices.appendChild(el('p','tel-done-note','Ya has respondido'));
       }
+      // Si está "esperando" (escribiendo…) no se ofrece nada todavía.
       c.appendChild(choices);
     }
   }
@@ -14719,6 +14987,202 @@ function renderMovilContenido(c, j){
       tamanos.appendChild(btn);
     });
     c.appendChild(tamanos);
+  }
+
+  else if(vista === 'appstore'){
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','App Store'));
+    c.appendChild(header);
+    TEL_APP_STORE_CATALOGO.forEach(a=>{
+      const instalada = S.telAppsInstaladas && S.telAppsInstaladas[a.id];
+      const progreso = S._telInstalando ? S._telInstalando[a.id] : undefined;
+      const fila = el('div','tel-store-item');
+      fila.appendChild(el('span','tel-store-icon '+a.clase, a.icono));
+      const body = el('div','tel-store-body');
+      body.appendChild(el('div','tel-store-nombre', a.nombre));
+      body.appendChild(el('div','tel-store-desc', a.desc));
+      body.appendChild(el('div','tel-store-tamano', a.tamano));
+      fila.appendChild(body);
+      if(progreso !== undefined){
+        const prog = el('div','tel-store-progreso');
+        const fill = el('div','fill'); fill.style.width = Math.round(progreso)+'%';
+        prog.appendChild(fill);
+        prog.appendChild(el('span','pct', Math.round(progreso)+'%'));
+        fila.appendChild(prog);
+      } else if(instalada){
+        const acciones = el('div','tel-store-acciones');
+        const btnAbrir = document.createElement('button');
+        btnAbrir.className = 'tel-store-btn instalada';
+        btnAbrir.textContent = 'Abrir';
+        btnAbrir.onclick = ()=>{ S.movilVista = a.vista; pintar(); };
+        const btnQuitar = document.createElement('button');
+        btnQuitar.className = 'tel-store-quitar';
+        btnQuitar.textContent = 'Desinstalar';
+        btnQuitar.onclick = ()=> telDesinstalarApp(a.id);
+        acciones.appendChild(btnAbrir); acciones.appendChild(btnQuitar);
+        fila.appendChild(acciones);
+      } else {
+        const btn = document.createElement('button');
+        btn.className = 'tel-store-btn';
+        btn.textContent = 'Obtener';
+        btn.onclick = ()=> telInstalarApp(a.id);
+        fila.appendChild(btn);
+      }
+      c.appendChild(fila);
+    });
+  }
+
+  else if(vista === 'ritmo'){
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','Ritmo'));
+    c.appendChild(header);
+    const playlist = [
+      { titulo:'Antes del pitido', artista:'Vestuario FC' },
+      { titulo:'Cabeza fría', artista:'Los Suplentes' },
+      { titulo:'Noventa minutos', artista:'La Grada' },
+      { titulo:'Vuelta a los vestuarios', artista:'Bajo Palo' },
+      { titulo:'Otra semana más', artista:'Concentración' }
+    ];
+    const idx = Math.min(playlist.length-1, Math.max(0, S.telRitmoIndice||0));
+    const track = playlist[idx];
+    const reproduciendo = !!S.telRitmoReproduciendo;
+    const player = el('div','tel-ritmo-player');
+    const disco = el('div','tel-ritmo-disco'+(reproduciendo?' girando':''));
+    disco.innerHTML = TEL_ICONO_RITMO;
+    player.appendChild(disco);
+    player.appendChild(el('div','tel-ritmo-titulo', track.titulo));
+    player.appendChild(el('div','tel-ritmo-artista', track.artista));
+    const barra = el('div','tel-ritmo-barra'); barra.appendChild(el('div','fill'+(reproduciendo?' animando':'')));
+    player.appendChild(barra);
+    const controles = el('div','tel-ritmo-controles');
+    const btnPrev = document.createElement('button'); btnPrev.innerHTML = '⏮'; btnPrev.onclick = ()=>{ S.telRitmoIndice = (idx-1+playlist.length)%playlist.length; pintar(); };
+    const btnPlay = document.createElement('button'); btnPlay.className='play'; btnPlay.innerHTML = reproduciendo?'⏸':'▶'; btnPlay.onclick = ()=>{ S.telRitmoReproduciendo = !reproduciendo; pintar(); };
+    const btnNext = document.createElement('button'); btnNext.innerHTML = '⏭'; btnNext.onclick = ()=>{ S.telRitmoIndice = (idx+1)%playlist.length; pintar(); };
+    controles.appendChild(btnPrev); controles.appendChild(btnPlay); controles.appendChild(btnNext);
+    player.appendChild(controles);
+    c.appendChild(player);
+    const lista = el('div','tel-ritmo-lista');
+    playlist.forEach((t,i)=>{
+      const fila = el('div','tel-ritmo-fila'+(i===idx?' activa':''));
+      fila.innerHTML = `<span>${t.titulo}</span><span class="artista">${t.artista}</span>`;
+      fila.onclick = ()=>{ S.telRitmoIndice = i; pintar(); };
+      lista.appendChild(fila);
+    });
+    c.appendChild(lista);
+  }
+
+  else if(vista === 'notas'){
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','Notas'));
+    c.appendChild(header);
+    const nueva = el('div','tel-notas-nueva');
+    const input = document.createElement('textarea');
+    input.className = 'tel-notas-input';
+    input.placeholder = 'Escribe algo…';
+    input.rows = 2;
+    nueva.appendChild(input);
+    const btnAnadir = document.createElement('button');
+    btnAnadir.className = 'btn-main';
+    btnAnadir.textContent = 'Añadir nota';
+    btnAnadir.onclick = ()=>{
+      const texto = input.value.trim();
+      if(!texto) return;
+      S.telNotas = S.telNotas || [];
+      S.telNotas.unshift({ id:'nota_'+Date.now(), texto, temporada:S.temporada });
+      guardarPartida();
+      pintar();
+    };
+    nueva.appendChild(btnAnadir);
+    c.appendChild(nueva);
+    const notas = S.telNotas || [];
+    if(!notas.length){
+      c.appendChild(el('p',null,'Todavía no has apuntado nada.')).style.cssText = "font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-soft);padding:10px 4px;";
+    }
+    notas.forEach(n=>{
+      const fila = el('div','tel-nota-item');
+      fila.appendChild(el('div','tel-nota-txt', n.texto));
+      const meta = el('div','tel-nota-meta');
+      meta.appendChild(el('span',null, `Temp. ${temporadaAAnoCompleto(n.temporada)}`));
+      const btnBorrar = document.createElement('button');
+      btnBorrar.textContent = 'Eliminar';
+      btnBorrar.onclick = ()=>{ S.telNotas = (S.telNotas||[]).filter(x=>x.id!==n.id); guardarPartida(); pintar(); };
+      meta.appendChild(btnBorrar);
+      fila.appendChild(meta);
+      c.appendChild(fila);
+    });
+  }
+
+  else if(vista === 'mapas'){
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','Mapas'));
+    c.appendChild(header);
+    const mapa = el('div','tel-mapas-svg');
+    mapa.innerHTML = `<svg viewBox="0 0 200 140" width="100%" height="140">
+      <rect width="200" height="140" fill="#1c2334"/>
+      <path d="M0 40h200M0 90h200M40 0v140M120 0v140M170 0v140" stroke="#2d3650" stroke-width="3"/>
+      <path d="M0 65h200M80 0v140" stroke="#242c44" stroke-width="1.5"/>
+      <circle cx="95" cy="60" r="9" fill="#e0432e"/>
+      <circle cx="95" cy="60" r="15" fill="none" stroke="#e0432e" stroke-width="1.5" opacity=".5"/>
+    </svg>`;
+    c.appendChild(mapa);
+    const info = el('div','tel-mapas-info');
+    info.appendChild(el('div','tel-mapas-lugar', j.club && j.club.extranjero ? `${j.club.nombre}, ${j.club.pais}` : (j.localidad || j.club.nombre || 'Tu ciudad')));
+    info.appendChild(el('div','tel-mapas-sub', j.club.extranjero ? 'Tu nueva ciudad' : `Localidad de origen — juegas en ${j.club.nombre}`));
+    c.appendChild(info);
+    const filas = [
+      { icono:'🏟️', texto:`Campo de entrenamiento — ${j.club.nombre}` },
+      { icono:'🏠', texto:'Tu casa — 12 min en coche' },
+      { icono:'✈️', texto:'Aeropuerto — para los partidos fuera' }
+    ];
+    const lista = el('div','tel-mapas-lista');
+    filas.forEach(f=> lista.appendChild(el('div','tel-mapas-fila', `<span>${f.icono}</span><span>${f.texto}</span>`)));
+    c.appendChild(lista);
+  }
+
+  else if(vista === 'clima'){
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','Clima'));
+    c.appendChild(header);
+    const condiciones = [
+      { texto:'Despejado', icono:'☀️', tempBase:22 },
+      { texto:'Parcialmente nublado', icono:'⛅', tempBase:17 },
+      { texto:'Nublado', icono:'☁️', tempBase:14 },
+      { texto:'Lluvia ligera', icono:'🌦️', tempBase:11 },
+      { texto:'Lluvia', icono:'🌧️', tempBase:9 }
+    ];
+    // Estable mientras no cambie la temporada/paso — nada de aleatorio en cada repintado.
+    const semilla = (S.temporada||0)*10 + (S.pasoIndex||0);
+    const cond = condiciones[semilla % condiciones.length];
+    const temp = cond.tempBase + (semilla*7 % 6);
+    const hero = el('div','tel-clima-hero');
+    hero.appendChild(el('div','tel-clima-icono', cond.icono));
+    hero.appendChild(el('div','tel-clima-temp', temp+'°'));
+    hero.appendChild(el('div','tel-clima-cond', cond.texto));
+    hero.appendChild(el('div','tel-clima-lugar', j.club && j.club.extranjero ? j.club.pais : (j.localidad||j.club.nombre)));
+    c.appendChild(hero);
+    const dias = ['Hoy','Mañana','Pasado'];
+    const lista = el('div','tel-clima-lista');
+    dias.forEach((d,i)=>{
+      const c2 = condiciones[(semilla+i) % condiciones.length];
+      const t2 = c2.tempBase + ((semilla+i)*7 % 6);
+      lista.appendChild(el('div','tel-clima-fila', `<span>${d}</span><span>${c2.icono}</span><span>${t2}°</span>`));
+    });
+    c.appendChild(lista);
   }
 }
 
