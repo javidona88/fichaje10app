@@ -185,16 +185,20 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .season-dot.hecho{ background:var(--gold); border-color:var(--gold); }
 .season-dot.actual{ transform:scale(1.35); box-shadow:0 0 0 3px rgba(212,175,55,0.25); }
 .season-avanzar-btn{
-  width:20%; flex-shrink:0; height:34px; border-radius:10px; border:none; cursor:pointer;
-  background:var(--gold); color:#191507; display:flex; align-items:center; justify-content:center; gap:5px;
+  width:20%; flex-shrink:0; height:34px; border-radius:10px; border:1.5px solid var(--gold); cursor:pointer;
+  background:transparent; color:var(--gold); display:flex; align-items:center; justify-content:center; gap:5px;
   font-family:'Space Grotesk',sans-serif; font-size:11.5px; font-weight:700;
 }
-.season-avanzar-btn:active{ background:#E0BE49; }
+.season-avanzar-btn:active{ background:rgba(212,175,55,0.12); }
 .season-avanzar-btn svg{ width:15px; height:15px; }
-.season-avanzar-btn.deshabilitado{ background:var(--panel2); color:var(--ink-soft); opacity:.5; cursor:not-allowed; }
+.season-avanzar-btn.deshabilitado{ border-color:var(--line); color:var(--ink-soft); opacity:.5; cursor:not-allowed; background:transparent; }
 /* Sucesos de la semana: sin caja propia — el texto y las opciones se apoyan directamente en el
    fondo oscuro de la página, a todo el ancho disponible (respetando el margen estándar del body). */
-.suceso-plano{ color:var(--ink); padding:2px 0 18px; margin-bottom:0; }
+.suceso-plano{ color:var(--ink); padding:2px 8px 18px; margin-bottom:0; }
+/* Jugador y Club: mismo criterio que .suceso-plano (sin fondo/borde/sombra propios, apoyado
+   directo sobre el fondo oscuro de la página) — a diferencia de .cromo, que sigue con su propia
+   tarjeta en el resto de sitios que la usan. */
+.cromo-plano{ color:var(--ink); padding:2px 4px 18px; position:relative; }
 .card{
   background: var(--panel);
   color: var(--ink);
@@ -619,7 +623,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* ---- resumen de temporada (modal progresivo) ---- */
 .resumen-card{ max-width:420px; margin:0 auto; }
 .resumen-card .eyebrow{ text-align:center; }
-.resumen-card h2{ text-align:center; font-size:22px; font-weight:400; margin-bottom:14px; }
+.resumen-card h2{ text-align:center; font-size:18px; font-weight:400; margin-bottom:14px; }
 .reveal-stats-row{
   display:flex; gap:8px; margin-bottom:6px; opacity:0; transform:translateY(8px);
   transition:opacity .4s ease, transform .4s ease;
@@ -1279,10 +1283,16 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-status-ic{ display:flex; align-items:center; }
 .tel-status-ic svg{ display:block; width:15px; height:12px; }
 .tel-status-ic.bateria svg{ width:20px; height:12px; }
-/* Notificaciones DENTRO del propio móvil simulado (no de la página real): caen desde detrás del
-   notch, cubriendo lo que haya debajo (asomo o pantalla abierta), igual que en un móvil de
-   verdad. Ver pintarNotifMovil(). */
-.tel-notif-movil-wrap{ position:absolute; left:8px; right:8px; top:44px; z-index:9; display:flex; flex-direction:column; gap:6px; pointer-events:none; }
+/* Notificaciones del móvil: capa PROPIA por encima del aparato entero (ya no confinadas dentro
+   de .tel-device, donde competían por espacio con el notch y los iconos del dock) — se ven igual
+   de claras con el móvil recogido o abierto, en cualquier pantalla. Nacen justo detrás del borde
+   superior del asomo (empiezan un poco más abajo de su sitio y transparentes, como si salieran de
+   detrás del aparato) y suben hasta quedar POR ENCIMA de él durante los 4 segundos que dura el
+   aviso. Ver pintarNotifMovil(). */
+.tel-notif-movil-wrap{
+  position:fixed; left:50%; transform:translateX(-50%); width:93%; max-width:460px;
+  bottom:calc(var(--tel-peek-h) + 12px); z-index:1; display:flex; flex-direction:column; gap:6px; pointer-events:none;
+}
 .tel-notif-movil{
   pointer-events:auto; box-sizing:border-box;
   display:flex; align-items:center; gap:8px; width:100%;
@@ -1290,7 +1300,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   padding:9px 12px;
   font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; color:var(--ink);
   box-shadow:0 10px 24px rgba(0,0,0,0.45);
-  transform:translateY(-140%); opacity:0;
+  transform:translateY(30%); opacity:0;
   transition:transform .38s cubic-bezier(.25,.8,.35,1), opacity .3s ease;
 }
 .tel-notif-movil.show{ transform:translateY(0); opacity:1; }
@@ -1307,6 +1317,12 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   flex:1; min-height:0; position:relative; background:var(--bg2); border-radius:25px 25px 0 0;
   overflow-y:auto; overflow-x:hidden; padding:46px 14px 24px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05);
+  /* Misma tipografía en TODAS las apps del móvil (Inter, la de Banca) — la mayoría de clases
+     .tel-* ya la fijaban una a una, pero unas cuantas (nombre/preview de un contacto, el propio
+     texto de un mensaje de WhatsApp) se quedaban sin declararla y heredaban 'Space Grotesk' del
+     body, notándose distinta de una app a otra. Puesta aquí, en la raíz del contenido del móvil,
+     cualquier texto nuevo hereda Inter por defecto sin tener que acordarse de declararla suelto. */
+  font-family:'Inter',sans-serif;
 }
 .tel-icon-badge{
   position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 3px;
@@ -1349,24 +1365,27 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-app.locked .tel-icon{ filter:grayscale(1) brightness(.55); }
 .tel-lock-badge{ position:absolute; bottom:-2px; right:-2px; width:18px; height:18px; border-radius:50%; background:var(--bg2); border:1.5px solid var(--panel); display:flex; align-items:center; justify-content:center; color:var(--ink-soft); }
 .tel-lock-badge svg{ width:9px; height:9px; }
-.tel-icon.whatsapp{ background:linear-gradient(150deg,#3fce6e,#1f9e4c); }
-.tel-icon.email{ background:linear-gradient(150deg,#5a8fd6,#2c4d84); }
-.tel-icon.banca{ background:linear-gradient(150deg,#3f6fce,#233f80); }
-.tel-icon.economia{ background:linear-gradient(150deg,#3f6fce,#233f80); }
-.tel-icon.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
-.tel-icon.compras{ background:linear-gradient(150deg,#3f9e93,#1f5b53); }
-.tel-icon.casino{ background:linear-gradient(150deg,#7b2d8e,#341042); }
-.tel-icon.cromos{ background:linear-gradient(150deg,#4CAF6D,#1d5c37); }
-.tel-icon.club{ background:linear-gradient(150deg,#7c8494,#464c59); }
-.tel-icon.ajustes{ background:linear-gradient(150deg,#7c8494,#464c59); }
-.tel-icon.redes{ background:linear-gradient(150deg,#e0507a,#8a1f4a); }
-.tel-icon.x{ background:linear-gradient(150deg,#3a3d44,#111214); }
-.tel-icon.entrenamiento{ background:linear-gradient(150deg,#4CAF6D,#1d5c37); }
-.tel-icon.calendario{ background:linear-gradient(150deg,#e0432e,#8a1f14); }
-.tel-icon.appstore{ background:linear-gradient(150deg,#5a8fd6,#1f3a63); }
-.tel-icon.prensa{ background:linear-gradient(150deg,#c94b3f,#6e1f18); }
-.tel-icon.scout{ background:linear-gradient(150deg,#3fce9e,#1f6a4c); }
-.tel-icon.rendimiento{ background:linear-gradient(150deg,#e0a83e,#8a5f14); }
+/* Mismo color base de siempre por app, pero en tono pastel (más suave, menos saturado) en vez
+   del degradado vivo de antes — se mantiene el extremo oscuro algo más cargado que el claro para
+   que el icono blanco de encima siga leyéndose bien. */
+.tel-icon.whatsapp{ background:linear-gradient(150deg,#8fdaac,#4fa876); }
+.tel-icon.email{ background:linear-gradient(150deg,#9cc0ea,#5c85bd); }
+.tel-icon.banca{ background:linear-gradient(150deg,#a3b3e8,#6272b8); }
+.tel-icon.economia{ background:linear-gradient(150deg,#a3b3e8,#6272b8); }
+.tel-icon.servicios{ background:linear-gradient(150deg,#f0c48a,#c9924c); }
+.tel-icon.compras{ background:linear-gradient(150deg,#94d6cb,#559e91); }
+.tel-icon.casino{ background:linear-gradient(150deg,#cba3d8,#9865ab); }
+.tel-icon.cromos{ background:linear-gradient(150deg,#8cdcbd,#4ca688); }
+.tel-icon.club{ background:linear-gradient(150deg,#b9c0cc,#828a99); }
+.tel-icon.ajustes{ background:linear-gradient(150deg,#b9c0cc,#828a99); }
+.tel-icon.redes{ background:linear-gradient(150deg,#ec9bb8,#c15c82); }
+.tel-icon.x{ background:linear-gradient(150deg,#9aa1b0,#5d6474); }
+.tel-icon.entrenamiento{ background:linear-gradient(150deg,#8cdcbd,#4ca688); }
+.tel-icon.calendario{ background:linear-gradient(150deg,#eeae9f,#cc6f59); }
+.tel-icon.appstore{ background:linear-gradient(150deg,#9cc0ea,#4d7dbe); }
+.tel-icon.prensa{ background:linear-gradient(150deg,#e6ada2,#b85d4e); }
+.tel-icon.scout{ background:linear-gradient(150deg,#8fe0c5,#48ad81); }
+.tel-icon.rendimiento{ background:linear-gradient(150deg,#f1cb8e,#ca9c48); }
 /* Puntito de "hay algo nuevo" sobre el icono de una app (WhatsApp/Email/Redes/Servicios), con el
    número real dentro — verde (no rojo: aquí no es una alarma/error, solo un contador de cosas
    por ver) y algo más grande que antes, que el número se leía apretado. */
@@ -11214,7 +11233,7 @@ function togglePrioridadEntreno(j, a){
   j.prioridadesEntreno = prioridades;
   pintar();
 }
-const DURACION_NOTIFICACION_MS = 5000;
+const DURACION_NOTIFICACION_MS = 4000;
 // Notificación estilo móvil real: las notificaciones caen dentro del propio móvil simulado (ver
 // pintarNotifMovil, llamado desde pintarMovilSheet), como en un móvil de verdad — no son un
 // aviso de la página real.
@@ -11230,13 +11249,15 @@ function mostrarNotificacion(texto, tipo){
     pintarMovilSheet();
   }, DURACION_NOTIFICACION_MS);
 }
-// Pinta los avisos pendientes DENTRO de .tel-device (asomo o abierto, da igual) — un móvil real
-// muestra sus notificaciones en la propia pantalla estén donde estén, no en la página que hay
-// alrededor. Se llama desde pintarMovilSheet(), que reconstruye el móvil entero en cada
-// repintado, así que esto se repinta con él (mismo criterio ya aceptado en el resto del móvil:
-// la animación de entrada se puede repetir en un repintado que coincida por casualidad).
-function pintarNotifMovil(device){
-  // Red de seguridad: lo que retira un aviso a los 5s es un setTimeout en memoria, que NO
+// Pinta los avisos pendientes en su propia capa (raiz = #movil-root, ver .tel-notif-movil-wrap),
+// por ENCIMA del aparato entero en vez de encajados dentro de .tel-device — así no compiten por
+// espacio con el notch ni los iconos del dock, y se ven igual de claras con el móvil recogido,
+// abierto o en cualquier pantalla incrustada. Se llama desde pintarMovilSheet(), que reconstruye
+// el móvil entero en cada repintado, así que esto se repinta con él (mismo criterio ya aceptado
+// en el resto del móvil: la animación de entrada se puede repetir en un repintado que coincida
+// por casualidad).
+function pintarNotifMovil(raiz){
+  // Red de seguridad: lo que retira un aviso a los 4s es un setTimeout en memoria, que NO
   // sobrevive a una recarga de página — pero S.notificaciones sí, porque guardarPartida()
   // serializa S entero. Se purga aquí por edad real (reloj), no por el temporizador, así que se
   // autocura en el primer repintado tras cargar la partida. Un aviso sin `creadoEn` (guardado con
@@ -11250,7 +11271,7 @@ function pintarNotifMovil(device){
     item.innerHTML = n.texto;
     wrap.appendChild(item);
   });
-  device.appendChild(wrap);
+  raiz.appendChild(wrap);
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
     wrap.querySelectorAll('.tel-notif-movil').forEach(nodo=> nodo.classList.add('show'));
   }); });
@@ -11311,6 +11332,10 @@ function pintarMovilSheet(){
   if(!S.jugador || S.enFaseCreacion){ raiz.style.pointerEvents = 'none'; document.body.style.overflow = ''; return; }
   const pantallaEfectiva = (S.screen === 'ajustes' && S.pantallaAnteriorAjustes) ? S.pantallaAnteriorAjustes : S.screen;
   if(PANTALLAS_CREACION.has(pantallaEfectiva)){ raiz.style.pointerEvents = 'none'; document.body.style.overflow = ''; return; }
+  // Resumen de fin de temporada: pantalla de cierre, sin nada que hacer en el móvil (ni sucesos
+  // ligados, ni Economía que consultar) — se quita entero, ni siquiera el asomo desvaído de
+  // PANTALLAS_SIN_TABBAR, para no distraer de la lectura del resumen.
+  if(S.screen === 'finTemporada'){ raiz.style.pointerEvents = 'none'; document.body.style.overflow = ''; return; }
   if(S.movilAbierto && S.movilVista === 'pantallaReal' && !TEL_PANTALLAS_EMBEBIBLES.has(S.screen)){
     // El usuario salió de la pantalla incrustada por su propio botón de "volver" (Servicios,
     // Compras, Ajustes...) hacia una pantalla normal del juego que ya no tiene sentido ver
@@ -11454,9 +11479,11 @@ function pintarMovilSheet(){
   // iconos...) — solo las 5 apps de acceso directo (TEL_DOCK_APPS) hacen algo, cada una entrando
   // YA en su propia app. sheet se queda sin onclick propio en este estado.
 
-  pintarNotifMovil(device);
-
   raiz.appendChild(sheet);
+  // Se pinta DESPUÉS de anexar sheet (no antes, ni dentro de device): al ser un hermano posterior
+  // en el DOM dentro de la misma capa (#movil-root), queda por encima del aparato entero sin
+  // necesidad de más trucos de z-index — ver .tel-notif-movil-wrap.
+  pintarNotifMovil(raiz);
   if(S.movilAbierto){
     if(S._movilVisible){
       sheet.classList.add('show');
@@ -11573,16 +11600,21 @@ function pintar(){
   void app.offsetWidth;
   app.classList.add('fade-in');
   // Con el móvil abierto en una vista NATIVA (no una pantalla real incrustada, ver
-  // TEL_PANTALLAS_EMBEBIBLES), #app no se ve — el aparato lo tapa entero — así que no debe
-  // fundirse de vuelta aquí. Sin esto, #app siempre reaparecía un instante (su propio fade-in es
-  // inmediato, mientras que el fundido del móvil/backdrop se retrasa a próposito un par de
-  // frames con doble rAF para poder animarse) antes de que el móvil terminara de cubrirlo — se
-  // notaba sobre todo al cargar una partida guardada con el móvil ya abierto en una app nativa
-  // (bug real, reportado dos veces: al abrir cualquier app nativa, y al cargar una partida así).
-  // Va CENTRALIZADO aquí (no en cada sitio que abre una app) para cubrir cualquier camino que
-  // deje el móvil abierto así, incluida la carga de partida.
+  // TEL_PANTALLAS_EMBEBIBLES), #app no debe verse — el móvil se superpone y tapa la pantalla de
+  // detrás del todo, directamente, en vez de confiar solo en que el aparato y el fondo oscurecido
+  // (.tel-backdrop, que no llega a opacidad 100%) la cubran visualmente por encima. Antes solo se
+  // evitaba el fade-in (para que no "destellara" un instante antes de que el móvil terminara de
+  // cubrirlo), pero #app seguía pintada a opacidad normal por debajo — cualquier hueco real (los
+  // márgenes laterales del aparato, una esquina redondeada, el asomo en un móvil de verdad con la
+  // barra de direcciones moviéndose) dejaba entrever la pantalla de detrás. visibility:hidden la
+  // quita del todo, sin depender de la geometría exacta del móvil/backdrop por encima. Va
+  // CENTRALIZADO aquí (no en cada sitio que abre una app) para cubrir cualquier camino que deje
+  // el móvil abierto así, incluida la carga de partida.
   if(S.movilAbierto && S.movilVista !== 'pantallaReal'){
     app.classList.remove('fade-in');
+    app.style.visibility = 'hidden';
+  } else {
+    app.style.visibility = '';
   }
   requestAnimationFrame(()=>{
     const destacado = app.querySelector('.press-headline, .season-reveal .num');
@@ -12568,7 +12600,7 @@ SCREENS.tabJugador = function(){
   const j = S.jugador;
   S.objetosNuevosSinVer = 0;
   topbar("Jugador");
-  const c = el('div','cromo');
+  const c = el('div','cromo-plano');
   const nombreTop = el('div', null, capitalizarNombre(j.nombre));
   nombreTop.style.cssText = "text-align:center;font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--ink);margin-bottom:12px;";
   c.appendChild(nombreTop);
@@ -12686,7 +12718,7 @@ SCREENS.tabJugador = function(){
 SCREENS.tabClub = function(){
   const j = S.jugador;
   topbar("Club");
-  const c = el('div','cromo');
+  const c = el('div','cromo-plano');
   const head = el('div');
   head.style.cssText = 'display:flex;flex-direction:column;align-items:center;text-align:center;padding-bottom:6px;';
   head.innerHTML = `${escudoSVG(j.club.nombre,44,j.club.colores)}`;
@@ -14056,6 +14088,18 @@ function telAppTabsEconomia(activa){
 // mensaje a medida de cada uno no es viable; el estado resultante SÍ da contexto real y
 // reconocible ("te acabas de lesionar", "estás en racha") sin tener que engancharse a un id.
 const TEL_PLANTILLAS_NOTIF = {
+  campeon:{
+    whatsapp:['¡CAMPEONES! Todavía no me lo creo 🏆', 'Qué temporada, macho. Enhorabuena de verdad.', '¡Esto hay que celebrarlo como se merece!'],
+    instagram:['🏆 Al vestuario se le fue la cabeza cuando pitó el final. Un año para recordar.', 'De los títulos que no se olvidan. Enhorabuena, campeón.'],
+    x:['¡CAMPEONES! qué temporada la de este equipo 🏆', 'se lo han currado hasta el final, merecidísimo'],
+    grupo:['¡CAMPEONES, macho! Hay que quedar para celebrarlo.', 'Todavía estoy flipando con el título, enhorabuena de verdad.']
+  },
+  mvp:{
+    whatsapp:['¡Mejor jugador de la liga! Está bien merecido.', 'Enhorabuena por el premio, currárselo así tiene premio.'],
+    instagram:['🌟 El MVP de la temporada. Nivel de otra categoría.', 'El mejor de la liga, sin discusión.'],
+    x:['MVP de la temporada, lo mejor que se ha visto esta campaña', 'se lo ha ganado a pulso, mejor jugador de la liga'],
+    grupo:['¡MVP! Vaya temporadón te has marcado.', 'Con el premio de mejor jugador ya no hay quien te aguante 😂']
+  },
   lesion: {
     whatsapp:['Me acabo de enterar de la lesión, ¿cómo lo llevas?', 'Cuídate mucho estos días — aquí estamos para lo que necesites.', '¿Sabes ya cuánto vas a estar parado?'],
     email:{ remitente:'Departamento Médico', asunto:'Parte de evolución', cuerpoFn:j=>`Seguimos de cerca tu recuperación. Ánimo, ${primerNombre(j)} — de momento todo evoluciona según lo previsto.` },
@@ -14393,14 +14437,24 @@ function generarNotificacionMovil(j){
   const tierAhora = estadoPopularidad(j.stats.popularidad||0).texto;
   const subioPopularidad = !!tierAntes && tierAhora !== tierAntes;
   S._movilTierPopularidadVisto = tierAhora;
+  // Título recién ganado / MVP de la temporada: como con popularSube arriba, se avisa UNA sola
+  // vez por temporada (no en cada paso mientras S.titulosTemporadaActual/temporadaResumen sigan
+  // reflejando la temporada ya cerrada) — si no, la misma "¡CAMPEONES!" se repetiría semana tras
+  // semana hasta el próximo reinicio.
+  const hayTituloSinAvisar = (S.titulosTemporadaActual||[]).length && S._movilCampeonNotifTemp !== S.temporada;
+  const hayMvpSinAvisar = S.temporadaResumen && S.temporadaResumen.mvp && S._movilMvpNotifTemp !== S.temporada;
   let bucket;
-  if(j.lesionSemanas > 0) bucket = 'lesion';
+  if(hayTituloSinAvisar) bucket = 'campeon';
+  else if(hayMvpSinAvisar) bucket = 'mvp';
+  else if(j.lesionSemanas > 0) bucket = 'lesion';
   else if(j.estadoMental === 'crisis') bucket = 'crisis';
   else if(j.estadoMental === 'racha') bucket = 'racha';
   else if(subioPopularidad) bucket = 'popularSube';
   else if((j.stats.forma||0) >= 80) bucket = 'formaAlta';
   else if((j.stats.forma||0) <= 25) bucket = 'formaBaja';
   else bucket = 'generico';
+  if(bucket === 'campeon') S._movilCampeonNotifTemp = S.temporada;
+  if(bucket === 'mvp') S._movilMvpNotifTemp = S.temporada;
   const plantillas = TEL_PLANTILLAS_NOTIF[bucket] || TEL_PLANTILLAS_NOTIF.generico;
   const contactos = telContactosDe(j);
   const grupos = telGruposDe(j);
@@ -14471,6 +14525,40 @@ function generarNotificacionMovil(j){
     if(lista.length > 40) lista.splice(0, lista.length-40);
   });
   Sonido.movilNotif();
+}
+// Sugerencias de publicación para la app Redes (ver vista 'redesComponer'): a diferencia del
+// feed automático de generarNotificacionMovil (rumores/menciones de fuera), estas son textos en
+// primera persona que el propio jugador puede elegir publicar — con contexto real de lo que
+// acaba de pasar en la partida (título recién ganado, MVP, pareja...) cuando lo hay, y genéricas
+// de repuesto para que siempre haya algo que publicar aunque no haya ningún hito reciente.
+function telSugerenciasPost(j){
+  const sug = [];
+  const r = S.temporadaResumen;
+  if((S.titulosTemporadaActual||[]).length){
+    const titulo = S.titulosTemporadaActual[S.titulosTemporadaActual.length-1];
+    sug.push(`¡CAMPEONES! 🏆 ${titulo} para casa. Nada que se compare a esto — gracias a todos los que lo habéis hecho posible.`);
+  }
+  if(r && r.mvp) sug.push('El reconocimiento individual está bien, pero esto es de equipo. Gracias por el cariño de siempre 🙏⚽');
+  if(r && r.pichichi) sug.push(`Máximo goleador de la temporada en ${j.club.nombre}. Se lo dedico a mi gente 🥅🔥`);
+  if(r && r.balonDeOroPuesto === 1) sug.push('Balón de Oro. Todavía no me lo creo del todo 🌟');
+  if(j.tienePareja && j.pareja) sug.push(`Con la persona que hace que todo esto merezca más la pena ❤️`);
+  if(j.lesionSemanas > 0) sug.push('La recuperación también forma parte del camino. Volveré más fuerte 💪');
+  sug.push('Otro día más dándolo todo por este escudo ⚽', `Entrenando duro en ${j.club.nombre} — la temporada no da tregua`, 'Momento de desconectar antes del próximo partido 🌅');
+  return sug;
+}
+// Publica un post propio en el feed de Redes (vista 'redesComponer', botón "Publicar") — a
+// diferencia de los posts de generarNotificacionMovil (aparecen solos, narrando algo que se dice
+// DE ti), estos los elige y publica el propio jugador, así que se marcan leídos de entrada.
+function telPublicarPost(texto){
+  texto = (texto||'').trim();
+  if(!texto) return;
+  S.movilBandeja = S.movilBandeja || telBandejaVacia();
+  const idBase = 'post_' + S.temporada + '_' + (S.pasoIndex||0) + '_' + Math.random().toString(36).slice(2,8);
+  S.movilBandeja.instagram.push({ id:idBase, texto, temporada:S.temporada, pasoIndex:S.pasoIndex||0, leido:true });
+  if(S.movilBandeja.instagram.length > 40) S.movilBandeja.instagram.splice(0, S.movilBandeja.instagram.length-40);
+  S.movilVista = 'redes';
+  guardarPartida();
+  pintar();
 }
 const TEL_PLANTILLAS_COMPANERO = {
   bromista: {
@@ -15300,6 +15388,11 @@ function renderMovilContenido(c, j){
     back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Redes'));
+    const btnComponer = document.createElement('button'); btnComponer.className='tel-back-btn'; btnComponer.innerHTML=TEL_ICONO_LAPIZ;
+    btnComponer.style.marginLeft = 'auto';
+    btnComponer.title = 'Publicar algo';
+    btnComponer.onclick = ()=>{ S.movilVista = 'redesComponer'; pintar(); };
+    header.appendChild(btnComponer);
     c.appendChild(header);
     // Coherencia narrativa: si el suceso activo va de algo viral en redes, sus opciones reales se
     // responden aquí arriba del feed, sin tener que volver a la pantalla del suceso.
@@ -15365,6 +15458,39 @@ function renderMovilContenido(c, j){
         c.appendChild(card);
       }
     });
+  }
+
+  else if(vista === 'redesComponer'){
+    // Publicar algo tú, no un feed que solo aparece solo: unas cuantas sugerencias con contexto
+    // real de la partida (título recién ganado, MVP, pareja...) cuando las hay, más un puñado
+    // genéricas de repuesto, y la opción de escribir la propia con mostrarPromptTexto. Tocar una
+    // sugerencia la publica directamente — elegirla YA es la decisión de publicar.
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista = 'redes'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','Publicar'));
+    c.appendChild(header);
+    const foto = el('div','tel-ig-post-foto');
+    foto.style.background = 'linear-gradient(150deg,#3f6fce,#233f80)';
+    foto.innerHTML = ICONOS_SVG.estrella;
+    c.appendChild(foto);
+    c.appendChild(el('p','tel-choices-label','Elige qué publicar')).style.marginTop = '14px';
+    const lista = el('div','tel-choices');
+    telSugerenciasPost(j).forEach(texto=>{
+      const b = el('div','opt', texto);
+      b.onclick = ()=> telPublicarPost(texto);
+      lista.appendChild(b);
+    });
+    c.appendChild(lista);
+    const btnPropia = document.createElement('button');
+    btnPropia.className = 'btn-secondary';
+    btnPropia.style.marginTop = '12px';
+    btnPropia.textContent = 'Escribir la mía';
+    btnPropia.onclick = ()=>{
+      mostrarPromptTexto('¿Qué quieres publicar?', '', (texto)=> telPublicarPost(texto));
+    };
+    c.appendChild(btnPropia);
   }
 
   else if(vista === 'calendario'){
