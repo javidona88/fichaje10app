@@ -1199,8 +1199,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-dock{ position:absolute; left:0; right:0; bottom:0; height:calc(var(--tel-peek-h) + env(safe-area-inset-bottom,0px)); background:#15161c; }
 /* Fila de accesos directos que se ve con el móvil recogido (asomo alto, ver --tel-peek-h): 5
    apps de un toque, sin pasar por la pantalla de inicio del móvil. */
+/* justify-content:space-between (no space-around) para que el primer y el último icono queden
+   pegados justo a los 16px de padding, sin el medio hueco extra que deja space-around — así
+   coincide en horizontal con la hora/iconos de la barra de estado de arriba (mismo margen). */
 .tel-dock-apps{
-  position:absolute; left:0; right:0; top:50px; z-index:5; display:flex; justify-content:space-around; padding:0 16px;
+  position:absolute; left:0; right:0; top:50px; z-index:5; display:flex; justify-content:space-between; padding:0 16px;
   opacity:0; transform:translateY(4px); transition:opacity .4s ease, transform .4s ease;
 }
 .tel-dock-apps.entrando{ opacity:1; transform:translateY(0); }
@@ -1223,7 +1226,9 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-device{
   width:100%; height:calc(100vh - 128px - env(safe-area-inset-top,0px));
   display:flex; flex-direction:column; position:relative;
-  background:linear-gradient(155deg,#2b2f3d,#17181f 55%);
+  /* Bisel bien oscuro, casi al nivel del círculo de la cámara — antes era un gris medio que se
+     notaba demasiado como "marco" propio en vez de fundirse con el resto del cuerpo. */
+  background:linear-gradient(155deg,#16171d,#08090b 55%);
   border-radius:34px 34px 0 0; padding:9px;
   box-shadow:0 -10px 40px rgba(0,0,0,0.5), inset 0 0 0 1.5px rgba(255,255,255,0.06);
 }
@@ -1232,9 +1237,9 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    cámara/isla dinámica y los iconos de estado se ven DENTRO del propio display, no sobre un
    marco negro separado. En reposo es lo único que asoma; abierto, tocarlo vuelve a esconder el
    móvil (nada de flecha ni botón aparte — como pulsar la barra de estado de un móvil real).
-   Alineada a los mismos 16px de .tel-dock-apps (no los 12px del padding del aparato) — con más
-   margen que ese mínimo en el propio contenido (ver .tel-status-hora/.tel-status-iconos) para que
-   la info nunca llegue a superponerse a la curva de las esquinas del aparato. */
+   Alineada a los mismos 16px de .tel-dock-apps (no los 12px del padding del aparato), y la hora/
+   iconos (.tel-status-hora/.tel-status-iconos) van pegados a esos mismos bordes del header sin
+   margen extra — así coinciden en vertical con el primer y el último icono del dock de abajo. */
 .tel-header{
   position:absolute; top:12px; left:16px; right:16px; height:38px; z-index:6;
   cursor:pointer; display:flex; align-items:center; justify-content:center;
@@ -1251,12 +1256,12 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    telPintarStatusIconos en pintarMovilSheet(). Como una barra de estado real: sin chip de fondo
    propio, el texto/icono se apoya directo sobre la pantalla del móvil. */
 .tel-status-hora{
-  position:absolute; left:4px; top:50%; transform:translateY(-50%);
+  position:absolute; left:0; top:50%; transform:translateY(-50%);
   font-family:'Inter',sans-serif; font-weight:700; font-size:12px; color:rgba(255,255,255,0.92);
   letter-spacing:.01em; pointer-events:none;
 }
 .tel-status-iconos{
-  position:absolute; right:4px; top:50%; transform:translateY(-50%);
+  position:absolute; right:0; top:50%; transform:translateY(-50%);
   display:flex; align-items:center; gap:5px; color:rgba(255,255,255,0.92); pointer-events:none;
 }
 .tel-status-ic{ display:flex; align-items:center; }
@@ -11259,13 +11264,20 @@ function cerrarMovilSheet(){
   if(sheetVivo){
     sheetVivo.classList.remove('show');
     // El fondo oscurecido (.tel-backdrop) se desvanece EN PARALELO al deslizamiento del móvil,
-    // no de golpe cuando termine — así lo de detrás se va revelando poco a poco (y, si venía de
-    // una pantalla incrustada, da tiempo a que su propio fade-in de #app disimule que el
-    // contenido no existía hasta este momento) en vez de aparecer todo de una vez al final.
+    // no de golpe cuando termine — así lo de detrás se va revelando poco a poco.
     const backdropVivo = document.querySelector('.tel-backdrop');
     if(backdropVivo) backdropVivo.classList.remove('show');
-    setTimeout(()=>{ S.movilAbierto = false; S._movilVisible = false; pintar(); }, 320);
+    setTimeout(()=>{
+      S.movilAbierto = false; S._movilVisible = false;
+      // Quita 'fade-in' ANTES de repintar: si ya estaba puesta de la última vez (nada la había
+      // retirado desde entonces, porque este pintar() no pasa por render()), volver a añadirla
+      // dentro de pintar() no hace nada — la pantalla de detrás "aparecía" de golpe en vez de
+      // fundirse, justo cuando el móvil termina de esconderse y la deja a la vista.
+      app.classList.remove('fade-in');
+      pintar();
+    }, 320);
   } else {
+    app.classList.remove('fade-in');
     S.movilAbierto = false; S._movilVisible = false; pintar();
   }
 }
@@ -13911,11 +13923,14 @@ const TEL_CARPETA_REDES = {
 // sujeto a cambiar qué apps son estas 5. Con esto, el resto de apps (App Store, Club,
 // Calendario, Email, Ajustes del móvil, carpetas...) quedan aparcadas por ahora: su código
 // sigue aquí tal cual, sencillamente no hay ningún camino en la interfaz que lleve a ellas.
+// ir() usa render() (fundido de #app, 260ms) en vez de pintar() directo — así el fondo real se
+// difumina y desaparece al abrir cualquier app, no solo Casino (que ya lo tenía "gratis" porque
+// telAbrirPantallaReal() pasa por render()).
 const TEL_DOCK_APPS = [
-  { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, ir:()=>{ S.movilVista='chatlist'; pintar(); } },
-  { id:'redes', nombre:'Redes', clase:'redes', icono:TEL_ICONO_REDES, ir:()=>{ S.movilVista='redes'; pintar(); } },
-  { id:'entrenamiento', nombre:'Entreno', clase:'entrenamiento', icono:TEL_ICONO_ENTRENAMIENTO, ir:()=>{ S.movilVista='entrenamiento'; pintar(); } },
-  { id:'economia', nombre:'Economía', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ S.movilVista='economia'; pintar(); } },
+  { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, ir:()=>{ S.movilVista='chatlist'; render(); } },
+  { id:'redes', nombre:'Redes', clase:'redes', icono:TEL_ICONO_REDES, ir:()=>{ S.movilVista='redes'; render(); } },
+  { id:'entrenamiento', nombre:'Entreno', clase:'entrenamiento', icono:TEL_ICONO_ENTRENAMIENTO, ir:()=>{ S.movilVista='entrenamiento'; render(); } },
+  { id:'economia', nombre:'Economía', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ S.movilVista='economia'; render(); } },
   { id:'casino', nombre:'Casino', clase:'casino', icono:TEL_ICONO_CASINO, ir:()=>{ telAbrirPantallaReal('casino'); } }
 ];
 const TEL_APPS_BLOQUEADAS = [
