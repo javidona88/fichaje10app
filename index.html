@@ -1185,7 +1185,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    propia posición vertical entre los dos estados — nunca dos piezas distintas. Casi todo el
    ancho de pantalla en ambos estados (ver .tel-sheet), como se ve un móvil real en la mano. */
 .tel-sheet{
-  width:92%; max-width:460px; position:relative; cursor:pointer;
+  width:97%; max-width:480px; position:relative; cursor:pointer;
   transform:translateY(calc(100% - var(--tel-peek-h)));
   transition:transform .34s cubic-bezier(.25,.8,.35,1);
   pointer-events:auto;
@@ -1199,7 +1199,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-dock{ position:absolute; left:0; right:0; bottom:0; height:calc(var(--tel-peek-h) + env(safe-area-inset-bottom,0px)); background:#15161c; }
 /* Fila de accesos directos que se ve con el móvil recogido (asomo alto, ver --tel-peek-h): 5
    apps de un toque, sin pasar por la pantalla de inicio del móvil. */
-.tel-dock-apps{ position:absolute; left:0; right:0; top:50px; z-index:5; display:flex; justify-content:space-around; padding:0 16px; }
+.tel-dock-apps{
+  position:absolute; left:0; right:0; top:50px; z-index:5; display:flex; justify-content:space-around; padding:0 16px;
+  opacity:0; transform:translateY(4px); transition:opacity .4s ease, transform .4s ease;
+}
+.tel-dock-apps.entrando{ opacity:1; transform:translateY(0); }
 .tel-dock-app{ background:none; border:none; padding:0; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:5px; }
 .tel-dock-app .tel-icon{ width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; filter:grayscale(1) brightness(.8); transition:filter .2s ease; }
 .tel-dock-app.pendiente .tel-icon{ filter:none; }
@@ -1217,20 +1221,31 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   width:100%; height:calc(100vh - 90px - env(safe-area-inset-top,0px));
   display:flex; flex-direction:column; position:relative;
   background:linear-gradient(155deg,#2b2f3d,#17181f 55%);
-  border-radius:44px 44px 0 0; padding:12px;
+  border-radius:28px 28px 0 0; padding:12px;
   box-shadow:0 -10px 40px rgba(0,0,0,0.5), inset 0 0 0 1.5px rgba(255,255,255,0.06);
 }
 /* Notch + notificaciones: FLOTAN sobre la propia pantalla (.tel-screen), no en una franja aparte
    por encima — como en un móvil actual, donde la pantalla llega hasta arriba y el recorte de la
    cámara/isla dinámica y los iconos de estado se ven DENTRO del propio display, no sobre un
    marco negro separado. En reposo es lo único que asoma; abierto, tocarlo vuelve a esconder el
-   móvil (nada de flecha ni botón aparte — como pulsar la barra de estado de un móvil real). */
+   móvil (nada de flecha ni botón aparte — como pulsar la barra de estado de un móvil real).
+   Alineada a los mismos 16px de .tel-dock-apps (no los 12px del padding del aparato) para que la
+   fila de arriba quede a plomo con el resto de iconos del móvil. */
 .tel-header{
-  position:absolute; top:12px; left:12px; right:12px; height:38px; z-index:6;
+  position:absolute; top:12px; left:16px; right:16px; height:38px; z-index:6;
   cursor:pointer; display:flex; align-items:center; justify-content:center;
 }
-.tel-notch{ width:60px; height:18px; background:#000; border-radius:10px; }
+/* Círculo tipo cámara delantera, no la píldora de antes — más pequeño y discreto. */
+.tel-notch{
+  width:20px; height:20px; border-radius:50%; flex-shrink:0;
+  background:radial-gradient(circle at 35% 32%, #3a3d47 0%, #0b0c0f 60%, #000 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+/* Estado (izquierda) y habilidades (derecha) del jugador, siempre visibles en esta misma línea
+   — con el móvil recogido (asomo) o abierto, da igual: ver telPintarStatusStats/telPintarStatusAttrs
+   en pintarMovilSheet(). */
 .tel-status-stats{ position:absolute; left:0; top:50%; transform:translateY(-50%); display:flex; gap:6px; pointer-events:none; }
+.tel-status-attrs{ position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; gap:6px; pointer-events:none; }
 .tel-status-stat{
   display:flex; align-items:center; gap:3px; font-family:'Inter',sans-serif; font-weight:700;
   font-size:10px; color:rgba(255,255,255,0.9); background:rgba(0,0,0,0.4); border-radius:8px; padding:3px 6px;
@@ -1327,7 +1342,18 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* Puntito de "hay algo nuevo" sobre el icono de una app (WhatsApp/Email/Redes/Servicios) —
    mismo lenguaje visual que el badge dorado de Logros en la topbar, pero aquí genérico (rojo,
    como una notificación real) porque son varias apps distintas, no un solo contador. */
-.tel-app-dot{ position:absolute; top:-2px; right:-2px; width:12px; height:12px; border-radius:50%; background:#e0432e; border:2px solid var(--panel2); }
+.tel-app-dot{
+  position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 3px; box-sizing:border-box;
+  border-radius:8px; background:#e0432e; border:2px solid var(--panel2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Inter',sans-serif; font-size:9px; font-weight:800; color:#fff; line-height:1;
+}
+/* Icono destacado (dorado) cuando el suceso activo está ligado a esta app — ver telAppVinculada()
+   y renderizarOpcionesEvento(), que deja responder la decisión real del suceso desde dentro. */
+.tel-dock-app.destacado .tel-icon{
+  filter:none; box-shadow:0 6px 14px rgba(0,0,0,0.35), 0 0 0 2px var(--gold), 0 0 16px rgba(212,175,55,0.65);
+}
+.tel-dock-app.destacado .tel-label{ color:var(--gold); font-weight:700; }
 /* Carpeta del móvil (estilo iOS): fondo translúcido con una previsualización 2x2 de los
    iconos que contiene — Economía agrupa Banca/Casino Online/Servicios/Compras, ver TEL_CARPETAS. */
 .tel-icon.carpeta{ background:rgba(255,255,255,0.09); display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(2,1fr); gap:4px; padding:8px; }
@@ -1356,6 +1382,10 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-app-tabs{ display:flex; gap:8px; margin-bottom:16px; }
 .tel-app-tab{ flex:1; background:var(--panel2); border:1px solid var(--line); color:var(--ink-soft); font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; padding:10px 0; border-radius:11px; cursor:pointer; text-align:center; }
 .tel-app-tab.active{ background:rgba(212,175,55,0.14); border-color:var(--gold-dim); color:var(--gold); }
+.tel-tab-dot{
+  display:inline-flex; align-items:center; justify-content:center; min-width:15px; height:15px; padding:0 3px;
+  border-radius:8px; background:#e0432e; color:#fff; font-size:9.5px; font-weight:800; vertical-align:middle;
+}
 .tel-bank-card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px; }
 .tel-bank-card-title{ font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 10px; }
 .tel-sparkline-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:10px; }
@@ -11257,6 +11287,10 @@ function pintarMovilSheet(){
   // scroll de la página aunque la rueda/gesto se dispare sobre esa zona.
   raiz.style.pointerEvents = S.movilAbierto ? 'auto' : 'none';
   document.body.style.overflow = S.movilAbierto ? 'hidden' : '';
+  // Con el móvil abierto, se arma para que la próxima vez que se recoja los 5 iconos del asomo
+  // vuelvan a aparecer con su propio fundido (ver .tel-dock-apps.entrando más abajo), en vez de
+  // "saltar" de golpe tras los 320ms del cierre.
+  if(S.movilAbierto) S._dockVisible = false;
   if(!S.movilAbierto && !deshabilitada){
     raiz.appendChild(el('div','tel-dock'));
   }
@@ -11273,23 +11307,31 @@ function pintarMovilSheet(){
   // onclick propio (ver más abajo, sheet.onclick) — tocar la parte de arriba del asomo ya no abre
   // el móvil, solo las 5 apps lo hacen.
   const header = el('div','tel-header');
-  if(S.movilAbierto && S.jugador) header.appendChild(telPintarStatusStats(S.jugador));
+  // Estado (izq.) y habilidades (der.) siempre visibles en esta línea, con el móvil recogido o
+  // abierto — antes solo salían con el móvil abierto.
+  if(S.jugador){
+    header.appendChild(telPintarStatusStats(S.jugador));
+    header.appendChild(telPintarStatusAttrs(S.jugador));
+  }
   header.appendChild(el('div','tel-notch'));
   device.appendChild(header);
 
   // Con el móvil recogido (asomo alto, ver --tel-peek-h), 5 apps de acceso directo debajo del
   // notch, cada una con su nombre — un toque las abre YA dentro de esa app (sin pasar por una
   // pantalla de inicio, que de momento se aparca). En escala de grises salvo que tengan algo
-  // pendiente que ver (pendientesDock), para que el color marque justo eso.
+  // pendiente que ver (pendientesDock) o estén destacadas por el suceso activo (telAppVinculada),
+  // para que el color marque justo eso.
   if(!S.movilAbierto && !deshabilitada){
     const dockApps = el('div','tel-dock-apps');
     const pendientesDock = telAppsConPendiente(S.jugador);
+    const appVinculada = telAppVinculada();
     TEL_DOCK_APPS.forEach(a=>{
-      const hayPendiente = pendientesDock[a.id] || (a.id==='redes' && pendientesDock.x)
-        || (a.id==='economia' && (pendientesDock.servicios || pendientesDock.compras));
+      const totalPendiente = (pendientesDock[a.id]||0) + (a.id==='redes' ? (pendientesDock.x||0) : 0)
+        + (a.id==='economia' ? ((pendientesDock.servicios||0) + (pendientesDock.compras||0)) : 0);
+      const destacada = a.id === appVinculada;
       const btn = document.createElement('button');
-      btn.className = 'tel-dock-app'+(hayPendiente?' pendiente':'');
-      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${hayPendiente?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${a.nombre}</span>`;
+      btn.className = 'tel-dock-app'+(totalPendiente>0?' pendiente':'')+(destacada?' destacado':'');
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${totalPendiente>0?`<span class="tel-app-dot">${totalPendiente>99?'99+':totalPendiente}</span>`:''}</span><span class="tel-label">${a.nombre}</span>`;
       btn.onclick = (e)=>{
         e.stopPropagation();
         // 'home' es el centinela de "se abrió directo desde el asomo, sin pasar por ninguna
@@ -11302,6 +11344,13 @@ function pintarMovilSheet(){
       dockApps.appendChild(btn);
     });
     device.appendChild(dockApps);
+    // Fundido de entrada (ver .tel-dock-apps.entrando): solo se anima la primera vez que aparece
+    // tras esconder el móvil, no en cada repintado suelto mientras ya está recogido (S._dockVisible).
+    if(S._dockVisible){
+      dockApps.classList.add('entrando');
+    } else {
+      requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ dockApps.classList.add('entrando'); S._dockVisible = true; }); });
+    }
   }
 
   const pantalla = el('div','tel-screen');
@@ -11732,6 +11781,10 @@ let tituloPaginaPendiente = null;
 // tu pantalla base, solo avanza la temporada de verdad cuando esa base es una pestaña normal
 // (nunca debería ser otra cosa, salvo un flujo abandonado a medias en un guardado raro).
 function accionAvanzar(){
+  // Avanzar cambia la pantalla de detrás del móvil (nuevo suceso, tirada, resultado...); si se
+  // pulsa con el móvil abierto, se esconde primero para que lo nuevo se vea de verdad, en vez de
+  // quedar tapado por un móvil que ya no tiene sentido con el suceso que había.
+  if(S.movilAbierto){ S.movilAbierto = false; S._movilVisible = false; }
   const destino = S.pantallaBase || 'tabJugador';
   if(destino === S.screen){
     if(PANTALLAS_TAB.has(destino) && S.jugador){
@@ -13889,12 +13942,11 @@ function telAbrirPantallaReal(destino, antesDeIr){
   render();
 }
 // Barra de estado del móvil (misma línea que el notch, a la izquierda): abreviatura + número +
-// flecha de si ha subido o bajado desde el último paso de temporada. Solo con el móvil abierto
-// (en el asomo ya va justo el notch con las 5 apps debajo, sin sitio de sobra). La comparación es
-// contra el valor que tenía cada stat al EMPEZAR el paso actual (S.temporada + S.pasoIndex), no
-// contra el repintado anterior — así la flecha no parpadea a "sin cambios" en cada repintado
-// suelto (abrir/cerrar el móvil, tocar una pestaña...) y solo se actualiza cuando de verdad se
-// avanza de paso.
+// flecha de si ha subido o bajado desde el último paso de temporada. Siempre visible, con el
+// móvil recogido (asomo) o abierto, da igual. La comparación es contra el valor que tenía cada
+// stat al EMPEZAR el paso actual (S.temporada + S.pasoIndex), no contra el repintado anterior —
+// así la flecha no parpadea a "sin cambios" en cada repintado suelto (abrir/cerrar el móvil,
+// tocar una pestaña...) y solo se actualiza cuando de verdad se avanza de paso.
 const TEL_STATS_BARRA = [
   { clave:'forma', abr:'FOR' },
   { clave:'confianza', abr:'CNF' },
@@ -13919,6 +13971,23 @@ function telPintarStatusStats(j){
   });
   return wrap;
 }
+// Habilidades del jugador (misma línea, a la derecha): las 3 marcadas como prioridad de
+// entrenamiento (mismo orden que en la app Entrenamiento); si hay menos de 3, se completa con
+// las de valor más alto para que el hueco nunca quede vacío.
+function telPintarStatusAttrs(j){
+  let claves = (j.prioridadesEntreno||[]).slice(0,3);
+  if(claves.length < 3){
+    const resto = ATRIBUTOS_JUGADOR.filter(a=>!claves.includes(a)).sort((a,b)=> j.atributos[b]-j.atributos[a]);
+    claves = claves.concat(resto).slice(0,3);
+  }
+  const wrap = el('div','tel-status-attrs');
+  claves.forEach(a=>{
+    const item = el('span','tel-status-stat');
+    item.innerHTML = `<span class="lbl">${ATRIBUTO_INFO[a].corto}</span><span class="num">${j.atributos[a]}</span>`;
+    wrap.appendChild(item);
+  });
+  return wrap;
+}
 // Fila de pestañas Banco/Servicios/Compras de la app Economía — se usa tanto en su vista nativa
 // (Banco) como incrustada encima de Servicios/Compras (SCREENS.servicios/compras dentro del
 // móvil), para poder saltar entre las tres sin volver antes a Banco. `activa` es 'banco'|
@@ -13936,9 +14005,14 @@ function telAppTabsEconomia(activa){
     S.movilPantallaAnterior = null;
     pintar();
   };
+  // Cada pestaña muestra un número si hay algo nuevo esperando en esa sección concreta — así se
+  // ve de un vistazo a qué se debe lo pendiente (Servicios o Compras) sin tener que entrar.
+  const pendientesEco = S.jugador ? telAppsConPendiente(S.jugador) : {};
   const tabServicios = document.createElement('button'); tabServicios.className='tel-app-tab'+(activa==='servicios'?' active':''); tabServicios.textContent='Servicios';
+  if(pendientesEco.servicios) tabServicios.innerHTML += ` <span class="tel-tab-dot">${pendientesEco.servicios}</span>`;
   tabServicios.onclick = ()=>{ S.pantallaAnteriorServicios = S.pantallaAnteriorServicios || S.pantallaBase || S.screen; telAbrirPantallaReal('servicios'); };
   const tabCompras = document.createElement('button'); tabCompras.className='tel-app-tab'+(activa==='compras'?' active':''); tabCompras.textContent='Compras';
+  if(pendientesEco.compras) tabCompras.innerHTML += ` <span class="tel-tab-dot">${pendientesEco.compras}</span>`;
   tabCompras.onclick = ()=>{ S.pantallaAnteriorCompras = S.pantallaAnteriorCompras || S.pantallaBase || S.screen; telAbrirPantallaReal('compras'); };
   appTabs.appendChild(tabBanco); appTabs.appendChild(tabServicios); appTabs.appendChild(tabCompras);
   return appTabs;
@@ -14119,17 +14193,46 @@ function telContactoPendiente(c){
 // Mapa {appId:true} de qué apps tienen algo pendiente — una única fuente de verdad para el
 // puntito (y el color, ver .tel-dock-app.pendiente) de cada icono de acceso directo del móvil
 // (ver pintarMovilSheet) y de la rejilla/carpeta (ver renderMovilContenido).
+// Cuántas categorías de COMPRAS (garaje: coche/moto/botas) tienen un nivel nuevo que se pueda
+// pagar de verdad, para poder mostrar un número real en vez de un simple sí/no — mismo criterio
+// que comprasDisponibles() (que se queda como booleano, lo sigue usando SCREENS.gastos).
+function contarComprasUnicasDisponibles(j){
+  let n = 0;
+  if(tiendaUnicaDisponible(TIENDA_COCHES, j.cocheActual||0, j)) n++;
+  if(tiendaUnicaDisponible(TIENDA_MOTOS, j.motoActual||0, j)) n++;
+  if(tiendaUnicaDisponible(TIENDA_BOTAS, j.botasActual||0, j)) n++;
+  return n;
+}
+// Mapa {appId:N} de cuántas cosas pendientes tiene cada app (0 = nada) — una única fuente de
+// verdad para el número de la burbuja (ver .tel-app-dot) de cada icono de acceso directo del
+// móvil (pintarMovilSheet) y de la rejilla/carpeta (renderMovilContenido). Antes era {appId:true},
+// solo un sí/no; ahora cuenta de verdad para poder mostrar la cifra en la burbuja.
 function telAppsConPendiente(j){
   const mapa = {};
-  if(telContactosDe(j).some(telContactoPendiente)) mapa.whatsapp = true;
+  const pendientesContactos = telContactosDe(j).filter(telContactoPendiente).length;
   const gruposObj = (S.movilBandeja && S.movilBandeja.grupos) || {};
-  if(Object.values(gruposObj).some(lista=>lista.some(m=>!m.leido))) mapa.whatsapp = true;
-  if(telTodosLosCorreos(j).some(co=>!(S.telEmailsLeidos && S.telEmailsLeidos[co.id]))) mapa.email = true;
-  if((S.movilBandeja && S.movilBandeja.instagram || []).some(p=>!p.leido)) mapa.redes = true;
-  if((S.movilBandeja && S.movilBandeja.x || []).some(p=>!p.leido)) mapa.x = true;
-  if(contarComprasDisponibles(j) > 0) mapa.servicios = true;
-  if(comprasDisponibles(j)) mapa.compras = true;
+  const pendientesGrupos = Object.values(gruposObj).reduce((n,lista)=> n + lista.filter(m=>!m.leido).length, 0);
+  const totalWhatsapp = pendientesContactos + pendientesGrupos;
+  if(totalWhatsapp > 0) mapa.whatsapp = totalWhatsapp;
+  const totalEmail = telTodosLosCorreos(j).filter(co=>!(S.telEmailsLeidos && S.telEmailsLeidos[co.id])).length;
+  if(totalEmail > 0) mapa.email = totalEmail;
+  const totalIg = ((S.movilBandeja && S.movilBandeja.instagram) || []).filter(p=>!p.leido).length;
+  if(totalIg > 0) mapa.redes = totalIg;
+  const totalX = ((S.movilBandeja && S.movilBandeja.x) || []).filter(p=>!p.leido).length;
+  if(totalX > 0) mapa.x = totalX;
+  const totalServicios = contarComprasDisponibles(j);
+  if(totalServicios > 0) mapa.servicios = totalServicios;
+  const totalCompras = contarComprasUnicasDisponibles(j);
+  if(totalCompras > 0) mapa.compras = totalCompras;
   return mapa;
+}
+// Si el suceso activo está ligado a WhatsApp o a Redes (ev.vinculoMovil), da el id del icono del
+// dock que debe iluminarse en dorado para que el jugador sepa dónde responder — ver el color
+// dorado de .tel-dock-app.destacado y el enganche de renderizarOpcionesEvento dentro de cada app.
+function telAppVinculada(){
+  const vinc = S.eventoActual && S.eventoActual.vinculoMovil;
+  if(!vinc) return null;
+  return vinc.app === 'redes' ? 'redes' : 'whatsapp';
 }
 // Respuestas genéricas para los mensajes nuevos que van llegando con el avance de temporada
 // (a diferencia del primer intercambio de cada contacto, que sí tiene opciones a medida) — no
@@ -14744,7 +14847,7 @@ function renderMovilContenido(c, j){
       const desbloqueada = telAppDesbloqueada(a.nivelMin);
       const btn = document.createElement('button');
       btn.className = 'tel-app' + (desbloqueada?'':' locked');
-      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${desbloqueada?'':`<span class="tel-lock-badge">${TEL_ICONO_LOCK}</span>`}${desbloqueada&&pendientes[a.id]?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${a.nombre}</span>`;
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${desbloqueada?'':`<span class="tel-lock-badge">${TEL_ICONO_LOCK}</span>`}${desbloqueada&&pendientes[a.id]?`<span class="tel-app-dot">${pendientes[a.id]>99?'99+':pendientes[a.id]}</span>`:''}</span><span class="tel-label">${a.nombre}</span>`;
       btn.onclick = ()=>{
         if(!desbloqueada){ mostrarNotificacion(`${a.nombre} se desbloquea al llegar a "${estadoPopularidad(a.nivelMin).texto}" (${a.nivelMin} de popularidad)`, 'info'); return; }
         if(a.esInterna){ S.movilVista = a.id; S.telBancoTab = S.telBancoTab || 'resumen'; pintar(); return; }
@@ -14768,7 +14871,7 @@ function renderMovilContenido(c, j){
     folder.apps.forEach(a=>{
       const btn = document.createElement('button');
       btn.className = 'tel-app';
-      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${pendientes[a.id]?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${a.nombre}</span>`;
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${pendientes[a.id]?`<span class="tel-app-dot">${pendientes[a.id]>99?'99+':pendientes[a.id]}</span>`:''}</span><span class="tel-label">${a.nombre}</span>`;
       btn.onclick = ()=>{ S.movilVista = a.vista; pintar(); };
       grid.appendChild(btn);
     });
@@ -14783,6 +14886,9 @@ function renderMovilContenido(c, j){
     header.appendChild(el('span','tel-title','Entrenamiento'));
     c.appendChild(header);
     pintarEntrenoLista(c, j);
+    // Mismo gráfico hexagonal de atributos que en la ficha del jugador (seccionAtributos), aquí
+    // dentro de la app de Entrenamiento para verlo junto a las prioridades sin salir del móvil.
+    c.appendChild(seccionAtributos(j));
   }
 
   else if(vista === 'economia'){
@@ -14991,6 +15097,16 @@ function renderMovilContenido(c, j){
       const todos = grupo.mensajesSemilla.concat(dinamicos);
       todos.forEach(m=> thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble"><span class="tel-bubble-autor">${m.autor}</span>${m.texto}</div>`)));
       c.appendChild(thread);
+      // Coherencia narrativa: si el suceso activo está ligado a ESTE grupo de WhatsApp, sus
+      // opciones reales (las mismas de SCREENS.evento, misma tirada y efectos) se responden aquí
+      // mismo, sin tener que cerrar el móvil para ir a la pantalla del suceso.
+      const vinc = S.eventoActual && S.eventoActual.vinculoMovil;
+      if(vinc && vinc.app === 'whatsapp' && vinc.grupoId === grupo.id){
+        const choices = el('div','tel-choices');
+        choices.appendChild(el('p','tel-choices-label','Responde desde aquí'));
+        c.appendChild(choices);
+        renderizarOpcionesEvento(choices, S.eventoActual, j);
+      }
     }
   }
 
@@ -15060,6 +15176,15 @@ function renderMovilContenido(c, j){
       }
       // Si está "esperando" (escribiendo…) no se ofrece nada todavía.
       c.appendChild(choices);
+      // Mismo enganche que en el grupo: si el suceso activo está ligado a ESTE contacto, sus
+      // opciones reales se responden aquí mismo.
+      const vinc = S.eventoActual && S.eventoActual.vinculoMovil;
+      if(vinc && vinc.app === 'whatsapp' && vinc.contactoId === contacto.id){
+        const choicesEvento = el('div','tel-choices');
+        choicesEvento.appendChild(el('p','tel-choices-label','Responde desde aquí'));
+        c.appendChild(choicesEvento);
+        renderizarOpcionesEvento(choicesEvento, S.eventoActual, j);
+      }
     }
   }
 
@@ -15122,6 +15247,15 @@ function renderMovilContenido(c, j){
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Redes'));
     c.appendChild(header);
+    // Coherencia narrativa: si el suceso activo va de algo viral en redes, sus opciones reales se
+    // responden aquí arriba del feed, sin tener que volver a la pantalla del suceso.
+    const vincRedes = S.eventoActual && S.eventoActual.vinculoMovil;
+    if(vincRedes && vincRedes.app === 'redes'){
+      const choicesRedes = el('div','tel-choices tel-choices-redes');
+      choicesRedes.appendChild(el('p','tel-choices-label','Responde desde aquí'));
+      c.appendChild(choicesRedes);
+      renderizarOpcionesEvento(choicesRedes, S.eventoActual, j);
+    }
     // Al entrar se marca todo como visto — es un feed, no hay detalle propio por post que abrir.
     (S.movilBandeja && S.movilBandeja.instagram || []).forEach(p=> p.leido = true);
     (S.movilBandeja && S.movilBandeja.x || []).forEach(p=> p.leido = true);
@@ -18582,59 +18716,13 @@ function renderContextoPartido(j, momento){
     </div>
   </div>`;
 }
-SCREENS.evento = function(){
-  topbar("Suceso de la semana");
-  const j = S.jugador;
-  const ev = S.eventoActual;
-  const c = el('div','suceso-plano');
-  c.appendChild(crearEyebrow('Decisión'));
-  // El texto (y su variante, si toca sortear una) se decide UNA sola vez por suceso, no en cada
-  // repintado — S.eventoActual es la misma copia superficial mientras dure este suceso (se
-  // interactúe con el móvil, se repinte por lo que sea...), así que cachear aquí es seguro y
-  // evita que el texto "cambie solo" de un repintado a otro (bug real: se notaba sobre todo al
-  // abrir/usar el móvil mientras había un suceso de fondo, cada toque volvía a sortear variante).
-  if(ev._textoResuelto === undefined){
-    const vecesVisto = j.eventosVistos.filter(v=>v.id===ev.id).length;
-    ev._textoResuelto = (vecesVisto > 1 && ev.variantes && ev.variantes.length)
-      ? resolverTexto(ev.variantes[Math.floor(Math.random()*ev.variantes.length)], j)
-      : resolverTexto(ev.texto, j);
-  }
-  c.appendChild(el('div','event-text', ev._textoResuelto));
-  // Sucesos que hablan de intercambiar mensajes o de hacerte viral en redes enlazan con la app
-  // correspondiente del móvil: un botón abre el móvil YA dentro de esa conversación/feed (sin
-  // tocar S.screen ni el suceso de fondo, que sigue ahí para resolverse con sus opciones de
-  // siempre en cuanto se cierre el móvil — ver items 6/7/8). Cobertura parcial, aplicado a los
-  // sucesos donde el vínculo es inequívoco (BANCO_EVENTOS pasa de cien entradas).
-  if(ev.vinculoMovil){
-    const vinc = ev.vinculoMovil;
-    const banner = document.createElement('button');
-    banner.type = 'button';
-    banner.className = 'suceso-vinculo-movil';
-    banner.innerHTML = `${iconoInline(vinc.app==='redes'?'comunicacion':'movil',18)}<span>${vinc.app==='redes'?'Ver en Redes':'Ver en WhatsApp'}</span>`;
-    banner.onclick = ()=>{
-      S.movilAbierto = true;
-      if(vinc.app==='redes'){
-        S.movilVista = 'redes';
-      } else if(vinc.grupoId){
-        S.movilVista = 'grupo';
-        S.movilGrupoAbierto = vinc.grupoId;
-      } else if(vinc.contactoId){
-        S.movilVista = 'thread';
-        S.movilContactoAbierto = vinc.contactoId;
-      } else {
-        S.movilVista = 'chatlist';
-      }
-      pintar();
-    };
-    c.appendChild(banner);
-  }
-  if(ev.id && ev.id.indexOf('encargo_tactico_') === 0){
-    const idxEncargo = parseInt(ev.id.slice('encargo_tactico_'.length), 10);
-    const momentoEncargo = (ENCARGOS_TACTICOS[idxEncargo] || {}).momento || 'previo';
-    const contextoHTML = renderContextoPartido(j, momentoEncargo);
-    if(contextoHTML) c.appendChild(el('div', null, contextoHTML));
-  }
-
+// Pinta las opciones reales de un suceso (con tirada, coste, tokens de Inspiración/Vestuario) y
+// las resuelve exactamente igual pase lo que pase de dónde se llame — usada por SCREENS.evento
+// para el suceso normal a pantalla completa, y también desde dentro del móvil (WhatsApp/Redes,
+// ver ev.vinculoMovil) para que responder ahí mismo sea EXACTAMENTE la misma decisión, con las
+// mismas tiradas y efectos, nunca una copia que se pueda desincronizar. Si se resuelve con el
+// móvil abierto, lo cierra al terminar para que la pantalla de resultado/tirada quede visible.
+function renderizarOpcionesEvento(contenedor, ev, j){
   let respondiendo = false; // evita que un doble toque resuelva el mismo suceso dos veces (260ms de transición)
   // ev.opciones normalmente es un array fijo, pero también admite j=>array para sucesos cuyas
   // opciones cambian según lo que tenga contratado el jugador (p. ej. una opción extra solo si
@@ -18689,9 +18777,10 @@ SCREENS.evento = function(){
         S.pendienteNegociacionFichaje = cambioDeClub;
         S.screen = 'resultado';
       }
+      if(S.movilAbierto) S.movilAbierto = false;
       render();
     };
-    c.appendChild(b);
+    contenedor.appendChild(b);
 
     if(op.tirada && j.objetos.inspiracion>0){
       const tokenBtn = document.createElement('div');
@@ -18706,6 +18795,7 @@ SCREENS.evento = function(){
         const r = tirar(j, op.tirada, 4);
         S.pendingRoll = { j, ev, op, r, conToken:'inspiracion' };
         S.screen = 'tirando';
+        if(S.movilAbierto) S.movilAbierto = false;
         render();
       };
       b.appendChild(tokenBtn);
@@ -18722,11 +18812,67 @@ SCREENS.evento = function(){
         const r = tirar(j, op.tirada, 2);
         S.pendingRoll = { j, ev, op, r, conToken:'vestuario' };
         S.screen = 'tirando';
+        if(S.movilAbierto) S.movilAbierto = false;
         render();
       };
       b.appendChild(tokenBtn2);
     }
   });
+}
+SCREENS.evento = function(){
+  topbar("Suceso de la semana");
+  const j = S.jugador;
+  const ev = S.eventoActual;
+  const c = el('div','suceso-plano');
+  c.appendChild(crearEyebrow('Decisión'));
+  // El texto (y su variante, si toca sortear una) se decide UNA sola vez por suceso, no en cada
+  // repintado — S.eventoActual es la misma copia superficial mientras dure este suceso (se
+  // interactúe con el móvil, se repinte por lo que sea...), así que cachear aquí es seguro y
+  // evita que el texto "cambie solo" de un repintado a otro (bug real: se notaba sobre todo al
+  // abrir/usar el móvil mientras había un suceso de fondo, cada toque volvía a sortear variante).
+  if(ev._textoResuelto === undefined){
+    const vecesVisto = j.eventosVistos.filter(v=>v.id===ev.id).length;
+    ev._textoResuelto = (vecesVisto > 1 && ev.variantes && ev.variantes.length)
+      ? resolverTexto(ev.variantes[Math.floor(Math.random()*ev.variantes.length)], j)
+      : resolverTexto(ev.texto, j);
+  }
+  c.appendChild(el('div','event-text', ev._textoResuelto));
+  // Sucesos que hablan de intercambiar mensajes o de hacerte viral en redes enlazan con la app
+  // correspondiente del móvil: un botón abre el móvil YA dentro de esa conversación/feed (sin
+  // tocar S.screen ni el suceso de fondo, que sigue ahí para resolverse con sus opciones de
+  // siempre en cuanto se cierre el móvil — ver items 6/7/8). Cobertura parcial, aplicado a los
+  // sucesos donde el vínculo es inequívoco (BANCO_EVENTOS pasa de cien entradas).
+  if(ev.vinculoMovil){
+    const vinc = ev.vinculoMovil;
+    const banner = document.createElement('button');
+    banner.type = 'button';
+    banner.className = 'suceso-vinculo-movil';
+    banner.innerHTML = `${iconoInline(vinc.app==='redes'?'comunicacion':'movil',18)}<span>${vinc.app==='redes'?'Ver en Redes':'Ver en WhatsApp'}</span>`;
+    banner.onclick = ()=>{
+      S.movilAbierto = true;
+      if(vinc.app==='redes'){
+        S.movilVista = 'redes';
+      } else if(vinc.grupoId){
+        S.movilVista = 'grupo';
+        S.movilGrupoAbierto = vinc.grupoId;
+      } else if(vinc.contactoId){
+        S.movilVista = 'thread';
+        S.movilContactoAbierto = vinc.contactoId;
+      } else {
+        S.movilVista = 'chatlist';
+      }
+      pintar();
+    };
+    c.appendChild(banner);
+  }
+  if(ev.id && ev.id.indexOf('encargo_tactico_') === 0){
+    const idxEncargo = parseInt(ev.id.slice('encargo_tactico_'.length), 10);
+    const momentoEncargo = (ENCARGOS_TACTICOS[idxEncargo] || {}).momento || 'previo';
+    const contextoHTML = renderContextoPartido(j, momentoEncargo);
+    if(contextoHTML) c.appendChild(el('div', null, contextoHTML));
+  }
+
+  renderizarOpcionesEvento(c, ev, j);
   app.appendChild(c);
 };
 
