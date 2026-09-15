@@ -64,6 +64,22 @@ body.sin-topbar{ padding-top: calc(24px + env(safe-area-inset-top,0px)); }
 /* Por encima de cualquier otra capa (el asomo del móvil vive aquí siempre que hay partida en
    curso, ver pintarMovilSheet), tape lo que tape debajo. */
 #movil-root{ position:fixed; left:0; right:0; bottom:0; z-index:60; display:flex; justify-content:center; pointer-events:none; }
+/* Sin esto, tocar el móvil (asomo o abierto) destella entero en azul un instante — el resaltado
+   táctil que ponen algunos navegadores móviles por defecto en cualquier elemento tocable, muy
+   visible aquí por lo grande que es el área (.tel-sheet ocupa casi toda la pantalla al abrirse).
+   Mismo criterio que ya se usaba suelto en otros sitios del juego (.trayectoria-fila). */
+#movil-root, #movil-root *{ -webkit-tap-highlight-color:transparent; }
+/* Cuando la pantalla real tiene mucho contenido, su borde inferior queda justo pegado al asomo
+   del móvil, un corte seco — mismo problema que ya resolvía el degradado de #topbar-root::after
+   por arriba, aquí por abajo. No puede vivir dentro de #movil-root (su alto real es el de
+   .tel-sheet entero, casi toda la pantalla, no solo el asomo) así que es su propia capa fija,
+   anclada justo encima de --tel-peek-h; oculta si no hay móvil (mismo criterio que el padding de
+   body.con-movil, ver actualizarLayoutInferior). */
+#movil-fade-root{
+  position:fixed; left:0; right:0; bottom:var(--tel-peek-h); height:34px; z-index:59;
+  background:linear-gradient(to bottom, transparent, var(--bg) 90%); pointer-events:none;
+}
+body:not(.con-movil) #movil-fade-root{ display:none; }
 .mini-barra-item{ display:flex; flex-direction:column; align-items:center; min-width:0; }
 .mini-circulo{ position:relative; width:46px; height:46px; }
 .mini-circulo.grande{ width:58px; height:58px; }
@@ -1194,7 +1210,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-sheet{
   width:93%; max-width:460px; position:relative; cursor:pointer;
   transform:translateY(calc(100% - var(--tel-peek-h)));
-  transition:transform .34s cubic-bezier(.25,.8,.35,1);
+  transition:transform .2s cubic-bezier(.25,.8,.35,1);
   pointer-events:auto;
 }
 .tel-sheet.show{ transform:translateY(0); cursor:default; }
@@ -1216,15 +1232,20 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 }
 .tel-dock-apps.entrando{ opacity:1; transform:translateY(0); }
 .tel-dock-app{ background:none; border:none; padding:0; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:5px; }
-.tel-dock-app .tel-icon{ width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; filter:grayscale(1) brightness(.8); transition:filter .2s ease; }
-.tel-dock-app.pendiente .tel-icon{ filter:none; }
+/* Reposo = el pastel de base (.tel-icon.*) tal cual; con algo pendiente que ver, un filtro de
+   saturación lo pasa a su versión de color "normal" (más vivo), sin necesitar un segundo juego de
+   degradados por app. Antes era justo al revés en escala de grises (blanco y negro) por defecto y
+   a color solo con novedad — pero al pasar los degradados de base a pastel (ver .tel-icon.*), el
+   reposo se quedaba literalmente en blanco y negro en vez de en su color pastel. */
+.tel-dock-app .tel-icon{ width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; transition:filter .2s ease; }
+.tel-dock-app.pendiente .tel-icon{ filter:saturate(2.4) brightness(0.96); }
 .tel-dock-app .tel-icon svg{ width:21px; height:21px; }
 .tel-dock-app .tel-label{ font-family:'Inter',sans-serif; font-size:10px; color:var(--ink-soft); text-align:center; }
 .tel-dock-app:active .tel-icon{ transform:scale(.92); }
 /* Oscurece TODA la pantalla real detrás del móvil abierto (incluida la franja de arriba, entre
    la topbar real y el aparato, y los márgenes laterales) — evita que se cuelen ahí bordes o
    esquinas de lo que hubiera debajo (p. ej. la tarjeta del suceso de la semana). */
-.tel-backdrop{ position:fixed; inset:0; background:rgba(3,4,7,0.93); opacity:0; transition:opacity .34s ease; pointer-events:none; }
+.tel-backdrop{ position:fixed; inset:0; background:rgba(3,4,7,0.93); opacity:0; transition:opacity .2s ease; pointer-events:none; }
 .tel-backdrop.show{ opacity:1; }
 /* Se asoma hasta justo debajo de la topbar real + la barra de temporada (juntas miden 117px de
    alto real, comprobado con las dos filas de la cabecera fija) cuando está abierto, dejando un
@@ -1322,6 +1343,20 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
      texto de un mensaje de WhatsApp) se quedaban sin declararla y heredaban 'Space Grotesk' del
      body, notándose distinta de una app a otra. Puesta aquí, en la raíz del contenido del móvil,
      cualquier texto nuevo hereda Inter por defecto sin tener que acordarse de declararla suelto. */
+  font-family:'Inter',sans-serif;
+}
+/* Servicios y Compras (SCREENS.servicios/compras vistos incrustados en el móvil, ver
+   renderizarPlantillaServicios/renderizarTiendaOnline) reutilizan clases YA declaradas con
+   'Space Grotesk' a propósito (SCREENS.gastos, fuera del móvil, tiene que seguir viéndose con la
+   tipografía normal del juego) — la herencia de Inter puesta arriba en .tel-screen no les gana
+   porque esas clases fijan su propia fuente explícita, con más peso que la heredada. Se
+   sobrescriben aquí, solo dentro de .tel-screen, para que sea Inter SOLO cuando se ven desde el
+   móvil, sin tocar su aspecto en la pantalla real. */
+.tel-screen .tienda-online-saldo .lbl, .tel-screen .staff-resumen .lbl, .tel-screen .staff-dept,
+.tel-screen .staff-nombre, .tel-screen .staff-mejora, .tel-screen .servicio-nombre,
+.tel-screen .servicio-activo-tag, .tel-screen .servicio-desc, .tel-screen .tienda-cat-chip,
+.tel-screen .tienda-card-tag, .tel-screen .tienda-card-nombre, .tel-screen .tienda-card-efecto,
+.tel-screen .tienda-card-nota, .tel-screen .tienda-card-cta button{
   font-family:'Inter',sans-serif;
 }
 .tel-icon-badge{
@@ -1468,6 +1503,17 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-movements-vacio{ font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-soft); text-align:center; padding:18px 4px; }
 
 .tel-app-header{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+/* Hilo de WhatsApp (grupo/thread): el nombre del contacto/grupo y la flecha de volver tienen que
+   seguir a la vista aunque haya que hacer scroll por un hilo largo. position:sticky en la propia
+   cabecera se probó primero, pero .tel-screen reserva 46px de padding-top para el notch/barra de
+   estado flotantes (ver más abajo) y esa franja no queda cubierta por nada opaco propio de la
+   cabecera — los mensajes que van pasando por ahí al hacer scroll se colaban por detrás del
+   notch (bug real). Más simple y robusto: la cabecera deja de ser hija de .tel-screen-scroll (que
+   sigue reservando ese padding, pero ya NO hace scroll — overflow:hidden) y los mensajes pasan a
+   su PROPIO contenedor con scroll aparte, por debajo de la cabecera fija. */
+.tel-screen.tel-vista-hilo{ display:flex; flex-direction:column; overflow:hidden; }
+.tel-screen.tel-vista-hilo > .tel-app-header{ flex-shrink:0; }
+.tel-hilo-scroll{ flex:1; min-height:0; overflow-y:auto; }
 .tel-back-btn{ background:none; border:1px solid var(--line); border-radius:8px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); cursor:pointer; flex-shrink:0; }
 .tel-app-header .tel-title{ font-family:'Inter',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
 /* Pantallas reales incrustadas (Club/Ajustes/Casino/Servicios/Compras, ver telAbrirPantallaReal):
@@ -1485,7 +1531,14 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-contact-top{ display:flex; justify-content:space-between; gap:8px; }
 .tel-contact-name{ font-weight:600; font-size:14px; color:var(--ink); }
 .tel-contact-sub{ font-size:11px; color:var(--ink-soft); }
-.tel-contact-preview{ font-size:12px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+.tel-contact-preview{
+  display:block; font-size:12px; color:var(--ink-soft); white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis; margin-top:2px;
+  /* Es un <span> (comparte .tel-contact-body con el nombre/sub, todo texto en línea) — sin
+     display:block, overflow/text-overflow no hacen nada en un inline de verdad (no tiene ancho
+     propio del que desbordarse), así que el texto largo se salía del margen del móvil en vez de
+     cortarse con "…" (bug real: nunca llegaba a truncarse). */
+}
 .tel-contact-answered{ flex-shrink:0; color:#8fe3ab; }
 .tel-contact-answered svg{ width:16px; height:16px; }
 
@@ -1632,6 +1685,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 <div id="bg-anim-menu" class="bg-anim" aria-hidden="true" style="display:none;"></div>
 <div id="topbar-root"></div>
 <div class="wrap" id="app"></div>
+<div id="movil-fade-root" aria-hidden="true"></div>
 <div id="movil-root"></div>
 <div id="logro-aviso-root"></div>
 <div id="confirm-root"></div>
@@ -6910,6 +6964,11 @@ const PAISES_CROMO = [
     curiosidades:['Ganó las <b>dos primeras</b> Copas del Mundo en las que participó: 1930 (como anfitriona) y 1950.','El "Maracanazo" de 1950, venciendo a Brasil en su propia casa, sigue siendo una leyenda del fútbol sudamericano.','Es, junto a Argentina, la selección con más Copas América de la historia.','El Estadio Centenario de Montevideo, sede de la primera final de un Mundial en 1930, fue declarado Monumento Histórico por la FIFA.','Peñarol y Nacional protagonizan el Clásico uruguayo, uno de los derbis más antiguos de Sudamérica.'] }
 ];
 const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoIntro','prologoPrueba','prologoResultado','elegirClub','origenRival','origenRivalResultado','origenCompaneros','prologoBienvenida']);
+// Pantallas de cierre/trámite sin nada que hacer en el móvil (ni sucesos ligados, ni Economía que
+// consultar): se quita entero, ni siquiera el asomo desvaído de PANTALLAS_SIN_TABBAR, para no
+// distraer de la lectura. La rueda de prensa y su resumen son un cara a cara con los periodistas,
+// fuera de lugar con el móvil de fondo.
+const PANTALLAS_SIN_MOVIL = new Set(['finTemporada','ruedaPrensa','ruedaPrensaResultado']);
 const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','sancionReveal','changelog','rankings','logros','escudosPersonalizados',
   // Todo el Mundial es una secuencia sin cortes: mientras dura, no tiene sentido poder escaparse
   // al menú, a la tienda o al plan de entreno — como en las demás secuencias "de un tirón" de
@@ -11282,7 +11341,7 @@ function pintarNotifMovil(raiz){
 // que esta función solo decide si hay sitio reservado para su asomo (con-movil).
 function actualizarLayoutInferior(){
   const pantallaEfectiva = (S.screen === 'ajustes' && S.pantallaAnteriorAjustes) ? S.pantallaAnteriorAjustes : S.screen;
-  if(!S.jugador || S.enFaseCreacion || PANTALLAS_CREACION.has(pantallaEfectiva)){
+  if(!S.jugador || S.enFaseCreacion || PANTALLAS_CREACION.has(pantallaEfectiva) || PANTALLAS_SIN_MOVIL.has(S.screen)){
     document.body.classList.remove('con-movil');
     return;
   }
@@ -11315,7 +11374,7 @@ function cerrarMovilSheet(){
       // fundirse, justo cuando el móvil termina de esconderse y la deja a la vista.
       app.classList.remove('fade-in');
       pintar();
-    }, 320);
+    }, 200);
   } else {
     app.classList.remove('fade-in');
     S.movilAbierto = false; S._movilVisible = false; pintar();
@@ -11332,10 +11391,7 @@ function pintarMovilSheet(){
   if(!S.jugador || S.enFaseCreacion){ raiz.style.pointerEvents = 'none'; document.body.style.overflow = ''; return; }
   const pantallaEfectiva = (S.screen === 'ajustes' && S.pantallaAnteriorAjustes) ? S.pantallaAnteriorAjustes : S.screen;
   if(PANTALLAS_CREACION.has(pantallaEfectiva)){ raiz.style.pointerEvents = 'none'; document.body.style.overflow = ''; return; }
-  // Resumen de fin de temporada: pantalla de cierre, sin nada que hacer en el móvil (ni sucesos
-  // ligados, ni Economía que consultar) — se quita entero, ni siquiera el asomo desvaído de
-  // PANTALLAS_SIN_TABBAR, para no distraer de la lectura del resumen.
-  if(S.screen === 'finTemporada'){ raiz.style.pointerEvents = 'none'; document.body.style.overflow = ''; return; }
+  if(PANTALLAS_SIN_MOVIL.has(S.screen)){ raiz.style.pointerEvents = 'none'; document.body.style.overflow = ''; return; }
   if(S.movilAbierto && S.movilVista === 'pantallaReal' && !TEL_PANTALLAS_EMBEBIBLES.has(S.screen)){
     // El usuario salió de la pantalla incrustada por su propio botón de "volver" (Servicios,
     // Compras, Ajustes...) hacia una pantalla normal del juego que ya no tiene sentido ver
@@ -11356,7 +11412,7 @@ function pintarMovilSheet(){
   document.body.style.overflow = S.movilAbierto ? 'hidden' : '';
   // Con el móvil abierto, se arma para que la próxima vez que se recoja los 5 iconos del asomo
   // vuelvan a aparecer con su propio fundido (ver .tel-dock-apps.entrando más abajo), en vez de
-  // "saltar" de golpe tras los 320ms del cierre.
+  // "saltar" de golpe tras los 200ms del cierre.
   if(S.movilAbierto) S._dockVisible = false;
   if(!S.movilAbierto && !deshabilitada){
     raiz.appendChild(el('div','tel-dock'));
@@ -15220,6 +15276,7 @@ function renderMovilContenido(c, j){
   }
 
   else if(vista === 'grupo'){
+    c.classList.add('tel-vista-hilo');
     const grupo = telGruposDe(j).find(g=>g.id===S.movilGrupoAbierto);
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
@@ -15233,12 +15290,14 @@ function renderMovilContenido(c, j){
       header.appendChild(titWrap);
     }
     c.appendChild(header);
+    const scroll = el('div','tel-hilo-scroll');
+    c.appendChild(scroll);
     if(grupo){
       const dinamicos = (S.movilBandeja && S.movilBandeja.grupos && S.movilBandeja.grupos[grupo.id]) || [];
       const thread = el('div','tel-thread');
       const todos = grupo.mensajesSemilla.concat(dinamicos);
       todos.forEach(m=> thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble"><span class="tel-bubble-autor">${m.autor}</span>${m.texto}</div>`)));
-      c.appendChild(thread);
+      scroll.appendChild(thread);
       // Coherencia narrativa: si el suceso activo está ligado a ESTE grupo de WhatsApp, sus
       // opciones reales (las mismas de SCREENS.evento, misma tirada y efectos) se responden aquí
       // mismo, sin tener que cerrar el móvil para ir a la pantalla del suceso.
@@ -15246,13 +15305,14 @@ function renderMovilContenido(c, j){
       if(vinc && vinc.app === 'whatsapp' && vinc.grupoId === grupo.id){
         const choices = el('div','tel-choices');
         choices.appendChild(el('p','tel-choices-label','Responde desde aquí'));
-        c.appendChild(choices);
+        scroll.appendChild(choices);
         renderizarOpcionesEvento(choices, S.eventoActual, j);
       }
     }
   }
 
   else if(vista === 'thread'){
+    c.classList.add('tel-vista-hilo');
     const contacto = telContactosDe(j).find(x=>x.id===S.movilContactoAbierto);
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
@@ -15262,10 +15322,12 @@ function renderMovilContenido(c, j){
       header.appendChild(el('span','tel-avatar', telIniciales(contacto.nombre))).style.cssText = `width:32px;height:32px;font-size:12px;background:${contacto.color};flex-shrink:0;`;
       const titWrap = el('div');
       titWrap.appendChild(el('div','tel-title', contacto.nombre));
-      titWrap.appendChild(el('div',null, contacto.sub)).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);";
+      titWrap.appendChild(el('div',null, contacto.sub)).style.cssText = "font-family:'Inter',sans-serif;font-size:10.5px;color:var(--ink-soft);";
       header.appendChild(titWrap);
     }
     c.appendChild(header);
+    const scroll = el('div','tel-hilo-scroll');
+    c.appendChild(scroll);
     if(contacto){
       const thread = el('div','tel-thread');
       contacto.mensajes.forEach(m=> thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${m}</div>`)));
@@ -15302,7 +15364,7 @@ function renderMovilContenido(c, j){
           activo = { estado:estado2, aplicar:(idx)=>telResponderExtra(idR2, idx, contacto, poolR2), pool:poolR2 };
         }
       });
-      c.appendChild(thread);
+      scroll.appendChild(thread);
       const choices = el('div','tel-choices');
       if(activo.estado === 'pendiente'){
         choices.appendChild(el('p','tel-choices-label','Tu respuesta'));
@@ -15317,14 +15379,14 @@ function renderMovilContenido(c, j){
         choices.appendChild(el('p','tel-done-note','Ya has respondido'));
       }
       // Si está "esperando" (escribiendo…) no se ofrece nada todavía.
-      c.appendChild(choices);
+      scroll.appendChild(choices);
       // Mismo enganche que en el grupo: si el suceso activo está ligado a ESTE contacto, sus
       // opciones reales se responden aquí mismo.
       const vinc = S.eventoActual && S.eventoActual.vinculoMovil;
       if(vinc && vinc.app === 'whatsapp' && vinc.contactoId === contacto.id){
         const choicesEvento = el('div','tel-choices');
         choicesEvento.appendChild(el('p','tel-choices-label','Responde desde aquí'));
-        c.appendChild(choicesEvento);
+        scroll.appendChild(choicesEvento);
         renderizarOpcionesEvento(choicesEvento, S.eventoActual, j);
       }
     }
