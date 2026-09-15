@@ -38,6 +38,7 @@
   --green: #4CAF6D;
   --line: rgba(255,255,255,0.11);
   --shadow: 0 14px 34px rgba(0,0,0,0.5);
+  --tel-peek-h: 150px;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
@@ -49,57 +50,25 @@ body{
   font-family: 'Space Grotesk',sans-serif;
   font-weight: 400;
   min-height: 100vh;
-  padding: calc(82px + env(safe-area-inset-top,0px)) 16px 60px;
+  padding: calc(132px + env(safe-area-inset-top,0px)) 16px 60px;
 }
 .wrap{ max-width: 760px; margin: 0 auto; }
-/* +42px de sitio permanente para el asomo del móvil (ver #movil-root/.tel-sheet más abajo):
-   el asomo vive en su propia capa fija, pegada al fondo de página, así que #tabbar-root se
-   levanta ese margen para no solaparse con él. */
-body.con-tabbar{ padding-bottom: 134px; }
-body.con-barra-entreno{ padding-bottom: 210px; }
+/* Sitio permanente para el asomo del móvil (ver #movil-root/.tel-sheet más abajo, --tel-peek-h) —
+   ya no hay tabbar de 3 botones ni barra de entreno propia: el único elemento fijo al fondo de
+   página es el móvil, así que el padding del body se calcula directo sobre su altura de asomo. */
+body.con-movil{ padding-bottom: calc(var(--tel-peek-h) + 22px); }
 body.sin-topbar{ padding-top: calc(24px + env(safe-area-inset-top,0px)); }
-#tabbar-root{ position:fixed; left:0; right:0; bottom:42px; z-index:50; display:flex; flex-direction:column; }
-/* Por encima de la tabbar (ver más abajo el porqué de los 42px): el asomo del móvil vive aquí
-   siempre que hay partida en curso (pintarMovilSheet), tape lo que tape debajo. */
+/* Por encima de cualquier otra capa (el asomo del móvil vive aquí siempre que hay partida en
+   curso, ver pintarMovilSheet), tape lo que tape debajo. */
 #movil-root{ position:fixed; left:0; right:0; bottom:0; z-index:60; display:flex; justify-content:center; pointer-events:none; }
-.tabbar{
-  display:flex; justify-content:space-around; align-items:stretch;
-  background:rgba(20,22,31,0.96); backdrop-filter:blur(10px);
-  border-top:1px solid var(--line);
-  padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));
+/* Notificaciones estilo móvil real: caen desde arriba del todo, por encima incluso de la topbar,
+   tal y como se ve un aviso emergente de verdad — no un toast pegado al pie de página. */
+#notif-root{
+  position:fixed; top:0; left:0; right:0; z-index:300;
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 16px 0;
+  pointer-events:none;
 }
-.tabbar-btn{
-  flex:1; max-width:140px; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:3px; padding:6px 4px; border-radius:10px; cursor:pointer; color:var(--ink-soft); position:relative;
-  font-family:'Space Grotesk',sans-serif; font-size:10.5px; font-weight:600; letter-spacing:.02em;
-  transition:color .15s, background .15s;
-}
-.tabbar-badge{
-  position:absolute; top:2px; right:calc(50% - 26px); min-width:15px; height:15px; padding:0 3px;
-  border-radius:8px; background:var(--gold); color:#1a1408; font-family:'Space Grotesk',sans-serif;
-  font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
-  box-shadow:0 1px 4px rgba(0,0,0,0.4);
-}
-.tabbar-btn svg{ width:21px; height:21px; }
-.tabbar-btn:active{ background:rgba(255,255,255,0.06); }
-.tabbar-btn.activo{ color:var(--gold); }
-.tabbar.deshabilitada .tabbar-btn{ opacity:.32; pointer-events:none; }
-.tabbar-btn.destacado{ color:var(--ink); }
-.tabbar-btn.destacado.activo{ color:var(--gold); }
-.barra-entreno{
-  background:rgba(38,43,60,0.97); backdrop-filter:blur(10px);
-  border-top:1px solid var(--line); padding:16px 14px 11px; cursor:pointer; position:relative;
-}
-.barra-entreno-titulo{
-  position:absolute; top:-13px; left:50%; transform:translateX(-50%);
-  background:var(--panel2); border:1px solid rgba(255,255,255,0.22); border-radius:20px; padding:3px 14px 3px 12px;
-  font-family:'Space Grotesk',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.08em;
-  color:var(--ink); white-space:nowrap; box-shadow:0 2px 8px rgba(0,0,0,0.4);
-  display:flex; align-items:center; gap:5px;
-}
-.barra-entreno-flecha{ font-size:9px; color:var(--ink-soft); transition:transform .25s ease; display:inline-block; }
-.barra-entreno-fila{ display:flex; align-items:center; justify-content:center; gap:10px; max-width:760px; margin:0 auto; }
-.mini-barras{ flex:1; display:flex; justify-content:space-between; gap:4px; max-width:420px; margin:0 auto; }
 .mini-barra-item{ display:flex; flex-direction:column; align-items:center; min-width:0; }
 .mini-circulo{ position:relative; width:46px; height:46px; }
 .mini-circulo.grande{ width:58px; height:58px; }
@@ -115,15 +84,22 @@ body.sin-topbar{ padding-top: calc(24px + env(safe-area-inset-top,0px)); }
   font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:400; color:var(--ink); white-space:nowrap; line-height:1;
 }
 .mini-circulo.grande .mini-circulo-valor{ font-size:13.5px; }
-.notif-wrap{ position:absolute; bottom:100%; left:0; right:0; display:flex; flex-direction:column; align-items:center; gap:6px; padding:0 14px 20px; pointer-events:none; }
-.notif-wrap .notif-toast{ pointer-events:auto; }
-.notif-wrap:not(:empty){ padding-top:8px; }
+/* Aviso estilo notificación real de móvil: cae desde arriba del todo (#notif-root) con su propio
+   icono de app a la izquierda y el resumen al lado — nunca "aparece" de golpe, entra deslizándose. */
 .notif-toast{
-  display:flex; align-items:center; gap:8px; max-width:392px; width:auto;
-  background:var(--panel2); border:1.5px solid var(--gold); border-radius:10px; padding:9px 14px;
+  pointer-events:auto; box-sizing:border-box;
+  display:flex; align-items:center; gap:10px; width:100%; max-width:420px;
+  background:rgba(28,31,42,0.97); backdrop-filter:blur(14px); border:1px solid var(--line); border-radius:16px;
+  padding:11px 15px;
   font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:600; color:var(--ink);
-  box-shadow:0 6px 16px rgba(0,0,0,0.4); animation:notifIn .25s ease;
+  box-shadow:0 12px 30px rgba(0,0,0,0.45);
+  transform:translateY(-140%); opacity:0;
+  transition:transform .38s cubic-bezier(.25,.8,.35,1), opacity .3s ease;
 }
+.notif-toast.show{ transform:translateY(0); opacity:1; }
+/* El icono que ya viene embebido al principio del texto (iconoInline) hace de "icono de app" de
+   la notificación — se agranda un poco respecto a su tamaño normal en línea de texto. */
+.notif-toast > .icono-inline{ width:26px!important; height:26px!important; margin-right:3px!important; flex-shrink:0; }
 /* Aviso combinado de subida de atributos (notificarSubidasAtributo): cada icono+texto es un
    bloque "de una pieza" (.notif-attr) dentro de su propio contenedor con flex-wrap propio — si no
    caben todos en una línea, saltan de línea completos, nunca partidos a media palabra, sin tocar
@@ -133,27 +109,9 @@ body.sin-topbar{ padding-top: calc(24px + env(safe-area-inset-top,0px)); }
 .notif-toast.objeto{ border-color:var(--gold); }
 .notif-toast.atributo{ border-color:var(--gold); }
 .notif-toast.riesgo{ border-color:var(--red); }
-@keyframes notifIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
-.panel-entreno-overlay{
-  position:fixed; inset:0; background:rgba(5,7,15,0); z-index:70;
-  display:flex; align-items:flex-end; justify-content:center;
-  transition:background .28s ease;
-}
-.panel-entreno-overlay.show{ background:rgba(5,7,15,0.75); }
-.panel-entreno{
-  background:var(--panel2); border-top:1px solid var(--line); border-radius:18px 18px 0 0;
-  padding:16px 18px calc(20px + env(safe-area-inset-bottom,0px)); width:100%; max-width:500px;
-  box-shadow:0 -10px 30px rgba(0,0,0,0.5); max-height:85vh; overflow-y:auto;
-  transform:translateY(100%); transition:transform .3s cubic-bezier(.25,.8,.35,1);
-}
-.panel-entreno-overlay.show .panel-entreno{ transform:translateY(0); }
-.panel-entreno-titulo-fija{
-  display:flex; flex-direction:column; align-items:center; text-align:center; margin-bottom:14px;
-}
-.panel-entreno-titulo-fija .titulo{
-  font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--ink); margin-bottom:12px;
-}
-.panel-entreno-circulos{ display:flex; justify-content:space-between; gap:8px; width:100%; max-width:420px; }
+/* Reutilizadas dentro de la app "Entrenamiento" del móvil (ver pintarEntrenoLista) — antes eran
+   el contenido de un overlay propio, ahora son contenido normal de una vista del móvil. */
+.panel-entreno-circulos{ display:flex; justify-content:space-between; gap:8px; width:100%; max-width:420px; margin:0 auto; }
 .panel-entreno-hint{
   font-family:'Space Grotesk',sans-serif; font-size:11.5px; color:var(--ink-soft); text-align:center;
   margin:12px 0 16px; line-height:1.5;
@@ -194,6 +152,18 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   display:flex; justify-content:space-between; align-items:center; position:relative; height:62px; box-sizing:border-box;
   max-width:760px; margin:0 auto; padding:14px 0;
 }
+/* Ficha rápida a la izquierda de la topbar: escudo del club + nombre del jugador/nombre del club,
+   cada uno clicable por separado (jugador -> tabJugador, escudo y nombre de club -> tabClub). */
+.topbar-jugador{ display:flex; align-items:center; gap:8px; min-width:0; max-width:150px; }
+.topbar-escudo{ flex-shrink:0; display:flex; cursor:pointer; }
+.topbar-nombres{ display:flex; flex-direction:column; min-width:0; line-height:1.25; }
+.topbar-nombre-jugador, .topbar-nombre-club{
+  cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  font-family:'Space Grotesk',sans-serif;
+}
+.topbar-nombre-jugador{ font-size:12.5px; font-weight:700; color:var(--ink); }
+.topbar-nombre-club{ font-size:10.5px; font-weight:500; color:var(--ink-soft); }
+.topbar-nombre-jugador:hover, .topbar-nombre-club:hover{ color:var(--gold); }
 .topbar h1{ font-size:24px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.02em; }
 .logo-wrap{ display:flex; align-items:center; gap:8px; }
 .logo-badge{ flex-shrink:0; display:flex; align-items:center; }
@@ -215,6 +185,30 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* Versión más grande del logo, solo para la barra superior: la camiseta crece algo más que las
    letras (queda como protagonista), en vez de escalar ambas piezas por igual. */
 .logo-wrap-lg .logo-text .top, .logo-wrap-lg .logo-text .main{ font-size:22px; }
+/* Barra de progreso de temporada: fila única debajo de la topbar — edad/temporada a la izquierda
+   (20%), circulitos conectados por una línea en el centro (cada uno = un paso de
+   SECUENCIA_TEMPORADA, o un día de la prueba del prólogo), botón Avanzar a la derecha (20%). */
+.season-bar{ display:flex; align-items:center; gap:10px; max-width:760px; margin:0 auto; padding:8px 0 12px; }
+.season-info{ width:20%; flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); line-height:1.35; }
+.season-info .edad{ color:var(--ink); font-weight:600; }
+.season-stepper{ flex:1; min-width:0; position:relative; height:16px; display:flex; align-items:center; }
+.season-line-bg{ position:absolute; left:4px; right:4px; top:50%; height:2px; background:rgba(255,255,255,0.1); transform:translateY(-50%); }
+.season-line-fill{ position:absolute; left:4px; top:50%; height:2px; background:var(--gold); transform:translateY(-50%); transition:width .4s ease; }
+.season-dots{ position:relative; width:100%; display:flex; justify-content:space-between; align-items:center; }
+.season-dot{ width:8px; height:8px; border-radius:50%; background:var(--bg); border:2px solid rgba(255,255,255,0.22); box-sizing:border-box; transition:background .3s ease, border-color .3s ease, transform .3s ease; }
+.season-dot.hecho{ background:var(--gold); border-color:var(--gold); }
+.season-dot.actual{ transform:scale(1.35); box-shadow:0 0 0 3px rgba(212,175,55,0.25); }
+.season-avanzar-btn{
+  width:20%; flex-shrink:0; height:34px; border-radius:10px; border:none; cursor:pointer;
+  background:var(--gold); color:#191507; display:flex; align-items:center; justify-content:center; gap:5px;
+  font-family:'Space Grotesk',sans-serif; font-size:11.5px; font-weight:700;
+}
+.season-avanzar-btn:active{ background:#E0BE49; }
+.season-avanzar-btn svg{ width:15px; height:15px; }
+.season-avanzar-btn.deshabilitado{ background:var(--panel2); color:var(--ink-soft); opacity:.5; cursor:not-allowed; }
+/* Sucesos de la semana: sin caja propia — el texto y las opciones se apoyan directamente en el
+   fondo oscuro de la página, a todo el ancho disponible (respetando el margen estándar del body). */
+.suceso-plano{ color:var(--ink); padding:2px 0 18px; margin-bottom:0; }
 .card{
   background: var(--panel);
   color: var(--ink);
@@ -1193,7 +1187,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    ancho de pantalla en ambos estados (ver .tel-sheet), como se ve un móvil real en la mano. */
 .tel-sheet{
   width:92%; max-width:460px; position:relative; cursor:pointer;
-  transform:translateY(calc(100% - 42px));
+  transform:translateY(calc(100% - var(--tel-peek-h)));
   transition:transform .34s cubic-bezier(.25,.8,.35,1);
   pointer-events:auto;
 }
@@ -1203,7 +1197,14 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    (.tel-device) dejan un recorte transparente en esos dos picos por los que, sin esto, se cuela
    la pantalla real de detrás — un bar sólido del mismo ancho, justo detrás del móvil, tapa ese
    hueco por más que la esquina sea curva. Solo se pinta con el móvil recogido (pintarMovilSheet). */
-.tel-dock{ position:absolute; left:0; right:0; bottom:0; height:calc(42px + env(safe-area-inset-bottom,0px)); background:#15161c; }
+.tel-dock{ position:absolute; left:0; right:0; bottom:0; height:calc(var(--tel-peek-h) + env(safe-area-inset-bottom,0px)); background:#15161c; }
+/* Fila de accesos directos que se ve con el móvil recogido (asomo alto, ver --tel-peek-h): 5
+   apps de un toque, sin pasar por la pantalla de inicio del móvil. */
+.tel-dock-apps{ position:absolute; left:0; right:0; top:56px; z-index:5; display:flex; justify-content:space-around; padding:0 18px; }
+.tel-dock-app{ background:none; border:none; padding:0; cursor:pointer; }
+.tel-dock-app .tel-icon{ width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; }
+.tel-dock-app .tel-icon svg{ width:22px; height:22px; }
+.tel-dock-app:active .tel-icon{ transform:scale(.92); }
 /* Oscurece TODA la pantalla real detrás del móvil abierto (incluida la franja de arriba, entre
    la topbar real y el aparato, y los márgenes laterales) — evita que se cuelen ahí bordes o
    esquinas de lo que hubiera debajo (p. ej. la tarjeta del suceso de la semana). */
@@ -1285,6 +1286,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-icon.whatsapp{ background:linear-gradient(150deg,#3fce6e,#1f9e4c); }
 .tel-icon.email{ background:linear-gradient(150deg,#5a8fd6,#2c4d84); }
 .tel-icon.banca{ background:linear-gradient(150deg,#3f6fce,#233f80); }
+.tel-icon.economia{ background:linear-gradient(150deg,#3f6fce,#233f80); }
 .tel-icon.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
 .tel-icon.compras{ background:linear-gradient(150deg,#3f9e93,#1f5b53); }
 .tel-icon.casino{ background:linear-gradient(150deg,#7b2d8e,#341042); }
@@ -1293,6 +1295,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-icon.ajustes{ background:linear-gradient(150deg,#7c8494,#464c59); }
 .tel-icon.redes{ background:linear-gradient(150deg,#e0507a,#8a1f4a); }
 .tel-icon.x{ background:linear-gradient(150deg,#3a3d44,#111214); }
+.tel-icon.entrenamiento{ background:linear-gradient(150deg,#4CAF6D,#1d5c37); }
 .tel-icon.calendario{ background:linear-gradient(150deg,#e0432e,#8a1f14); }
 .tel-icon.appstore{ background:linear-gradient(150deg,#5a8fd6,#1f3a63); }
 .tel-icon.prensa{ background:linear-gradient(150deg,#c94b3f,#6e1f18); }
@@ -1312,6 +1315,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-icon.carpeta .mini.casino{ background:linear-gradient(150deg,#7b2d8e,#341042); }
 .tel-icon.carpeta .mini.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
 .tel-icon.carpeta .mini.compras{ background:linear-gradient(150deg,#3f9e93,#1f5b53); }
+.tel-icon.carpeta .mini.redes{ background:linear-gradient(150deg,#e0507a,#8a1f4a); }
+.tel-icon.carpeta .mini.x{ background:linear-gradient(150deg,#3a3d44,#111214); }
 
 /* ---------- App Banca: extracto real (SCREENS.movil, vista 'banca') ---------- */
 .tel-bank-hero{ text-align:center; padding:6px 0 2px; }
@@ -1492,10 +1497,9 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
      se veía como un corte. Oculto por defecto; pintar() lo muestra solo con S.screen==='menu'. -->
 <div id="bg-anim-menu" class="bg-anim" aria-hidden="true" style="display:none;"></div>
 <div id="topbar-root"></div>
+<div id="notif-root"></div>
 <div class="wrap" id="app"></div>
-<div id="tabbar-root"></div>
 <div id="movil-root"></div>
-<div id="panel-entreno-root"></div>
 <div id="logro-aviso-root"></div>
 
 <script>/* ============================================================
@@ -6819,7 +6823,7 @@ const PANTALLAS_MUNDIAL_JUEGO = new Set(['mundialIntro','mundialBombos','mundial
 const PANTALLAS_FICHAJE_SEGURAS = new Set(['regresoClub','ruedaPrensa','ruedaPrensaResultado']);
 const ABREV_ATTR = { fisico:'FÍS', velocidad:'VEL', tiro:'TIR', regate:'REG', pase:'PAS', desmarque:'DES' };
 const COLOR_PRIORIDAD_ENTRENO = ['#EEEFF3', '#EEEFF3', '#EEEFF3'];
-const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEstadisticas','tabEconomia','gastos','servicios','compras','ajustes','casino','ruleta','tragaperras','blackjack']);
+const PANTALLAS_TAB = new Set(['tabJugador','tabClub','tabEconomia','gastos','servicios','compras','ajustes','casino','ruleta','tragaperras','blackjack']);
 
 const NICE_ATTR = {fisico:"Físico",velocidad:"Velocidad",tiro:"Tiro",regate:"Regate",pase:"Pase",desmarque:"Desmarque",mental:"Carácter",tecnica:"Técnica"};
 
@@ -7886,7 +7890,8 @@ function iconoInline(clave, tamano){
   const svg = ICONOS_SVG[clave] || '';
   return `<span class="icono-inline" style="display:inline-flex;vertical-align:middle;width:${tamano}px;height:${tamano}px;margin-right:5px;">${svg}</span>`;
 }
-// Insignia circular genérica de reserva para el tipo "liga" del desglose de SCREENS.tabEstadisticas,
+// Insignia circular genérica de reserva para el tipo "liga" del desglose de estadísticas (dentro
+// de SCREENS.tabJugador, ver seccionEstadisticas),
 // cuando no hay logo de liga personalizado (logoLiga() se queda vacío a propósito, ver su comentario).
 // Reutiliza iconos ya existentes de ICONOS_SVG, nunca el logo real de una liga.
 function insigniaCompeticion(tamano){
@@ -8743,7 +8748,7 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   const fraccionRol = j.enFilial ? 0.7 : ((S.rolTemporada && S.rolTemporada.fraccion) || 0.85);
   // Copa doméstica y competición europea suman partidos aparte de la liga. Se calculan cada una
   // por separado (en vez de un "partidosExtra" combinado) para poder repartir después goles y
-  // asistencias competición a competición en el desglose de SCREENS.tabEstadisticas — ver
+  // asistencias competición a competición en el desglose de estadísticas de SCREENS.tabJugador — ver
   // competiciones en procesarFinTemporada.
   const partidosLiga = Math.max(1, Math.round(partidosBase * fraccionSalud * fraccionRol * (0.92 + Math.random()*0.16)));
   const partidosEuropa = (j.club.clasificacionEuropea && !j.enFilial) ? Math.round((4 + Math.random()*4) * fraccionSalud * fraccionRol) : 0;
@@ -9778,8 +9783,10 @@ function iniciarTemporadaJuego(j){
   }
   S.comprasHechas = 0;
   S.comprasEstaTemporada = [];
-  S.mostrandoPanelEntreno = S.temporada === 1;
-  S.eligiendoPrioridadesEntreno = true;
+  // Primera temporada: abre el móvil directo en la app Entrenamiento, para que el jugador
+  // descubra el plan de entrenamiento desde el principio (antes se forzaba un overlay propio;
+  // ahora Entrenamiento vive dentro del móvil, así que el gancho es abrirlo ahí la primera vez).
+  S.telAbrirEntrenoInicio = S.temporada === 1;
   if(j.clubesEnfriados){
     Object.keys(j.clubesEnfriados).forEach(nombre=>{
       j.clubesEnfriados[nombre]--;
@@ -11050,71 +11057,12 @@ document.body.addEventListener('click', e=>{
   Sonido.desbloquear();
   if(e.target.closest('.btn-main,.opt,.train-btn,.tienda-item button,.btn-secondary,.token-btn,.tabbar-btn')) Sonido.click();
 });
-function pintarBarraEntreno(contenedor, j){
-  const bar = el('div','barra-entreno');
-  const tituloWrap = el('span','barra-entreno-titulo');
-  tituloWrap.innerHTML = `<span>PLAN DE ENTRENAMIENTO</span><span class="barra-entreno-flecha" style="transform:rotate(${S.mostrandoPanelEntreno?'90deg':'-90deg'});">›</span>`;
-  bar.appendChild(tituloWrap);
-  const fila = el('div','barra-entreno-fila');
-  const miniBarras = el('div','mini-barras');
-  const RADIO = 18, CIRCUNFERENCIA = 2 * Math.PI * RADIO;
-  ATRIBUTOS_JUGADOR.forEach(a=>{
-    const idxPrioridad = (j.prioridadesEntreno||[]).indexOf(a);
-    const pct = Math.max(0, Math.min(1, j.atributosProgreso[a]||0));
-    const color = idxPrioridad >= 0 ? COLOR_PRIORIDAD_ENTRENO[idxPrioridad] : '#5A5F70';
-    const offset = CIRCUNFERENCIA * (1 - pct);
-    const item = el('div','mini-barra-item');
-    item.innerHTML = `
-      <div class="mini-circulo">
-        <svg viewBox="0 0 44 44">
-          <circle cx="22" cy="22" r="${RADIO}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3.5"/>
-          <circle cx="22" cy="22" r="${RADIO}" fill="none" stroke="${color}" stroke-width="3.5" stroke-linecap="round"
-            stroke-dasharray="${CIRCUNFERENCIA}" stroke-dashoffset="${offset}" style="transition:stroke-dashoffset .4s ease;"/>
-        </svg>
-        <div class="mini-circulo-centro">
-          <span class="mini-circulo-ic" style="color:${idxPrioridad>=0?color:'var(--ink-soft)'};">${ABREV_ATTR[a]}</span>
-          <span class="mini-circulo-valor">${j.atributos[a]}</span>
-        </div>
-      </div>`;
-    miniBarras.appendChild(item);
-  });
-  fila.appendChild(miniBarras);
-  bar.appendChild(fila);
-  bar.onclick = ()=>{ S.mostrandoPanelEntreno = true; pintar(); };
-  contenedor.appendChild(bar);
-}
-function togglePrioridadEntreno(j, a){
-  const prioridades = [...(j.prioridadesEntreno||[])];
-  const idx = prioridades.indexOf(a);
-  if(idx>=0){ prioridades.splice(idx,1); }
-  else if(prioridades.length<3){ prioridades.push(a); }
-  j.prioridadesEntreno = prioridades;
-  pintar();
-}
-function cerrarPanelEntreno(){
-  const overlayVivo = document.querySelector('.panel-entreno-overlay');
-  if(overlayVivo){
-    overlayVivo.classList.remove('show');
-    setTimeout(()=>{
-      S.mostrandoPanelEntreno = false;
-      S.eligiendoPrioridadesEntreno = false;
-      S._panelEntrenoVisible = false;
-      pintar();
-    }, 280);
-  } else {
-    S.mostrandoPanelEntreno = false;
-    S.eligiendoPrioridadesEntreno = false;
-    S._panelEntrenoVisible = false;
-    pintar();
-  }
-}
-function pintarPanelEntreno(j){
-  const overlay = el('div','panel-entreno-overlay');
-  overlay.onclick = (e)=>{ if(e.target === overlay) cerrarPanelEntreno(); };
-  const panel = el('div','panel-entreno');
-
-  const cabFija = el('div','panel-entreno-titulo-fija');
-  cabFija.appendChild(el('div','titulo','PLAN DE ENTRENAMIENTO'));
+// Plan de entrenamiento: antes vivía en una barra fija sobre la tabbar (con overlay propio al
+// tocarla); ahora es contenido normal dentro de la app "Entrenamiento" del móvil (ver vista
+// 'entrenamiento' en renderMovilContenido) — esta función pinta esa lista de circulitos+filas
+// directamente en el contenedor que le pasen, reutilizando las mismas clases .mini-circulo/
+// .fila-atributo-entreno de siempre.
+function pintarEntrenoLista(contenedor, j){
   const circulos = el('div','panel-entreno-circulos');
   const RADIO2 = 21, CIRCUNFERENCIA2 = 2 * Math.PI * RADIO2;
   ATRIBUTOS_JUGADOR.forEach(a=>{
@@ -11139,10 +11087,9 @@ function pintarPanelEntreno(j){
     item.onclick = ()=>togglePrioridadEntreno(j, a);
     circulos.appendChild(item);
   });
-  cabFija.appendChild(circulos);
-  panel.appendChild(cabFija);
+  contenedor.appendChild(circulos);
 
-  panel.appendChild(el('div','panel-entreno-hint','Toca un atributo (arriba o abajo) para marcarlo como prioridad, hasta 3. El orden en que los toques decide qué tan rápido mejora cada uno respecto a los demás.'));
+  contenedor.appendChild(el('div','panel-entreno-hint','Toca un atributo (arriba o abajo) para marcarlo como prioridad, hasta 3. El orden en que los toques decide qué tan rápido mejora cada uno respecto a los demás.'));
 
   ATRIBUTOS_JUGADOR.forEach(a=>{
     const idxPrioridad = (j.prioridadesEntreno||[]).indexOf(a);
@@ -11155,124 +11102,68 @@ function pintarPanelEntreno(j){
       : `<div class="badge-prioridad" style="background:rgba(255,255,255,0.06);color:var(--ink-soft);">–</div>`;
     fila.innerHTML = `${badge}<div class="info"><div class="nombre"><span>${NICE_ATTR[a]} (${j.atributos[a]}/${ATRIBUTO_MAX})</span><span class="pct">${pct}%</span></div><div class="track"><div class="fill" style="width:${pct}%;background:${color};"></div></div></div>`;
     fila.onclick = ()=>togglePrioridadEntreno(j, a);
-    panel.appendChild(fila);
+    contenedor.appendChild(fila);
   });
-
-  const btnCerrar = document.createElement('button'); btnCerrar.className='btn-main'; btnCerrar.style.cssText='margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);'; btnCerrar.textContent='Cerrar';
-  btnCerrar.onclick = cerrarPanelEntreno;
-  panel.appendChild(btnCerrar);
-
-  overlay.appendChild(panel);
-  document.getElementById('panel-entreno-root').appendChild(overlay);
-  if(S._panelEntrenoVisible){
-    overlay.classList.add('show');
-  } else {
-    S._panelEntrenoVisible = true;
-    requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ overlay.classList.add('show'); }); });
-  }
+}
+function togglePrioridadEntreno(j, a){
+  const prioridades = [...(j.prioridadesEntreno||[])];
+  const idx = prioridades.indexOf(a);
+  if(idx>=0){ prioridades.splice(idx,1); }
+  else if(prioridades.length<3){ prioridades.push(a); }
+  j.prioridadesEntreno = prioridades;
+  pintar();
 }
 const DURACION_NOTIFICACION_MS = 5000;
+// Notificación estilo móvil real: cae desde arriba de toda la pantalla (#notif-root), con su
+// propio icono de app a la izquierda del texto — ver pintarNotifDrop() y la animación
+// .notif-toast/.show en CSS.
 function mostrarNotificacion(texto, tipo){
   tipo = tipo || 'info';
   S.notificaciones = S.notificaciones || [];
   if(S.notificaciones.some(n=>n.texto===texto)) return; // evita acumular avisos duplicados
   const id = Date.now()+'_'+Math.random();
   S.notificaciones.push({ id, texto, tipo, creadoEn: Date.now() });
-  pintarTabbar();
+  pintarNotifDrop();
   setTimeout(()=>{
     S.notificaciones = (S.notificaciones||[]).filter(n=>n.id!==id);
-    pintarTabbar();
+    pintarNotifDrop();
   }, DURACION_NOTIFICACION_MS);
 }
-function pintarTabbar(){
-  const raiz = document.getElementById('tabbar-root');
-  const pantallaEfectiva = (S.screen === 'ajustes' && S.pantallaAnteriorAjustes) ? S.pantallaAnteriorAjustes : S.screen;
-  if(!S.jugador || S.enFaseCreacion || PANTALLAS_CREACION.has(pantallaEfectiva)){
-    document.body.classList.remove('con-tabbar');
-    document.body.classList.remove('con-barra-entreno');
-    raiz.innerHTML = '';
-    return;
-  }
-  document.body.classList.add('con-tabbar');
-  document.body.classList.add('con-barra-entreno');
-  raiz.innerHTML = '';
-  // El móvil abierto tapa esto entero (ver pintarMovilSheet) — nada que pintar aquí debajo.
-  if(S.movilAbierto) return;
+function pintarNotifDrop(){
+  const raiz = document.getElementById('notif-root');
+  if(!raiz) return;
   // Red de seguridad: lo que retira un aviso a los 5s es un setTimeout en memoria, que NO
   // sobrevive a una recarga de página (recargar el navegador, o el móvil descargando la pestaña
   // en segundo plano) — pero S.notificaciones sí, porque guardarPartida() serializa S entero. Sin
   // esto, un aviso visible justo en el momento de recargar se quedaba "colgado" para siempre, sin
   // ningún temporizador vivo que lo fuera a quitar (bug real reportado: "Cariño de la afición" no
   // desaparecía). Aquí se purga por edad real (reloj), no por el temporizador, así que se autocura
-  // en el primer repintado de la tabbar tras cargar la partida, sin depender de que el timer original
-  // sobreviviera. Un aviso sin `creadoEn` (guardado con una versión anterior a este arreglo) se trata
-  // como ya caducado.
+  // en el primer repintado tras cargar la partida, sin depender de que el timer original
+  // sobreviviera. Un aviso sin `creadoEn` (guardado con una versión anterior a este arreglo) se
+  // trata como ya caducado.
   const ahora = Date.now();
   S.notificaciones = (S.notificaciones||[]).filter(n => (n.creadoEn ? (ahora - n.creadoEn) : Infinity) < DURACION_NOTIFICACION_MS);
-  const notifWrap = el('div','notif-wrap');
+  raiz.innerHTML = '';
   (S.notificaciones||[]).forEach(n=>{
     const item = el('div','notif-toast '+n.tipo);
     item.innerHTML = n.texto;
-    notifWrap.appendChild(item);
+    raiz.appendChild(item);
   });
-  raiz.appendChild(notifWrap);
-  const deshabilitada = PANTALLAS_SIN_TABBAR.has(S.screen);
-  if(!deshabilitada){
-    pintarBarraEntreno(raiz, S.jugador);
-  } else {
-    const barraVacia = el('div','barra-entreno');
-    barraVacia.style.opacity = '.32';
-    barraVacia.style.pointerEvents = 'none';
-    const fila = el('div','barra-entreno-fila');
-    barraVacia.appendChild(fila);
-    raiz.appendChild(barraVacia);
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
+    raiz.querySelectorAll('.notif-toast').forEach(nodo=> nodo.classList.add('show'));
+  }); });
+}
+// Ya no hay tabbar de 3 botones (Jugador/Avanzar/Estadísticas se retiraron — ver topbar() y
+// SCREENS.tabJugador) ni barra de plan de entrenamiento propia (ahora vive en la app
+// "Entrenamiento" del móvil) — lo único que queda fijo al fondo de página es el propio móvil, así
+// que esta función solo decide si hay sitio reservado para su asomo (con-movil).
+function actualizarLayoutInferior(){
+  const pantallaEfectiva = (S.screen === 'ajustes' && S.pantallaAnteriorAjustes) ? S.pantallaAnteriorAjustes : S.screen;
+  if(!S.jugador || S.enFaseCreacion || PANTALLAS_CREACION.has(pantallaEfectiva)){
+    document.body.classList.remove('con-movil');
+    return;
   }
-  const bar = el('div','tabbar'+(deshabilitada?' deshabilitada':''));
-  const tabs = [
-    { id:'jugador', icono:'tabFicha', label:'Jugador', pantalla:'tabJugador' },
-    { id:'avanzar', icono:'tabAvanzar', label:'Avanzar', pantalla:null, destacado:true },
-    { id:'estadisticas', icono:'tabInversiones', label:'Estadísticas', pantalla:'tabEstadisticas' }
-  ];
-  tabs.forEach(t=>{
-    const activo = t.pantalla ? S.screen === t.pantalla : S.screen === S.pantallaBase;
-    const btn = el('div','tabbar-btn'+(activo && !deshabilitada?' activo':'')+(t.destacado?' destacado':''));
-    btn.innerHTML = `${ICONOS_SVG[t.icono]}<span>${t.label}</span>`;
-    if(t.id === 'jugador' && S.objetosNuevosSinVer > 0){
-      btn.appendChild(el('div','tabbar-badge', S.objetosNuevosSinVer));
-    }
-    if(!deshabilitada){
-      btn.onclick = ()=>{
-        if(t.id === 'avanzar'){
-          // "Avanzar" tiene que llevarte SIEMPRE a alguna parte. Si S.pantallaBase apunta a
-          // otra pantalla (p. ej. un suceso de la semana ya generado, viendo otra pestaña),
-          // te devuelve a ella. Si ya ESTÁS en tu pantalla base, solo tiene sentido avanzar la
-          // temporada de verdad (avanzarPaso) cuando esa base es una pestaña normal
-          // (tabJugador y compañía — nunca debería serlo, salvo una partida guardada rara de
-          // un flujo abandonado a medias: red de seguridad para que el botón nunca se quede
-          // "muerto"). Si es una pantalla de flujo real (p. ej. el propio suceso en pantalla),
-          // no se hace nada — se resuelve con sus propios botones, no con "Avanzar"; forzar
-          // avanzarPaso() ahí abandonaría el suceso a medias y duplicaría el paso de temporada
-          // (bug real: antes esto te devolvía a Jugador en vez de dejarte resolver el suceso).
-          const destino = S.pantallaBase || 'tabJugador';
-          if(destino === S.screen){
-            if(PANTALLAS_TAB.has(destino) && S.jugador){
-              avanzarPaso(S.jugador);
-              guardarPartida();
-              render();
-            }
-          } else {
-            S.screen = destino;
-            render();
-          }
-        } else {
-          S.screen = t.pantalla || S.pantallaBase || S.screen;
-          render();
-        }
-      };
-    }
-    bar.appendChild(btn);
-  });
-  raiz.appendChild(bar);
+  document.body.classList.add('con-movil');
 }
 function abrirMovilSheet(){
   S.movilAbierto = true;
@@ -11317,11 +11208,11 @@ function telNotificacionesPendientes(j){
   if(mapa.servicios) lista.push({ clase:'servicios', icono:TEL_ICONO_COMPRAS });
   return lista;
 }
-// El móvil vive en su propia capa (#movil-root), siempre por encima de la tabbar: un único
+// El móvil vive en su propia capa (#movil-root), por encima de todo lo demás: un único
 // elemento (.tel-sheet) hace de asomo (abajo del todo, casi todo el ancho de pantalla) y de
 // móvil abierto a la vez, animando su propia posición vertical entre los dos estados — nunca
-// dos piezas distintas que haya que sincronizar. Mismo patrón de "no repetir la animación de
-// apertura en cada repintado" que pintarPanelEntreno (ver S._movilVisible / S._panelEntrenoVisible).
+// dos piezas distintas que haya que sincronizar (ver S._movilVisible, "no repetir la animación
+// de apertura en cada repintado").
 function pintarMovilSheet(){
   const raiz = document.getElementById('movil-root');
   raiz.innerHTML = '';
@@ -11368,6 +11259,27 @@ function pintarMovilSheet(){
   });
   header.appendChild(notifs);
   device.appendChild(header);
+
+  // Con el móvil recogido (asomo alto, ver --tel-peek-h), 5 apps de acceso directo debajo del
+  // notch — un toque las abre sin pasar por la pantalla de inicio del móvil.
+  if(!S.movilAbierto && !deshabilitada){
+    const dockApps = el('div','tel-dock-apps');
+    const pendientesDock = telAppsConPendiente(S.jugador);
+    TEL_DOCK_APPS.forEach(a=>{
+      const btn = document.createElement('button');
+      btn.className = 'tel-dock-app';
+      const hayPendiente = pendientesDock[a.id] || (a.id==='redes' && pendientesDock.x);
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${hayPendiente?'<span class="tel-app-dot"></span>':''}</span>`;
+      btn.onclick = (e)=>{
+        e.stopPropagation();
+        S.movilVista = S.movilVista || 'home';
+        S.movilAbierto = true;
+        a.ir();
+      };
+      dockApps.appendChild(btn);
+    });
+    device.appendChild(dockApps);
+  }
 
   const pantalla = el('div','tel-screen');
   // Ajustes DEL PROPIO móvil (ver vista 'ajustesMovil'): fondo y tamaño de letra, nada que ver
@@ -11428,6 +11340,13 @@ function pintarMovilSheet(){
 }
 let _pantallaPintadaPrevia = null;
 function pintar(){
+  // Gancho de la primera temporada (ver iniciarTemporadaJuego): abre el móvil directo en
+  // Entrenamiento una única vez, se consume aquí para no repetirse en cada repintado.
+  if(S.telAbrirEntrenoInicio){
+    S.telAbrirEntrenoInicio = false;
+    S.movilAbierto = true;
+    S.movilVista = 'entrenamiento';
+  }
   const mismaPantalla = (S.screen === _pantallaPintadaPrevia);
   const yScrollPrevio = window.scrollY;
   app.innerHTML = "";
@@ -11490,8 +11409,8 @@ function pintar(){
       S.screen = S.jugador ? 'tabJugador' : 'menu';
       S.pantallaBase = undefined;
       // Este último intento NO puede quedar sin proteger: si también fallara, la excepción saldría
-      // sin capturar de pintar() entero y ni pintarTabbar() ni procesarAvisosLogros() llegarían a
-      // ejecutarse — dejando la barra inferior y sus avisos (notificaciones, insignias) congelados
+      // sin capturar de pintar() entero y ni el móvil ni procesarAvisosLogros() llegarían a
+      // ejecutarse — dejando el asomo del móvil y sus avisos (notificaciones, insignias) congelados
       // en lo que tuvieran pintado, aunque el propio setTimeout de un aviso siguiera disparándose
       // por detrás sin nadie que refleje el cambio en el DOM.
       try{
@@ -11504,15 +11423,11 @@ function pintar(){
   }
   // pintarMovilSheet() va PRIMERO: puede decidir que el móvil se cierra solo (p. ej. tras
   // "volver" desde una pantalla incrustada hacia una pantalla normal, ver TEL_PANTALLAS_EMBEBIBLES)
-  // y pintarTabbar() necesita ver ese S.movilAbierto ya actualizado para no dejarse la tabbar
-  // escondida (bug real: tras el auto-cierre, la tabbar no volvía hasta el siguiente repintado).
+  // y actualizarLayoutInferior()/pintarNotifDrop() necesitan ver ese S.movilAbierto ya actualizado.
   pintarMovilSheet();
-  pintarTabbar();
+  actualizarLayoutInferior();
+  pintarNotifDrop();
   procesarAvisosLogros();
-  document.getElementById('panel-entreno-root').innerHTML = '';
-  if(S.mostrandoPanelEntreno && S.jugador){
-    pintarPanelEntreno(S.jugador);
-  }
   if(document.getElementById('topbar-root').innerHTML){
     document.body.classList.remove('sin-topbar');
   } else {
@@ -11717,29 +11632,60 @@ function logoCamisetaCompacta(altoPx){
   return logoCamiseta(1).replace('viewBox="0 0 24 24" width="1" height="1"', `viewBox="1.4 3.5 21.2 18" height="${altoPx}"`);
 }
 let tituloPaginaPendiente = null;
+// Botón "Avanzar", antes en la tabbar de 3 pestañas, ahora al final de la barra de progreso de
+// temporada (ver topbar()). SIEMPRE lleva a alguna parte: si S.pantallaBase apunta a otra
+// pantalla (p. ej. un suceso ya generado, viendo otra pestaña), te devuelve a ella; si ya ESTÁS en
+// tu pantalla base, solo avanza la temporada de verdad cuando esa base es una pestaña normal
+// (nunca debería ser otra cosa, salvo un flujo abandonado a medias en un guardado raro).
+function accionAvanzar(){
+  const destino = S.pantallaBase || 'tabJugador';
+  if(destino === S.screen){
+    if(PANTALLAS_TAB.has(destino) && S.jugador){
+      avanzarPaso(S.jugador);
+      guardarPartida();
+      render();
+    }
+  } else {
+    S.screen = destino;
+    render();
+  }
+}
 function topbar(titulo){
   const t = el('div','topbar');
 
-  const temporadaTxt = document.createElement('div');
+  // Ficha rápida a la izquierda: escudo del club actual + nombre del jugador (-> tabJugador) +
+  // nombre del club (-> tabClub), cada uno clicable por separado.
+  const left = el('div','topbar-jugador');
   if(S.jugador){
-    temporadaTxt.innerHTML = `<div>${S.jugador.edad} ${S.jugador.edad===1?'año':'años'}</div><div>Temp. ${temporadaAAnoCompleto(S.temporada)}</div>`;
-    temporadaTxt.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--ink-soft);white-space:nowrap;line-height:1.35;";
+    const escudo = el('span','topbar-escudo', escudoSVG(S.jugador.club.nombre, 30, S.jugador.club.colores));
+    escudo.onclick = ()=>{ S.screen = 'tabClub'; render(); };
+    left.appendChild(escudo);
+    const nombres = el('div','topbar-nombres');
+    const nombreJugador = el('span','topbar-nombre-jugador', capitalizarNombre(S.jugador.nombre));
+    if(S.objetosNuevosSinVer > 0){
+      nombreJugador.innerHTML += ' <span class="tb-dot-logros" style="position:static;display:inline-block;vertical-align:middle;"></span>';
+    }
+    nombreJugador.onclick = ()=>{ S.screen = 'tabJugador'; render(); };
+    nombres.appendChild(nombreJugador);
+    const nombreClub = el('span','topbar-nombre-club', S.jugador.club.nombre);
+    nombreClub.onclick = ()=>{ S.screen = 'tabClub'; render(); };
+    nombres.appendChild(nombreClub);
+    left.appendChild(nombres);
   }
-  t.appendChild(temporadaTxt);
+  t.appendChild(left);
 
-  const left = el('div');
-  left.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;';
+  const centro = el('div');
+  centro.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;';
 
   const logoWrap = el('div','logo-wrap logo-wrap-lg');
   const badge = el('div','logo-badge');
   badge.innerHTML = logoCamisetaCompacta(27);
   logoWrap.appendChild(badge);
   const logoText = el('div','logo-text');
-  logoText.appendChild(el('div','top','FICHAJE'));
-  logoText.appendChild(el('div','main','10'));
+  logoText.appendChild(el('div','main','F10'));
   logoWrap.appendChild(logoText);
-  left.appendChild(logoWrap);
-  t.appendChild(left);
+  centro.appendChild(logoWrap);
+  t.appendChild(centro);
 
   if(S.jugador){
     const botonesDcha = el('div');
@@ -11760,8 +11706,7 @@ function topbar(titulo){
     botonesDcha.appendChild(logrosBtn);
 
     // El botón de "Tu móvil" en la topbar se retiró: ahora se saca desde el asomo fijo al fondo
-    // de pantalla (.tel-peek-dock, ver pintarTabbar) — un único sitio para entrar, siempre visible
-    // junto a Jugador/Avanzar/Estadísticas.
+    // de pantalla (ver pintarMovilSheet) — un único sitio para entrar.
 
     const ajustesBtn = document.createElement('button');
     ajustesBtn.innerHTML = ICONOS_SVG.ajustes;
@@ -11780,21 +11725,50 @@ function topbar(titulo){
   raiz.innerHTML = '';
   raiz.appendChild(t);
   if((S.jugador && !S.enFaseCreacion) || S.screen === 'prologoPrueba' || S.screen === 'prologoResultado'){
-    let pctProgreso;
+    let totalPasos, pasoActual;
     if(S.screen === 'prologoPrueba' || S.screen === 'prologoResultado'){
-      const diaActual = Math.max(1, Math.min(3, S.pruebaDia||1));
-      pctProgreso = Math.round((diaActual/3)*100);
+      totalPasos = 3;
+      pasoActual = Math.max(1, Math.min(3, S.pruebaDia||1));
     } else {
-      const totalPasos = SECUENCIA_TEMPORADA.length;
-      const pasoActual = Math.max(0, Math.min(totalPasos, (S.pasoIndex||0)+1));
-      pctProgreso = Math.round((pasoActual/totalPasos)*100);
+      totalPasos = SECUENCIA_TEMPORADA.length;
+      pasoActual = Math.max(0, Math.min(totalPasos, (S.pasoIndex||0)+1));
     }
-    const progresoWrap = el('div');
-    progresoWrap.style.cssText = 'height:3px;background:rgba(255,255,255,0.08);';
-    const progresoFill = el('div');
-    progresoFill.style.cssText = `height:100%;width:${pctProgreso}%;background:var(--gold);transition:width .4s ease;`;
-    progresoWrap.appendChild(progresoFill);
-    raiz.appendChild(progresoWrap);
+    const seasonBar = el('div','season-bar');
+
+    const info = el('div','season-info');
+    if(S.jugador){
+      info.innerHTML = `<div class="edad">${S.jugador.edad} ${S.jugador.edad===1?'año':'años'}</div><div>Temp. ${temporadaAAnoCompleto(S.temporada)}</div>`;
+    }
+    seasonBar.appendChild(info);
+
+    const stepper = el('div','season-stepper');
+    stepper.appendChild(el('div','season-line-bg'));
+    const fillPct = totalPasos>1 ? Math.max(0,(pasoActual-1)/(totalPasos-1))*100 : 100;
+    const fill = el('div','season-line-fill'); fill.style.width = fillPct+'%';
+    stepper.appendChild(fill);
+    const dots = el('div','season-dots');
+    for(let i=0;i<totalPasos;i++){
+      dots.appendChild(el('div','season-dot'+(i<pasoActual?' hecho':'')+(i===pasoActual-1?' actual':'')));
+    }
+    stepper.appendChild(dots);
+    seasonBar.appendChild(stepper);
+
+    // Durante la creación de personaje / prólogo (la vieja tabbar no se mostraba entera ahí) no
+    // hay botón de Avanzar — la prueba y el resto de la creación se resuelven con sus propias
+    // opciones, nunca saltándoselas. En pantallas de reveal/flujo propio (rueda de prensa,
+    // títulos, retiro...) sí se ve, pero deshabilitado, igual que hacía la vieja tabbar.
+    const avanzarOculto = !S.jugador || S.enFaseCreacion || PANTALLAS_CREACION.has(S.screen);
+    if(!avanzarOculto){
+      const avanzarDeshabilitado = PANTALLAS_SIN_TABBAR.has(S.screen);
+      const btnAvanzar = document.createElement('button');
+      btnAvanzar.className = 'season-avanzar-btn'+(avanzarDeshabilitado?' deshabilitado':'');
+      btnAvanzar.innerHTML = `${ICONOS_SVG.tabAvanzar}<span>Avanzar</span>`;
+      btnAvanzar.disabled = avanzarDeshabilitado;
+      if(!avanzarDeshabilitado) btnAvanzar.onclick = accionAvanzar;
+      seasonBar.appendChild(btnAvanzar);
+    }
+
+    raiz.appendChild(seasonBar);
   }
   tituloPaginaPendiente = titulo || null;
   // El móvil necesita el título de la pantalla real que incrusta (ver pintarMovilSheet), pero
@@ -12492,6 +12466,9 @@ SCREENS.tabJugador = function(){
       </div>`;
     c.appendChild(cajaRival);
   }
+  // Estadísticas se fusiona aquí (antes pestaña propia de la tabbar, ya retirada — ver topbar()):
+  // el carné del jugador es ahora también su ficha estadística completa.
+  c.appendChild(seccionEstadisticas(j));
   app.appendChild(c);
 };
 
@@ -12515,14 +12492,6 @@ SCREENS.tabClub = function(){
   c.appendChild(head);
   c.appendChild(seccionPerfil(j));
   c.appendChild(seccionContrato(j));
-  app.appendChild(c);
-};
-
-SCREENS.tabEstadisticas = function(){
-  const j = S.jugador;
-  topbar("Estadísticas");
-  const c = el('div','cromo');
-  c.appendChild(seccionEstadisticas(j));
   app.appendChild(c);
 };
 
@@ -13725,6 +13694,7 @@ const TEL_ICONO_APPSTORE = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" s
 const TEL_ICONO_PRENSA = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h13a2 2 0 0 1 2 2V18a1.5 1.5 0 0 1-1.5 1.5H6A2 2 0 0 1 4 17.5z"/><path d="M4 17.5V5.5M8 9h7M8 12.5h7M8 16h4"/></svg>';
 const TEL_ICONO_SCOUT = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3L21 21"/><path d="M7.5 10.5l2 2 3.5-4"/></svg>';
 const TEL_ICONO_RENDIMIENTO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>';
+const TEL_ICONO_ENTRENAMIENTO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M6.5 17.5l11-11"/><circle cx="5" cy="5" r="2.3"/><circle cx="19" cy="19" r="2.3"/><circle cx="5" cy="19" r="2.3"/><circle cx="19" cy="5" r="2.3"/></svg>';
 // Umbrales reales: los mismos NIVELES_POPULARIDAD que usa el resto del juego (Conocido/Popular/Ídolo).
 // Carpeta "Economía" (estilo iOS): agrupa las 3 apps de dinero. Banca es la única con pantalla
 // propia dentro del móvil (S.movilVista='banca', ver más abajo); Casino Online y Servicios
@@ -13741,6 +13711,24 @@ const TEL_CARPETA_ECONOMIA = {
       antesDeIr:()=>{ S.pantallaAnteriorCompras = S.pantallaBase || S.screen; } }
   ]
 };
+// Carpeta "Redes" (estilo iOS): agrupa Instagram y X, antes dos iconos sueltos en el escritorio.
+const TEL_CARPETA_REDES = {
+  id:'redesFolder', nombre:'Redes', clase:'redesFolder',
+  apps:[
+    { id:'redes', nombre:'Instagram', nivelMin:0, clase:'redes', icono:TEL_ICONO_REDES, vista:'redes' },
+    { id:'x', nombre:'X', nivelMin:0, clase:'x', icono:TEL_ICONO_X, vista:'x' }
+  ]
+};
+// Accesos directos que se ven con el móvil recogido (asomo alto, ver --tel-peek-h y
+// .tel-dock-apps): 5 apps de un solo toque, sin pasar por la pantalla de inicio — provisional,
+// sujeto a cambiar qué apps son estas 5.
+const TEL_DOCK_APPS = [
+  { id:'whatsapp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, ir:()=>{ S.movilVista='chatlist'; pintar(); } },
+  { id:'redes', clase:'redes', icono:TEL_ICONO_REDES, ir:()=>{ S.movilVista='carpeta_redes'; pintar(); } },
+  { id:'entrenamiento', clase:'entrenamiento', icono:TEL_ICONO_ENTRENAMIENTO, ir:()=>{ S.movilVista='entrenamiento'; pintar(); } },
+  { id:'economia', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ S.movilVista='carpeta_economia'; pintar(); } },
+  { id:'casino', clase:'casino', icono:TEL_ICONO_CASINO, ir:()=>{ telAbrirPantallaReal('casino'); } }
+];
 const TEL_APPS_BLOQUEADAS = [
   { id:'cromos', nombre:'Cromos', nivelMin:65, clase:'cromos', icono:TEL_ICONO_CROMOS, destino:'logros', antesDeIr:()=>{ S.logrosVistaActiva = 'cromos'; } }
 ];
@@ -14380,8 +14368,7 @@ function renderMovilContenido(c, j){
     const apps = [
       { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, onclick:()=>{ S.movilVista='chatlist'; pintar(); } },
       { id:'email', nombre:'Email', clase:'email', icono:TEL_ICONO_EMAIL, onclick:()=>{ S.movilVista='emailLista'; pintar(); } },
-      { id:'redes', nombre:'Instagram', clase:'redes', icono:TEL_ICONO_REDES, onclick:()=>{ S.movilVista='redes'; pintar(); } },
-      { id:'x', nombre:'X', clase:'x', icono:TEL_ICONO_X, onclick:()=>{ S.movilVista='x'; pintar(); } },
+      { id:'entrenamiento', nombre:'Entrenamiento', clase:'entrenamiento', icono:TEL_ICONO_ENTRENAMIENTO, onclick:()=>{ S.movilVista='entrenamiento'; pintar(); } },
       { id:'calendario', nombre:'Calendario', clase:'calendario', icono:TEL_ICONO_CALENDARIO, onclick:()=>{ S.movilVista='calendario'; pintar(); } },
       { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ telAbrirPantallaReal('tabClub'); } },
       // Los ajustes del propio MÓVIL (fondo, tamaño de letra) — no los del juego, que siguen
@@ -14410,16 +14397,17 @@ function renderMovilContenido(c, j){
       grid.appendChild(btn);
     };
     apps.filter(a=>!enCarpetaUsuario.has(a.id)).forEach(pintarBotonApp);
-    // Carpeta Economía (estilo iOS, fija): un solo icono de "carpeta" con miniatura de las apps
-    // que contiene; se coloca junto a WhatsApp, en el hueco que antes ocupaba Banca sola.
-    const folder = TEL_CARPETA_ECONOMIA;
-    const btnFolder = document.createElement('button');
-    btnFolder.className = 'tel-app';
-    const miniHtml = folder.apps.slice(0,4).map(a=>`<span class="mini ${a.clase}">${a.icono}</span>`).join('') + (folder.apps.length < 4 ? '<span class="mini vacio"></span>' : '');
-    const hayPendienteEnCarpeta = folder.apps.some(a=>pendientes[a.id]);
-    btnFolder.innerHTML = `<span class="tel-icon carpeta">${miniHtml}${hayPendienteEnCarpeta?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${folder.nombre}</span>`;
-    btnFolder.onclick = ()=>{ S.movilVista='carpeta_economia'; pintar(); };
-    grid.insertBefore(btnFolder, grid.children[1] || null);
+    // Carpetas fijas estilo iOS (Economía y Redes): un solo icono de "carpeta" con miniatura de
+    // las apps que contiene cada una.
+    [TEL_CARPETA_ECONOMIA, TEL_CARPETA_REDES].forEach(folder=>{
+      const btnFolder = document.createElement('button');
+      btnFolder.className = 'tel-app';
+      const miniHtml = folder.apps.slice(0,4).map(a=>`<span class="mini ${a.clase}">${a.icono}</span>`).join('') + (folder.apps.length < 4 ? '<span class="mini vacio"></span>' : '');
+      const hayPendienteEnCarpeta = folder.apps.some(a=>pendientes[a.id]);
+      btnFolder.innerHTML = `<span class="tel-icon carpeta">${miniHtml}${hayPendienteEnCarpeta?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${folder.nombre}</span>`;
+      btnFolder.onclick = ()=>{ S.movilVista = folder===TEL_CARPETA_ECONOMIA?'carpeta_economia':'carpeta_redes'; pintar(); };
+      grid.insertBefore(btnFolder, grid.children[1] || null);
+    });
     // Carpetas creadas por el jugador — mismo patrón de icono con miniaturas.
     carpetas.forEach(cp=>{
       const appsDentro = apps.filter(a=>cp.appIds.includes(a.id));
@@ -14503,8 +14491,7 @@ function renderMovilContenido(c, j){
       const apps = [
         { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, onclick:()=>{ S.movilVista='chatlist'; pintar(); } },
         { id:'email', nombre:'Email', clase:'email', icono:TEL_ICONO_EMAIL, onclick:()=>{ S.movilVista='emailLista'; pintar(); } },
-        { id:'redes', nombre:'Instagram', clase:'redes', icono:TEL_ICONO_REDES, onclick:()=>{ S.movilVista='redes'; pintar(); } },
-        { id:'x', nombre:'X', clase:'x', icono:TEL_ICONO_X, onclick:()=>{ S.movilVista='x'; pintar(); } },
+        { id:'entrenamiento', nombre:'Entrenamiento', clase:'entrenamiento', icono:TEL_ICONO_ENTRENAMIENTO, onclick:()=>{ S.movilVista='entrenamiento'; pintar(); } },
         { id:'calendario', nombre:'Calendario', clase:'calendario', icono:TEL_ICONO_CALENDARIO, onclick:()=>{ S.movilVista='calendario'; pintar(); } },
         { id:'club', nombre:'Club', clase:'club', icono:ICONOS_SVG.tabClub, onclick:()=>{ telAbrirPantallaReal('tabClub'); } },
         { id:'ajustes', nombre:'Ajustes', clase:'ajustes', icono:ICONOS_SVG.ajustes, onclick:()=>{ S.movilVista='ajustesMovil'; pintar(); } },
@@ -14557,6 +14544,36 @@ function renderMovilContenido(c, j){
       grid.appendChild(btn);
     });
     c.appendChild(grid);
+  }
+
+  else if(vista === 'carpeta_redes'){
+    const folder = TEL_CARPETA_REDES;
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title', folder.nombre));
+    c.appendChild(header);
+    const grid = el('div','tel-app-grid');
+    const pendientes = telAppsConPendiente(j);
+    folder.apps.forEach(a=>{
+      const btn = document.createElement('button');
+      btn.className = 'tel-app';
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${pendientes[a.id]?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${a.nombre}</span>`;
+      btn.onclick = ()=>{ S.movilVista = a.vista; pintar(); };
+      grid.appendChild(btn);
+    });
+    c.appendChild(grid);
+  }
+
+  else if(vista === 'entrenamiento'){
+    const header = el('div','tel-app-header');
+    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
+    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    header.appendChild(back);
+    header.appendChild(el('span','tel-title','Entrenamiento'));
+    c.appendChild(header);
+    pintarEntrenoLista(c, j);
   }
 
   else if(vista === 'banca'){
@@ -18320,7 +18337,7 @@ SCREENS.evento = function(){
   topbar("Suceso de la semana");
   const j = S.jugador;
   const ev = S.eventoActual;
-  const c = el('div','card');
+  const c = el('div','suceso-plano');
   c.appendChild(crearEyebrow('Decisión'));
   const vecesVisto = j.eventosVistos.filter(v=>v.id===ev.id).length;
   const textoMostrado = (vecesVisto > 1 && ev.variantes && ev.variantes.length)
