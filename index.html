@@ -1200,10 +1200,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* Fila de accesos directos que se ve con el móvil recogido (asomo alto, ver --tel-peek-h): 5
    apps de un toque, sin pasar por la pantalla de inicio del móvil. */
 /* justify-content:space-between (no space-around) para que el primer y el último icono queden
-   pegados justo a los 16px de padding, sin el medio hueco extra que deja space-around — así
-   coincide en horizontal con la hora/iconos de la barra de estado de arriba (mismo margen). */
+   pegados justo al padding, sin el medio hueco extra que deja space-around — así coincide en
+   horizontal con la hora/iconos de la barra de estado de arriba (mismo margen, ver .tel-header:
+   24px en los dos sitios, no los 16px de antes — se quedaba demasiado pegado al borde). */
 .tel-dock-apps{
-  position:absolute; left:0; right:0; top:50px; z-index:5; display:flex; justify-content:space-between; padding:0 16px;
+  position:absolute; left:0; right:0; top:50px; z-index:5; display:flex; justify-content:space-between; padding:0 24px;
   opacity:0; transform:translateY(4px); transition:opacity .4s ease, transform .4s ease;
 }
 .tel-dock-apps.entrando{ opacity:1; transform:translateY(0); }
@@ -1237,11 +1238,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    cámara/isla dinámica y los iconos de estado se ven DENTRO del propio display, no sobre un
    marco negro separado. En reposo es lo único que asoma; abierto, tocarlo vuelve a esconder el
    móvil (nada de flecha ni botón aparte — como pulsar la barra de estado de un móvil real).
-   Alineada a los mismos 16px de .tel-dock-apps (no los 12px del padding del aparato), y la hora/
+   Alineada a los mismos 24px de .tel-dock-apps (no los 12px del padding del aparato), y la hora/
    iconos (.tel-status-hora/.tel-status-iconos) van pegados a esos mismos bordes del header sin
    margen extra — así coinciden en vertical con el primer y el último icono del dock de abajo. */
 .tel-header{
-  position:absolute; top:12px; left:16px; right:16px; height:38px; z-index:6;
+  position:absolute; top:12px; left:24px; right:24px; height:38px; z-index:6;
   cursor:pointer; display:flex; align-items:center; justify-content:center;
 }
 /* Círculo tipo cámara delantera, no la píldora de antes — más pequeño, discreto y bien oscuro
