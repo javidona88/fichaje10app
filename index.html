@@ -111,7 +111,10 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   color: var(--gold); margin-bottom:6px;
 }
 #topbar-root{
-  position:fixed; left:0; right:0; top:0; z-index:60;
+  /* Por encima del móvil (#movil-root, z-index:60) a propósito: con el móvil abierto, el fondo
+     oscurecido detrás (.tel-backdrop) NO debe tapar la topbar ni la barra de temporada — se ven
+     siempre, tape lo que tape debajo. */
+  position:fixed; left:0; right:0; top:0; z-index:70;
   padding:env(safe-area-inset-top,0px) 16px 0;
 }
 /* El contenido que se desliza por debajo de la cabecera fija (topbar + barra de temporada) ya
@@ -211,6 +214,15 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .field-row{ display:flex; gap:12px; margin-bottom:16px; }
 .field-row .field{ flex:1; min-width:0; margin-bottom:0; }
 .field-hint{ font-size:11.5px; color:var(--ink-soft); margin-top:5px; }
+.field-inline{ display:flex; gap:8px; }
+.field-inline input{ flex:1; min-width:0; }
+.btn-dado{
+  flex:none; width:40px; height:40px; border-radius:8px; border:1px solid var(--line);
+  background:var(--bg2); color:var(--gold); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; padding:0;
+}
+.btn-dado:hover{ border-color:var(--gold-dim); }
+.btn-dado svg{ width:16px; height:16px; }
 .points-header{ display:flex; justify-content:space-between; align-items:center; margin:20px 0 12px; }
 .attr-row button{
   width:26px; height:26px; border-radius:50%; border:1px solid var(--line); background:var(--bg2);
@@ -393,6 +405,13 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 
 /* ---- eventos ---- */
 .event-text{ font-family:'Space Grotesk',sans-serif; font-weight:400; font-size:16px; line-height:1.55; margin-bottom:20px; color:var(--ink); }
+.suceso-vinculo-movil{
+  display:flex; align-items:center; gap:8px; width:100%; margin:-8px 0 20px; padding:11px 14px;
+  border-radius:12px; border:1px solid var(--gold-dim); background:rgba(212,175,55,0.08);
+  color:var(--gold); font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer;
+}
+.suceso-vinculo-movil:hover{ background:rgba(212,175,55,0.14); }
+.suceso-vinculo-movil .icono-inline{ width:18px!important; height:18px!important; flex-shrink:0; }
 /* Contexto de partido (solo encargos tácticos): competición/rival/jornada + marcador tipo placa
    LED de estadio. Ver candidatasContextoPartido()/renderContextoPartido() en el JS. */
 .contexto-partido{ border:1px solid var(--line); border-radius:12px; padding:14px 14px 16px; margin-bottom:16px; }
@@ -1190,7 +1209,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* Oscurece TODA la pantalla real detrás del móvil abierto (incluida la franja de arriba, entre
    la topbar real y el aparato, y los márgenes laterales) — evita que se cuelen ahí bordes o
    esquinas de lo que hubiera debajo (p. ej. la tarjeta del suceso de la semana). */
-.tel-backdrop{ position:fixed; inset:0; background:rgba(8,9,13,0.72); opacity:0; transition:opacity .34s ease; pointer-events:none; }
+.tel-backdrop{ position:fixed; inset:0; background:rgba(3,4,7,0.93); opacity:0; transition:opacity .34s ease; pointer-events:none; }
 .tel-backdrop.show{ opacity:1; }
 /* Se asoma hasta justo debajo de la topbar real del juego (82px + su zona segura) cuando está
    abierto — el mismo elemento que en reposo solo enseña 42px (ver .tel-sheet arriba). */
@@ -1210,7 +1229,16 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   position:absolute; top:12px; left:12px; right:12px; height:38px; z-index:6;
   cursor:pointer; display:flex; align-items:center; justify-content:center;
 }
-.tel-notch{ width:88px; height:24px; background:#000; border-radius:13px; }
+.tel-notch{ width:60px; height:18px; background:#000; border-radius:10px; }
+.tel-status-stats{ position:absolute; left:0; top:50%; transform:translateY(-50%); display:flex; gap:6px; pointer-events:none; }
+.tel-status-stat{
+  display:flex; align-items:center; gap:3px; font-family:'Inter',sans-serif; font-weight:700;
+  font-size:10px; color:rgba(255,255,255,0.9); background:rgba(0,0,0,0.4); border-radius:8px; padding:3px 6px;
+}
+.tel-status-stat .lbl{ opacity:.65; letter-spacing:.02em; }
+.tel-status-stat .arr{ font-size:8px; line-height:1; }
+.tel-status-stat .arr.up{ color:#5fd97e; }
+.tel-status-stat .arr.down{ color:#e2544b; }
 /* Notificaciones DENTRO del propio móvil simulado (no de la página real): caen desde detrás del
    notch, cubriendo lo que haya debajo (asomo o pantalla abierta), igual que en un móvil de
    verdad. Ver pintarNotifMovil(). */
@@ -1489,6 +1517,32 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-rend-card .estado.ok{ color:#3fce9e; }
 .tel-rend-card .estado.warn{ color:#e0a83e; }
 .tel-rend-card .estado.bad{ color:#e0432e; }
+/* Confirmación/prompt propios: los diálogos nativos del navegador (confirm/prompt) no se
+   pueden dar por hechos aquí — el juego se sirve a menudo embebido en un iframe con
+   restricciones (Artifact de Claude y similares), y en ese contexto confirm()/prompt() puede
+   quedarse callado sin avisar de nada, dejando el botón "sin hacer nada" en apariencia (bug
+   real reportado: "Volver al menú principal" no respondía — usaba confirm()). Mismo patrón de
+   overlay que ya se usaba en el juego (panel-entreno-overlay, ya retirado). */
+.confirm-overlay{
+  position:fixed; inset:0; background:rgba(5,7,15,0); z-index:90;
+  display:flex; align-items:center; justify-content:center; padding:20px;
+  transition:background .22s ease;
+}
+.confirm-overlay.show{ background:rgba(5,7,15,0.75); }
+.confirm-box{
+  background:var(--panel2); border:1px solid var(--line); border-radius:16px;
+  padding:22px 20px; width:100%; max-width:360px; box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  transform:translateY(10px) scale(.97); opacity:0; transition:transform .22s ease, opacity .22s ease;
+}
+.confirm-overlay.show .confirm-box{ transform:translateY(0) scale(1); opacity:1; }
+.confirm-msg{ font-family:'Space Grotesk',sans-serif; font-size:14px; color:var(--ink); line-height:1.5; margin:0 0 16px; }
+.confirm-input{
+  width:100%; box-sizing:border-box; background:var(--bg2); border:1px solid var(--line); border-radius:10px;
+  padding:11px 12px; font-family:'Space Grotesk',sans-serif; font-size:14px; color:var(--ink); margin-bottom:16px;
+}
+.confirm-input:focus{ outline:none; border-color:var(--gold-dim); }
+.confirm-btns{ display:flex; gap:10px; }
+.confirm-btns button{ flex:1; margin-top:0; }
 </style>
 </head>
 <body>
@@ -1501,6 +1555,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 <div class="wrap" id="app"></div>
 <div id="movil-root"></div>
 <div id="logro-aviso-root"></div>
+<div id="confirm-root"></div>
 
 <script>/* ============================================================
    DATOS DEL JUEGO — clubes, eventos, tienda, objetivos, torneos,
@@ -1514,11 +1569,9 @@ const ATRIBUTOS_BASE = { fisico:6, velocidad:8, tiro:7, regate:6, pase:6, desmar
 const LIGAS_ELITE_EXTRANJERO = ["Inglaterra", "Alemania", "Francia", "Italia"]; // fuera de España, las ligas de mayor exposición y prestigio real
 const COMPANEROS_CANTERA_BASE = [
   { id:'kike', nombre:'Kike Roldán', apodo:'Kike', rasgo:'bromista', titulo:'El bromista del grupo', techo:'Segunda RFEF',
-    desc:'Siempre quitando hierro a todo, el primero en gastar una broma justo cuando más tensión hay en el vestuario. Por debajo, es el más leal del grupo — el humor es su forma de cuidar a los demás sin decirlo directamente.' },
+    desc:'Siempre quitando hierro a todo, el primero en gastar una broma en el vestuario. El humor es su forma de cuidar a los demás.' },
   { id:'marcos', nombre:'Marcos Ibáñez', apodo:'Marcos', rasgo:'lider', titulo:'El que pone orden', techo:'Primera RFEF',
-    desc:'El que organiza, el que media en las broncas, el que te frena si te calientas de más. Tiene una madurez que no le corresponde a su edad, del tipo que acaba llevando el brazalete tarde o temprano.' },
-  { id:'nico', nombre:'Nico Cortés', apodo:'Nico', rasgo:'ambicioso', titulo:'El ambicioso', techo:'LaLiga2',
-    desc:'No se corta un pelo hablando de querer ser el mejor, y eso a veces incomoda. Pero no es tóxico: su ambición empuja al grupo a currárselo más, no compite pisando a nadie. El que más se ilusiona con cada meta cumplida, tuya o suya.' }
+    desc:'El que organiza, el que media en las broncas, el que te frena si te calientas de más. Madurez de sobra para su edad.' }
 ];
 const RIVAL_CANTERA_BASE = { nombre:'Adrián Ferraz', apodo:'Ferraz', titulo:'El crack indiscutible' };
 const ESTILOS_JUEGO = [
@@ -2235,8 +2288,8 @@ const LOGROS = [
     cond:j=> j.rival && tierRelacionRival(j.rival.relacion)==='reconciliacion' },
   { id:'discipulo', cat:'vida', nombre:'Discípulo aventajado', desc:'Tu protegido llega al máximo nivel.', icono:'🌱', pesoRareza:15,
     cond:j=> j.protegido && j.protegido.nivel >= 4 },
-  { id:'pandilla_siempre', cat:'vida', nombre:'La pandilla de siempre', desc:'Mantén buena relación con tus 3 compañeros de cantera.', icono:'👥', pesoRareza:25,
-    cond:j=> (j.companeros||[]).length >= 3 && j.companeros.every(c=>(c.relacion||0) >= 60) },
+  { id:'pandilla_siempre', cat:'vida', nombre:'La pandilla de siempre', desc:'Mantén buena relación con tus compañeros de cantera.', icono:'👥', pesoRareza:25,
+    cond:j=> (j.companeros||[]).length >= 2 && j.companeros.every(c=>(c.relacion||0) >= 60) },
   { id:'vuelve_a_casa', cat:'vida', nombre:'Aquí nunca eres visitante', desc:'Regresas a un club en el que ya habías jugado.', icono:'🏠', pesoRareza:20,
     cond:j=> !!(j.hitosLogro && j.hitosLogro.regresoClub) },
 
@@ -2343,6 +2396,19 @@ function comprobarLogros(j){
   });
   if(cambios) guardarLogrosGuardados(guardados);
 }
+// Aviso de "ya puedes entrar al casino", al cumplir 18 — mismo tratamiento a pantalla completa
+// que un logro difícil (ver aviso.tipo==='especial' en procesarAvisosLogros), pero no es un logro
+// de verdad: no se guarda en fichaje10_logros_v1, solo un flag de una vez en j.hitosLogro para no
+// repetirse en cada repintado. El bloqueo real de la sala vive en SCREENS.casino (j.edad < 18).
+function comprobarDesbloqueoCasino(j){
+  if(!j) return;
+  if(!j.hitosLogro) j.hitosLogro = {};
+  if(j.edad === 18 && !j.hitosLogro.casino18Avisado){
+    j.hitosLogro.casino18Avisado = true;
+    S.avisosPendientes = S.avisosPendientes || [];
+    S.avisosPendientes.push({ tipo:'especial', datos:{ icono:'🎰', nombre:'Ya eres mayor de edad', desc:'El casino del club te abre sus puertas. A partir de ahora puedes probar suerte en la ruleta, las tragaperras y el blackjack.' } });
+  }
+}
 // Cola de avisos: como puede desbloquearse más de un logro o cromo a la vez (p. ej. al fichar
 // por un club extranjero justo tras cumplir un hito), se muestran de uno en uno. El aviso vive
 // en #logro-aviso-root, fuera de #app, para no desaparecer si pintar() repinta la pantalla
@@ -2352,6 +2418,11 @@ function procesarAvisosLogros(){
   if(root.children.length) return;
   if(!(S.avisosPendientes && S.avisosPendientes.length)) return;
   const aviso = S.avisosPendientes.shift();
+  if(aviso.tipo === 'especial'){
+    Sonido.subeNivel();
+    mostrarLogroPantallaCompleta(aviso.datos);
+    return;
+  }
   if(aviso.tipo === 'cromo'){
     const c = PAISES_CROMO.find(p=>p.pais===aviso.id);
     if(!c){ procesarAvisosLogros(); return; }
@@ -2803,6 +2874,7 @@ const BANCO_EVENTOS = [
   },
   {
     id:"comentario_viral_redes", cooldown:2,
+    vinculoMovil:{ app:'redes' },
     trigger:{ probabilidad:0.25 },
     texto:"Una publicación tuya en X de hace tiempo se hace viral en el peor momento posible: justo antes de un partido importante.",
     variantes:[
@@ -2850,6 +2922,7 @@ const BANCO_EVENTOS = [
   // premia una buena decisión, y una vía de ingresos que solo se desbloquea con una cuenta grande
   // de verdad, aparte del sistema de patrocinio local/regional/nacional de siempre.
   { id:"video_viral_seguidores", cooldown:4,
+    vinculoMovil:{ app:'redes' },
     trigger:{ probabilidad:0.16 },
     texto:"Un vídeo tuyo de hace unos días —una jugada, una celebración, una imagen cualquiera del día a día— empieza a circular sin que nadie sepa muy bien por qué, y no para de crecer.",
     variantes:[
@@ -3915,6 +3988,7 @@ const BANCO_EVENTOS = [
   },
   {
     id:"salida_amigos_barrio", cooldown:4,
+    vinculoMovil:{ app:'whatsapp', grupoId:'grupo_pandilla' },
     // Quedar "esta noche" con la pandilla del barrio solo tiene sentido si estás jugando en
     // España — jugando en el extranjero no puedes quedar en persona con ellos.
     trigger:{ edadMin:18, probabilidad:0.22, condicion: j => !j.club.extranjero },
@@ -4110,45 +4184,6 @@ const BANCO_EVENTOS = [
     ]
   },
   {
-    id:"nico_reto_conjunto", cooldown:4,
-    trigger:{ probabilidad:0.15, condicion: j => { const c = j.companeros.find(x=>x.id==='nico'); return !!c && !c.retirado &&c.club === j.club.nombre; } },
-    texto: j => { const c = j.companeros.find(x=>x.id==='nico'); return `Tu amigo ${c.apodo} te reta en el vestuario, con esa energía suya que no conoce el término medio: "Te apuesto lo que quieras a que meto más goles que tú esta temporada." Lo dice en broma, pero solo a medias.`; },
-    opciones:[
-      { texto:"Aceptar el reto con ganas",
-        resultado:"Chocáis la mano ahí mismo. Durante semanas os picáis con cada gol que marca cada uno — una tontería que, sin que lo digáis en voz alta, os hace entrenar un poco más fuerte a los dos.",
-        efectosFn: j => { const c = j.companeros.find(x=>x.id==='nico'); c.relacion = Math.min(100, c.relacion + 10); return {confianza:4, forma:3}; } },
-      { texto:"Quitarle importancia, no todo es competir",
-        resultado: j => { const c = j.companeros.find(x=>x.id==='nico'); return `${c.apodo} se encoge de hombros, algo decepcionado. "Tú te lo pierdes", dice, aunque no insiste más.`; },
-        efectos:{} }
-    ]
-  },
-  {
-    id:"nico_se_ilusiona", cooldown:5,
-    trigger:{ probabilidad:0.13, condicion: j => { const c = j.companeros.find(x=>x.id==='nico'); return !!c && !c.retirado &&c.club === j.club.nombre; } },
-    texto: j => { const c = j.companeros.find(x=>x.id==='nico'); return `Consigues algo importante esta temporada, y tu amigo ${c.apodo} se pone más contento que tú mismo. Te organiza una cena para celebrarlo con medio equipo, insistiendo en que esto "hay que vivirlo a lo grande".`; },
-    opciones:[
-      { texto:"Dejarte llevar por su ilusión",
-        resultado:"Acabáis la noche coreando tonterías en una mesa demasiado ruidosa. Ver a alguien alegrarse tanto por ti, sin ninguna envidia de por medio, no tiene precio.",
-        efectosFn: j => { const c = j.companeros.find(x=>x.id==='nico'); c.relacion = Math.min(100, c.relacion + 12); return {mental:4, vestuario:3}; } },
-      { texto:"Preferir algo más tranquilo, no es tu estilo",
-        resultado: j => { const c = j.companeros.find(x=>x.id==='nico'); return `${c.apodo} respeta que no te apetezca la fiesta, pero se le nota un poco de decepción por no poder celebrarlo como él quería.`; },
-        efectos:{} }
-    ]
-  },
-  {
-    id:"nico_mensaje_ambicioso", cooldown:5,
-    trigger:{ probabilidad:0.12, condicion: j => { const c = j.companeros.find(x=>x.id==='nico'); return !!c && !c.retirado &&!!c.club && c.club !== j.club.nombre; } },
-    texto: j => { const c = j.companeros.find(x=>x.id==='nico'); return `Tu amigo ${c.apodo} te escribe contándote sus planes: quiere dar el salto a una categoría más exigente cuanto antes, y quiere tu opinión antes de decidir nada. "Tú siempre dices las cosas claras", te dice.`; },
-    opciones:[
-      { texto:"Animarle a que se arriesgue",
-        resultado: j => { const c = j.companeros.find(x=>x.id==='nico'); return `Le dices que vaya a por ello sin mirar atrás. "Sabía que dirías eso", contesta, y notas que ya lo tenía decidido de todos modos.`; },
-        efectosFn: j => { const c = j.companeros.find(x=>x.id==='nico'); c.relacion = Math.min(100, c.relacion + 8); return {}; } },
-      { texto:"Aconsejarle prudencia",
-        resultado:"Le planteas los riesgos con calma. Te lo agradece, aunque por cómo te contesta, intuyes que va a hacer lo que ya tenía pensado desde el principio.",
-        efectos:{} }
-    ]
-  },
-  {
     id:"companero_reto_goles", cooldown:4, soloSiSano:true,
     trigger:{ edadMin:17, probabilidad:0.16, condicion: j => !S.retoGolesCompanero && (j.companeros||[]).some(c=>!c.retirado && c.club===j.club.nombre) },
     texto: j => {
@@ -4224,6 +4259,7 @@ const BANCO_EVENTOS = [
   },
   {
     id:"momento_viral_redes", cooldown:5,
+    vinculoMovil:{ app:'redes' },
     trigger:{ probabilidad:0.15 },
     texto:"Un vídeo tuyo tropezando con el cubo de las bebidas en el banquillo, grabado por un aficionado, se ha hecho viral en TikTok de la noche a la mañana. Millones de reproducciones y memes por todas partes.",
     variantes:[
@@ -11237,6 +11273,7 @@ function pintarMovilSheet(){
   // onclick propio (ver más abajo, sheet.onclick) — tocar la parte de arriba del asomo ya no abre
   // el móvil, solo las 5 apps lo hacen.
   const header = el('div','tel-header');
+  if(S.movilAbierto && S.jugador) header.appendChild(telPintarStatusStats(S.jugador));
   header.appendChild(el('div','tel-notch'));
   device.appendChild(header);
 
@@ -11302,12 +11339,18 @@ function pintarMovilSheet(){
       headerReal.appendChild(backReal);
       headerReal.appendChild(el('span','tel-title', S._ultimoTituloTopbar || ''));
       pantalla.appendChild(headerReal);
+      // Servicios/Compras vistas desde dentro del móvil llevan también las pestañas Banco/
+      // Servicios/Compras de la app Economía, igual que si se viera Banco — así se puede saltar
+      // entre las tres sin tener que volver antes.
+      if(S.screen === 'servicios' || S.screen === 'compras'){
+        pantalla.appendChild(telAppTabsEconomia(S.screen));
+      }
       while(app.firstChild){ pantalla.appendChild(app.firstChild); }
       // Si lo primero que trae la pantalla real es justo su propia tarjeta "← Volver" (Ajustes,
       // Servicios, Compras...), se retira: la cabecera del móvil de arriba ya cumple esa función
       // aquí dentro, y las dos juntas son ruido visual sin ningún control extra de verdad.
-      const primerBloque = pantalla.children[1];
-      if(primerBloque && primerBloque.classList.contains('card')){
+      const primerBloque = [...pantalla.children].find(hijo=>hijo.classList.contains('card'));
+      if(primerBloque){
         const botones = primerBloque.querySelectorAll('button');
         if(botones.length === 1 && botones[0].textContent.trim() === '← Volver') primerBloque.remove();
       }
@@ -11371,7 +11414,7 @@ function pintar(){
     S.pantallaBase = S.screen;
   }
   if(!mismaPantalla && S.screen === 'menu') Sonido.menu();
-  if(S.jugador) comprobarLogros(S.jugador);
+  if(S.jugador){ comprobarLogros(S.jugador); comprobarDesbloqueoCasino(S.jugador); }
   // Red de seguridad general: si aun así el render de la pantalla falla (cualquier excepción
   // inesperada), no se deja la partida en una pantalla en blanco — se recupera a un sitio seguro
   // en vez de dejar el juego "trabado" sin ningún botón con el que seguir.
@@ -11450,6 +11493,63 @@ function render(){
   setTimeout(pintar, 260);
 }
 function el(tag, cls, html){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; }
+// Sustituto propio de confirm()/prompt(): los diálogos nativos del navegador no funcionan de
+// fiar aquí (el juego puede vivir embebido en un iframe con restricciones, donde confirm()/
+// prompt() se quedan mudos sin lanzar ningún error) — ver el comentario junto a .confirm-overlay
+// en el CSS. cerrarConfirmacion() se comparte entre las dos.
+function cerrarConfirmacion(){
+  const raiz = document.getElementById('confirm-root');
+  const overlay = raiz.querySelector('.confirm-overlay');
+  if(overlay){
+    overlay.classList.remove('show');
+    setTimeout(()=>{ raiz.innerHTML = ''; }, 220);
+  } else {
+    raiz.innerHTML = '';
+  }
+}
+function mostrarConfirmacion(mensaje, onOk, textoOk){
+  const raiz = document.getElementById('confirm-root');
+  raiz.innerHTML = '';
+  const overlay = el('div','confirm-overlay');
+  overlay.onclick = (e)=>{ if(e.target === overlay) cerrarConfirmacion(); };
+  const box = el('div','confirm-box');
+  box.appendChild(el('p','confirm-msg', mensaje));
+  const btns = el('div','confirm-btns');
+  const btnCancelar = document.createElement('button'); btnCancelar.className = 'btn-secondary'; btnCancelar.textContent = 'Cancelar';
+  btnCancelar.onclick = cerrarConfirmacion;
+  const btnOk = document.createElement('button'); btnOk.className = 'btn-main'; btnOk.textContent = textoOk || 'Aceptar';
+  btnOk.onclick = ()=>{ cerrarConfirmacion(); onOk(); };
+  btns.appendChild(btnCancelar); btns.appendChild(btnOk);
+  box.appendChild(btns);
+  overlay.appendChild(box);
+  raiz.appendChild(overlay);
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ overlay.classList.add('show'); }); });
+}
+function mostrarPromptTexto(mensaje, valorInicial, onOk){
+  const raiz = document.getElementById('confirm-root');
+  raiz.innerHTML = '';
+  const overlay = el('div','confirm-overlay');
+  overlay.onclick = (e)=>{ if(e.target === overlay) cerrarConfirmacion(); };
+  const box = el('div','confirm-box');
+  box.appendChild(el('p','confirm-msg', mensaje));
+  const input = document.createElement('input');
+  input.className = 'confirm-input';
+  input.type = 'text';
+  input.value = valorInicial || '';
+  box.appendChild(input);
+  const btns = el('div','confirm-btns');
+  const btnCancelar = document.createElement('button'); btnCancelar.className = 'btn-secondary'; btnCancelar.textContent = 'Cancelar';
+  btnCancelar.onclick = cerrarConfirmacion;
+  const btnOk = document.createElement('button'); btnOk.className = 'btn-main'; btnOk.textContent = 'Aceptar';
+  btnOk.onclick = ()=>{ const valor = input.value; cerrarConfirmacion(); onOk(valor); };
+  input.onkeydown = (e)=>{ if(e.key === 'Enter') btnOk.click(); };
+  btns.appendChild(btnCancelar); btns.appendChild(btnOk);
+  box.appendChild(btns);
+  overlay.appendChild(box);
+  raiz.appendChild(overlay);
+  setTimeout(()=>{ input.focus(); input.select(); }, 50);
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ overlay.classList.add('show'); }); });
+}
 // Envía un evento a Umami si el script de analítica ha cargado (puede no hacerlo: bloqueadores
 // de anuncios, sin conexión...). Nunca debe romper el juego si falla o no está disponible.
 // ---- Dashboard propio (Supabase): tabla "eventos", ver CLAUDE.md para el esquema. ----
@@ -11720,9 +11820,15 @@ function topbar(titulo){
   const topbarOuter = el('div','topbar');
   topbarOuter.appendChild(t);
   raiz.appendChild(topbarOuter);
-  if((S.jugador && !S.enFaseCreacion) || S.screen === 'prologoPrueba' || S.screen === 'prologoResultado'){
+  // La barra de progreso se ve también tirando el dado durante la prueba del prólogo y en la
+  // pantalla de las primeras ofertas (elegirClub) — antes desaparecía ahí (S.enFaseCreacion es
+  // true en todo el prólogo) y volvía a aparecer de golpe justo después, un corte raro en medio
+  // de la propia prueba de 3 días.
+  const esTiradaPrologo = S.screen === 'tirando' && S.pendingRoll && S.pendingRoll.esPrologo;
+  const esPrologoConBarra = S.screen === 'prologoPrueba' || S.screen === 'prologoResultado' || S.screen === 'elegirClub' || esTiradaPrologo;
+  if((S.jugador && !S.enFaseCreacion) || esPrologoConBarra){
     let totalPasos, pasoActual;
-    if(S.screen === 'prologoPrueba' || S.screen === 'prologoResultado'){
+    if(esPrologoConBarra){
       totalPasos = 3;
       pasoActual = Math.max(1, Math.min(3, S.pruebaDia||1));
     } else {
@@ -12555,6 +12661,21 @@ function svgRuedaRuleta(){
 }
 SCREENS.casino = function(){
   const j = S.jugador;
+  if(j.edad < 18){
+    topbar("Casino");
+    const cBloq = el('div','card');
+    cBloq.appendChild(crearEyebrow('Sala de juegos'));
+    cBloq.appendChild(el('h2',null,'Acceso restringido'));
+    const anos = 18 - j.edad;
+    cBloq.appendChild(el('div','event-text', `El casino del club es solo para mayores de edad. Podrás entrar dentro de ${anos} año${anos===1?'':'s'}, al cumplir 18.`));
+    const btnVolverBloq = document.createElement('button'); btnVolverBloq.className='btn-main';
+    btnVolverBloq.style.cssText = 'background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
+    btnVolverBloq.textContent = 'Volver';
+    btnVolverBloq.onclick = ()=>{ S.screen = S.pantallaBase || 'tabJugador'; render(); };
+    cBloq.appendChild(btnVolverBloq);
+    app.appendChild(cBloq);
+    return;
+  }
   topbar("Casino");
   const c = el('div','card');
   c.appendChild(crearEyebrow('Sala de juegos'));
@@ -13524,8 +13645,12 @@ function pintarFilaSlot(slot, contenedor, opciones){
     const btnGuardar = document.createElement('button'); btnGuardar.className='btn-main'; btnGuardar.style.cssText='flex:1;padding:9px;font-size:13px;background:transparent;color:var(--ink);border:1px solid var(--gold-dim);';
     btnGuardar.textContent = (resumen && resumen.nombre) ? 'Sobrescribir' : 'Guardar aquí';
     btnGuardar.onclick = opciones.onGuardar ? ()=>opciones.onGuardar(slot) : ()=>{
-      const confirmar = !(resumen && resumen.nombre) || confirm('Vas a sobrescribir la partida guardada en este hueco. ¿Seguro?');
-      if(confirmar && guardarPartida(slot)){ pintar(); }
+      const guardarYPintar = ()=>{ if(guardarPartida(slot)) pintar(); };
+      if(resumen && resumen.nombre){
+        mostrarConfirmacion('Vas a sobrescribir la partida guardada en este hueco. ¿Seguro?', guardarYPintar, 'Sobrescribir');
+      } else {
+        guardarYPintar();
+      }
     };
     filaBotones.appendChild(btnGuardar);
   }
@@ -13533,10 +13658,10 @@ function pintarFilaSlot(slot, contenedor, opciones){
     const btnBorrar = document.createElement('button'); btnBorrar.className='btn-main'; btnBorrar.style.cssText='padding:9px 12px;font-size:13px;background:transparent;color:var(--red);border:1px solid rgba(217,73,92,0.4);';
     btnBorrar.textContent = '🗑️';
     btnBorrar.onclick = ()=>{
-      if(confirm('¿Borrar la partida de este hueco? No se puede deshacer.')){
+      mostrarConfirmacion('¿Borrar la partida de este hueco? No se puede deshacer.', ()=>{
         borrarPartidaGuardada(slot);
         pintar();
-      }
+      }, 'Borrar');
     };
     filaBotones.appendChild(btnBorrar);
   }
@@ -13603,14 +13728,14 @@ SCREENS.ajustes = function(){
     btnSalir.innerHTML = `<span class="icono">${ICONOS_AJUSTES.menuPrincipal}</span>
       <span class="txt"><span class="titulo">Volver al menú principal</span><span class="subtitulo">Se guarda tu partida antes de salir</span></span>`;
     btnSalir.onclick = ()=>{
-      if(confirm('¿Volver al menú principal? Se guarda tu partida antes de salir, y podrás continuarla desde "Continuar carrera".')){
+      mostrarConfirmacion('¿Volver al menú principal? Se guarda tu partida antes de salir, y podrás continuarla desde "Continuar carrera".', ()=>{
         guardarPartida();
         S.jugador = null;
         S.pantallaBase = undefined;
         S.pantallaAnteriorAjustes = null;
         S.screen = 'menu';
         render();
-      }
+      }, 'Volver al menú');
     };
     grupoSalir.appendChild(btnSalir);
     menu.appendChild(grupoSalir);
@@ -13762,6 +13887,61 @@ function telAbrirPantallaReal(destino, antesDeIr){
   S.movilVista = 'pantallaReal';
   S.screen = destino;
   render();
+}
+// Barra de estado del móvil (misma línea que el notch, a la izquierda): abreviatura + número +
+// flecha de si ha subido o bajado desde el último paso de temporada. Solo con el móvil abierto
+// (en el asomo ya va justo el notch con las 5 apps debajo, sin sitio de sobra). La comparación es
+// contra el valor que tenía cada stat al EMPEZAR el paso actual (S.temporada + S.pasoIndex), no
+// contra el repintado anterior — así la flecha no parpadea a "sin cambios" en cada repintado
+// suelto (abrir/cerrar el móvil, tocar una pestaña...) y solo se actualiza cuando de verdad se
+// avanza de paso.
+const TEL_STATS_BARRA = [
+  { clave:'forma', abr:'FOR' },
+  { clave:'confianza', abr:'CNF' },
+  { clave:'salud', abr:'SAL' }
+];
+function telPintarStatusStats(j){
+  const actuales = {};
+  TEL_STATS_BARRA.forEach(s=>{ actuales[s.clave] = Math.round(j.stats[s.clave]||0); });
+  const clave = `${S.temporada}_${S.pasoIndex}`;
+  if(S._telStatsBaseClave !== clave){
+    S._telStatsBase = S._telStatsUltimo || actuales;
+    S._telStatsBaseClave = clave;
+  }
+  S._telStatsUltimo = actuales;
+  const wrap = el('div','tel-status-stats');
+  TEL_STATS_BARRA.forEach(s=>{
+    const base = (S._telStatsBase && S._telStatsBase[s.clave] !== undefined) ? S._telStatsBase[s.clave] : actuales[s.clave];
+    const dir = actuales[s.clave] > base ? 'up' : (actuales[s.clave] < base ? 'down' : '');
+    const item = el('span','tel-status-stat');
+    item.innerHTML = `<span class="lbl">${s.abr}</span><span class="num">${actuales[s.clave]}</span>${dir ? `<span class="arr ${dir}">${dir==='up'?'▲':'▼'}</span>` : ''}`;
+    wrap.appendChild(item);
+  });
+  return wrap;
+}
+// Fila de pestañas Banco/Servicios/Compras de la app Economía — se usa tanto en su vista nativa
+// (Banco) como incrustada encima de Servicios/Compras (SCREENS.servicios/compras dentro del
+// móvil), para poder saltar entre las tres sin volver antes a Banco. `activa` es 'banco'|
+// 'servicios'|'compras'. El tab Banco, cuando se pulsa desde dentro de una pantalla incrustada,
+// hace exactamente lo mismo que el botón atrás propio de esa pantalla (ver backReal en
+// pintarMovilSheet): vuelve a la vista/pantalla que hubiera antes de entrar.
+function telAppTabsEconomia(activa){
+  const appTabs = el('div','tel-app-tabs');
+  const tabBanco = document.createElement('button'); tabBanco.className='tel-app-tab'+(activa==='banco'?' active':''); tabBanco.textContent='Banco';
+  tabBanco.onclick = ()=>{
+    if(S.movilVista !== 'pantallaReal'){ S.telEconomiaTab='banco'; pintar(); return; }
+    if(S.movilVistaAnterior === 'home' || !S.movilVistaAnterior){ cerrarMovilSheet(); return; }
+    S.screen = S.movilPantallaAnterior || S.pantallaBase || 'tabJugador';
+    S.movilVista = S.movilVistaAnterior;
+    S.movilPantallaAnterior = null;
+    pintar();
+  };
+  const tabServicios = document.createElement('button'); tabServicios.className='tel-app-tab'+(activa==='servicios'?' active':''); tabServicios.textContent='Servicios';
+  tabServicios.onclick = ()=>{ S.pantallaAnteriorServicios = S.pantallaAnteriorServicios || S.pantallaBase || S.screen; telAbrirPantallaReal('servicios'); };
+  const tabCompras = document.createElement('button'); tabCompras.className='tel-app-tab'+(activa==='compras'?' active':''); tabCompras.textContent='Compras';
+  tabCompras.onclick = ()=>{ S.pantallaAnteriorCompras = S.pantallaAnteriorCompras || S.pantallaBase || S.screen; telAbrirPantallaReal('compras'); };
+  appTabs.appendChild(tabBanco); appTabs.appendChild(tabServicios); appTabs.appendChild(tabCompras);
+  return appTabs;
 }
 // Plantillas de notificaciones "de vez en cuando" (WhatsApp/Email/Redes), ligadas al ESTADO
 // reciente del jugador (lesión, racha, crisis, forma, salto de popularidad) en vez de a un
@@ -14617,15 +14797,7 @@ function renderMovilContenido(c, j){
     header.appendChild(el('span','tel-title','Economía'));
     c.appendChild(header);
 
-    const appTabs = el('div','tel-app-tabs');
-    const tabBanco = document.createElement('button'); tabBanco.className='tel-app-tab active'; tabBanco.textContent='Banco';
-    tabBanco.onclick = ()=>{ S.telEconomiaTab='banco'; pintar(); };
-    const tabServicios = document.createElement('button'); tabServicios.className='tel-app-tab'; tabServicios.textContent='Servicios';
-    tabServicios.onclick = ()=>{ S.pantallaAnteriorServicios = S.pantallaBase || S.screen; telAbrirPantallaReal('servicios'); };
-    const tabCompras = document.createElement('button'); tabCompras.className='tel-app-tab'; tabCompras.textContent='Compras';
-    tabCompras.onclick = ()=>{ S.pantallaAnteriorCompras = S.pantallaBase || S.screen; telAbrirPantallaReal('compras'); };
-    appTabs.appendChild(tabBanco); appTabs.appendChild(tabServicios); appTabs.appendChild(tabCompras);
-    c.appendChild(appTabs);
+    c.appendChild(telAppTabsEconomia('banco'));
 
     const desglose = telDesglosePasoActual(j);
     const trendNeto = desglose.totalIn - desglose.totalOut;
@@ -14856,11 +15028,16 @@ function renderMovilContenido(c, j){
         if(t.entrante) thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${t.entrante}</div>`));
         const estado1 = telPintarIntercambio(thread, t.id, t.mapa, t.pool);
         activo = { estado:estado1, aplicar:t.aplicar, pool:t.pool };
-        if(estado1 === 'cerrado'){
-          if(t.id === contacto.id){
-            const cambios = (S.movilCambios && S.movilCambios[contacto.id]) || [];
-            if(cambios.length) thread.appendChild(telChipsEfecto(cambios));
-          }
+        if(estado1 === 'cerrado' && t.id === contacto.id){
+          // El intercambio FIJO de cada contacto ya tiene su propio cierre, escrito a medida
+          // para esa respuesta concreta (p. ej. "Eres un profesional de cuidado 😅") — encadenar
+          // encima una segunda ronda con el pool GENÉRICO ("¿y tú qué tal todo?") sonaba a no
+          // venir a cuento la mitad de las veces (bug real, reportado con captura). La segunda
+          // ronda genérica se queda solo para los mensajes sueltos que van llegando después
+          // (más abajo), que sí están pensados para ese pool abierto tipo "cómo estás".
+          const cambios = (S.movilCambios && S.movilCambios[contacto.id]) || [];
+          if(cambios.length) thread.appendChild(telChipsEfecto(cambios));
+        } else if(estado1 === 'cerrado'){
           const idR2 = t.id+'_r2';
           S.movilRespuestasExtra = S.movilRespuestasExtra || {};
           const estado2 = telPintarIntercambio(thread, idR2, S.movilRespuestasExtra, poolR2);
@@ -15649,10 +15826,10 @@ function pintarFilaSlotMenu(slot, contenedor, opciones){
     btnBorrar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M9.5 7V5.2a1 1 0 011-1h3a1 1 0 011 1V7M18 7l-.8 12.2a1.6 1.6 0 01-1.6 1.5H8.4a1.6 1.6 0 01-1.6-1.5L6 7"/><path d="M10.2 11v6M13.8 11v6"/></svg>`;
     btnBorrar.onclick = (e)=>{
       e.stopPropagation();
-      if(confirm('¿Borrar la partida de este hueco? No se puede deshacer.')){
+      mostrarConfirmacion('¿Borrar la partida de este hueco? No se puede deshacer.', ()=>{
         borrarPartidaGuardada(slot);
         (opciones.onCambio || pintar)();
-      }
+      }, 'Borrar');
     };
     filaBtns.appendChild(btnBorrar);
   }
@@ -15824,25 +16001,26 @@ SCREENS.escudosPersonalizados = function(){
   const btnMod = document.createElement('button');
   btnMod.className = 'btn-main';
   btnMod.textContent = 'Cargar Mod Escudos 2026/2027';
-  btnMod.onclick = async ()=>{
-    if(!confirm('Se van a aplicar los escudos del "Mod Escudos 2026/2027" (clubes, selecciones, ligas, títulos y marcas ya preparados). Se fusiona con lo que ya tengas personalizado, sin borrar nada. ¿Continuar?')) return;
-    btnMod.disabled = true;
-    const textoOriginal = btnMod.textContent;
-    btnMod.textContent = 'Cargando…';
-    try{
-      const resp = await fetch('mod-escudos-2026-2027.json');
-      if(!resp.ok) throw new Error('http');
-      const datos = await resp.json();
-      const resultado = importarEscudosPersonalizados(datos);
-      if(!resultado.ok){ mostrarAvisoEscudos(resultado.error); return; }
-      mostrarAvisoEscudos(`Mod cargado: ${resultado.clubes} clubes, ${resultado.selecciones} selecciones, ${resultado.ligas} ligas, ${resultado.titulos} títulos y ${resultado.marcas} marcas.`, true);
-      pintarFilas();
-    }catch(e){
-      mostrarAvisoEscudos('No se ha podido cargar el mod. Comprueba tu conexión e inténtalo de nuevo.');
-    }finally{
-      btnMod.disabled = false;
-      btnMod.textContent = textoOriginal;
-    }
+  btnMod.onclick = ()=>{
+    mostrarConfirmacion('Se van a aplicar los escudos del "Mod Escudos 2026/2027" (clubes, selecciones, ligas, títulos y marcas ya preparados). Se fusiona con lo que ya tengas personalizado, sin borrar nada. ¿Continuar?', async ()=>{
+      btnMod.disabled = true;
+      const textoOriginal = btnMod.textContent;
+      btnMod.textContent = 'Cargando…';
+      try{
+        const resp = await fetch('mod-escudos-2026-2027.json');
+        if(!resp.ok) throw new Error('http');
+        const datos = await resp.json();
+        const resultado = importarEscudosPersonalizados(datos);
+        if(!resultado.ok){ mostrarAvisoEscudos(resultado.error); return; }
+        mostrarAvisoEscudos(`Mod cargado: ${resultado.clubes} clubes, ${resultado.selecciones} selecciones, ${resultado.ligas} ligas, ${resultado.titulos} títulos y ${resultado.marcas} marcas.`, true);
+        pintarFilas();
+      }catch(e){
+        mostrarAvisoEscudos('No se ha podido cargar el mod. Comprueba tu conexión e inténtalo de nuevo.');
+      }finally{
+        btnMod.disabled = false;
+        btnMod.textContent = textoOriginal;
+      }
+    }, 'Continuar');
   };
   modCard.appendChild(btnMod);
   c.appendChild(modCard);
@@ -15987,19 +16165,19 @@ SCREENS.escudosPersonalizados = function(){
     btnUrl.textContent = 'URL';
     btnUrl.onclick = ()=>{
       const actual = escudoPersonalizado(tipo, nombre);
-      const valor = prompt(`Pega la URL de la imagen para "${nombre}":`, actual && !actual.startsWith('data:') ? actual : '');
-      if(valor === null) return;
-      const url = valor.trim();
-      if(!url) return;
-      if(!/^https?:\/\//i.test(url)){ mostrarAvisoEscudos('Tiene que ser una URL que empiece por http:// o https://'); return; }
-      const guardarYActualizar = (valorFinal)=>{
-        const ok = fijarEscudoPersonalizado(tipo, nombre, valorFinal);
-        if(!ok){ mostrarAvisoEscudos('No se ha podido guardar.'); return; }
-        actualizar();
-      };
-      // Se intenta recortar (o ajustar, si es una liga), igual que al subir un archivo; si el
-      // servidor de esa URL no permite leer la imagen (CORS), se guarda tal cual, sin procesar.
-      procesarUrlDelTipo(tipo, url).then(guardarYActualizar).catch(()=> guardarYActualizar(url));
+      mostrarPromptTexto(`Pega la URL de la imagen para "${nombre}":`, actual && !actual.startsWith('data:') ? actual : '', (valor)=>{
+        const url = (valor||'').trim();
+        if(!url) return;
+        if(!/^https?:\/\//i.test(url)){ mostrarAvisoEscudos('Tiene que ser una URL que empiece por http:// o https://'); return; }
+        const guardarYActualizar = (valorFinal)=>{
+          const ok = fijarEscudoPersonalizado(tipo, nombre, valorFinal);
+          if(!ok){ mostrarAvisoEscudos('No se ha podido guardar.'); return; }
+          actualizar();
+        };
+        // Se intenta recortar (o ajustar, si es una liga), igual que al subir un archivo; si el
+        // servidor de esa URL no permite leer la imagen (CORS), se guarda tal cual, sin procesar.
+        procesarUrlDelTipo(tipo, url).then(guardarYActualizar).catch(()=> guardarYActualizar(url));
+      });
     };
     acciones.appendChild(btnUrl);
     if(tieneCustom){
@@ -16086,10 +16264,10 @@ SCREENS.escudosPersonalizados = function(){
     btnReset.textContent = 'Quitar todos los escudos personalizados';
     btnReset.style.marginTop = '18px';
     btnReset.onclick = ()=>{
-      if(confirm('¿Quitar todas las imágenes personalizadas y volver a los escudos generados por el juego? No se puede deshacer.')){
+      mostrarConfirmacion('¿Quitar todas las imágenes personalizadas y volver a los escudos generados por el juego? No se puede deshacer.', ()=>{
         quitarTodosLosEscudosPersonalizados();
         pintar();
-      }
+      }, 'Quitar todo');
     };
     c.appendChild(btnReset);
   }
@@ -16288,16 +16466,28 @@ SCREENS.crear = function(){
   const row1 = el('div','field-row');
   const f1 = el('div','field');
   f1.appendChild(el('label',null,'Nombre'));
+  const wrapN = el('div','field-inline');
   const inp = document.createElement('input'); inp.type='text'; inp.value=state.nombrePila; inp.placeholder='Nombre';
   inp.oninput = e=>{ state.nombrePila = e.target.value; };
-  f1.appendChild(inp);
+  wrapN.appendChild(inp);
+  const btnDadoN = document.createElement('button'); btnDadoN.type='button'; btnDadoN.className='btn-dado'; btnDadoN.title='Nombre al azar';
+  btnDadoN.innerHTML = iconoInline('dado',16);
+  btnDadoN.onclick = ()=>{ state.nombrePila = NOMBRES_PROTEGIDO[Math.floor(Math.random()*NOMBRES_PROTEGIDO.length)]; pintar(); };
+  wrapN.appendChild(btnDadoN);
+  f1.appendChild(wrapN);
   row1.appendChild(f1);
 
   const f1b = el('div','field');
   f1b.appendChild(el('label',null,'Apellido'));
+  const wrapA = el('div','field-inline');
   const inpApellido = document.createElement('input'); inpApellido.type='text'; inpApellido.value=state.apellido; inpApellido.placeholder='Apellido';
   inpApellido.oninput = e=>{ state.apellido = e.target.value; };
-  f1b.appendChild(inpApellido);
+  wrapA.appendChild(inpApellido);
+  const btnDadoA = document.createElement('button'); btnDadoA.type='button'; btnDadoA.className='btn-dado'; btnDadoA.title='Apellido al azar';
+  btnDadoA.innerHTML = iconoInline('dado',16);
+  btnDadoA.onclick = ()=>{ state.apellido = APELLIDOS_PROTEGIDO[Math.floor(Math.random()*APELLIDOS_PROTEGIDO.length)]; pintar(); };
+  wrapA.appendChild(btnDadoA);
+  f1b.appendChild(wrapA);
   row1.appendChild(f1b);
   c.appendChild(row1);
 
@@ -16406,8 +16596,8 @@ SCREENS.personalizarGrupo = function(){
   c.appendChild(el('div','event-text', `Estos son los amigos con los que has crecido jugando al fútbol en ${j.localidad}. Puedes cambiarles el nombre si quieres, o dejarlos tal cual — te van a acompañar durante toda la carrera.`));
 
   const personajes = [
-    ...j.companeros.map(cmp=>({ id:cmp.id, titulo:cmp.titulo, desc:cmp.desc })),
-    { id:'rival', titulo: RIVAL_CANTERA_BASE.titulo, desc:'El que mejor juega de todos vosotros, sin discusión — el que todo el barrio da por hecho que será el primero en dar el salto.' }
+    ...j.companeros.map(cmp=>({ id:cmp.id, titulo:cmp.titulo, desc:cmp.desc, esRival:false })),
+    { id:'rival', titulo: RIVAL_CANTERA_BASE.titulo, desc:'El que mejor juega de todos vosotros, sin discusión — el que todo el barrio da por hecho que será el primero en dar el salto.', esRival:true }
   ];
 
   personajes.forEach(p=>{
@@ -16421,13 +16611,26 @@ SCREENS.personalizarGrupo = function(){
     box.appendChild(el('div','field-hint', p.desc));
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;gap:8px;margin-top:8px;';
+    const inpEstilo = 'flex:1;min-width:0;padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);font-family:\'Space Grotesk\',sans-serif;font-size:14px;color:var(--ink);';
     const inpN = document.createElement('input'); inpN.type='text'; inpN.value = state[p.id].nombre; inpN.placeholder='Nombre';
-    inpN.style.cssText = 'flex:1;min-width:0;padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);font-family:\'Space Grotesk\',sans-serif;font-size:14px;color:var(--ink);';
+    inpN.style.cssText = inpEstilo;
     inpN.oninput = e=>{ state[p.id].nombre = e.target.value; };
-    const inpA = document.createElement('input'); inpA.type='text'; inpA.value = state[p.id].apellido; inpA.placeholder='Apellido (opcional)';
-    inpA.style.cssText = inpN.style.cssText;
-    inpA.oninput = e=>{ state[p.id].apellido = e.target.value; };
-    row.appendChild(inpN); row.appendChild(inpA);
+    row.appendChild(inpN);
+    if(p.esRival){
+      const inpA = document.createElement('input'); inpA.type='text'; inpA.value = state[p.id].apellido; inpA.placeholder='Apellido (opcional)';
+      inpA.style.cssText = inpEstilo;
+      inpA.oninput = e=>{ state[p.id].apellido = e.target.value; };
+      row.appendChild(inpA);
+    }
+    const btnDado = document.createElement('button'); btnDado.type='button'; btnDado.className='btn-dado';
+    btnDado.innerHTML = iconoInline('dado',16);
+    btnDado.title = 'Nombre al azar';
+    btnDado.onclick = ()=>{
+      state[p.id].nombre = NOMBRES_PROTEGIDO[Math.floor(Math.random()*NOMBRES_PROTEGIDO.length)];
+      if(p.esRival) state[p.id].apellido = APELLIDOS_PROTEGIDO[Math.floor(Math.random()*APELLIDOS_PROTEGIDO.length)];
+      pintar();
+    };
+    row.appendChild(btnDado);
     box.appendChild(row);
     c.appendChild(box);
   });
@@ -16436,8 +16639,8 @@ SCREENS.personalizarGrupo = function(){
   btn.onclick = ()=>{
     j.companeros.forEach(cmp=>{
       const st = state[cmp.id];
-      const nombreFinal = `${(st.nombre||'').trim()} ${(st.apellido||'').trim()}`.trim();
-      if(nombreFinal){ cmp.nombre = nombreFinal; cmp.apodo = (st.nombre||'').trim() || cmp.apodo; }
+      const nombreFinal = (st.nombre||'').trim();
+      if(nombreFinal){ cmp.nombre = nombreFinal; cmp.apodo = nombreFinal; }
     });
     const stRival = state.rival;
     const nombreRivalFinal = `${(stRival.nombre||'').trim()} ${(stRival.apellido||'').trim()}`.trim();
@@ -16457,7 +16660,7 @@ SCREENS.prologoIntro = function(){
   const c = el('div','card');
   c.appendChild(crearEyebrow('Prólogo'));
   c.appendChild(el('h2',null,'Los días de la prueba'));
-  c.appendChild(el('div','lore-box', `Llevas media vida jugando al fútbol en las calles y los descampados de ${j.localidad}. Nadie de tu familia se ha dedicado nunca a esto, pero tú no has dejado de soñar con ello ni un solo día. A tu lado, desde que erais unos críos, siempre ha estado la misma pandilla: ${j.companeros[0].apodo}, el que siempre tiene una broma lista; ${j.companeros[1].apodo}, el que pone paz cuando hace falta; ${j.companeros[2].apodo}, el que ya habla de fichar por un grande antes de haber debutado en ningún sitio. Y ${j.rival.nombre}, el que mejor juega de todos vosotros, sin discusión — el que todo el barrio da por hecho que será el primero en dar el salto.`));
+  c.appendChild(el('div','lore-box', `Llevas media vida jugando al fútbol en las calles y los descampados de ${j.localidad}. Nadie de tu familia se ha dedicado nunca a esto, pero tú no has dejado de soñar con ello ni un solo día. A tu lado, desde que erais unos críos, siempre ha estado la misma pandilla: ${j.companeros[0].apodo}, el que siempre tiene una broma lista; ${j.companeros[1].apodo}, el que pone paz cuando hace falta. Y ${j.rival.nombre}, el que mejor juega de todos vosotros, sin discusión — el que todo el barrio da por hecho que será el primero en dar el salto.`));
   c.appendChild(el('div','lore-box', `Hoy, con ${j.edad} años, empiezan tres días de pruebas abiertas a las que acuden ojeadores de varios clubes de 3ª RFEF de la zona. Hay más de cuarenta chavales en el campo, ${j.rival.apodo||j.rival.nombre} entre ellos. Solo unos pocos se van a llevar una llamada al final.`));
   c.appendChild(el('p',null,`<span style="color:var(--ink-soft)">Tres días para dejar huella. Cuanto mejor lo hagas cada jornada, más ojos se fijarán en ti.</span>`));
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Salir al campo →';
@@ -17781,6 +17984,10 @@ function telGastoAnualServicios(j){
 // Acordeón propio (no comparte estado con el de SCREENS.gastos, para no desincronizar qué
 // categoría ves abierta en cada pantalla).
 function renderizarPlantillaServicios(j, contenedor){
+  const saldo = el('div','tienda-online-saldo');
+  saldo.innerHTML = `<span class="lbl">Tu saldo</span><span class="val">${formatearEuros(j.stats.dinero||0)}</span>`;
+  contenedor.appendChild(saldo);
+
   const gastoAnual = telGastoAnualServicios(j);
   const resumen = el('div','staff-resumen');
   resumen.innerHTML = `<span class="lbl">Gasto anual en servicios</span><span class="val">${formatearEuros(gastoAnual)}</span>`;
@@ -18381,11 +18588,46 @@ SCREENS.evento = function(){
   const ev = S.eventoActual;
   const c = el('div','suceso-plano');
   c.appendChild(crearEyebrow('Decisión'));
-  const vecesVisto = j.eventosVistos.filter(v=>v.id===ev.id).length;
-  const textoMostrado = (vecesVisto > 1 && ev.variantes && ev.variantes.length)
-    ? resolverTexto(ev.variantes[Math.floor(Math.random()*ev.variantes.length)], j)
-    : resolverTexto(ev.texto, j);
-  c.appendChild(el('div','event-text', textoMostrado));
+  // El texto (y su variante, si toca sortear una) se decide UNA sola vez por suceso, no en cada
+  // repintado — S.eventoActual es la misma copia superficial mientras dure este suceso (se
+  // interactúe con el móvil, se repinte por lo que sea...), así que cachear aquí es seguro y
+  // evita que el texto "cambie solo" de un repintado a otro (bug real: se notaba sobre todo al
+  // abrir/usar el móvil mientras había un suceso de fondo, cada toque volvía a sortear variante).
+  if(ev._textoResuelto === undefined){
+    const vecesVisto = j.eventosVistos.filter(v=>v.id===ev.id).length;
+    ev._textoResuelto = (vecesVisto > 1 && ev.variantes && ev.variantes.length)
+      ? resolverTexto(ev.variantes[Math.floor(Math.random()*ev.variantes.length)], j)
+      : resolverTexto(ev.texto, j);
+  }
+  c.appendChild(el('div','event-text', ev._textoResuelto));
+  // Sucesos que hablan de intercambiar mensajes o de hacerte viral en redes enlazan con la app
+  // correspondiente del móvil: un botón abre el móvil YA dentro de esa conversación/feed (sin
+  // tocar S.screen ni el suceso de fondo, que sigue ahí para resolverse con sus opciones de
+  // siempre en cuanto se cierre el móvil — ver items 6/7/8). Cobertura parcial, aplicado a los
+  // sucesos donde el vínculo es inequívoco (BANCO_EVENTOS pasa de cien entradas).
+  if(ev.vinculoMovil){
+    const vinc = ev.vinculoMovil;
+    const banner = document.createElement('button');
+    banner.type = 'button';
+    banner.className = 'suceso-vinculo-movil';
+    banner.innerHTML = `${iconoInline(vinc.app==='redes'?'comunicacion':'movil',18)}<span>${vinc.app==='redes'?'Ver en Redes':'Ver en WhatsApp'}</span>`;
+    banner.onclick = ()=>{
+      S.movilAbierto = true;
+      if(vinc.app==='redes'){
+        S.movilVista = 'redes';
+      } else if(vinc.grupoId){
+        S.movilVista = 'grupo';
+        S.movilGrupoAbierto = vinc.grupoId;
+      } else if(vinc.contactoId){
+        S.movilVista = 'thread';
+        S.movilContactoAbierto = vinc.contactoId;
+      } else {
+        S.movilVista = 'chatlist';
+      }
+      pintar();
+    };
+    c.appendChild(banner);
+  }
   if(ev.id && ev.id.indexOf('encargo_tactico_') === 0){
     const idxEncargo = parseInt(ev.id.slice('encargo_tactico_'.length), 10);
     const momentoEncargo = (ENCARGOS_TACTICOS[idxEncargo] || {}).momento || 'previo';
