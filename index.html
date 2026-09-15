@@ -1227,14 +1227,6 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   border-radius:28px 28px 0 0; padding:12px;
   box-shadow:0 -10px 40px rgba(0,0,0,0.5), inset 0 0 0 1.5px rgba(255,255,255,0.06);
 }
-/* Franja de fondo de la barra de estado, de lado a lado del aparato (no solo del contenido) —
-   por debajo del propio .tel-header (que lleva la info), con las mismas esquinas superiores que
-   .tel-device para no cuadrar la curva. Sin esto, el notch y los stats flotaban directamente
-   sobre .tel-screen, sin ninguna franja que los agrupase como una barra de estado real. */
-.tel-statusbar-bg{
-  position:absolute; top:0; left:0; right:0; height:50px; z-index:5;
-  background:rgba(0,0,0,0.24); border-radius:28px 28px 0 0; pointer-events:none;
-}
 /* Notch + notificaciones: FLOTAN sobre la propia pantalla (.tel-screen), no en una franja aparte
    por encima — como en un móvil actual, donde la pantalla llega hasta arriba y el recorte de la
    cámara/isla dinámica y los iconos de estado se ven DENTRO del propio display, no sobre un
@@ -11314,11 +11306,6 @@ function pintarMovilSheet(){
   }
   const sheet = el('div','tel-sheet'+(deshabilitada?' deshabilitada':''));
   const device = el('div','tel-device');
-
-  // Franja de fondo de la barra de estado, de lado a lado (ver .tel-statusbar-bg) — detrás del
-  // propio header, para que el notch y los stats se lean como una barra de estado real y no
-  // floten sueltos sobre la pantalla del móvil.
-  device.appendChild(el('div','tel-statusbar-bg'));
 
   // Notch: en reposo es todo lo que asoma por encima de las apps de acceso directo. Ya no tiene
   // onclick propio (ver más abajo, sheet.onclick) — tocar la parte de arriba del asomo ya no abre
