@@ -11561,6 +11561,18 @@ function pintar(){
   app.classList.remove('fade-out');
   void app.offsetWidth;
   app.classList.add('fade-in');
+  // Con el móvil abierto en una vista NATIVA (no una pantalla real incrustada, ver
+  // TEL_PANTALLAS_EMBEBIBLES), #app no se ve — el aparato lo tapa entero — así que no debe
+  // fundirse de vuelta aquí. Sin esto, #app siempre reaparecía un instante (su propio fade-in es
+  // inmediato, mientras que el fundido del móvil/backdrop se retrasa a próposito un par de
+  // frames con doble rAF para poder animarse) antes de que el móvil terminara de cubrirlo — se
+  // notaba sobre todo al cargar una partida guardada con el móvil ya abierto en una app nativa
+  // (bug real, reportado dos veces: al abrir cualquier app nativa, y al cargar una partida así).
+  // Va CENTRALIZADO aquí (no en cada sitio que abre una app) para cubrir cualquier camino que
+  // deje el móvil abierto así, incluida la carga de partida.
+  if(S.movilAbierto && S.movilVista !== 'pantallaReal'){
+    app.classList.remove('fade-in');
+  }
   requestAnimationFrame(()=>{
     const destacado = app.querySelector('.press-headline, .season-reveal .num');
     if(destacado) destacado.scrollIntoView({ behavior:'smooth', block:'center' });
@@ -13931,29 +13943,16 @@ const TEL_CARPETA_REDES = {
 // sujeto a cambiar qué apps son estas 5. Con esto, el resto de apps (App Store, Club,
 // Calendario, Email, Ajustes del móvil, carpetas...) quedan aparcadas por ahora: su código
 // sigue aquí tal cual, sencillamente no hay ningún camino en la interfaz que lleve a ellas.
-// Abre una vista NATIVA del móvil (no una pantalla real incrustada, ver telAbrirPantallaReal):
-// difumina #app (el fondo real) y lo deja escondido — a diferencia de render() normal, que lo
-// vuelve a traer de fundido en cuanto repinta. Para Casino (pantallaReal) eso no se nota porque
-// su contenido se MUEVE dentro de .tel-screen y #app queda vacío de verdad; para WhatsApp/Redes/
-// Entreno/Economía, S.screen no cambia (solo S.movilVista), así que #app repinta la MISMA
-// pantalla de siempre y, con solo render(), se veía "reaparecer" un instante antes de que el
-// móvil terminara de subir encima (bug real, reportado). Quitar 'fade-in' justo después del
-// pintar() evita esa reaparición — el móvil ya lo tapa, no hace falta que se vea fundirse de vuelta.
-function telAbrirAppNativa(vista){
-  if(app.children.length === 0){ S.movilVista = vista; pintar(); return; }
-  app.classList.remove('fade-in');
-  app.classList.add('fade-out');
-  setTimeout(()=>{
-    S.movilVista = vista;
-    pintar();
-    app.classList.remove('fade-in');
-  }, 260);
-}
+// ir() usa render() (fundido de #app, 260ms) en vez de pintar() directo, para que el fondo real
+// se difumine al abrir cualquier app — el propio pintar() (ver su comentario junto a
+// "S.movilAbierto && S.movilVista !== 'pantallaReal'") ya se encarga de que #app no vuelva a
+// aparecer mientras el móvil esté abierto en una vista nativa, venga la llamada de aquí, de
+// cargar una partida guardada o de cualquier otro sitio.
 const TEL_DOCK_APPS = [
-  { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, ir:()=>{ telAbrirAppNativa('chatlist'); } },
-  { id:'redes', nombre:'Redes', clase:'redes', icono:TEL_ICONO_REDES, ir:()=>{ telAbrirAppNativa('redes'); } },
-  { id:'entrenamiento', nombre:'Entreno', clase:'entrenamiento', icono:TEL_ICONO_ENTRENAMIENTO, ir:()=>{ telAbrirAppNativa('entrenamiento'); } },
-  { id:'economia', nombre:'Economía', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ telAbrirAppNativa('economia'); } },
+  { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, ir:()=>{ S.movilVista='chatlist'; render(); } },
+  { id:'redes', nombre:'Redes', clase:'redes', icono:TEL_ICONO_REDES, ir:()=>{ S.movilVista='redes'; render(); } },
+  { id:'entrenamiento', nombre:'Entreno', clase:'entrenamiento', icono:TEL_ICONO_ENTRENAMIENTO, ir:()=>{ S.movilVista='entrenamiento'; render(); } },
+  { id:'economia', nombre:'Economía', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ S.movilVista='economia'; render(); } },
   { id:'casino', nombre:'Casino', clase:'casino', icono:TEL_ICONO_CASINO, ir:()=>{ telAbrirPantallaReal('casino'); } }
 ];
 const TEL_APPS_BLOQUEADAS = [
