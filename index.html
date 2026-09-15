@@ -1233,31 +1233,35 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    marco negro separado. En reposo es lo único que asoma; abierto, tocarlo vuelve a esconder el
    móvil (nada de flecha ni botón aparte — como pulsar la barra de estado de un móvil real).
    Alineada a los mismos 16px de .tel-dock-apps (no los 12px del padding del aparato) — con más
-   margen que ese mínimo en el propio contenido (ver .tel-status-stats/.tel-status-attrs) para que
+   margen que ese mínimo en el propio contenido (ver .tel-status-hora/.tel-status-iconos) para que
    la info nunca llegue a superponerse a la curva de las esquinas del aparato. */
 .tel-header{
   position:absolute; top:12px; left:16px; right:16px; height:38px; z-index:6;
   cursor:pointer; display:flex; align-items:center; justify-content:center;
 }
-/* Círculo tipo cámara delantera, no la píldora de antes — más pequeño y discreto. */
+/* Círculo tipo cámara delantera, no la píldora de antes — más pequeño, discreto y bien oscuro
+   (una cámara real no brilla, y con degradados claros se notaba demasiado). */
 .tel-notch{
   width:20px; height:20px; border-radius:50%; flex-shrink:0;
-  background:radial-gradient(circle at 35% 32%, #3a3d47 0%, #0b0c0f 60%, #000 100%);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08);
+  background:radial-gradient(circle at 35% 32%, #1a1b20 0%, #050506 55%, #000 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05);
 }
-/* Estado (izquierda) y habilidades (derecha) del jugador, siempre visibles en esta misma línea
-   — con el móvil recogido (asomo) o abierto, da igual: ver telPintarStatusStats/telPintarStatusAttrs
-   en pintarMovilSheet(). */
-.tel-status-stats{ position:absolute; left:4px; top:50%; transform:translateY(-50%); display:flex; gap:6px; pointer-events:none; }
-.tel-status-attrs{ position:absolute; right:4px; top:50%; transform:translateY(-50%); display:flex; gap:6px; pointer-events:none; }
-.tel-status-stat{
-  display:flex; align-items:center; gap:3px; font-family:'Inter',sans-serif; font-weight:700;
-  font-size:10px; color:rgba(255,255,255,0.9); background:rgba(0,0,0,0.4); border-radius:8px; padding:3px 6px;
+/* Hora (izquierda) e iconos de cobertura/wifi/batería (derecha), siempre visibles en esta misma
+   línea — con el móvil recogido (asomo) o abierto, da igual: ver telPintarStatusHora/
+   telPintarStatusIconos en pintarMovilSheet(). Como una barra de estado real: sin chip de fondo
+   propio, el texto/icono se apoya directo sobre la pantalla del móvil. */
+.tel-status-hora{
+  position:absolute; left:4px; top:50%; transform:translateY(-50%);
+  font-family:'Inter',sans-serif; font-weight:700; font-size:12px; color:rgba(255,255,255,0.92);
+  letter-spacing:.01em; pointer-events:none;
 }
-.tel-status-stat .lbl{ opacity:.65; letter-spacing:.02em; }
-.tel-status-stat .arr{ font-size:8px; line-height:1; }
-.tel-status-stat .arr.up{ color:#5fd97e; }
-.tel-status-stat .arr.down{ color:#e2544b; }
+.tel-status-iconos{
+  position:absolute; right:4px; top:50%; transform:translateY(-50%);
+  display:flex; align-items:center; gap:5px; color:rgba(255,255,255,0.92); pointer-events:none;
+}
+.tel-status-ic{ display:flex; align-items:center; }
+.tel-status-ic svg{ display:block; width:15px; height:12px; }
+.tel-status-ic.bateria svg{ width:20px; height:12px; }
 /* Notificaciones DENTRO del propio móvil simulado (no de la página real): caen desde detrás del
    notch, cubriendo lo que haya debajo (asomo o pantalla abierta), igual que en un móvil de
    verdad. Ver pintarNotifMovil(). */
@@ -1279,8 +1283,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-notif-movil.objeto{ border-color:var(--gold); }
 .tel-notif-movil.atributo{ border-color:var(--gold); }
 .tel-notif-movil.riesgo{ border-color:var(--red); }
+/* Mismo radio que .tel-device menos su padding (34px - 9px = 25px), para que la curva de la
+   pantalla sea CONCÉNTRICA a la del aparato — mismo grosor de "marco" en cualquier punto del
+   borde, esquinas incluidas, en vez de que la curva de la pantalla se despegue de la del cuerpo. */
 .tel-screen{
-  flex:1; min-height:0; position:relative; background:var(--bg2); border-radius:44px 44px 0 0;
+  flex:1; min-height:0; position:relative; background:var(--bg2); border-radius:25px 25px 0 0;
   overflow-y:auto; overflow-x:hidden; padding:46px 14px 24px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05);
 }
@@ -11311,11 +11318,11 @@ function pintarMovilSheet(){
   // onclick propio (ver más abajo, sheet.onclick) — tocar la parte de arriba del asomo ya no abre
   // el móvil, solo las 5 apps lo hacen.
   const header = el('div','tel-header');
-  // Estado (izq.) y habilidades (der.) siempre visibles en esta línea, con el móvil recogido o
-  // abierto — antes solo salían con el móvil abierto.
+  // Hora (izq.) e iconos de cobertura/wifi/batería (der.), siempre visibles en esta línea, con
+  // el móvil recogido o abierto da igual — como la barra de estado de un móvil real.
   if(S.jugador){
-    header.appendChild(telPintarStatusStats(S.jugador));
-    header.appendChild(telPintarStatusAttrs(S.jugador));
+    header.appendChild(telPintarStatusHora());
+    header.appendChild(telPintarStatusIconos());
   }
   header.appendChild(el('div','tel-notch'));
   device.appendChild(header);
@@ -13945,51 +13952,25 @@ function telAbrirPantallaReal(destino, antesDeIr){
   S.screen = destino;
   render();
 }
-// Barra de estado del móvil (misma línea que el notch, a la izquierda): abreviatura + número +
-// flecha de si ha subido o bajado desde el último paso de temporada. Siempre visible, con el
-// móvil recogido (asomo) o abierto, da igual. La comparación es contra el valor que tenía cada
-// stat al EMPEZAR el paso actual (S.temporada + S.pasoIndex), no contra el repintado anterior —
-// así la flecha no parpadea a "sin cambios" en cada repintado suelto (abrir/cerrar el móvil,
-// tocar una pestaña...) y solo se actualiza cuando de verdad se avanza de paso.
-const TEL_STATS_BARRA = [
-  { clave:'forma', abr:'FOR' },
-  { clave:'confianza', abr:'CNF' },
-  { clave:'salud', abr:'SAL' }
-];
-function telPintarStatusStats(j){
-  const actuales = {};
-  TEL_STATS_BARRA.forEach(s=>{ actuales[s.clave] = Math.round(j.stats[s.clave]||0); });
-  const clave = `${S.temporada}_${S.pasoIndex}`;
-  if(S._telStatsBaseClave !== clave){
-    S._telStatsBase = S._telStatsUltimo || actuales;
-    S._telStatsBaseClave = clave;
-  }
-  S._telStatsUltimo = actuales;
-  const wrap = el('div','tel-status-stats');
-  TEL_STATS_BARRA.forEach(s=>{
-    const base = (S._telStatsBase && S._telStatsBase[s.clave] !== undefined) ? S._telStatsBase[s.clave] : actuales[s.clave];
-    const dir = actuales[s.clave] > base ? 'up' : (actuales[s.clave] < base ? 'down' : '');
-    const item = el('span','tel-status-stat');
-    item.innerHTML = `<span class="lbl">${s.abr}</span><span class="num">${actuales[s.clave]}</span>${dir ? `<span class="arr ${dir}">${dir==='up'?'▲':'▼'}</span>` : ''}`;
-    wrap.appendChild(item);
-  });
+// Barra de estado del móvil (misma línea que el notch): hora real a la izquierda, iconos de
+// cobertura/wifi/batería a la derecha — como la barra de estado de un móvil de verdad, ya sin
+// los stats del jugador (se probaron un par de rondas, pero no acababan de convencer). Siempre
+// visible, con el móvil recogido (asomo) o abierto, da igual.
+function telPintarStatusHora(){
+  const ahora = new Date();
+  const wrap = el('div','tel-status-hora');
+  wrap.textContent = `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
   return wrap;
 }
-// Habilidades del jugador (misma línea, a la derecha): las 3 marcadas como prioridad de
-// entrenamiento (mismo orden que en la app Entrenamiento); si hay menos de 3, se completa con
-// las de valor más alto para que el hueco nunca quede vacío.
-function telPintarStatusAttrs(j){
-  let claves = (j.prioridadesEntreno||[]).slice(0,3);
-  if(claves.length < 3){
-    const resto = ATRIBUTOS_JUGADOR.filter(a=>!claves.includes(a)).sort((a,b)=> j.atributos[b]-j.atributos[a]);
-    claves = claves.concat(resto).slice(0,3);
-  }
-  const wrap = el('div','tel-status-attrs');
-  claves.forEach(a=>{
-    const item = el('span','tel-status-stat');
-    item.innerHTML = `<span class="lbl">${ATRIBUTO_INFO[a].corto}</span><span class="num">${j.atributos[a]}</span>`;
-    wrap.appendChild(item);
-  });
+const TEL_ICONO_SENAL = `<svg viewBox="0 0 18 14" fill="currentColor"><rect x="0" y="9" width="3" height="5" rx="0.6"/><rect x="5" y="6" width="3" height="8" rx="0.6"/><rect x="10" y="3" width="3" height="11" rx="0.6"/><rect x="15" y="0" width="3" height="14" rx="0.6"/></svg>`;
+const TEL_ICONO_WIFI = `<svg viewBox="0 0 18 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 5.2a11.5 11.5 0 0 1 15 0"/><path d="M4.3 8.4a7.4 7.4 0 0 1 9.4 0"/><circle cx="9" cy="12" r="1.35" fill="currentColor" stroke="none"/></svg>`;
+const TEL_ICONO_BATERIA = `<svg viewBox="0 0 25 14" fill="none"><rect x="0.75" y="0.75" width="20.5" height="12.5" rx="3" stroke="currentColor" stroke-width="1.3"/><rect x="22.7" y="4.5" width="2" height="5" rx="1" fill="currentColor"/><rect x="2.5" y="2.5" width="15" height="8.5" rx="1.5" fill="currentColor"/></svg>`;
+// Puramente decorativos (nivel de batería fijo, no hay forma de leer la batería real del
+// visitante de un modo fiable) — el objetivo es que se lea como una barra de estado real, no
+// datos de verdad del dispositivo.
+function telPintarStatusIconos(){
+  const wrap = el('div','tel-status-iconos');
+  wrap.innerHTML = `<span class="tel-status-ic">${TEL_ICONO_SENAL}</span><span class="tel-status-ic">${TEL_ICONO_WIFI}</span><span class="tel-status-ic bateria">${TEL_ICONO_BATERIA}</span>`;
   return wrap;
 }
 // Fila de pestañas Banco/Servicios/Compras de la app Economía — se usa tanto en su vista nativa
@@ -14147,12 +14128,14 @@ function telDesinstalarApp(appId){
 // Ajustes del PROPIO móvil (fondo, tamaño de letra) — nada que ver con S.jugador ni con los
 // ajustes reales del juego; por eso viven sueltos en S, no en j, y se guardan con guardarPartida()
 // igual que cualquier otro S.movil* (persisten con la partida, pero son gustos del aparato).
+// Fondos de pantalla del móvil: degradados, no color plano — para que parezca un fondo de
+// móvil de verdad (azules y grises metalizados) en vez de una pantalla lisa de un solo tono.
 const TEL_FONDOS_MOVIL = [
-  { id:'oscuro', nombre:'Oscuro (por defecto)', valor:'#171922' },
-  { id:'azul', nombre:'Azul noche', valor:'#131c2e' },
-  { id:'verde', nombre:'Verde césped', valor:'#131f18' },
-  { id:'vino', nombre:'Granate', valor:'#241318' },
-  { id:'claro', nombre:'Claro', valor:'#e8e6de' }
+  { id:'oscuro', nombre:'Oscuro (por defecto)', valor:'linear-gradient(160deg, #333c55 0%, #181b26 50%, #3d4760 100%)' },
+  { id:'azul', nombre:'Azul noche', valor:'linear-gradient(160deg, #1e3f6e 0%, #0c1830 55%, #2c5d92 100%)' },
+  { id:'verde', nombre:'Verde césped', valor:'linear-gradient(160deg, #1f3d2a 0%, #0e1a13 55%, #2c5a3b 100%)' },
+  { id:'vino', nombre:'Granate', valor:'linear-gradient(160deg, #3c1c2a 0%, #1a0c12 55%, #5c2438 100%)' },
+  { id:'claro', nombre:'Claro', valor:'linear-gradient(160deg, #f1efe8 0%, #ded9cd 55%, #c7c2b3 100%)' }
 ];
 // Cuántos seguidores "tendría" el jugador en redes — pura decoración derivada de stats reales
 // (popularidad + goles de carrera), no se guarda aparte ni se usa en ningún cálculo del juego.
