@@ -1215,22 +1215,34 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    esquinas de lo que hubiera debajo (p. ej. la tarjeta del suceso de la semana). */
 .tel-backdrop{ position:fixed; inset:0; background:rgba(3,4,7,0.93); opacity:0; transition:opacity .34s ease; pointer-events:none; }
 .tel-backdrop.show{ opacity:1; }
-/* Se asoma hasta justo debajo de la topbar real del juego (82px + su zona segura) cuando está
-   abierto — el mismo elemento que en reposo solo enseña 42px (ver .tel-sheet arriba). */
+/* Se asoma hasta justo debajo de la topbar real + la barra de temporada (juntas miden 117px de
+   alto real, comprobado con las dos filas de la cabecera fija) cuando está abierto, dejando un
+   margen de sobra para que no se le pegue ni la tape — el mismo elemento que en reposo solo
+   enseña 42px (ver .tel-sheet arriba). Antes eran 90px, calibrados de antes de que la barra de
+   temporada existiera como fila propia: se quedaban cortos y el móvil subía por detrás de ella. */
 .tel-device{
-  width:100%; height:calc(100vh - 90px - env(safe-area-inset-top,0px));
+  width:100%; height:calc(100vh - 128px - env(safe-area-inset-top,0px));
   display:flex; flex-direction:column; position:relative;
   background:linear-gradient(155deg,#2b2f3d,#17181f 55%);
   border-radius:28px 28px 0 0; padding:12px;
   box-shadow:0 -10px 40px rgba(0,0,0,0.5), inset 0 0 0 1.5px rgba(255,255,255,0.06);
+}
+/* Franja de fondo de la barra de estado, de lado a lado del aparato (no solo del contenido) —
+   por debajo del propio .tel-header (que lleva la info), con las mismas esquinas superiores que
+   .tel-device para no cuadrar la curva. Sin esto, el notch y los stats flotaban directamente
+   sobre .tel-screen, sin ninguna franja que los agrupase como una barra de estado real. */
+.tel-statusbar-bg{
+  position:absolute; top:0; left:0; right:0; height:50px; z-index:5;
+  background:rgba(0,0,0,0.24); border-radius:28px 28px 0 0; pointer-events:none;
 }
 /* Notch + notificaciones: FLOTAN sobre la propia pantalla (.tel-screen), no en una franja aparte
    por encima — como en un móvil actual, donde la pantalla llega hasta arriba y el recorte de la
    cámara/isla dinámica y los iconos de estado se ven DENTRO del propio display, no sobre un
    marco negro separado. En reposo es lo único que asoma; abierto, tocarlo vuelve a esconder el
    móvil (nada de flecha ni botón aparte — como pulsar la barra de estado de un móvil real).
-   Alineada a los mismos 16px de .tel-dock-apps (no los 12px del padding del aparato) para que la
-   fila de arriba quede a plomo con el resto de iconos del móvil. */
+   Alineada a los mismos 16px de .tel-dock-apps (no los 12px del padding del aparato) — con más
+   margen que ese mínimo en el propio contenido (ver .tel-status-stats/.tel-status-attrs) para que
+   la info nunca llegue a superponerse a la curva de las esquinas del aparato. */
 .tel-header{
   position:absolute; top:12px; left:16px; right:16px; height:38px; z-index:6;
   cursor:pointer; display:flex; align-items:center; justify-content:center;
@@ -1244,8 +1256,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* Estado (izquierda) y habilidades (derecha) del jugador, siempre visibles en esta misma línea
    — con el móvil recogido (asomo) o abierto, da igual: ver telPintarStatusStats/telPintarStatusAttrs
    en pintarMovilSheet(). */
-.tel-status-stats{ position:absolute; left:0; top:50%; transform:translateY(-50%); display:flex; gap:6px; pointer-events:none; }
-.tel-status-attrs{ position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; gap:6px; pointer-events:none; }
+.tel-status-stats{ position:absolute; left:4px; top:50%; transform:translateY(-50%); display:flex; gap:6px; pointer-events:none; }
+.tel-status-attrs{ position:absolute; right:4px; top:50%; transform:translateY(-50%); display:flex; gap:6px; pointer-events:none; }
 .tel-status-stat{
   display:flex; align-items:center; gap:3px; font-family:'Inter',sans-serif; font-weight:700;
   font-size:10px; color:rgba(255,255,255,0.9); background:rgba(0,0,0,0.4); border-radius:8px; padding:3px 6px;
@@ -11302,6 +11314,11 @@ function pintarMovilSheet(){
   }
   const sheet = el('div','tel-sheet'+(deshabilitada?' deshabilitada':''));
   const device = el('div','tel-device');
+
+  // Franja de fondo de la barra de estado, de lado a lado (ver .tel-statusbar-bg) — detrás del
+  // propio header, para que el notch y los stats se lean como una barra de estado real y no
+  // floten sueltos sobre la pantalla del móvil.
+  device.appendChild(el('div','tel-statusbar-bg'));
 
   // Notch: en reposo es todo lo que asoma por encima de las apps de acceso directo. Ya no tiene
   // onclick propio (ver más abajo, sheet.onclick) — tocar la parte de arriba del asomo ya no abre
