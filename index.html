@@ -50,6 +50,9 @@ body{
   font-family: 'Space Grotesk',sans-serif;
   font-weight: 400;
   min-height: 100vh;
+  min-height: 100dvh; /* unidad dinámica real del móvil (la barra de direcciones aparece/
+    desaparece al hacer scroll) — si el navegador no la soporta, esta línea se ignora entera y se
+    queda la de arriba; si la soporta, gana esta por ir después. */
   padding: calc(132px + env(safe-area-inset-top,0px)) 16px 60px;
 }
 .wrap{ max-width: 760px; margin: 0 auto; }
@@ -1223,9 +1226,17 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    alto real, comprobado con las dos filas de la cabecera fija) cuando está abierto, dejando un
    margen de sobra para que no se le pegue ni la tape — el mismo elemento que en reposo solo
    enseña 42px (ver .tel-sheet arriba). Antes eran 90px, calibrados de antes de que la barra de
-   temporada existiera como fila propia: se quedaban cortos y el móvil subía por detrás de ella. */
+   temporada existiera como fila propia: se quedaban cortos y el móvil subía por detrás de ella.
+   100vh EN MÓVIL DE VERDAD no es de fiar: cuenta el hueco que ocupa la barra de direcciones del
+   navegador aunque esté oculta en ese momento, así que el cálculo queda mal en cuanto el
+   navegador la enseña/esconde al hacer scroll — el aparato "sube demasiado" o deja un hueco por
+   donde se cuela la pantalla de detrás (los dos bugs reportados probando en un móvil real, que
+   en el escritorio no se reproducían porque ahí 100vh sí es estable). 100dvh sigue el alto
+   VISIBLE de verdad en cada momento; se declara dos veces (mismo truco que min-height del body
+   más arriba) para que sea 100dvh donde el navegador lo entiende y 100vh si no. */
 .tel-device{
   width:100%; height:calc(100vh - 128px - env(safe-area-inset-top,0px));
+  height:calc(100dvh - 128px - env(safe-area-inset-top,0px));
   display:flex; flex-direction:column; position:relative;
   /* Bisel bien oscuro, casi al nivel del círculo de la cámara — antes era un gris medio que se
      notaba demasiado como "marco" propio en vez de fundirse con el resto del cuerpo. */
@@ -11387,7 +11398,7 @@ function pintarMovilSheet(){
   const pantalla = el('div','tel-screen');
   // Ajustes DEL PROPIO móvil (ver vista 'ajustesMovil'): fondo y tamaño de letra, nada que ver
   // con los ajustes reales del juego.
-  pantalla.style.background = S.telFondoColor || TEL_FONDOS_MOVIL[0].valor;
+  pantalla.style.background = telFondoMovilActual();
   const zoomPorTamano = { pequeno:0.88, normal:1, grande:1.16 };
   pantalla.style.zoom = zoomPorTamano[S.telFontScale] || 1;
   device.appendChild(pantalla);
@@ -14174,6 +14185,19 @@ const TEL_FONDOS_MOVIL = [
   { id:'vino', nombre:'Granate', valor:'linear-gradient(160deg, #3c1c2a 0%, #1a0c12 55%, #5c2438 100%)' },
   { id:'claro', nombre:'Claro', valor:'linear-gradient(160deg, #f1efe8 0%, #ded9cd 55%, #c7c2b3 100%)' }
 ];
+// Antes de pasar a degradado, TEL_FONDOS_MOVIL guardaba colores planos ('#171922', '#131c2e',
+// '#131f18', '#241318', '#e8e6de'). Una partida guardada de entonces con un fondo elegido a mano
+// lleva ese hex viejo en S.telFondoColor — al no ser falsy, no cae en el fallback
+// TEL_FONDOS_MOVIL[0].valor, así que el móvil se quedaba con el plano de siempre y el degradado
+// nuevo nunca llegaba a verse. Migra ese valor viejo al degradado equivalente por id.
+const TEL_FONDOS_MOVIL_LEGADO = { '#171922':'oscuro', '#131c2e':'azul', '#131f18':'verde', '#241318':'vino', '#e8e6de':'claro' };
+function telFondoMovilActual(){
+  if(S.telFondoColor && TEL_FONDOS_MOVIL_LEGADO[S.telFondoColor]){
+    const f = TEL_FONDOS_MOVIL.find(x=>x.id === TEL_FONDOS_MOVIL_LEGADO[S.telFondoColor]);
+    if(f) return f.valor;
+  }
+  return S.telFondoColor || TEL_FONDOS_MOVIL[0].valor;
+}
 // Cuántos seguidores "tendría" el jugador en redes — pura decoración derivada de stats reales
 // (popularidad + goles de carrera), no se guarda aparte ni se usa en ningún cálculo del juego.
 function telSeguidoresRedes(j){
@@ -15385,7 +15409,7 @@ function renderMovilContenido(c, j){
     c.appendChild(el('div','tel-ajustes-tit','FONDO DE PANTALLA'));
     const swatches = el('div','tel-ajustes-swatches');
     TEL_FONDOS_MOVIL.forEach(f=>{
-      const activo = (S.telFondoColor||TEL_FONDOS_MOVIL[0].valor) === f.valor;
+      const activo = telFondoMovilActual() === f.valor;
       const sw = document.createElement('button');
       sw.className = 'tel-swatch'+(activo?' activo':'');
       sw.style.background = f.valor;
