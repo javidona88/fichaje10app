@@ -1258,7 +1258,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    propio, el texto/icono se apoya directo sobre la pantalla del móvil. */
 .tel-status-hora{
   position:absolute; left:0; top:50%; transform:translateY(-50%);
-  font-family:'Inter',sans-serif; font-weight:700; font-size:12px; color:rgba(255,255,255,0.92);
+  font-family:'Inter',sans-serif; font-weight:500; font-size:12px; color:rgba(255,255,255,0.92);
   letter-spacing:.01em; pointer-events:none;
 }
 .tel-status-iconos{
@@ -1356,14 +1356,15 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-icon.prensa{ background:linear-gradient(150deg,#c94b3f,#6e1f18); }
 .tel-icon.scout{ background:linear-gradient(150deg,#3fce9e,#1f6a4c); }
 .tel-icon.rendimiento{ background:linear-gradient(150deg,#e0a83e,#8a5f14); }
-/* Puntito de "hay algo nuevo" sobre el icono de una app (WhatsApp/Email/Redes/Servicios) —
-   mismo lenguaje visual que el badge dorado de Logros en la topbar, pero aquí genérico (rojo,
-   como una notificación real) porque son varias apps distintas, no un solo contador. */
+/* Puntito de "hay algo nuevo" sobre el icono de una app (WhatsApp/Email/Redes/Servicios), con el
+   número real dentro — verde (no rojo: aquí no es una alarma/error, solo un contador de cosas
+   por ver) y algo más grande que antes, que el número se leía apretado. */
 .tel-app-dot{
-  position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 3px; box-sizing:border-box;
-  border-radius:8px; background:#e0432e; border:2px solid var(--panel2);
+  position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; padding:0 4px; box-sizing:border-box;
+  border-radius:9px; background:#3ecf6e; border:2px solid var(--panel2);
   display:flex; align-items:center; justify-content:center;
-  font-family:'Inter',sans-serif; font-size:9px; font-weight:800; color:#fff; line-height:1;
+  font-family:'Inter',sans-serif; font-size:10.5px; font-weight:800; color:#0a2412; line-height:1;
+  font-variant-numeric:tabular-nums;
 }
 /* Icono destacado (dorado) cuando el suceso activo está ligado a esta app — ver telAppVinculada()
    y renderizarOpcionesEvento(), que deja responder la decisión real del suceso desde dentro. */
@@ -1400,8 +1401,9 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-app-tab{ flex:1; background:var(--panel2); border:1px solid var(--line); color:var(--ink-soft); font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; padding:10px 0; border-radius:11px; cursor:pointer; text-align:center; }
 .tel-app-tab.active{ background:rgba(212,175,55,0.14); border-color:var(--gold-dim); color:var(--gold); }
 .tel-tab-dot{
-  display:inline-flex; align-items:center; justify-content:center; min-width:15px; height:15px; padding:0 3px;
-  border-radius:8px; background:#e0432e; color:#fff; font-size:9.5px; font-weight:800; vertical-align:middle;
+  display:inline-flex; align-items:center; justify-content:center; min-width:17px; height:17px; padding:0 4px;
+  border-radius:9px; background:#3ecf6e; color:#0a2412; font-size:10px; font-weight:800; vertical-align:middle;
+  font-variant-numeric:tabular-nums;
 }
 .tel-bank-card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px; }
 .tel-bank-card-title{ font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 10px; }
@@ -8703,7 +8705,7 @@ function procesarBanderasFichaje(j, rama){
 function registrarMovimientoBanca(j, tipo, titulo, sub, monto){
   if(!monto) return;
   j.movimientosBanca = j.movimientosBanca || [];
-  j.movimientosBanca.unshift({ tipo, titulo, sub, monto, temporada:S.temporada });
+  j.movimientosBanca.unshift({ tipo, titulo, sub, monto, temporada:S.temporada, pasoBanca:S._pasoBancaContador });
   // Tope generoso (no solo los últimos 30): el balance anual de Banca necesita poder sumar
   // TODOS los movimientos de la temporada en curso (nómina sola ya deja ~24-30 en 6 pasos), así
   // que un tope corto los iba dejando fuera antes de que acabara la temporada.
@@ -9632,6 +9634,11 @@ function aplicarProgresoEntrenoPasivo(j){
   return aplicarEfectos(j, efectosCombinados);
 }
 function avanzarPaso(j){
+  // Un id propio de "este paso" (independiente de S.pasoIndex, que ya ha cambiado de valor para
+  // cuando la app Economía lee S.pasoIndex más tarde) — se estampa en cada movimiento que registre
+  // pagarNomina() aquí abajo, para que telDesglosePasoActual() pueda distinguir "de verdad este
+  // paso" de "el más reciente de esa categoría en todo el historial" (ver su comentario).
+  S._pasoBancaContador = (S._pasoBancaContador||0) + 1;
   pagarNomina(j);
   const serviciosCancelados = comprobarNumerosRojos(j);
   if(serviciosCancelados){
@@ -13924,14 +13931,29 @@ const TEL_CARPETA_REDES = {
 // sujeto a cambiar qué apps son estas 5. Con esto, el resto de apps (App Store, Club,
 // Calendario, Email, Ajustes del móvil, carpetas...) quedan aparcadas por ahora: su código
 // sigue aquí tal cual, sencillamente no hay ningún camino en la interfaz que lleve a ellas.
-// ir() usa render() (fundido de #app, 260ms) en vez de pintar() directo — así el fondo real se
-// difumina y desaparece al abrir cualquier app, no solo Casino (que ya lo tenía "gratis" porque
-// telAbrirPantallaReal() pasa por render()).
+// Abre una vista NATIVA del móvil (no una pantalla real incrustada, ver telAbrirPantallaReal):
+// difumina #app (el fondo real) y lo deja escondido — a diferencia de render() normal, que lo
+// vuelve a traer de fundido en cuanto repinta. Para Casino (pantallaReal) eso no se nota porque
+// su contenido se MUEVE dentro de .tel-screen y #app queda vacío de verdad; para WhatsApp/Redes/
+// Entreno/Economía, S.screen no cambia (solo S.movilVista), así que #app repinta la MISMA
+// pantalla de siempre y, con solo render(), se veía "reaparecer" un instante antes de que el
+// móvil terminara de subir encima (bug real, reportado). Quitar 'fade-in' justo después del
+// pintar() evita esa reaparición — el móvil ya lo tapa, no hace falta que se vea fundirse de vuelta.
+function telAbrirAppNativa(vista){
+  if(app.children.length === 0){ S.movilVista = vista; pintar(); return; }
+  app.classList.remove('fade-in');
+  app.classList.add('fade-out');
+  setTimeout(()=>{
+    S.movilVista = vista;
+    pintar();
+    app.classList.remove('fade-in');
+  }, 260);
+}
 const TEL_DOCK_APPS = [
-  { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, ir:()=>{ S.movilVista='chatlist'; render(); } },
-  { id:'redes', nombre:'Redes', clase:'redes', icono:TEL_ICONO_REDES, ir:()=>{ S.movilVista='redes'; render(); } },
-  { id:'entrenamiento', nombre:'Entreno', clase:'entrenamiento', icono:TEL_ICONO_ENTRENAMIENTO, ir:()=>{ S.movilVista='entrenamiento'; render(); } },
-  { id:'economia', nombre:'Economía', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ S.movilVista='economia'; render(); } },
+  { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, ir:()=>{ telAbrirAppNativa('chatlist'); } },
+  { id:'redes', nombre:'Redes', clase:'redes', icono:TEL_ICONO_REDES, ir:()=>{ telAbrirAppNativa('redes'); } },
+  { id:'entrenamiento', nombre:'Entreno', clase:'entrenamiento', icono:TEL_ICONO_ENTRENAMIENTO, ir:()=>{ telAbrirAppNativa('entrenamiento'); } },
+  { id:'economia', nombre:'Economía', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ telAbrirAppNativa('economia'); } },
   { id:'casino', nombre:'Casino', clase:'casino', icono:TEL_ICONO_CASINO, ir:()=>{ telAbrirPantallaReal('casino'); } }
 ];
 const TEL_APPS_BLOQUEADAS = [
@@ -14605,15 +14627,21 @@ function telChipsEfecto(cambios){
 /* ---------- App Banca (real): extracto con datos de verdad de j.movimientosBanca ---------- */
 const TEL_ICONO_MV_IN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>';
 const TEL_ICONO_MV_OUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>';
-// El desglose "este paso" no recalcula fórmulas por su cuenta: lee el último movimiento real de
-// cada categoría recurrente en j.movimientosBanca (unshift = más reciente primero), así que
-// siempre coincide exactamente con lo que pagarNomina acaba de anotar — una sola fuente de verdad.
+// El desglose "este paso" no recalcula fórmulas por su cuenta: lee los movimientos reales que
+// pagarNomina acaba de anotar en j.movimientosBanca, así que siempre coincide exactamente con lo
+// que se cobró/pagó de verdad — una sola fuente de verdad. Filtra por pasoBanca (estampado en
+// avanzarPaso/registrarMovimientoBanca) en vez de coger sin más "el más reciente de esa
+// categoría": sin este filtro, un servicio que tuviste activo hace pasos y ya cancelaste seguía
+// saliendo aquí como gasto "de este paso" para siempre, porque seguía siendo el único movimiento
+// "Servicios" en todo el historial (bug real, reportado: "gasto de servicio cuando no estoy
+// gastando nada").
 const TEL_CATEGORIAS_PASO = ['Nómina','Patrocinio','Representante','Servicios','Nivel de vida'];
 function telDesglosePasoActual(j){
   const ingresos = [], gastos = [];
   let totalIn = 0, totalOut = 0;
+  const deEstePaso = (j.movimientosBanca||[]).filter(m=>m.pasoBanca === S._pasoBancaContador);
   TEL_CATEGORIAS_PASO.forEach(cat=>{
-    const mov = (j.movimientosBanca||[]).find(m=>m.titulo===cat);
+    const mov = deEstePaso.find(m=>m.titulo===cat);
     if(!mov) return;
     if(mov.tipo==='in'){ ingresos.push(mov); totalIn += mov.monto; }
     else { gastos.push(mov); totalOut += Math.abs(mov.monto); }
@@ -18884,7 +18912,9 @@ SCREENS.tirando = function(){
   const { j, ev, op, r, conToken, esPrologo } = S.pendingRoll;
   if(!esPrologo){
   }
-  const c = el('div','card');
+  // Sin caja — mismo criterio que los sucesos (.suceso-plano): a todo el ancho disponible,
+  // apoyado directo sobre el fondo oscuro de la página.
+  const c = el('div','suceso-plano');
   const scene = el('div','dice-scene');
   scene.appendChild(el('div','dice-need', `Necesitas un total de <b>${r.dificultad}</b> o más`));
   const die = el('div','die', '?');
@@ -19092,8 +19122,10 @@ SCREENS.resultado = function(){
   const j = S.jugador;
   const r = S.resultadoEvento;
   const cambios = r.cambios || [];
-  const c = el('div','card');
-  const box = el('div','outcome'+(r.roll && !r.roll.exito?' fail':''));
+  // Sin caja — mismo criterio que SCREENS.tirando/los sucesos: a todo el ancho, sobre el fondo
+  // oscuro de la página, en vez de una tarjeta propia.
+  const c = el('div','suceso-plano');
+  const box = el('div');
   if(r.roll){
     const big = el('div','roll-result show'+(r.roll.exito?' exito':' fallo'), r.roll.exito?'ÉXITO':'FALLO');
     big.style.fontSize = '30px';
