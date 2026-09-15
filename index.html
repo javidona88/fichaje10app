@@ -38,7 +38,7 @@
   --green: #4CAF6D;
   --line: rgba(255,255,255,0.11);
   --shadow: 0 14px 34px rgba(0,0,0,0.5);
-  --tel-peek-h: 150px;
+  --tel-peek-h: 128px;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
@@ -61,14 +61,6 @@ body.sin-topbar{ padding-top: calc(24px + env(safe-area-inset-top,0px)); }
 /* Por encima de cualquier otra capa (el asomo del móvil vive aquí siempre que hay partida en
    curso, ver pintarMovilSheet), tape lo que tape debajo. */
 #movil-root{ position:fixed; left:0; right:0; bottom:0; z-index:60; display:flex; justify-content:center; pointer-events:none; }
-/* Notificaciones estilo móvil real: caen desde arriba del todo, por encima incluso de la topbar,
-   tal y como se ve un aviso emergente de verdad — no un toast pegado al pie de página. */
-#notif-root{
-  position:fixed; top:0; left:0; right:0; z-index:300;
-  display:flex; flex-direction:column; align-items:center; gap:7px;
-  padding:calc(10px + env(safe-area-inset-top,0px)) 16px 0;
-  pointer-events:none;
-}
 .mini-barra-item{ display:flex; flex-direction:column; align-items:center; min-width:0; }
 .mini-circulo{ position:relative; width:46px; height:46px; }
 .mini-circulo.grande{ width:58px; height:58px; }
@@ -84,31 +76,6 @@ body.sin-topbar{ padding-top: calc(24px + env(safe-area-inset-top,0px)); }
   font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:400; color:var(--ink); white-space:nowrap; line-height:1;
 }
 .mini-circulo.grande .mini-circulo-valor{ font-size:13.5px; }
-/* Aviso estilo notificación real de móvil: cae desde arriba del todo (#notif-root) con su propio
-   icono de app a la izquierda y el resumen al lado — nunca "aparece" de golpe, entra deslizándose. */
-.notif-toast{
-  pointer-events:auto; box-sizing:border-box;
-  display:flex; align-items:center; gap:10px; width:100%; max-width:420px;
-  background:rgba(28,31,42,0.97); backdrop-filter:blur(14px); border:1px solid var(--line); border-radius:16px;
-  padding:11px 15px;
-  font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:600; color:var(--ink);
-  box-shadow:0 12px 30px rgba(0,0,0,0.45);
-  transform:translateY(-140%); opacity:0;
-  transition:transform .38s cubic-bezier(.25,.8,.35,1), opacity .3s ease;
-}
-.notif-toast.show{ transform:translateY(0); opacity:1; }
-/* El icono que ya viene embebido al principio del texto (iconoInline) hace de "icono de app" de
-   la notificación — se agranda un poco respecto a su tamaño normal en línea de texto. */
-.notif-toast > .icono-inline{ width:26px!important; height:26px!important; margin-right:3px!important; flex-shrink:0; }
-/* Aviso combinado de subida de atributos (notificarSubidasAtributo): cada icono+texto es un
-   bloque "de una pieza" (.notif-attr) dentro de su propio contenedor con flex-wrap propio — si no
-   caben todos en una línea, saltan de línea completos, nunca partidos a media palabra, sin tocar
-   el layout (nowrap) del resto de notificaciones de una sola línea. */
-.notif-toast .notif-attrs{ display:inline-flex; flex-wrap:wrap; align-items:center; gap:4px 12px; }
-.notif-toast .notif-attr{ display:inline-flex; align-items:center; white-space:nowrap; }
-.notif-toast.objeto{ border-color:var(--gold); }
-.notif-toast.atributo{ border-color:var(--gold); }
-.notif-toast.riesgo{ border-color:var(--red); }
 /* Reutilizadas dentro de la app "Entrenamiento" del móvil (ver pintarEntrenoLista) — antes eran
    el contenido de un overlay propio, ahora son contenido normal de una vista del móvil. */
 .panel-entreno-circulos{ display:flex; justify-content:space-between; gap:8px; width:100%; max-width:420px; margin:0 auto; }
@@ -145,12 +112,24 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 }
 #topbar-root{
   position:fixed; left:0; right:0; top:0; z-index:60;
-  background:rgba(20,22,31,0.96); backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--line); padding:env(safe-area-inset-top,0px) 16px 0;
+  padding:env(safe-area-inset-top,0px) 16px 0;
 }
-.topbar{
+/* El contenido que se desliza por debajo de la cabecera fija (topbar + barra de temporada) ya
+   no desaparece de golpe en un borde recto — este degradado, justo debajo de #topbar-root,
+   difumina esa transición. */
+#topbar-root::after{
+  content:''; position:absolute; left:0; right:0; top:100%; height:24px;
+  background:linear-gradient(to bottom, rgba(15,16,22,0.7), transparent);
+  pointer-events:none;
+}
+/* .topbar/.season-bar pintan el fondo a todo el ancho real de la pantalla (sangran hasta el
+   borde, fuera del padding de #topbar-root); .topbar-inner/.season-bar-inner centran el
+   contenido dentro de los 760px de siempre. Fondos distintos entre las dos filas (bg2 vs panel)
+   para que se note el cambio de tono en vez de compartir un único panel. */
+.topbar{ background:var(--bg2); margin:0 -16px; }
+.topbar-inner{
   display:flex; justify-content:space-between; align-items:center; position:relative; height:62px; box-sizing:border-box;
-  max-width:760px; margin:0 auto; padding:14px 0;
+  max-width:760px; margin:0 auto; padding:14px 16px;
 }
 /* Ficha rápida a la izquierda de la topbar: escudo del club + nombre del jugador/nombre del club,
    cada uno clicable por separado (jugador -> tabJugador, escudo y nombre de club -> tabClub). */
@@ -188,7 +167,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* Barra de progreso de temporada: fila única debajo de la topbar — edad/temporada a la izquierda
    (20%), circulitos conectados por una línea en el centro (cada uno = un paso de
    SECUENCIA_TEMPORADA, o un día de la prueba del prólogo), botón Avanzar a la derecha (20%). */
-.season-bar{ display:flex; align-items:center; gap:10px; max-width:760px; margin:0 auto; padding:8px 0 12px; }
+.season-bar{ background:var(--panel); margin:0 -16px; border-top:1px solid var(--line); }
+.season-bar-inner{ display:flex; align-items:center; gap:10px; max-width:760px; margin:0 auto; padding:8px 16px 12px; }
 .season-info{ width:20%; flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); line-height:1.35; }
 .season-info .edad{ color:var(--ink); font-weight:600; }
 .season-stepper{ flex:1; min-width:0; position:relative; height:16px; display:flex; align-items:center; }
@@ -1200,10 +1180,12 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-dock{ position:absolute; left:0; right:0; bottom:0; height:calc(var(--tel-peek-h) + env(safe-area-inset-bottom,0px)); background:#15161c; }
 /* Fila de accesos directos que se ve con el móvil recogido (asomo alto, ver --tel-peek-h): 5
    apps de un toque, sin pasar por la pantalla de inicio del móvil. */
-.tel-dock-apps{ position:absolute; left:0; right:0; top:56px; z-index:5; display:flex; justify-content:space-around; padding:0 18px; }
-.tel-dock-app{ background:none; border:none; padding:0; cursor:pointer; }
-.tel-dock-app .tel-icon{ width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; }
-.tel-dock-app .tel-icon svg{ width:22px; height:22px; }
+.tel-dock-apps{ position:absolute; left:0; right:0; top:50px; z-index:5; display:flex; justify-content:space-around; padding:0 16px; }
+.tel-dock-app{ background:none; border:none; padding:0; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:5px; }
+.tel-dock-app .tel-icon{ width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; filter:grayscale(1) brightness(.8); transition:filter .2s ease; }
+.tel-dock-app.pendiente .tel-icon{ filter:none; }
+.tel-dock-app .tel-icon svg{ width:21px; height:21px; }
+.tel-dock-app .tel-label{ font-family:'Inter',sans-serif; font-size:10px; color:var(--ink-soft); text-align:center; }
 .tel-dock-app:active .tel-icon{ transform:scale(.92); }
 /* Oscurece TODA la pantalla real detrás del móvil abierto (incluida la franja de arriba, entre
    la topbar real y el aparato, y los márgenes laterales) — evita que se cuelen ahí bordes o
@@ -1229,14 +1211,27 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   cursor:pointer; display:flex; align-items:center; justify-content:center;
 }
 .tel-notch{ width:88px; height:24px; background:#000; border-radius:13px; }
-.tel-notifs{ position:absolute; top:50%; right:14px; transform:translateY(-50%); z-index:2; display:flex; gap:5px; align-items:center; }
-.tel-notif-ic{ width:17px; height:17px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 1px 4px rgba(0,0,0,0.4); }
-.tel-notif-ic svg{ width:9px; height:9px; }
-.tel-notif-ic.whatsapp{ background:linear-gradient(150deg,#3fce6e,#1f9e4c); }
-.tel-notif-ic.email{ background:linear-gradient(150deg,#5a8fd6,#2c4d84); }
-.tel-notif-ic.redes{ background:linear-gradient(150deg,#e0507a,#8a1f4a); }
-.tel-notif-ic.x{ background:linear-gradient(150deg,#3a3d44,#111214); }
-.tel-notif-ic.servicios{ background:linear-gradient(150deg,#e0932e,#8a531a); }
+/* Notificaciones DENTRO del propio móvil simulado (no de la página real): caen desde detrás del
+   notch, cubriendo lo que haya debajo (asomo o pantalla abierta), igual que en un móvil de
+   verdad. Ver pintarNotifMovil(). */
+.tel-notif-movil-wrap{ position:absolute; left:8px; right:8px; top:44px; z-index:9; display:flex; flex-direction:column; gap:6px; pointer-events:none; }
+.tel-notif-movil{
+  pointer-events:auto; box-sizing:border-box;
+  display:flex; align-items:center; gap:8px; width:100%;
+  background:rgba(28,31,42,0.97); backdrop-filter:blur(10px); border:1px solid var(--line); border-radius:13px;
+  padding:9px 12px;
+  font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; color:var(--ink);
+  box-shadow:0 10px 24px rgba(0,0,0,0.45);
+  transform:translateY(-140%); opacity:0;
+  transition:transform .38s cubic-bezier(.25,.8,.35,1), opacity .3s ease;
+}
+.tel-notif-movil.show{ transform:translateY(0); opacity:1; }
+.tel-notif-movil > .icono-inline{ width:20px!important; height:20px!important; margin-right:2px!important; flex-shrink:0; }
+.tel-notif-movil .notif-attrs{ display:inline-flex; flex-wrap:wrap; align-items:center; gap:3px 8px; }
+.tel-notif-movil .notif-attr{ display:inline-flex; align-items:center; white-space:nowrap; }
+.tel-notif-movil.objeto{ border-color:var(--gold); }
+.tel-notif-movil.atributo{ border-color:var(--gold); }
+.tel-notif-movil.riesgo{ border-color:var(--red); }
 .tel-screen{
   flex:1; min-height:0; position:relative; background:var(--bg2); border-radius:44px 44px 0 0;
   overflow-y:auto; overflow-x:hidden; padding:46px 14px 24px;
@@ -1327,6 +1322,12 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-bank-tabs{ display:flex; gap:6px; background:var(--panel2); border-radius:11px; padding:3px; margin:14px 0 12px; }
 .tel-bank-tab{ flex:1; background:none; border:none; color:var(--ink-soft); font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; padding:8px 0; border-radius:9px; cursor:pointer; }
 .tel-bank-tab.active{ background:var(--panel); color:var(--ink); }
+/* Pestañas de nivel de app (Banco/Servicios/Compras dentro de Economía) — un escalón por encima
+   de .tel-bank-tabs (Resumen/Movimientos, dentro del propio Banco), con un estilo distinto para
+   no confundir los dos niveles de pestaña. */
+.tel-app-tabs{ display:flex; gap:8px; margin-bottom:16px; }
+.tel-app-tab{ flex:1; background:var(--panel2); border:1px solid var(--line); color:var(--ink-soft); font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; padding:10px 0; border-radius:11px; cursor:pointer; text-align:center; }
+.tel-app-tab.active{ background:rgba(212,175,55,0.14); border-color:var(--gold-dim); color:var(--gold); }
 .tel-bank-card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px; }
 .tel-bank-card-title{ font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 10px; }
 .tel-sparkline-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:10px; }
@@ -1497,7 +1498,6 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
      se veía como un corte. Oculto por defecto; pintar() lo muestra solo con S.screen==='menu'. -->
 <div id="bg-anim-menu" class="bg-anim" aria-hidden="true" style="display:none;"></div>
 <div id="topbar-root"></div>
-<div id="notif-root"></div>
 <div class="wrap" id="app"></div>
 <div id="movil-root"></div>
 <div id="logro-aviso-root"></div>
@@ -11114,43 +11114,44 @@ function togglePrioridadEntreno(j, a){
   pintar();
 }
 const DURACION_NOTIFICACION_MS = 5000;
-// Notificación estilo móvil real: cae desde arriba de toda la pantalla (#notif-root), con su
-// propio icono de app a la izquierda del texto — ver pintarNotifDrop() y la animación
-// .notif-toast/.show en CSS.
+// Notificación estilo móvil real: las notificaciones caen dentro del propio móvil simulado (ver
+// pintarNotifMovil, llamado desde pintarMovilSheet), como en un móvil de verdad — no son un
+// aviso de la página real.
 function mostrarNotificacion(texto, tipo){
   tipo = tipo || 'info';
   S.notificaciones = S.notificaciones || [];
   if(S.notificaciones.some(n=>n.texto===texto)) return; // evita acumular avisos duplicados
   const id = Date.now()+'_'+Math.random();
   S.notificaciones.push({ id, texto, tipo, creadoEn: Date.now() });
-  pintarNotifDrop();
+  pintarMovilSheet();
   setTimeout(()=>{
     S.notificaciones = (S.notificaciones||[]).filter(n=>n.id!==id);
-    pintarNotifDrop();
+    pintarMovilSheet();
   }, DURACION_NOTIFICACION_MS);
 }
-function pintarNotifDrop(){
-  const raiz = document.getElementById('notif-root');
-  if(!raiz) return;
+// Pinta los avisos pendientes DENTRO de .tel-device (asomo o abierto, da igual) — un móvil real
+// muestra sus notificaciones en la propia pantalla estén donde estén, no en la página que hay
+// alrededor. Se llama desde pintarMovilSheet(), que reconstruye el móvil entero en cada
+// repintado, así que esto se repinta con él (mismo criterio ya aceptado en el resto del móvil:
+// la animación de entrada se puede repetir en un repintado que coincida por casualidad).
+function pintarNotifMovil(device){
   // Red de seguridad: lo que retira un aviso a los 5s es un setTimeout en memoria, que NO
-  // sobrevive a una recarga de página (recargar el navegador, o el móvil descargando la pestaña
-  // en segundo plano) — pero S.notificaciones sí, porque guardarPartida() serializa S entero. Sin
-  // esto, un aviso visible justo en el momento de recargar se quedaba "colgado" para siempre, sin
-  // ningún temporizador vivo que lo fuera a quitar (bug real reportado: "Cariño de la afición" no
-  // desaparecía). Aquí se purga por edad real (reloj), no por el temporizador, así que se autocura
-  // en el primer repintado tras cargar la partida, sin depender de que el timer original
-  // sobreviviera. Un aviso sin `creadoEn` (guardado con una versión anterior a este arreglo) se
-  // trata como ya caducado.
+  // sobrevive a una recarga de página — pero S.notificaciones sí, porque guardarPartida()
+  // serializa S entero. Se purga aquí por edad real (reloj), no por el temporizador, así que se
+  // autocura en el primer repintado tras cargar la partida. Un aviso sin `creadoEn` (guardado con
+  // una versión anterior a este arreglo) se trata como ya caducado.
   const ahora = Date.now();
   S.notificaciones = (S.notificaciones||[]).filter(n => (n.creadoEn ? (ahora - n.creadoEn) : Infinity) < DURACION_NOTIFICACION_MS);
-  raiz.innerHTML = '';
-  (S.notificaciones||[]).forEach(n=>{
-    const item = el('div','notif-toast '+n.tipo);
+  if(!S.notificaciones.length) return;
+  const wrap = el('div','tel-notif-movil-wrap');
+  S.notificaciones.forEach(n=>{
+    const item = el('div','tel-notif-movil '+n.tipo);
     item.innerHTML = n.texto;
-    raiz.appendChild(item);
+    wrap.appendChild(item);
   });
+  device.appendChild(wrap);
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
-    raiz.querySelectorAll('.notif-toast').forEach(nodo=> nodo.classList.add('show'));
+    wrap.querySelectorAll('.tel-notif-movil').forEach(nodo=> nodo.classList.add('show'));
   }); });
 }
 // Ya no hay tabbar de 3 botones (Jugador/Avanzar/Estadísticas se retiraron — ver topbar() y
@@ -11164,11 +11165,6 @@ function actualizarLayoutInferior(){
     return;
   }
   document.body.classList.add('con-movil');
-}
-function abrirMovilSheet(){
-  S.movilAbierto = true;
-  S.movilVista = S.movilVista || 'home';
-  pintar();
 }
 function cerrarMovilSheet(){
   // Si se cierra estando incrustada una pantalla real (Club/Ajustes/Casino/Servicios/Compras),
@@ -11195,18 +11191,6 @@ function cerrarMovilSheet(){
   } else {
     S.movilAbierto = false; S._movilVisible = false; pintar();
   }
-}
-// Notificaciones reales pendientes, para el asomo con iconos de apps (como el status bar de un
-// móvil real) — solo lo que ya calculábamos en otros sitios del propio móvil, nada narrativo.
-function telNotificacionesPendientes(j){
-  const mapa = telAppsConPendiente(j);
-  const lista = [];
-  if(mapa.whatsapp) lista.push({ clase:'whatsapp', icono:TEL_ICONO_WHATSAPP });
-  if(mapa.email) lista.push({ clase:'email', icono:TEL_ICONO_EMAIL });
-  if(mapa.redes) lista.push({ clase:'redes', icono:TEL_ICONO_REDES });
-  if(mapa.x) lista.push({ clase:'x', icono:TEL_ICONO_X });
-  if(mapa.servicios) lista.push({ clase:'servicios', icono:TEL_ICONO_COMPRAS });
-  return lista;
 }
 // El móvil vive en su propia capa (#movil-root), por encima de todo lo demás: un único
 // elemento (.tel-sheet) hace de asomo (abajo del todo, casi todo el ancho de pantalla) y de
@@ -11249,30 +11233,32 @@ function pintarMovilSheet(){
   const sheet = el('div','tel-sheet'+(deshabilitada?' deshabilitada':''));
   const device = el('div','tel-device');
 
-  // Notch + notificaciones: en reposo es todo lo que asoma; abierto, tocarlo esconde el móvil
-  // de nuevo (sin flecha ni botón aparte).
+  // Notch: en reposo es todo lo que asoma por encima de las apps de acceso directo. Ya no tiene
+  // onclick propio (ver más abajo, sheet.onclick) — tocar la parte de arriba del asomo ya no abre
+  // el móvil, solo las 5 apps lo hacen.
   const header = el('div','tel-header');
   header.appendChild(el('div','tel-notch'));
-  const notifs = el('div','tel-notifs');
-  telNotificacionesPendientes(S.jugador).forEach(n=>{
-    notifs.appendChild(el('span','tel-notif-ic '+n.clase, n.icono));
-  });
-  header.appendChild(notifs);
   device.appendChild(header);
 
   // Con el móvil recogido (asomo alto, ver --tel-peek-h), 5 apps de acceso directo debajo del
-  // notch — un toque las abre sin pasar por la pantalla de inicio del móvil.
+  // notch, cada una con su nombre — un toque las abre YA dentro de esa app (sin pasar por una
+  // pantalla de inicio, que de momento se aparca). En escala de grises salvo que tengan algo
+  // pendiente que ver (pendientesDock), para que el color marque justo eso.
   if(!S.movilAbierto && !deshabilitada){
     const dockApps = el('div','tel-dock-apps');
     const pendientesDock = telAppsConPendiente(S.jugador);
     TEL_DOCK_APPS.forEach(a=>{
+      const hayPendiente = pendientesDock[a.id] || (a.id==='redes' && pendientesDock.x)
+        || (a.id==='economia' && (pendientesDock.servicios || pendientesDock.compras));
       const btn = document.createElement('button');
-      btn.className = 'tel-dock-app';
-      const hayPendiente = pendientesDock[a.id] || (a.id==='redes' && pendientesDock.x);
-      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${hayPendiente?'<span class="tel-app-dot"></span>':''}</span>`;
+      btn.className = 'tel-dock-app'+(hayPendiente?' pendiente':'');
+      btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${hayPendiente?'<span class="tel-app-dot"></span>':''}</span><span class="tel-label">${a.nombre}</span>`;
       btn.onclick = (e)=>{
         e.stopPropagation();
-        S.movilVista = S.movilVista || 'home';
+        // 'home' es el centinela de "se abrió directo desde el asomo, sin pasar por ninguna
+        // otra app" — lo lee el botón de volver de una pantalla real incrustada (Casino) para
+        // saber si debe cerrar el móvil entero en vez de "volver" a una app que no se mostró.
+        S.movilVista = 'home';
         S.movilAbierto = true;
         a.ir();
       };
@@ -11300,11 +11286,17 @@ function pintarMovilSheet(){
       const headerReal = el('div','tel-app-header');
       const backReal = document.createElement('button'); backReal.className='tel-back-btn'; backReal.innerHTML=TEL_ICONO_BACK;
       backReal.onclick = ()=>{
-        // Restaura también la pantalla real de detrás (S.screen), no solo la vista del móvil —
-        // si no, al cerrar el móvil después de "volver" te encontrarías la última pantalla
-        // incrustada (p. ej. Club) en vez de donde estabas de verdad antes de abrir esa app.
+        // Si se entró aquí directo desde el asomo (p. ej. Casino, uno de los 5 accesos
+        // directos — ver TEL_DOCK_APPS), S.movilVistaAnterior quedó en 'home': no hay ninguna
+        // app "de antes" a la que volver, así que "volver" cierra el móvil entero. Si se entró
+        // desde dentro de otra app del móvil (p. ej. Servicios/Compras desde Economía),
+        // movilVistaAnterior es esa app de verdad y se restaura tal cual, con el móvil abierto.
+        if(S.movilVistaAnterior === 'home' || !S.movilVistaAnterior){
+          cerrarMovilSheet(); // ya restaura S.screen y limpia S.movilVista, ver arriba
+          return;
+        }
         S.screen = S.movilPantallaAnterior || S.pantallaBase || 'tabJugador';
-        S.movilVista = S.movilVistaAnterior || 'home';
+        S.movilVista = S.movilVistaAnterior;
         pintar();
       };
       headerReal.appendChild(backReal);
@@ -11323,10 +11315,12 @@ function pintarMovilSheet(){
       renderMovilContenido(pantalla, S.jugador);
     }
     header.onclick = (e)=>{ e.stopPropagation(); cerrarMovilSheet(); };
-  } else if(!deshabilitada){
-    sheet.title = 'Tu móvil';
-    sheet.onclick = abrirMovilSheet;
   }
+  // Con el móvil recogido, ya NO se abre tocando el resto del asomo (notch, huecos entre
+  // iconos...) — solo las 5 apps de acceso directo (TEL_DOCK_APPS) hacen algo, cada una entrando
+  // YA en su propia app. sheet se queda sin onclick propio en este estado.
+
+  pintarNotifMovil(device);
 
   raiz.appendChild(sheet);
   if(S.movilAbierto){
@@ -11421,12 +11415,12 @@ function pintar(){
       }
     }
   }
-  // pintarMovilSheet() va PRIMERO: puede decidir que el móvil se cierra solo (p. ej. tras
-  // "volver" desde una pantalla incrustada hacia una pantalla normal, ver TEL_PANTALLAS_EMBEBIBLES)
-  // y actualizarLayoutInferior()/pintarNotifDrop() necesitan ver ese S.movilAbierto ya actualizado.
+  // pintarMovilSheet() ya pinta las notificaciones dentro del propio móvil (ver
+  // pintarNotifMovil) — puede decidir además que el móvil se cierra solo (p. ej. tras "volver"
+  // desde una pantalla incrustada hacia una pantalla normal, ver TEL_PANTALLAS_EMBEBIBLES) y
+  // actualizarLayoutInferior() necesita ver ese S.movilAbierto ya actualizado.
   pintarMovilSheet();
   actualizarLayoutInferior();
-  pintarNotifDrop();
   procesarAvisosLogros();
   if(document.getElementById('topbar-root').innerHTML){
     document.body.classList.remove('sin-topbar');
@@ -11651,7 +11645,7 @@ function accionAvanzar(){
   }
 }
 function topbar(titulo){
-  const t = el('div','topbar');
+  const t = el('div','topbar-inner');
 
   // Ficha rápida a la izquierda: escudo del club actual + nombre del jugador (-> tabJugador) +
   // nombre del club (-> tabClub), cada uno clicable por separado.
@@ -11723,7 +11717,9 @@ function topbar(titulo){
 
   const raiz = document.getElementById('topbar-root');
   raiz.innerHTML = '';
-  raiz.appendChild(t);
+  const topbarOuter = el('div','topbar');
+  topbarOuter.appendChild(t);
+  raiz.appendChild(topbarOuter);
   if((S.jugador && !S.enFaseCreacion) || S.screen === 'prologoPrueba' || S.screen === 'prologoResultado'){
     let totalPasos, pasoActual;
     if(S.screen === 'prologoPrueba' || S.screen === 'prologoResultado'){
@@ -11733,7 +11729,7 @@ function topbar(titulo){
       totalPasos = SECUENCIA_TEMPORADA.length;
       pasoActual = Math.max(0, Math.min(totalPasos, (S.pasoIndex||0)+1));
     }
-    const seasonBar = el('div','season-bar');
+    const seasonBar = el('div','season-bar-inner');
 
     const info = el('div','season-info');
     if(S.jugador){
@@ -11768,7 +11764,9 @@ function topbar(titulo){
       seasonBar.appendChild(btnAvanzar);
     }
 
-    raiz.appendChild(seasonBar);
+    const seasonBarOuter = el('div','season-bar');
+    seasonBarOuter.appendChild(seasonBar);
+    raiz.appendChild(seasonBarOuter);
   }
   tituloPaginaPendiente = titulo || null;
   // El móvil necesita el título de la pantalla real que incrusta (ver pintarMovilSheet), pero
@@ -13721,13 +13719,15 @@ const TEL_CARPETA_REDES = {
 };
 // Accesos directos que se ven con el móvil recogido (asomo alto, ver --tel-peek-h y
 // .tel-dock-apps): 5 apps de un solo toque, sin pasar por la pantalla de inicio — provisional,
-// sujeto a cambiar qué apps son estas 5.
+// sujeto a cambiar qué apps son estas 5. Con esto, el resto de apps (App Store, Club,
+// Calendario, Email, Ajustes del móvil, carpetas...) quedan aparcadas por ahora: su código
+// sigue aquí tal cual, sencillamente no hay ningún camino en la interfaz que lleve a ellas.
 const TEL_DOCK_APPS = [
-  { id:'whatsapp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, ir:()=>{ S.movilVista='chatlist'; pintar(); } },
-  { id:'redes', clase:'redes', icono:TEL_ICONO_REDES, ir:()=>{ S.movilVista='carpeta_redes'; pintar(); } },
-  { id:'entrenamiento', clase:'entrenamiento', icono:TEL_ICONO_ENTRENAMIENTO, ir:()=>{ S.movilVista='entrenamiento'; pintar(); } },
-  { id:'economia', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ S.movilVista='carpeta_economia'; pintar(); } },
-  { id:'casino', clase:'casino', icono:TEL_ICONO_CASINO, ir:()=>{ telAbrirPantallaReal('casino'); } }
+  { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, ir:()=>{ S.movilVista='chatlist'; pintar(); } },
+  { id:'redes', nombre:'Redes', clase:'redes', icono:TEL_ICONO_REDES, ir:()=>{ S.movilVista='redes'; pintar(); } },
+  { id:'entrenamiento', nombre:'Entreno', clase:'entrenamiento', icono:TEL_ICONO_ENTRENAMIENTO, ir:()=>{ S.movilVista='entrenamiento'; pintar(); } },
+  { id:'economia', nombre:'Economía', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ S.movilVista='economia'; pintar(); } },
+  { id:'casino', nombre:'Casino', clase:'casino', icono:TEL_ICONO_CASINO, ir:()=>{ telAbrirPantallaReal('casino'); } }
 ];
 const TEL_APPS_BLOQUEADAS = [
   { id:'cromos', nombre:'Cromos', nivelMin:65, clase:'cromos', icono:TEL_ICONO_CROMOS, destino:'logros', antesDeIr:()=>{ S.logrosVistaActiva = 'cromos'; } }
@@ -13936,9 +13936,9 @@ function telContactoPendiente(c){
   if(estado1 !== 'cerrado') return estado1 === 'pendiente';
   return telEstadoTurno(ultimoId+'_r2', S.movilRespuestasExtra) === 'pendiente';
 }
-// Mapa {appId:true} de qué apps tienen algo pendiente — una única fuente de verdad tanto para
-// los iconos del notch (telNotificacionesPendientes) como para el puntito sobre cada icono de
-// la rejilla/carpeta (ver renderMovilContenido).
+// Mapa {appId:true} de qué apps tienen algo pendiente — una única fuente de verdad para el
+// puntito (y el color, ver .tel-dock-app.pendiente) de cada icono de acceso directo del móvil
+// (ver pintarMovilSheet) y de la rejilla/carpeta (ver renderMovilContenido).
 function telAppsConPendiente(j){
   const mapa = {};
   if(telContactosDe(j).some(telContactoPendiente)) mapa.whatsapp = true;
@@ -13966,6 +13966,35 @@ const TEL_RESPUESTAS_GENERICAS_R2 = [
   { texto:'Oye, ¿y tú qué tal todo?', respuesta:'Yo tirando, como siempre. Nos vemos pronto.', relDelta:2 },
   { texto:'Bueno, te dejo que sigo liado', respuesta:'Vale, hablamos 👋', relDelta:0 }
 ];
+// Variantes de los mismos dos pools, pero con el tono que le pega a según quién escribe — la
+// pareja no habla como el representante. Solo estos dos contactos tienen voz propia de sobra
+// (uno personal, otro profesional); el resto (compañeros) se queda con el pool genérico de
+// arriba, que ya les pega bien tal cual.
+const TEL_RESPUESTAS_PAREJA = [
+  { texto:'Todo bien, aunque te echo de menos ❤️', respuesta:'Y yo a ti — queda menos para verte.', relDelta:2 },
+  { texto:'Cansado, pero contento con cómo va todo', respuesta:'Me alegro muchísimo, cuídate igual 🥰', relDelta:1 },
+  { texto:'Con la cabeza en el partido, luego te cuento con calma', respuesta:'Tranquilo, aquí estaré.', relDelta:0 }
+];
+const TEL_RESPUESTAS_PAREJA_R2 = [
+  { texto:'De verdad, no cambiaría esto por nada', respuesta:'Qué cosas tan bonitas dices 🥹', relDelta:2 },
+  { texto:'¿Qué tal tu semana por ahí?', respuesta:'Bien, ya te cuento con calma cuando nos veamos.', relDelta:1 },
+  { texto:'Te dejo que me llaman, hablamos luego', respuesta:'Vale, un beso 😘', relDelta:0 }
+];
+const TEL_RESPUESTAS_REPRESENTANTE = [
+  { texto:'Dime, te escucho', respuesta:'Perfecto, sigo moviendo hilos por ti.', relDelta:1 },
+  { texto:'Ahora mismo prefiero centrarme solo en jugar', respuesta:'Entendido, yo me encargo del resto.', relDelta:0 },
+  { texto:'¿Hay algo concreto que deba saber?', respuesta:'Todavía no, pero serás el primero en saberlo.', relDelta:1 }
+];
+const TEL_RESPUESTAS_REPRESENTANTE_R2 = [
+  { texto:'Confío en tu criterio para estas cosas', respuesta:'Así me gusta, para eso estoy.', relDelta:2 },
+  { texto:'Mantenme al tanto de cualquier novedad', respuesta:'Por supuesto, en cuanto sepa algo te llamo.', relDelta:1 },
+  { texto:'Ahora tengo que dejarte, hablamos', respuesta:'Claro, éxito esta semana.', relDelta:0 }
+];
+function telPoolGenericoPara(contacto, ronda){
+  if(contacto && contacto.id === 'pareja') return ronda===2 ? TEL_RESPUESTAS_PAREJA_R2 : TEL_RESPUESTAS_PAREJA;
+  if(contacto && contacto.id === 'representante') return ronda===2 ? TEL_RESPUESTAS_REPRESENTANTE_R2 : TEL_RESPUESTAS_REPRESENTANTE;
+  return ronda===2 ? TEL_RESPUESTAS_GENERICAS_R2 : TEL_RESPUESTAS_GENERICAS;
+}
 // Segundo mensaje que a veces manda la MISMA persona justo detrás del primero (como cuando
 // alguien "dobla texto" en un chat real) — no necesita respuesta propia, solo alarga la
 // conversación antes de que te toque contestar.
@@ -14451,7 +14480,7 @@ function renderMovilContenido(c, j){
   else if(vista === 'nuevaCarpeta'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Nueva carpeta'));
     c.appendChild(header);
@@ -14482,7 +14511,7 @@ function renderMovilContenido(c, j){
     const carpeta = (S.telCarpetasUsuario||[]).find(cp=>cp.id===S.movilCarpetaUsuarioAbierta);
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title', carpeta ? carpeta.nombre : 'Carpeta'));
     c.appendChild(header);
@@ -14525,7 +14554,7 @@ function renderMovilContenido(c, j){
     const folder = TEL_CARPETA_ECONOMIA;
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title', folder.nombre));
     c.appendChild(header);
@@ -14550,7 +14579,7 @@ function renderMovilContenido(c, j){
     const folder = TEL_CARPETA_REDES;
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title', folder.nombre));
     c.appendChild(header);
@@ -14569,20 +14598,34 @@ function renderMovilContenido(c, j){
   else if(vista === 'entrenamiento'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Entrenamiento'));
     c.appendChild(header);
     pintarEntrenoLista(c, j);
   }
 
-  else if(vista === 'banca'){
+  else if(vista === 'economia'){
+    // App única que aúna Banco + Servicios + Compras (antes carpeta con 4 iconos sueltos, uno
+    // de ellos Casino — Casino ahora es su propio acceso directo, así que aquí solo quedan los
+    // tres relacionados con el dinero del día a día). Banco es contenido nativo del móvil;
+    // Servicios/Compras son las pantallas reales de siempre, incrustadas al tocar su pestaña.
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='carpeta_economia'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
-    header.appendChild(el('span','tel-title','Banca'));
+    header.appendChild(el('span','tel-title','Economía'));
     c.appendChild(header);
+
+    const appTabs = el('div','tel-app-tabs');
+    const tabBanco = document.createElement('button'); tabBanco.className='tel-app-tab active'; tabBanco.textContent='Banco';
+    tabBanco.onclick = ()=>{ S.telEconomiaTab='banco'; pintar(); };
+    const tabServicios = document.createElement('button'); tabServicios.className='tel-app-tab'; tabServicios.textContent='Servicios';
+    tabServicios.onclick = ()=>{ S.pantallaAnteriorServicios = S.pantallaBase || S.screen; telAbrirPantallaReal('servicios'); };
+    const tabCompras = document.createElement('button'); tabCompras.className='tel-app-tab'; tabCompras.textContent='Compras';
+    tabCompras.onclick = ()=>{ S.pantallaAnteriorCompras = S.pantallaBase || S.screen; telAbrirPantallaReal('compras'); };
+    appTabs.appendChild(tabBanco); appTabs.appendChild(tabServicios); appTabs.appendChild(tabCompras);
+    c.appendChild(appTabs);
 
     const desglose = telDesglosePasoActual(j);
     const trendNeto = desglose.totalIn - desglose.totalOut;
@@ -14688,7 +14731,7 @@ function renderMovilContenido(c, j){
   else if(vista === 'chatlist'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','WhatsApp'));
     c.appendChild(header);
@@ -14803,9 +14846,10 @@ function renderMovilContenido(c, j){
       // los anteriores son historial ya cerrado (los contestaras o no en su momento).
       const extras = (S.movilBandeja && S.movilBandeja.whatsapp || []).filter(m=>m.contactoId===contacto.id);
       S.movilRespuestas = S.movilRespuestas || {};
+      const poolR1 = telPoolGenericoPara(contacto, 1), poolR2 = telPoolGenericoPara(contacto, 2);
       const turnos = [
         { id: contacto.id, mapa: S.movilRespuestas, pool: contacto.opciones, aplicar:(idx)=>telAplicarRespuesta(contacto.id, idx) },
-        ...extras.map(m=>({ id: m.id, mapa: (S.movilRespuestasExtra=S.movilRespuestasExtra||{}), pool: TEL_RESPUESTAS_GENERICAS, entrante: m.texto, aplicar:(idx)=>telResponderExtra(m.id, idx, contacto, TEL_RESPUESTAS_GENERICAS) }))
+        ...extras.map(m=>({ id: m.id, mapa: (S.movilRespuestasExtra=S.movilRespuestasExtra||{}), pool: poolR1, entrante: m.texto, aplicar:(idx)=>telResponderExtra(m.id, idx, contacto, poolR1) }))
       ];
       let activo = null;
       turnos.forEach((t,i)=>{
@@ -14819,8 +14863,8 @@ function renderMovilContenido(c, j){
           }
           const idR2 = t.id+'_r2';
           S.movilRespuestasExtra = S.movilRespuestasExtra || {};
-          const estado2 = telPintarIntercambio(thread, idR2, S.movilRespuestasExtra, TEL_RESPUESTAS_GENERICAS_R2);
-          activo = { estado:estado2, aplicar:(idx)=>telResponderExtra(idR2, idx, contacto, TEL_RESPUESTAS_GENERICAS_R2), pool:TEL_RESPUESTAS_GENERICAS_R2 };
+          const estado2 = telPintarIntercambio(thread, idR2, S.movilRespuestasExtra, poolR2);
+          activo = { estado:estado2, aplicar:(idx)=>telResponderExtra(idR2, idx, contacto, poolR2), pool:poolR2 };
         }
       });
       c.appendChild(thread);
@@ -14845,7 +14889,7 @@ function renderMovilContenido(c, j){
   else if(vista === 'emailLista'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Email'));
     c.appendChild(header);
@@ -14891,15 +14935,23 @@ function renderMovilContenido(c, j){
   }
 
   else if(vista === 'redes'){
+    // Una sola app "Redes" para lo que antes eran Instagram y X por separado: mismo perfil
+    // arriba, y debajo un feed único que mezcla fotos estilo Instagram y tuits estilo X,
+    // ordenados por fecha (más reciente primero) — como una persona real solo tiene un móvil,
+    // no dos apps que consultar por separado para enterarse de lo que se dice de ella.
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
-    header.appendChild(el('span','tel-title','Instagram'));
+    header.appendChild(el('span','tel-title','Redes'));
     c.appendChild(header);
     // Al entrar se marca todo como visto — es un feed, no hay detalle propio por post que abrir.
     (S.movilBandeja && S.movilBandeja.instagram || []).forEach(p=> p.leido = true);
-    const posts = (S.movilBandeja && S.movilBandeja.instagram || []).slice().reverse();
+    (S.movilBandeja && S.movilBandeja.x || []).forEach(p=> p.leido = true);
+    const clave = p => (p.temporada||0)*10 + (p.pasoIndex||0);
+    const igPosts = ((S.movilBandeja && S.movilBandeja.instagram) || []).map(p=>({ ...p, tipo:'ig' }));
+    const xPosts = ((S.movilBandeja && S.movilBandeja.x) || []).map(p=>({ ...p, tipo:'x' }));
+    const posts = igPosts.concat(xPosts).sort((a,b)=> clave(b)-clave(a));
     const perfil = el('div','tel-ig-perfil');
     perfil.appendChild(el('span','tel-avatar tel-ig-avatar', telIniciales(j.nombre)));
     const perfilStats = el('div','tel-ig-stats');
@@ -14915,55 +14967,45 @@ function renderMovilContenido(c, j){
       c.appendChild(el('p',null,'Todavía no se habla mucho de ti por aquí — según vayas jugando, la cosa se anima.')).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);padding:14px 4px;";
     }
     const gradientes = ['150deg,#e0507a,#8a1f4a', '150deg,#3f9e93,#1f5b53', '150deg,#e0932e,#8a531a', '150deg,#3f6fce,#233f80', '150deg,#7b2d8e,#341042'];
-    posts.forEach((p,i)=>{
-      const card = el('div','tel-ig-post');
-      const foto = el('div','tel-ig-post-foto');
-      foto.style.background = `linear-gradient(${gradientes[i%gradientes.length]})`;
-      foto.innerHTML = ICONOS_SVG.estrella;
-      card.appendChild(foto);
-      const likes = Math.round(20 + (j.stats.popularidad||0) * 3 + Math.random()*30);
-      const meta = el('div','tel-ig-post-meta');
-      meta.innerHTML = `<span class="tel-ig-post-likes">❤️ ${likes.toLocaleString('es-ES')} me gusta</span><span class="tel-ig-post-temp">Temp. ${temporadaAAnoCompleto(p.temporada)}</span>`;
-      card.appendChild(meta);
-      card.appendChild(el('div','tel-ig-post-txt', `<b>${capitalizarNombre(j.nombre).split(' ')[0].toLowerCase()}</b> ${p.texto}`));
-      c.appendChild(card);
-    });
-  }
-
-  else if(vista === 'x'){
-    const header = el('div','tel-app-header');
-    const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
-    header.appendChild(back);
-    header.appendChild(el('span','tel-title','X'));
-    c.appendChild(header);
-    (S.movilBandeja && S.movilBandeja.x || []).forEach(p=> p.leido = true);
-    const posts = (S.movilBandeja && S.movilBandeja.x || []).slice().reverse();
-    if(!posts.length){
-      c.appendChild(el('p',null,'Todavía nadie ha tuiteado sobre ti — dale tiempo a la temporada.')).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);padding:10px 4px;";
-    }
     const nombresAficion = ['@futbol_total','@aficionrf','@datos_liga','@elgraderio','@balonpremium'];
-    posts.forEach((p,i)=>{
-      const card = el('div','tel-x-post');
-      const cab = el('div','tel-x-post-cab');
-      cab.appendChild(el('span','tel-avatar', '𝕏')).style.cssText = 'width:34px;height:34px;font-size:13px;background:#22252b;flex-shrink:0;';
-      const cabBody = el('div');
-      cabBody.appendChild(el('div',null, nombresAficion[i%nombresAficion.length])).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:700;color:var(--ink);";
-      cabBody.appendChild(el('div',null, `Temp. ${temporadaAAnoCompleto(p.temporada)}`)).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);";
-      cab.appendChild(cabBody);
-      card.appendChild(cab);
-      card.appendChild(el('div','tel-x-post-txt', p.texto));
-      const rt = Math.round(5 + (j.stats.popularidad||0)*0.6 + Math.random()*15);
-      const likes = Math.round(15 + (j.stats.popularidad||0)*1.4 + Math.random()*25);
-      card.appendChild(el('div','tel-x-post-meta', `🔁 ${rt} · ❤️ ${likes}`));
-      c.appendChild(card);
+    let idxIg = 0, idxX = 0;
+    posts.forEach(p=>{
+      if(p.tipo === 'ig'){
+        const i = idxIg++;
+        const card = el('div','tel-ig-post');
+        const foto = el('div','tel-ig-post-foto');
+        foto.style.background = `linear-gradient(${gradientes[i%gradientes.length]})`;
+        foto.innerHTML = ICONOS_SVG.estrella;
+        card.appendChild(foto);
+        const likes = Math.round(20 + (j.stats.popularidad||0) * 3 + Math.random()*30);
+        const meta = el('div','tel-ig-post-meta');
+        meta.innerHTML = `<span class="tel-ig-post-likes">❤️ ${likes.toLocaleString('es-ES')} me gusta</span><span class="tel-ig-post-temp">Temp. ${temporadaAAnoCompleto(p.temporada)}</span>`;
+        card.appendChild(meta);
+        card.appendChild(el('div','tel-ig-post-txt', `<b>${capitalizarNombre(j.nombre).split(' ')[0].toLowerCase()}</b> ${p.texto}`));
+        c.appendChild(card);
+      } else {
+        const i = idxX++;
+        const card = el('div','tel-x-post');
+        const cab = el('div','tel-x-post-cab');
+        cab.appendChild(el('span','tel-avatar', '𝕏')).style.cssText = 'width:34px;height:34px;font-size:13px;background:#22252b;flex-shrink:0;';
+        const cabBody = el('div');
+        cabBody.appendChild(el('div',null, nombresAficion[i%nombresAficion.length])).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:700;color:var(--ink);";
+        cabBody.appendChild(el('div',null, `Temp. ${temporadaAAnoCompleto(p.temporada)}`)).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);";
+        cab.appendChild(cabBody);
+        card.appendChild(cab);
+        card.appendChild(el('div','tel-x-post-txt', p.texto));
+        const rt = Math.round(5 + (j.stats.popularidad||0)*0.6 + Math.random()*15);
+        const likes = Math.round(15 + (j.stats.popularidad||0)*1.4 + Math.random()*25);
+        card.appendChild(el('div','tel-x-post-meta', `🔁 ${rt} · ❤️ ${likes}`));
+        c.appendChild(card);
+      }
     });
   }
 
   else if(vista === 'calendario'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Calendario'));
     c.appendChild(header);
@@ -14994,7 +15036,7 @@ function renderMovilContenido(c, j){
   else if(vista === 'ajustesMovil'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Ajustes'));
     c.appendChild(header);
@@ -15026,7 +15068,7 @@ function renderMovilContenido(c, j){
   else if(vista === 'appstore'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','App Store'));
     c.appendChild(header);
@@ -15072,7 +15114,7 @@ function renderMovilContenido(c, j){
   else if(vista === 'prensa'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Prensa'));
     c.appendChild(header);
@@ -15088,7 +15130,7 @@ function renderMovilContenido(c, j){
   else if(vista === 'scout'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Scout'));
     c.appendChild(header);
@@ -15118,7 +15160,7 @@ function renderMovilContenido(c, j){
   else if(vista === 'rendimiento'){
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
-    back.onclick = ()=>{ S.movilVista='home'; pintar(); };
+    back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Rendimiento'));
     c.appendChild(header);
