@@ -14738,6 +14738,14 @@ function telContactoPendiente(c){
   const mapaR1 = extras.length ? S.movilRespuestasExtra : S.movilRespuestas;
   const estado1 = telEstadoTurno(ultimoId, mapaR1);
   if(estado1 !== 'cerrado') return estado1 === 'pendiente';
+  // El intercambio FIJO del contacto (sin extras todavía) no encadena una segunda ronda propia
+  // — ver el hilo (SCREENS.thread): "la segunda ronda genérica se queda solo para los mensajes
+  // sueltos que van llegando después". Comprobar aquí la R2 de todos modos dejaba el contacto
+  // "pendiente" para siempre en cuanto se cerraba esa primera conversación, porque
+  // S.movilRespuestasExtra[c.id+'_r2'] nunca llega a existir (bug real: tras responder por
+  // primera vez a alguien, el tick verde no aparecía y el punto naranja + la notificación se
+  // quedaban pegados). Solo los mensajes extra sí encadenan R2 de verdad.
+  if(!extras.length) return false;
   return telEstadoTurno(ultimoId+'_r2', S.movilRespuestasExtra) === 'pendiente';
 }
 // Mapa {appId:true} de qué apps tienen algo pendiente — una única fuente de verdad para el
