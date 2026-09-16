@@ -74,9 +74,13 @@ body.sin-topbar{ padding-top: calc(24px + env(safe-area-inset-top,0px)); }
    por arriba, aquí por abajo. No puede vivir dentro de #movil-root (su alto real es el de
    .tel-sheet entero, casi toda la pantalla, no solo el asomo) así que es su propia capa fija,
    anclada justo encima de --tel-peek-h; oculta si no hay móvil (mismo criterio que el padding de
-   body.con-movil, ver actualizarLayoutInferior). */
+   body.con-movil, ver actualizarLayoutInferior). El "bottom" tiene que sumar el mismo
+   env(safe-area-inset-bottom) que .tel-dock (el respaldo opaco del asomo) — sin él, en un móvil
+   con gesto/barra inferior real (inset > 0) el asomo sube más de lo que este degradado cubre y se
+   queda tapado del todo por el propio .tel-dock, sin llegar a verse (bug real: se veía un corte
+   duro en vez de un difuminado en un móvil de verdad, donde ese inset no es 0 como en escritorio). */
 #movil-fade-root{
-  position:fixed; left:0; right:0; bottom:var(--tel-peek-h); height:34px; z-index:59;
+  position:fixed; left:0; right:0; bottom:calc(var(--tel-peek-h) + env(safe-area-inset-bottom,0px)); height:34px; z-index:59;
   background:linear-gradient(to bottom, transparent, var(--bg) 90%); pointer-events:none;
 }
 body:not(.con-movil) #movil-fade-root{ display:none; }
@@ -166,6 +170,13 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .topbar-nombre-club{ font-size:10.5px; font-weight:500; color:var(--ink-soft); }
 .topbar-nombre-jugador:hover, .topbar-nombre-club:hover{ color:var(--gold); }
 .topbar h1{ font-size:24px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.02em; }
+/* PRUEBA: los 6 atributos de jugador en el centro de la topbar en vez del logo (ver topbar()) —
+   compacto a propósito, para que quepan los 6 sin invadir la ficha de la izquierda ni los botones
+   de la derecha en un móvil estrecho. */
+.topbar-attrs{ display:flex; align-items:center; gap:5px; }
+.topbar-attr-item{ display:flex; flex-direction:column; align-items:center; line-height:1.1; }
+.topbar-attr-item .k{ font-family:'Space Grotesk',sans-serif; font-size:7px; font-weight:700; letter-spacing:.02em; color:var(--gold-dim); }
+.topbar-attr-item .v{ font-family:'Big Shoulders Display',sans-serif; font-size:13px; font-weight:700; color:var(--ink); }
 .logo-wrap{ display:flex; align-items:center; gap:8px; }
 .logo-badge{ flex-shrink:0; display:flex; align-items:center; }
 .logo-badge svg{ display:block; }
@@ -1295,8 +1306,9 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-status-hora{
   position:absolute; left:0; top:50%; transform:translateY(-50%);
   font-family:'Inter',sans-serif; font-weight:500; font-size:12px; color:rgba(255,255,255,0.92);
-  letter-spacing:.01em; pointer-events:none;
+  letter-spacing:.01em; pointer-events:none; white-space:nowrap;
 }
+.tel-status-dinero{ color:var(--gold); font-weight:600; }
 .tel-status-iconos{
   position:absolute; right:0; top:50%; transform:translateY(-50%);
   display:flex; align-items:center; gap:5px; color:rgba(255,255,255,0.92); pointer-events:none;
@@ -6968,7 +6980,19 @@ const PANTALLAS_CREACION = new Set(['menu','crear','personalizarGrupo','prologoI
 // consultar): se quita entero, ni siquiera el asomo desvaído de PANTALLAS_SIN_TABBAR, para no
 // distraer de la lectura. La rueda de prensa y su resumen son un cara a cara con los periodistas,
 // fuera de lugar con el móvil de fondo.
-const PANTALLAS_SIN_MOVIL = new Set(['finTemporada','ruedaPrensa','ruedaPrensaResultado']);
+const PANTALLAS_SIN_MOVIL = new Set(['finTemporada','ruedaPrensa','ruedaPrensaResultado',
+  // Secuencias narrativas "de un tirón" (mismo criterio que PANTALLAS_SIN_TABBAR, ver más abajo):
+  // sin nada que hacer en el móvil mientras duran, así que se quita entero — quedan fuera
+  // deliberadamente 'changelog','rankings','logros','escudosPersonalizados', que son pantallas de
+  // utilidad/menú (no cutscenes) donde el asomo desvaído sigue teniendo sentido como recordatorio
+  // de que hay una partida en curso.
+  'tutorial','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal',
+  'nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal',
+  'retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub',
+  'temporadaSinClub','sancionReveal',
+  'mundialIntro','mundialBombos','mundialSorteo','mundialPrensa','mundialGrupo','mundialGrupoTabla','mundialElim','mundialPenaltis','mundialCampeones','mundialEliminado',
+  'eurocopaIntro','eurocopaBombos','eurocopaSorteo','eurocopaPrensa','eurocopaGrupo','eurocopaGrupoTabla','eurocopaElim','eurocopaPenaltis','eurocopaCampeones','eurocopaEliminado'
+]);
 const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','sancionReveal','changelog','rankings','logros','escudosPersonalizados',
   // Todo el Mundial es una secuencia sin cortes: mientras dura, no tiene sentido poder escaparse
   // al menú, a la tienda o al plan de entreno — como en las demás secuencias "de un tirón" de
@@ -8950,9 +8974,20 @@ function calcularResumenTemporada(j, ascensoPlayoff){
   const factorRachaGoleador = (j.objetos && j.objetos.rachaGoleador > 0) ? 1.2 : 1;
   const goles = Math.max(0, Math.round(ocasiones * conversion * factorForma * factorExperiencia * azar * factorVestuario * factorRachaGoleador));
 
-  // Pase decide tu capacidad de generar asistencias
-  const asistBase = (0.12 + (j.atributos.pase / ATRIBUTO_MAX) * 0.30) * factorDificultadCategoria;
-  const asistencias = Math.max(0, Math.round(partidos * asistBase * factorForma * factorExperiencia * azar * factorVestuario));
+  // Pase (visión) y Regate (encontrar el hueco) generan ocasiones de asistencia; Pase decide
+  // cuántas de esas ocasiones se convierten en asistencia — misma estructura de "ocasiones ×
+  // conversión" que los goles justo arriba. Antes las asistencias eran solo una tasa plana sobre
+  // partidos (sin ese primer factor de ocasiones), así que dos delanteros con tiro y pase
+  // parecidos siempre acababan con asistencias en torno a la mitad de los goles, pasase lo que
+  // pasase con el resto de atributos — el pase pesaba en la conversión, pero nada pesaba en el
+  // volumen de ocasiones, a diferencia del gol (donde velocidad+regate sí generaban ese volumen
+  // aparte del tiro). Con las dos ocasiones/conversión, un generador de juego de verdad (pase
+  // alto, tiro bajo) se acerca mucho más a un ratio 1:1 gol/asistencia, y un rematador puro (tiro
+  // alto, pase bajo) se queda muy por detrás — antes esa diferencia de perfil apenas se notaba.
+  const ocasionesAsistPorPartido = (0.6 + (j.atributos.pase + j.atributos.regate) / 50) * factorDificultadCategoria;
+  const ocasionesAsist = partidos * ocasionesAsistPorPartido;
+  const conversionAsist = (0.09 + (j.atributos.pase / ATRIBUTO_MAX) * 0.21) * factorDificultadCategoria;
+  const asistencias = Math.max(0, Math.round(ocasionesAsist * conversionAsist * factorForma * factorExperiencia * azar * factorVestuario));
 
   const posicionFinal = Math.min(EQUIPOS_EN_LIGA, Math.max(1, S.posicionLiga || 10));
 
@@ -11966,14 +12001,27 @@ function topbar(titulo){
   const centro = el('div');
   centro.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;';
 
-  const logoWrap = el('div','logo-wrap logo-wrap-lg');
-  const badge = el('div','logo-badge');
-  badge.innerHTML = logoCamisetaCompacta(27);
-  logoWrap.appendChild(badge);
-  const logoText = el('div','logo-text');
-  logoText.appendChild(el('div','main','F10'));
-  logoWrap.appendChild(logoText);
-  centro.appendChild(logoWrap);
+  // PRUEBA: en vez del logo, los 6 atributos de jugador de un vistazo (sin entrar en la ficha) —
+  // se decide aquí, no aparte, porque solo tiene sentido con una partida en curso (S.jugador).
+  if(S.jugador){
+    const attrRow = el('div','topbar-attrs');
+    [['fisico', S.jugador.atributos.fisico], ['velocidad', S.jugador.atributos.velocidad], ['tiro', S.jugador.atributos.tiro],
+     ['regate', S.jugador.atributos.regate], ['pase', S.jugador.atributos.pase], ['desmarque', S.jugador.atributos.desmarque]].forEach(([clave,valor])=>{
+      const item = el('span','topbar-attr-item');
+      item.innerHTML = `<span class="k">${ABREV_ATTR[clave]}</span><span class="v">${valor}</span>`;
+      attrRow.appendChild(item);
+    });
+    centro.appendChild(attrRow);
+  } else {
+    const logoWrap = el('div','logo-wrap logo-wrap-lg');
+    const badge = el('div','logo-badge');
+    badge.innerHTML = logoCamisetaCompacta(27);
+    logoWrap.appendChild(badge);
+    const logoText = el('div','logo-text');
+    logoText.appendChild(el('div','main','F10'));
+    logoWrap.appendChild(logoText);
+    centro.appendChild(logoWrap);
+  }
   t.appendChild(centro);
 
   if(S.jugador){
@@ -14095,7 +14143,11 @@ function telAbrirPantallaReal(destino, antesDeIr){
 function telPintarStatusHora(){
   const ahora = new Date();
   const wrap = el('div','tel-status-hora');
-  wrap.textContent = `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
+  const hora = `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
+  // El dinero del jugador junto a la hora — de un vistazo, sin tener que entrar en Banca.
+  // formatearDinero() abrevia (5K €, 1,2M €) para que quepa cómodo en esta línea tan justa de sitio.
+  const dinero = S.jugador ? formatearDinero(S.jugador.stats.dinero||0) : '';
+  wrap.innerHTML = dinero ? `${hora} <span class="tel-status-dinero">· ${dinero}</span>` : hora;
   return wrap;
 }
 const TEL_ICONO_SENAL = `<svg viewBox="0 0 18 14" fill="currentColor"><rect x="0" y="9" width="3" height="5" rx="0.6"/><rect x="5" y="6" width="3" height="8" rx="0.6"/><rect x="10" y="3" width="3" height="11" rx="0.6"/><rect x="15" y="0" width="3" height="14" rx="0.6"/></svg>`;
@@ -14145,59 +14197,82 @@ function telAppTabsEconomia(activa){
 // reconocible ("te acabas de lesionar", "estás en racha") sin tener que engancharse a un id.
 const TEL_PLANTILLAS_NOTIF = {
   campeon:{
-    whatsapp:['¡CAMPEONES! Todavía no me lo creo 🏆', 'Qué temporada, macho. Enhorabuena de verdad.', '¡Esto hay que celebrarlo como se merece!'],
+    whatsapp:['¡CAMPEONES! Todavía no me lo creo 🏆', 'Qué temporada, macho. Enhorabuena de verdad.', '¡Esto hay que celebrarlo como se merece!', 'Llevo toda la tarde viendo las imágenes del título, qué pasada.'],
     instagram:['🏆 Al vestuario se le fue la cabeza cuando pitó el final. Un año para recordar.', 'De los títulos que no se olvidan. Enhorabuena, campeón.'],
     x:['¡CAMPEONES! qué temporada la de este equipo 🏆', 'se lo han currado hasta el final, merecidísimo'],
-    grupo:['¡CAMPEONES, macho! Hay que quedar para celebrarlo.', 'Todavía estoy flipando con el título, enhorabuena de verdad.']
+    grupo:['¡CAMPEONES, macho! Hay que quedar para celebrarlo.', 'Todavía estoy flipando con el título, enhorabuena de verdad.', 'Esta se guarda en la memoria para siempre, qué temporada.', 'Voy a poner la foto de la celebración de perfil, no me juzguéis 😂']
   },
   mvp:{
     whatsapp:['¡Mejor jugador de la liga! Está bien merecido.', 'Enhorabuena por el premio, currárselo así tiene premio.'],
     instagram:['🌟 El MVP de la temporada. Nivel de otra categoría.', 'El mejor de la liga, sin discusión.'],
     x:['MVP de la temporada, lo mejor que se ha visto esta campaña', 'se lo ha ganado a pulso, mejor jugador de la liga'],
-    grupo:['¡MVP! Vaya temporadón te has marcado.', 'Con el premio de mejor jugador ya no hay quien te aguante 😂']
+    grupo:['¡MVP! Vaya temporadón te has marcado.', 'Con el premio de mejor jugador ya no hay quien te aguante 😂', 'Enhorabuena de verdad, te lo has currado toda la temporada.']
+  },
+  ascenso:{
+    whatsapp:['¡Ascenso conseguido! Menuda temporada.', 'Ya sois de la categoría de arriba, enhorabuena.'],
+    instagram:['⬆️ Ascenso logrado. Se lo merecían.', 'Un club entero de fiesta hoy — ascenso conseguido.'],
+    x:['ascenso conseguido, temporada redonda', 'suben de categoría por méritos propios'],
+    grupo:['¡ASCENSO! Menudo año habéis hecho.', 'Hay que celebrar la subida de categoría como se merece.', 'Ya era hora, os lo habéis currado todo el año.']
+  },
+  pichichi:{
+    whatsapp:['¡Máximo goleador! Te lo has currado.', 'Vaya temporada de gol llevas, enhorabuena por el Pichichi.'],
+    instagram:['⚽ Pichichi de la temporada. Otro nivel de cara a puerta.', 'El que más ha marcado esta campaña, y no por casualidad.'],
+    x:['máximo goleador de la temporada, qué manera de definir', 'se ha comido la liga a base de goles'],
+    grupo:['¡PICHICHI! Menudo animal de cara a puerta.', 'Con la cantidad de goles que llevas ya no me sorprende nada.']
   },
   lesion: {
-    whatsapp:['Me acabo de enterar de la lesión, ¿cómo lo llevas?', 'Cuídate mucho estos días — aquí estamos para lo que necesites.', '¿Sabes ya cuánto vas a estar parado?'],
+    whatsapp:['Me acabo de enterar de la lesión, ¿cómo lo llevas?', 'Cuídate mucho estos días — aquí estamos para lo que necesites.', '¿Sabes ya cuánto vas a estar parado?', 'Menudo palo la lesión, pero seguro que vuelves más fuerte.'],
     email:{ remitente:'Departamento Médico', asunto:'Parte de evolución', cuerpoFn:j=>`Seguimos de cerca tu recuperación. Ánimo, ${primerNombre(j)} — de momento todo evoluciona según lo previsto.` },
     instagram:['Fuerza, campeón 💪 Te esperamos de vuelta pronto.', 'Toda la afición contigo en la recuperación ❤️', 'Se le echa de menos ya en el campo.'],
     x:['fuerza @jugador, vuelve pronto 💪', 'se le va a echar de menos estas semanas...', 'ojalá se recupere rápido, lo necesitamos'],
-    grupo:['¿Cómo llevas la recuperación? Te echamos de menos por aquí.', 'Cualquier cosa que necesites nos dices.']
+    grupo:['¿Cómo llevas la recuperación? Te echamos de menos por aquí.', 'Cualquier cosa que necesites nos dices.', 'Aprovecha para descansar la cabeza también, que buena falta te hace.', '¿Ya tienes fecha para volver a pisar el campo?']
   },
   crisis:{
     whatsapp:['Sé que no está siendo un buen momento. Aquí me tienes para lo que sea.', 'No dejes que unos partidos malos te definan — esto se cambia con trabajo.'],
     instagram:['Los números no cuentan toda la historia. Confiamos en ti.', 'Toca apretar los dientes, esto es una racha y las rachas se cortan.'],
     x:['racha complicada la del chaval, esperemos que se corte pronto', 'un poco de paciencia, esto se da la vuelta'],
-    grupo:['Ánimo con la racha, esto se corta seguro.', 'No le des más vueltas de las necesarias, cabeza fría.']
+    grupo:['Ánimo con la racha, esto se corta seguro.', 'No le des más vueltas de las necesarias, cabeza fría.', 'Un mal momento no borra todo lo bueno que has hecho, cabeza arriba.']
   },
   racha:{
     whatsapp:['¡Estás que te sales! No pares ahora.', 'Como sigas así te vas a comer el mundo esta temporada.'],
     instagram:['🔥🔥🔥 IMPARABLE. Así, así, así.', 'Este nivel no se sostiene… ¿o sí? 😳', 'Cada semana mejor. Qué manera de crecer.'],
     x:['está IMPARABLE esta temporada 🔥', 'como siga así se lo va a llevar todo por delante', 'nivelazo semana tras semana'],
-    grupo:['Vaya nivel que tienes ahora mismo, tío.', 'Como sigas así nos vas a dejar a todos en ridículo 😂']
+    grupo:['Vaya nivel que tienes ahora mismo, tío.', 'Como sigas así nos vas a dejar a todos en ridículo 😂', 'Cada semana esperando a ver qué haces esta vez, en serio.']
   },
   formaAlta:{
     whatsapp:['Te veo en un momento de forma brutal, ¡a disfrutarlo!'],
     instagram:['Nunca lo había visto tan en forma. Qué animal.', 'Rindiendo a un nivel altísimo esta temporada — se nota.'],
     x:['qué forma física tiene esta temporada, una barbaridad'],
-    grupo:['Se te ve fino estos días, ¿qué estás haciendo distinto?']
+    grupo:['Se te ve fino estos días, ¿qué estás haciendo distinto?', '¿Qué desayunas ahora mismo? Porque vaya rachita.']
   },
   formaBaja:{
     whatsapp:['Te veo un poco apagado últimamente, ¿todo bien?', '¿Necesitas desconectar unos días? Se te ve cansado.'],
     instagram:['Se le nota falto de piernas, necesita descanso.'],
     x:['se le ve cansado últimamente, necesita un respiro'],
-    grupo:['Te veo un poco apagado, ¿todo bien por casa?']
+    grupo:['Te veo un poco apagado, ¿todo bien por casa?', '¿Necesitas unos días de desconexión? Se te ve la cara de cansado.']
   },
   popularSube:{
     email:{ remitente:'Departamento de Comunicación', asunto:'Tu perfil está creciendo', cuerpoFn:j=>`Enhorabuena, ${primerNombre(j)}. Tu popularidad ha dado un salto — se nota en redes y en el interés de los medios por ti.` },
     instagram:['🚀 Subiendo como la espuma, cada vez más gente habla de ti.', 'Empiezas a sonar en todas partes.'],
     x:['cada vez suena más este nombre, tomad nota', 'de un tiempo a esta parte no se habla de otra cosa'],
-    grupo:['Cada vez te sigue más gente eh, cuidado con la fama 😏', 'Ya eres famoso y todo, no te olvides de nosotros.']
+    grupo:['Cada vez te sigue más gente eh, cuidado con la fama 😏', 'Ya eres famoso y todo, no te olvides de nosotros.', 'Como sigas así vas a necesitar guardaespaldas para venir a vernos 😂']
   },
+  // El bucket que más se dispara en la práctica (todo lo demás son estados puntuales) — por eso
+  // lleva, con diferencia, el pool de "grupo" más grande: charla de la pandilla que no depende de
+  // cómo te vaya a ti (planes, coña, fútbol en general), para que el grupo se sienta vivo por sí
+  // mismo y no solo como un contestador que reacciona a tus resultados.
   generico:{
-    whatsapp:['¿Qué tal la semana? Aquí, dándole al día a día.', 'Oye, hace tiempo que no hablamos. ¿Todo en orden?', 'Cuéntame, ¿cómo va todo por el club?'],
+    whatsapp:['¿Qué tal la semana? Aquí, dándole al día a día.', 'Oye, hace tiempo que no hablamos. ¿Todo en orden?', 'Cuéntame, ¿cómo va todo por el club?', '¿Viste el partidazo de ayer? Menuda locura de resultado.', 'Oye, ¿al final vienes estas navidades por aquí?'],
     instagram:['Otra semana más dándolo todo. Vamos con esa. ⚽', 'El fútbol nunca duerme.', 'Entrenando duro, como siempre.'],
     x:['semana tranquila de entrenamientos, toca seguir sumando', 'el día a día también cuenta, aunque no se vea'],
-    grupo:['¿Qué tal todo? Hace tiempo que no hablamos por aquí.', 'Cuándo quedamos un día de estos, en serio.']
+    grupo:[
+      '¿Qué tal todo? Hace tiempo que no hablamos por aquí.', 'Cuándo quedamos un día de estos, en serio.',
+      '¿Habéis visto el resultado de anoche? Menuda locura de partido.', 'Se me ha ocurrido que podríamos organizar algo para las vacaciones, ¿qué decís?',
+      'Acabo de ver que hay una peli nueva de fútbol, ¿alguien la ha visto ya?', '¿Alguien sabe algo del sorteo de la Copa? Dicen que sale hoy.',
+      'Llevo toda la semana sin dormir bien, este calendario nos va a matar.', 'Qué ganas de que lleguen las vacaciones, en serio.',
+      'Me acabo de comprar unas botas nuevas, a ver qué tal van.', '¿Al final quedamos este fin de semana o qué?',
+      'Vaya nivel el del rival del fin de semana, hay que andarse con ojo.', 'Se me ha antojado una barbacoa este finde, ¿os apuntáis?'
+    ]
   }
 };
 function primerNombre(j){ return (j.nombre||'').split(' ')[0]; }
@@ -14499,9 +14574,13 @@ function generarNotificacionMovil(j){
   // semana hasta el próximo reinicio.
   const hayTituloSinAvisar = (S.titulosTemporadaActual||[]).length && S._movilCampeonNotifTemp !== S.temporada;
   const hayMvpSinAvisar = S.temporadaResumen && S.temporadaResumen.mvp && S._movilMvpNotifTemp !== S.temporada;
+  const hayAscensoSinAvisar = S.temporadaResumen && S.temporadaResumen.ascenso && S._movilAscensoNotifTemp !== S.temporada;
+  const hayPichichiSinAvisar = S.temporadaResumen && S.temporadaResumen.pichichi && S._movilPichichiNotifTemp !== S.temporada;
   let bucket;
   if(hayTituloSinAvisar) bucket = 'campeon';
+  else if(hayAscensoSinAvisar) bucket = 'ascenso';
   else if(hayMvpSinAvisar) bucket = 'mvp';
+  else if(hayPichichiSinAvisar) bucket = 'pichichi';
   else if(j.lesionSemanas > 0) bucket = 'lesion';
   else if(j.estadoMental === 'crisis') bucket = 'crisis';
   else if(j.estadoMental === 'racha') bucket = 'racha';
@@ -14511,6 +14590,8 @@ function generarNotificacionMovil(j){
   else bucket = 'generico';
   if(bucket === 'campeon') S._movilCampeonNotifTemp = S.temporada;
   if(bucket === 'mvp') S._movilMvpNotifTemp = S.temporada;
+  if(bucket === 'ascenso') S._movilAscensoNotifTemp = S.temporada;
+  if(bucket === 'pichichi') S._movilPichichiNotifTemp = S.temporada;
   const plantillas = TEL_PLANTILLAS_NOTIF[bucket] || TEL_PLANTILLAS_NOTIF.generico;
   const contactos = telContactosDe(j);
   const grupos = telGruposDe(j);
