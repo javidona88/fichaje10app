@@ -913,25 +913,29 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tienda-card-cta button.en-uso{ background:rgba(76,175,109,0.18); color:#8fe3ab; }
 
 /* ---------- Servicios: plantilla de personal (SCREENS.servicios) ---------- */
+/* Balance proyectado + gasto anual en la misma línea (dos tarjetas a medias), en vez de dos
+   bloques a todo lo ancho apilados — van de la mano, así que se leen mejor codo con codo. */
+.staff-balance-row{ display:flex; gap:10px; margin-bottom:16px; }
+.staff-balance-row .staff-resumen, .staff-balance-row .staff-balance{ flex:1; min-width:0; margin-bottom:0; }
 .staff-resumen{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  display:flex; flex-direction:column; gap:2px;
   background:var(--panel2); border:1px solid var(--line); border-radius:12px;
-  padding:10px 14px; margin-bottom:16px;
+  padding:10px 14px;
 }
 .staff-resumen .lbl{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); }
 .staff-resumen .val{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:18px; color:var(--gold); }
 /* El dato más importante de Servicios: mismo balance proyectado a fin de temporada que en Banco
    (calcularBalanceProyectadoTemporada) — más grande y con color según signo, a diferencia del
-   resumen neutro de arriba, porque es lo que de verdad decide si puedes permitirte algo nuevo. */
+   resumen neutro de al lado, porque es lo que de verdad decide si puedes permitirte algo nuevo. */
 .staff-balance{
   display:flex; flex-direction:column; gap:2px;
   background:var(--panel2); border:1.5px solid var(--line); border-radius:12px;
-  padding:12px 14px; margin-bottom:12px;
+  padding:12px 14px;
 }
 .staff-balance.pos{ border-color:rgba(76,175,109,0.45); }
 .staff-balance.neg{ border-color:rgba(217,73,92,0.45); }
 .staff-balance .lbl{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); }
-.staff-balance .val{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:24px; }
+.staff-balance .val{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:19px; }
 .staff-balance.pos .val{ color:var(--green); }
 .staff-balance.neg .val{ color:var(--red); }
 .staff-dept{
@@ -1355,22 +1359,26 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-status-ic.bateria svg{ width:20px; height:12px; }
 /* Notificaciones del móvil: capa PROPIA por encima del aparato entero (ya no confinadas dentro
    de .tel-device, donde competían por espacio con el notch y los iconos del dock) — se ven igual
-   de claras con el móvil recogido o abierto, en cualquier pantalla. Nacen justo detrás del borde
-   superior del asomo (empiezan un poco más abajo de su sitio y transparentes, como si salieran de
-   detrás del aparato) y suben hasta quedar POR ENCIMA de él durante los 4 segundos que dura el
-   aviso. Ver pintarNotifMovil(). */
+   de claras con el móvil recogido o abierto, en cualquier pantalla. Nacen desde detrás del borde
+   superior del asomo (empiezan bien por debajo de su sitio final y transparentes, como si
+   salieran de detrás del aparato) y suben hasta quedar POR ENCIMA de él; al expirar hacen el
+   mismo recorrido al revés, hundiéndose otra vez detrás del móvil en vez de desaparecer de golpe
+   (ver mostrarNotificacion/pintarNotifMovil: la salida es una fase "saliendo" propia, con su
+   propia transición, antes de quitarse de S.notificaciones de verdad). El ancho ya no es fijo:
+   cada aviso ocupa solo lo que pida su texto (width:max-content), así uno corto no estira una
+   caja tan ancha como uno largo. */
 .tel-notif-movil-wrap{
-  position:fixed; left:50%; transform:translateX(-50%); width:93%; max-width:460px;
-  bottom:calc(var(--tel-peek-h) + 12px); z-index:1; display:flex; flex-direction:column; gap:6px; pointer-events:none;
+  position:fixed; left:50%; transform:translateX(-50%); max-width:93vw;
+  bottom:calc(var(--tel-peek-h) + 12px); z-index:1; display:flex; flex-direction:column; align-items:center; gap:6px; pointer-events:none;
 }
 .tel-notif-movil{
   pointer-events:auto; box-sizing:border-box;
-  display:flex; align-items:center; gap:8px; width:100%;
+  display:flex; align-items:center; gap:8px; width:max-content; max-width:100%;
   background:rgba(28,31,42,0.97); backdrop-filter:blur(10px); border:1px solid var(--line); border-radius:13px;
   padding:9px 12px;
   font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; color:var(--ink);
   box-shadow:0 10px 24px rgba(0,0,0,0.45);
-  transform:translateY(30%); opacity:0;
+  transform:translateY(65%); opacity:0;
   transition:transform .38s cubic-bezier(.25,.8,.35,1), opacity .3s ease;
 }
 .tel-notif-movil.show{ transform:translateY(0); opacity:1; }
@@ -1402,6 +1410,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    sobrescriben aquí, solo dentro de .tel-screen, para que sea Inter SOLO cuando se ven desde el
    móvil, sin tocar su aspecto en la pantalla real. */
 .tel-screen .staff-resumen .lbl, .tel-screen .staff-balance .lbl,
+.tel-screen .staff-resumen .val, .tel-screen .staff-balance .val, .tel-screen .tienda-card-precio,
 .tel-screen .staff-dept, .tel-screen .staff-nombre, .tel-screen .staff-mejora, .tel-screen .servicio-nombre,
 .tel-screen .servicio-activo-tag, .tel-screen .servicio-desc, .tel-screen .tienda-cat-chip,
 .tel-screen .tienda-card-tag, .tel-screen .tienda-card-nombre, .tel-screen .tienda-card-efecto,
@@ -7923,13 +7932,19 @@ function abreviarNumero(valor){
 function formatearDinero(valor){
   return abreviarNumero(valor) + ' €';
 }
-// Cifra completa con separador de miles, para sitios donde abreviar (1,2M/9,8K) no encaja —
-// como una lista de movimientos bancarios. No usa toLocaleString: algunos motores empaquetan
-// un ICU reducido sin datos de es-ES y devuelven el número sin separador sin avisar.
+// Cifra completa con separador de miles manual — no usa toLocaleString: no es solo un problema
+// de ICU reducido en algunos motores (el comentario original), es un bug real reproducido en
+// Chromium normal, donde Intl.NumberFormat('es-ES') con useGrouping:'auto' NO agrupa números de
+// exactamente 4 cifras (p.ej. 6033 sale "6033", sin punto, pero 10000 sí sale "10.000") — parece
+// venir de un mínimo de dígitos de agrupación en los datos CLDR de 'es' que ha cambiado en algún
+// momento. Se evita del todo con un separador propio, sin depender del locale del navegador.
+function formatearMiles(valor){
+  const signo = valor < 0 ? '-' : '';
+  return signo + Math.abs(Math.round(valor)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
 function formatearEuros(valor){
   const signo = valor < 0 ? '−' : '';
-  const conPuntos = Math.abs(Math.round(valor)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return signo + conPuntos + ' €';
+  return signo + formatearMiles(Math.abs(valor)) + ' €';
 }
 function formatearSeguidores(valor){
   return abreviarNumero(valor);
@@ -11061,22 +11076,35 @@ function generarOfertas(j){
   }
 
   const bonoLigaTop = j.club.categoria === "LaLiga" ? 0.15 : 0;
-  const probExtranjero = j.edad >= 20 ? Math.min(0.65, (j.stats.valorMercado/2000000) + (rendimientoDestacado?0.15:0) + bonoLigaTop) : 0;
-  const maxOfertasExtranjero = (j.club.categoria === "LaLiga" && j.stats.reputacion >= 35) ? 2 : 1;
+  const probExtranjero = j.edad >= 20 ? Math.min(0.8, (j.stats.valorMercado/1700000) + (rendimientoDestacado?0.15:0) + bonoLigaTop) : 0;
+  // Más hueco para ofertas extranjeras que antes (antes tope 1, o 2 solo en LaLiga+reputación
+  // alta): con solo 1-2 tiradas por pretemporada y 26 países reales en CLUBES_EXTRANJERO, casi
+  // nunca llegaba a asomar esa variedad — la mayoría de carreras veían siempre los mismos 2-3
+  // países, si es que veían alguno. Sigue habiendo un techo por categoría/reputación (vía
+  // maxOfertasExtranjero y tierMax más abajo), pero con más intentos por ronda.
+  const maxOfertasExtranjero = j.club.categoria === "LaLiga" ? (j.stats.reputacion >= 35 ? 3 : 2) : (idxActual >= 3 ? 2 : 1);
   if(idxActual >= 2){
     let tierMax;
     if(j.club.categoria === "LaLiga") tierMax = j.stats.reputacion >= 60 ? 4 : (j.stats.reputacion >= 35 ? 3 : 2);
     else if(j.club.categoria === "LaLiga2") tierMax = 2;
     else tierMax = 1;
     const tierMin = Math.max(1, tierMax - 1); // suelo mínimo, para que un jugador de nivel alto no reciba ofertas de clubes extranjeros flojos
+    // Países ya repartidos en esta misma ronda de ofertas (domésticas incluidas, aunque esas no
+    // llevan país — solo importa aquí): evita que dos ofertas extranjeras del mismo lote caigan
+    // siempre en el mismo país por pura coincidencia del sorteo, y reparte mejor entre los 26
+    // países reales de CLUBES_EXTRANJERO en vez de agruparse en 2-3 recurrentes.
+    const paisesUsados = new Set();
     for(let i=0; i<maxOfertasExtranjero; i++){
       if(Math.random() >= probExtranjero) continue;
       let candidatosExt = CLUBES_EXTRANJERO.filter(c => { const p = PRESTIGIO_CLUB[c.nombre]||2; return p >= tierMin && p <= tierMax; });
       if(!candidatosExt.length) candidatosExt = CLUBES_EXTRANJERO.filter(c => (PRESTIGIO_CLUB[c.nombre]||2) <= tierMax);
-      const clubExt = candidatosExt[Math.floor(Math.random()*candidatosExt.length)];
+      const candidatosPaisNuevo = candidatosExt.filter(c => !paisesUsados.has(c.pais) && !nombresUsados.has(c.nombre));
+      const pool = candidatosPaisNuevo.length ? candidatosPaisNuevo : candidatosExt;
+      const clubExt = pool[Math.floor(Math.random()*pool.length)];
       if(nombresUsados.has(clubExt.nombre)) continue;
       if(esRivalDirecto(j.club.nombre, clubExt.nombre) && Math.random() < 0.93) continue;
       nombresUsados.add(clubExt.nombre);
+      paisesUsados.add(clubExt.pais);
       const esGrandeExt = CLUBES_GRANDES_EXTRANJERO.includes(clubExt.nombre);
       const duracion = calcularDuracionContrato(j);
       // sin escala de categorías para el extranjero, la "subida" se mide comparando prestigio con tu club actual
@@ -11439,6 +11467,9 @@ function togglePrioridadEntreno(j, a){
   pintar();
 }
 const DURACION_NOTIFICACION_MS = 4000;
+// Cuánto dura el hundimiento de vuelta detrás del móvil antes de quitar el aviso de verdad —
+// tiene que casar con la transición CSS de .tel-notif-movil (.38s transform).
+const SALIDA_NOTIFICACION_MS = 400;
 // Notificación estilo móvil real: las notificaciones caen dentro del propio móvil simulado (ver
 // pintarNotifMovil, llamado desde pintarMovilSheet), como en un móvil de verdad — no son un
 // aviso de la página real.
@@ -11450,8 +11481,17 @@ function mostrarNotificacion(texto, tipo){
   S.notificaciones.push({ id, texto, tipo, creadoEn: Date.now() });
   pintarMovilSheet();
   setTimeout(()=>{
-    S.notificaciones = (S.notificaciones||[]).filter(n=>n.id!==id);
+    // Fase "saliendo": no se quita todavía de S.notificaciones, solo se marca — pintarNotifMovil
+    // la pinta ya en su posición final para luego, en el mismo repintado, retirarle la clase
+    // 'show' y dejar que la transición CSS la hunda otra vez detrás del móvil antes de borrarla
+    // de verdad. Sin esto desaparecía de golpe en vez de esconderse.
+    const n = (S.notificaciones||[]).find(n=>n.id===id);
+    if(n) n.saliendo = true;
     pintarMovilSheet();
+    setTimeout(()=>{
+      S.notificaciones = (S.notificaciones||[]).filter(n=>n.id!==id);
+      pintarMovilSheet();
+    }, SALIDA_NOTIFICACION_MS);
   }, DURACION_NOTIFICACION_MS);
 }
 // Pinta los avisos pendientes en su propia capa (raiz = #movil-root, ver .tel-notif-movil-wrap),
@@ -11462,23 +11502,27 @@ function mostrarNotificacion(texto, tipo){
 // en el resto del móvil: la animación de entrada se puede repetir en un repintado que coincida
 // por casualidad).
 function pintarNotifMovil(raiz){
-  // Red de seguridad: lo que retira un aviso a los 4s es un setTimeout en memoria, que NO
-  // sobrevive a una recarga de página — pero S.notificaciones sí, porque guardarPartida()
-  // serializa S entero. Se purga aquí por edad real (reloj), no por el temporizador, así que se
-  // autocura en el primer repintado tras cargar la partida. Un aviso sin `creadoEn` (guardado con
-  // una versión anterior a este arreglo) se trata como ya caducado.
+  // Red de seguridad: lo que retira un aviso (y lo que lo pasa a "saliendo") son setTimeout en
+  // memoria, que NO sobreviven a una recarga de página — pero S.notificaciones sí, porque
+  // guardarPartida() serializa S entero. Se recalculan aquí por edad real (reloj), no por el
+  // temporizador, así que se autocuran en el primer repintado tras cargar la partida. Un aviso
+  // sin `creadoEn` (guardado con una versión anterior a este arreglo) se trata como ya caducado.
   const ahora = Date.now();
-  S.notificaciones = (S.notificaciones||[]).filter(n => (n.creadoEn ? (ahora - n.creadoEn) : Infinity) < DURACION_NOTIFICACION_MS);
+  S.notificaciones = (S.notificaciones||[]).filter(n => (n.creadoEn ? (ahora - n.creadoEn) : Infinity) < (DURACION_NOTIFICACION_MS + SALIDA_NOTIFICACION_MS));
   if(!S.notificaciones.length) return;
   const wrap = el('div','tel-notif-movil-wrap');
   S.notificaciones.forEach(n=>{
-    const item = el('div','tel-notif-movil '+n.tipo);
+    const saliendo = n.saliendo || (n.creadoEn && (ahora - n.creadoEn) >= DURACION_NOTIFICACION_MS);
+    const item = el('div','tel-notif-movil '+n.tipo+(saliendo?' show saliendo':''));
     item.innerHTML = n.texto;
     wrap.appendChild(item);
   });
   raiz.appendChild(wrap);
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
-    wrap.querySelectorAll('.tel-notif-movil').forEach(nodo=> nodo.classList.add('show'));
+    wrap.querySelectorAll('.tel-notif-movil').forEach(nodo=>{
+      if(nodo.classList.contains('saliendo')) nodo.classList.remove('show');
+      else nodo.classList.add('show');
+    });
   }); });
 }
 // Ya no hay tabbar de 3 botones (Jugador/Avanzar/Estadísticas se retiraron — ver topbar() y
@@ -11533,6 +11577,15 @@ function cerrarMovilSheet(){
 // de apertura en cada repintado").
 function pintarMovilSheet(){
   const raiz = document.getElementById('movil-root');
+  // Preservar el scroll DENTRO de la pantalla real incrustada (Servicios/Compras/...) si se repinta
+  // la MISMA pantalla — raiz.innerHTML se reconstruye entera en cada pintarMovilSheet(), así que
+  // .tel-screen nace siempre con scrollTop 0 aunque S.screen no haya cambiado (bug real: pulsar un
+  // nivel de servicio hacía "saltar" la vista arriba del todo). Mismo criterio que pintar() con
+  // window.scrollTo/_pantallaPintadaPrevia, pero para este scroll interno independiente.
+  const pantallaRealVieja = raiz.querySelector('.tel-screen');
+  const scrollPantallaRealPrevio = pantallaRealVieja ? pantallaRealVieja.scrollTop : 0;
+  const mismaPantallaReal = S.movilVista === 'pantallaReal' && S.screen === _pantallaRealMovilPrevia;
+  _pantallaRealMovilPrevia = S.movilVista === 'pantallaReal' ? S.screen : null;
   raiz.innerHTML = '';
   if(!S.jugador || S.enFaseCreacion){ raiz.style.pointerEvents = 'none'; document.body.style.overflow = ''; return; }
   const pantallaEfectiva = (S.screen === 'ajustes' && S.pantallaAnteriorAjustes) ? S.pantallaAnteriorAjustes : S.screen;
@@ -11682,6 +11735,10 @@ function pintarMovilSheet(){
   // YA en su propia app. sheet se queda sin onclick propio en este estado.
 
   raiz.appendChild(sheet);
+  // El scrollTop solo "cuadra" una vez el árbol está conectado al documento de verdad (con
+  // .tel-screen todavía suelto, sin layout calculado, scrollHeight es 0 y la asignación se
+  // recorta sola a 0) — por eso se restaura AQUÍ, después de raiz.appendChild(sheet), no antes.
+  if(mismaPantallaReal) pantalla.scrollTop = scrollPantallaRealPrevio;
   // Se pinta DESPUÉS de anexar sheet (no antes, ni dentro de device): al ser un hermano posterior
   // en el DOM dentro de la misma capa (#movil-root), queda por encima del aparato entero sin
   // necesidad de más trucos de z-index — ver .tel-notif-movil-wrap.
@@ -11696,6 +11753,9 @@ function pintarMovilSheet(){
   }
 }
 let _pantallaPintadaPrevia = null;
+// Misma idea que _pantallaPintadaPrevia, pero para el scroll DENTRO de .tel-screen cuando hay una
+// pantalla real incrustada (Servicios/Compras/...) — ver pintarMovilSheet.
+let _pantallaRealMovilPrevia = null;
 function pintar(){
   // Gancho de la primera temporada (ver iniciarTemporadaJuego): abre el móvil directo en
   // Entrenamiento una única vez, se consume aquí para no repetirse en cada repintado.
@@ -14263,7 +14323,7 @@ function telAbrirPantallaReal(destino, antesDeIr){
 // ahí, abreviado con un decimal (K/M), donde sí compensa por lo grande que se pondría el número.
 function formatearDineroStatusMovil(valor){
   const abs = Math.abs(valor);
-  if(abs < 100000) return (valor<0?'-':'') + Math.round(abs).toLocaleString('es-ES') + ' €';
+  if(abs < 100000) return (valor<0?'-':'') + formatearMiles(abs) + ' €';
   return formatearDinero(valor);
 }
 function telPintarStatusHora(){
@@ -14501,11 +14561,6 @@ function telFondoMovilActual(){
     if(f) return f.valor;
   }
   return S.telFondoColor || TEL_FONDOS_MOVIL[0].valor;
-}
-// Cuántos seguidores "tendría" el jugador en redes — pura decoración derivada de stats reales
-// (popularidad + goles de carrera), no se guarda aparte ni se usa en ningún cálculo del juego.
-function telSeguidoresRedes(j){
-  return Math.round(300 + (j.stats.popularidad||0) * 90 + (j.carrera.goles||0) * 12);
 }
 function tiendaUnicaDisponible(items, nivelActual, j){
   return (items||[]).some(info => info.nivel > nivelActual
@@ -15831,7 +15886,10 @@ function renderMovilContenido(c, j){
     perfil.appendChild(el('span','tel-avatar tel-ig-avatar', telIniciales(j.nombre)));
     const perfilStats = el('div','tel-ig-stats');
     perfilStats.appendChild(el('div','tel-ig-stat', `<b>${posts.length}</b>publicaciones`));
-    perfilStats.appendChild(el('div','tel-ig-stat', `<b>${telSeguidoresRedes(j).toLocaleString('es-ES')}</b>seguidores`));
+    // Mismo dato de verdad que la ficha del jugador (j.stats.seguidores, ver actualizarSeguidores)
+    // — antes Redes inventaba su propia cifra a partir de popularidad+goles, desligada del todo
+    // de lo que se veía en la pestaña Jugador (bug real, reportado: los números no cuadraban).
+    perfilStats.appendChild(el('div','tel-ig-stat', `<b>${formatearSeguidores(j.stats.seguidores||0)}</b>seguidores`));
     perfilStats.appendChild(el('div','tel-ig-stat', `<b>${Math.round(80 + (j.edad||16)*3)}</b>siguiendo`));
     perfil.appendChild(perfilStats);
     c.appendChild(perfil);
@@ -15854,7 +15912,7 @@ function renderMovilContenido(c, j){
         card.appendChild(foto);
         const likes = Math.round(20 + (j.stats.popularidad||0) * 3 + Math.random()*30);
         const meta = el('div','tel-ig-post-meta');
-        meta.innerHTML = `<span class="tel-ig-post-likes">❤️ ${likes.toLocaleString('es-ES')} me gusta</span><span class="tel-ig-post-temp">Temp. ${temporadaAAnoCompleto(p.temporada)}</span>`;
+        meta.innerHTML = `<span class="tel-ig-post-likes">❤️ ${formatearMiles(likes)} me gusta</span><span class="tel-ig-post-temp">Temp. ${temporadaAAnoCompleto(p.temporada)}</span>`;
         card.appendChild(meta);
         card.appendChild(el('div','tel-ig-post-txt', `<b>${capitalizarNombre(j.nombre).split(' ')[0].toLowerCase()}</b> ${p.texto}`));
         c.appendChild(card);
@@ -16201,10 +16259,10 @@ SCREENS.rankings = function(){
   const sumar = clave => filas.reduce((acc,f)=> acc + (f.datos?.[clave]||0), 0);
   const tiles = el('div','rk-tiles');
   [
-    [filas.length.toLocaleString('es-ES'), 'Carreras completadas'],
-    [sumar('goles').toLocaleString('es-ES'), 'Goles marcados'],
-    [sumar('asistencias').toLocaleString('es-ES'), 'Asistencias'],
-    [sumar('titulos').toLocaleString('es-ES'), 'Títulos levantados'],
+    [formatearMiles(filas.length), 'Carreras completadas'],
+    [formatearMiles(sumar('goles')), 'Goles marcados'],
+    [formatearMiles(sumar('asistencias')), 'Asistencias'],
+    [formatearMiles(sumar('titulos')), 'Títulos levantados'],
     [formatearDinero(sumar('dineroGanado')), 'Dinero generado']
   ].forEach(([num,lbl])=>{
     const t = el('div','rk-tile');
@@ -18786,15 +18844,17 @@ function telGastoAnualServicios(j){
 // Acordeón propio (no comparte estado con el de SCREENS.gastos, para no desincronizar qué
 // categoría ves abierta en cada pantalla).
 function renderizarPlantillaServicios(j, contenedor){
+  const fila = el('div','staff-balance-row');
   const proyeccion = calcularBalanceProyectadoTemporada(j);
   const balance = el('div','staff-balance '+(proyeccion.neto>=0?'pos':'neg'));
   balance.innerHTML = `<span class="lbl">Balance estimado a fin de temporada</span><span class="val">${proyeccion.neto>=0?'+':''}${formatearEuros(proyeccion.neto)}</span>`;
-  contenedor.appendChild(balance);
+  fila.appendChild(balance);
 
   const gastoAnual = telGastoAnualServicios(j);
   const resumen = el('div','staff-resumen');
   resumen.innerHTML = `<span class="lbl">Gasto anual en servicios</span><span class="val">${formatearEuros(gastoAnual)}</span>`;
-  contenedor.appendChild(resumen);
+  fila.appendChild(resumen);
+  contenedor.appendChild(fila);
 
   const categorias = {};
   TIENDA_SERVICIOS.forEach(s=>{
@@ -18828,20 +18888,27 @@ function renderizarPlantillaServicios(j, contenedor){
         j.suscripciones[servicio.familia] = cercano.nivel;
       }
       const nivelActual = j.suscripciones[servicio.familia] || 0;
+      // El icono solo ocupa la altura de la cabecera (nombre+estado+mejora), no la tarjeta
+      // entera — antes, al ser hermano de .staff-body en una fila flex, empujaba los niveles y
+      // la descripción a una columna más estrecha durante toda la tarjeta. Niveles/descripción
+      // van ahora fuera de esa cabecera, a ancho completo.
       const card = el('div','staff-card');
+      const cab = el('div','staff-cab');
       const avatar = el('div','staff-avatar');
       avatar.style.background = `linear-gradient(150deg,${colorClaro},${colorOscuro})`;
       avatar.innerHTML = ICONOS_SVG[servicio.icono] || '';
-      card.appendChild(avatar);
+      cab.appendChild(avatar);
 
-      const body = el('div','staff-body');
+      const infoCab = el('div','staff-info-cab');
       const top = el('div','staff-top');
       top.appendChild(el('span','staff-nombre', servicio.nombre));
       top.appendChild(el('span','staff-estado '+(nivelActual>0?'activo':'inactivo'), nivelActual>0 ? `Nivel ${nivelActual}` : 'Sin contratar'));
-      body.appendChild(top);
+      infoCab.appendChild(top);
       const efectoBase = (servicio.niveles[0] || {}).efectoTemporada || {};
       const mejoraTxt = Object.keys(efectoBase).map(k => NICE_ATTR[k] || NICE_STAT[k] || k).join(' · ');
-      if(mejoraTxt) body.appendChild(el('div','staff-mejora', `↑ ${mejoraTxt}`));
+      if(mejoraTxt) infoCab.appendChild(el('div','staff-mejora', `↑ ${mejoraTxt}`));
+      cab.appendChild(infoCab);
+      card.appendChild(cab);
 
       const niveles = el('div','servicio-niveles');
       servicio.niveles.forEach(info=>{
@@ -18870,15 +18937,14 @@ function renderizarPlantillaServicios(j, contenedor){
         }
         niveles.appendChild(btn);
       });
-      body.appendChild(niveles);
+      card.appendChild(niveles);
       const primerBloqueado = servicio.niveles.find(n => n.desbloqueo && !n.desbloqueo(j));
       if(primerBloqueado && !nivelActual){
-        body.appendChild(el('div','servicio-desc', `🔒 Nivel ${primerBloqueado.nivel}: ${primerBloqueado.etiquetaBloqueo}`));
+        card.appendChild(el('div','servicio-desc', `🔒 Nivel ${primerBloqueado.nivel}: ${primerBloqueado.etiquetaBloqueo}`));
       } else {
         const infoDesc = servicio.niveles.find(n=>n.nivel === (nivelActual || 1));
-        body.appendChild(el('div','servicio-desc', infoDesc.desc));
+        card.appendChild(el('div','servicio-desc', infoDesc.desc));
       }
-      card.appendChild(body);
       contenedor.appendChild(card);
     });
   });
@@ -19198,11 +19264,28 @@ SCREENS.numerosRojosReveal = function(){
   c.appendChild(el('div','lbl', 'Tu cuenta se queda en números rojos'));
   const cifra = c.appendChild(el('div','num', formatearDinero(j.stats.dinero)));
   cifra.style.cssText = 'font-size:32px;color:var(--red);';
+
+  // Caja de alerta (mismo rojo que .cooldown-box, reutilizada tal cual) en vez del párrafo suelto
+  // de antes: el texto va alineado a la izquierda (más legible que centrado para varias líneas) y
+  // los servicios cancelados salen como chips (.badge.risk), no enterrados en una frase corrida.
   const listaCancelados = S.pendienteNumerosRojos;
-  const textoNumerosRojos = listaCancelados.length
-    ? `Con el saldo en negativo, cancelas de golpe ${listaCancelados.asesorFiscalSalvado ? 'casi todos' : 'todos'} los servicios profesionales que tenías activos: ${listaCancelados.join(', ')}.${listaCancelados.asesorFiscalSalvado ? ' Tu Asesor fiscal es la excepción: precisamente para esto le pagas, y sigue trabajando en tus cuentas.' : ''} En cuanto tu cuenta vuelva a positivo, podrás contratar de nuevo lo que necesites.`
-    : 'Con el saldo en negativo, tocaría cancelar tus servicios profesionales de golpe — pero tu Asesor fiscal se encarga de que eso no haga falta. Sigue trabajando en tus cuentas mientras el resto espera a que vuelvas a números positivos.';
-  c.appendChild(el('div','event-text', textoNumerosRojos));
+  const huboProtegido = listaCancelados.asesorFiscalSalvado;
+  const caja = el('div','cooldown-box');
+  caja.style.cssText += 'text-align:left;';
+  if(listaCancelados.length){
+    caja.appendChild(el('div',null, `Con el saldo en negativo, cancelas de golpe ${huboProtegido ? 'casi todos' : 'todos'} los servicios profesionales que tenías activos:`)).style.marginBottom = '10px';
+    const chips = el('div');
+    listaCancelados.forEach(nombre=> chips.appendChild(el('span','badge risk', nombre)));
+    caja.appendChild(chips);
+    if(huboProtegido){
+      caja.appendChild(el('div',null, 'Tu <b style="color:var(--ink);">Asesor fiscal</b> es la excepción: precisamente para esto le pagas, y sigue trabajando en tus cuentas.')).style.cssText = 'margin-top:10px;';
+    }
+    caja.appendChild(el('div',null, 'En cuanto tu cuenta vuelva a positivo, podrás contratar de nuevo lo que necesites.')).style.cssText = 'margin-top:10px;';
+  } else {
+    caja.appendChild(el('div',null, 'Con el saldo en negativo, tocaría cancelar tus servicios profesionales de golpe — pero tu <b style="color:var(--ink);">Asesor fiscal</b> se encarga de que eso no haga falta. Sigue trabajando en tus cuentas mientras el resto espera a que vuelvas a números positivos.'));
+  }
+  c.appendChild(caja);
+
   const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Entendido →';
   btn.onclick = ()=>{
     S.pendienteNumerosRojos = null;
