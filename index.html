@@ -14522,81 +14522,123 @@ function telAppTabsCasino(activa){
   });
   return appTabs;
 }
+// Elige un elemento de `lista` evitando repetir los usados más recientemente para esa `clave`
+// (bucket+canal, autor de un grupo, etc.) — antes cada notificación/mensaje salía con
+// Math.random() puro, así que con pools pequeños (2-4 frases) era fácil ver la misma frase dos
+// veces seguidas o cada pocas temporadas. Se recuerdan hasta `lista.length-1` usos por clave
+// (nunca más, o un pool de 3 con margen 2 se quedaría sin ninguna opción libre) en
+// S._telUltimasFrases, que se guarda con la partida igual que el resto de S.movil*. Con listas de
+// un único elemento no hay nada que evitar, así que se devuelve directo.
+function elegirSinRepetir(lista, clave){
+  if(!lista || !lista.length) return undefined;
+  if(lista.length === 1) return lista[0];
+  S._telUltimasFrases = S._telUltimasFrases || {};
+  const usadas = S._telUltimasFrases[clave] || [];
+  const disponibles = lista.filter(x=>!usadas.includes(x));
+  const pool = disponibles.length ? disponibles : lista;
+  const elegido = pool[Math.floor(Math.random()*pool.length)];
+  S._telUltimasFrases[clave] = [elegido, ...usadas].slice(0, Math.min(2, lista.length-1));
+  return elegido;
+}
 // Plantillas de notificaciones "de vez en cuando" (WhatsApp/Email/Redes), ligadas al ESTADO
 // reciente del jugador (lesión, racha, crisis, forma, salto de popularidad) en vez de a un
 // suceso concreto — con más de un centenar de sucesos distintos en BANCO_EVENTOS, escribir un
 // mensaje a medida de cada uno no es viable; el estado resultante SÍ da contexto real y
 // reconocible ("te acabas de lesionar", "estás en racha") sin tener que engancharse a un id.
+// Cada canal lleva bastantes más líneas de las que parecen necesarias a propósito, precisamente
+// para que elegirSinRepetir tenga margen real donde variar en carreras largas.
 const TEL_PLANTILLAS_NOTIF = {
   campeon:{
-    whatsapp:['¡CAMPEONES! Todavía no me lo creo 🏆', 'Qué temporada, macho. Enhorabuena de verdad.', '¡Esto hay que celebrarlo como se merece!', 'Llevo toda la tarde viendo las imágenes del título, qué pasada.'],
-    instagram:['🏆 Al vestuario se le fue la cabeza cuando pitó el final. Un año para recordar.', 'De los títulos que no se olvidan. Enhorabuena, campeón.'],
-    x:['¡CAMPEONES! qué temporada la de este equipo 🏆', 'se lo han currado hasta el final, merecidísimo'],
-    grupo:['¡CAMPEONES, macho! Hay que quedar para celebrarlo.', 'Todavía estoy flipando con el título, enhorabuena de verdad.', 'Esta se guarda en la memoria para siempre, qué temporada.', 'Voy a poner la foto de la celebración de perfil, no me juzguéis 😂']
+    whatsapp:['¡CAMPEONES! Todavía no me lo creo 🏆', 'Qué temporada, macho. Enhorabuena de verdad.', '¡Esto hay que celebrarlo como se merece!', 'Llevo toda la tarde viendo las imágenes del título, qué pasada.', 'Me he quedado sin voz de gritar en el pitido final, en serio.', 'Se lo merece el equipo entero, pero tú el que más.', 'Vais a hablar de esta temporada toda la vida, no hay duda.', '¿Ya has bajado de la nube? Porque yo todavía no.'],
+    instagram:['🏆 Al vestuario se le fue la cabeza cuando pitó el final. Un año para recordar.', 'De los títulos que no se olvidan. Enhorabuena, campeón.', 'La foto de la celebración ya es historia del club.', 'Se lo han currado de principio a fin, título merecidísimo.', '🏆 Otro nombre más en la vitrina de los trofeos.'],
+    x:['¡CAMPEONES! qué temporada la de este equipo 🏆', 'se lo han currado hasta el final, merecidísimo', 'título en el bolsillo, temporada de las que no se olvidan', 'ni el mejor guion lo habría escrito así, qué final de temporada', 'otro título más para la historia del club'],
+    grupo:['¡CAMPEONES, macho! Hay que quedar para celebrarlo.', 'Todavía estoy flipando con el título, enhorabuena de verdad.', 'Esta se guarda en la memoria para siempre, qué temporada.', 'Voy a poner la foto de la celebración de perfil, no me juzguéis 😂', '¿Habéis salido a celebrarlo o qué? Contadlo todo.', 'Ya eres oficialmente de los que "algo levantó" en su carrera, illo.', '¿Cuándo enseñas la copa por aquí? Aunque sea en foto.']
   },
   mvp:{
-    whatsapp:['¡Mejor jugador de la liga! Está bien merecido.', 'Enhorabuena por el premio, currárselo así tiene premio.'],
-    instagram:['🌟 El MVP de la temporada. Nivel de otra categoría.', 'El mejor de la liga, sin discusión.'],
-    x:['MVP de la temporada, lo mejor que se ha visto esta campaña', 'se lo ha ganado a pulso, mejor jugador de la liga'],
-    grupo:['¡MVP! Vaya temporadón te has marcado.', 'Con el premio de mejor jugador ya no hay quien te aguante 😂', 'Enhorabuena de verdad, te lo has currado toda la temporada.']
+    whatsapp:['¡Mejor jugador de la liga! Está bien merecido.', 'Enhorabuena por el premio, currárselo así tiene premio.', 'No hay discusión posible, has sido el mejor con diferencia.', 'Menudo nivel para llevarte el premio individual, en serio.', 'Te lo has ganado partido a partido, no de churro.'],
+    instagram:['🌟 El MVP de la temporada. Nivel de otra categoría.', 'El mejor de la liga, sin discusión.', 'Un premio que llevaba semanas cantado.', '🌟 De los que marcan una temporada entera.'],
+    x:['MVP de la temporada, lo mejor que se ha visto esta campaña', 'se lo ha ganado a pulso, mejor jugador de la liga', 'ni un solo rival serio para el premio, se lo merecía de largo', 'MVP con mayúsculas, qué nivel'],
+    grupo:['¡MVP! Vaya temporadón te has marcado.', 'Con el premio de mejor jugador ya no hay quien te aguante 😂', 'Enhorabuena de verdad, te lo has currado toda la temporada.', 'Se veía venir desde hace semanas, la verdad.', '¿El premio lleva algo de pasta o solo el trofeo? 😏']
   },
   ascenso:{
-    whatsapp:['¡Ascenso conseguido! Menuda temporada.', 'Ya sois de la categoría de arriba, enhorabuena.'],
-    instagram:['⬆️ Ascenso logrado. Se lo merecían.', 'Un club entero de fiesta hoy — ascenso conseguido.'],
-    x:['ascenso conseguido, temporada redonda', 'suben de categoría por méritos propios'],
-    grupo:['¡ASCENSO! Menudo año habéis hecho.', 'Hay que celebrar la subida de categoría como se merece.', 'Ya era hora, os lo habéis currado todo el año.']
+    whatsapp:['¡Ascenso conseguido! Menuda temporada.', 'Ya sois de la categoría de arriba, enhorabuena.', 'Currado desde el primer día, se nota el trabajo de toda la plantilla.', 'Otro nivel os espera ya, a disfrutarlo.', 'De los ascensos que se recuerdan durante años, este.'],
+    instagram:['⬆️ Ascenso logrado. Se lo merecían.', 'Un club entero de fiesta hoy — ascenso conseguido.', 'Subida de categoría con todas las de la ley.', 'La afición entera celebrando el ascenso en la calle.'],
+    x:['ascenso conseguido, temporada redonda', 'suben de categoría por méritos propios', 'ascenso en el bolsillo, a disfrutarlo', 'trabajo de toda la temporada recompensado con el ascenso'],
+    grupo:['¡ASCENSO! Menudo año habéis hecho.', 'Hay que celebrar la subida de categoría como se merece.', 'Ya era hora, os lo habéis currado todo el año.', '¿Cómo se vive un ascenso por dentro? Cuenta, cuenta.', 'Vais a tener que empezar a hablar de otra categoría ya, illo.']
   },
   pichichi:{
-    whatsapp:['¡Máximo goleador! Te lo has currado.', 'Vaya temporada de gol llevas, enhorabuena por el Pichichi.'],
-    instagram:['⚽ Pichichi de la temporada. Otro nivel de cara a puerta.', 'El que más ha marcado esta campaña, y no por casualidad.'],
-    x:['máximo goleador de la temporada, qué manera de definir', 'se ha comido la liga a base de goles'],
-    grupo:['¡PICHICHI! Menudo animal de cara a puerta.', 'Con la cantidad de goles que llevas ya no me sorprende nada.']
+    whatsapp:['¡Máximo goleador! Te lo has currado.', 'Vaya temporada de gol llevas, enhorabuena por el Pichichi.', 'No hay quien te pare de cara a puerta esta temporada.', 'Con esos números no hay Pichichi que se resista.'],
+    instagram:['⚽ Pichichi de la temporada. Otro nivel de cara a puerta.', 'El que más ha marcado esta campaña, y no por casualidad.', '⚽ La bota de goles no la suelta en toda la temporada.', 'El olfato goleador de siempre, premiado como toca.'],
+    x:['máximo goleador de la temporada, qué manera de definir', 'se ha comido la liga a base de goles', 'nadie ha metido más goles esta temporada, normal que se lo lleve', 'pichichi con todas las de la ley'],
+    grupo:['¡PICHICHI! Menudo animal de cara a puerta.', 'Con la cantidad de goles que llevas ya no me sorprende nada.', 'A este paso te vas a quedar sin porterías rivales.', '¿Cuál ha sido tu gol favorito de la temporada?']
   },
   lesion: {
-    whatsapp:['Me acabo de enterar de la lesión, ¿cómo lo llevas?', 'Cuídate mucho estos días — aquí estamos para lo que necesites.', '¿Sabes ya cuánto vas a estar parado?', 'Menudo palo la lesión, pero seguro que vuelves más fuerte.'],
+    whatsapp:['Me acabo de enterar de la lesión, ¿cómo lo llevas?', 'Cuídate mucho estos días — aquí estamos para lo que necesites.', '¿Sabes ya cuánto vas a estar parado?', 'Menudo palo la lesión, pero seguro que vuelves más fuerte.', 'Qué rabia, justo cuando estabas en racha además.', 'Avísame si necesitas compañía estos días, en serio.'],
     email:{ remitente:'Departamento Médico', asunto:'Parte de evolución', cuerpoFn:j=>`Seguimos de cerca tu recuperación. Ánimo, ${primerNombre(j)} — de momento todo evoluciona según lo previsto.` },
-    instagram:['Fuerza, campeón 💪 Te esperamos de vuelta pronto.', 'Toda la afición contigo en la recuperación ❤️', 'Se le echa de menos ya en el campo.'],
-    x:['fuerza @jugador, vuelve pronto 💪', 'se le va a echar de menos estas semanas...', 'ojalá se recupere rápido, lo necesitamos'],
-    grupo:['¿Cómo llevas la recuperación? Te echamos de menos por aquí.', 'Cualquier cosa que necesites nos dices.', 'Aprovecha para descansar la cabeza también, que buena falta te hace.', '¿Ya tienes fecha para volver a pisar el campo?']
+    instagram:['Fuerza, campeón 💪 Te esperamos de vuelta pronto.', 'Toda la afición contigo en la recuperación ❤️', 'Se le echa de menos ya en el campo.', 'La recuperación también es parte del trabajo, ánimo.'],
+    x:['fuerza @jugador, vuelve pronto 💪', 'se le va a echar de menos estas semanas...', 'ojalá se recupere rápido, lo necesitamos', 'palo la lesión, esperemos que la baja sea corta'],
+    grupo:['¿Cómo llevas la recuperación? Te echamos de menos por aquí.', 'Cualquier cosa que necesites nos dices.', 'Aprovecha para descansar la cabeza también, que buena falta te hace.', '¿Ya tienes fecha para volver a pisar el campo?', 'Menudo palo, pero seguro que vuelves con más hambre todavía.', 'Avisa si te aburres en casa, que nos pasamos a hacerte compañía.']
   },
   crisis:{
-    whatsapp:['Sé que no está siendo un buen momento. Aquí me tienes para lo que sea.', 'No dejes que unos partidos malos te definan — esto se cambia con trabajo.'],
-    instagram:['Los números no cuentan toda la historia. Confiamos en ti.', 'Toca apretar los dientes, esto es una racha y las rachas se cortan.'],
-    x:['racha complicada la del chaval, esperemos que se corte pronto', 'un poco de paciencia, esto se da la vuelta'],
-    grupo:['Ánimo con la racha, esto se corta seguro.', 'No le des más vueltas de las necesarias, cabeza fría.', 'Un mal momento no borra todo lo bueno que has hecho, cabeza arriba.']
+    whatsapp:['Sé que no está siendo un buen momento. Aquí me tienes para lo que sea.', 'No dejes que unos partidos malos te definan — esto se cambia con trabajo.', 'Todos pasamos rachas así, lo importante es no venirse abajo.', 'Si necesitas hablar de lo que sea, aquí estoy.'],
+    instagram:['Los números no cuentan toda la historia. Confiamos en ti.', 'Toca apretar los dientes, esto es una racha y las rachas se cortan.', 'El apoyo de la afición sigue intacto, se nota.'],
+    x:['racha complicada la del chaval, esperemos que se corte pronto', 'un poco de paciencia, esto se da la vuelta', 'todos tenemos baches, lo importante es cómo se sale de ellos'],
+    grupo:['Ánimo con la racha, esto se corta seguro.', 'No le des más vueltas de las necesarias, cabeza fría.', 'Un mal momento no borra todo lo bueno que has hecho, cabeza arriba.', 'Aquí seguimos con la fe intacta, tío.', 'Nos vale mensaje si necesitas desahogarte, para eso está el grupo.']
   },
   racha:{
-    whatsapp:['¡Estás que te sales! No pares ahora.', 'Como sigas así te vas a comer el mundo esta temporada.'],
-    instagram:['🔥🔥🔥 IMPARABLE. Así, así, así.', 'Este nivel no se sostiene… ¿o sí? 😳', 'Cada semana mejor. Qué manera de crecer.'],
-    x:['está IMPARABLE esta temporada 🔥', 'como siga así se lo va a llevar todo por delante', 'nivelazo semana tras semana'],
-    grupo:['Vaya nivel que tienes ahora mismo, tío.', 'Como sigas así nos vas a dejar a todos en ridículo 😂', 'Cada semana esperando a ver qué haces esta vez, en serio.']
+    whatsapp:['¡Estás que te sales! No pares ahora.', 'Como sigas así te vas a comer el mundo esta temporada.', 'No sé qué has cambiado pero no lo toques, sigue así.', 'Cada partido a mejor, es una barbaridad.'],
+    instagram:['🔥🔥🔥 IMPARABLE. Así, así, así.', 'Este nivel no se sostiene… ¿o sí? 😳', 'Cada semana mejor. Qué manera de crecer.', '🔥 En su mejor momento, y no parece que vaya a parar.'],
+    x:['está IMPARABLE esta temporada 🔥', 'como siga así se lo va a llevar todo por delante', 'nivelazo semana tras semana', 'no hay quien lo pare en este momento de forma'],
+    grupo:['Vaya nivel que tienes ahora mismo, tío.', 'Como sigas así nos vas a dejar a todos en ridículo 😂', 'Cada semana esperando a ver qué haces esta vez, en serio.', '¿Qué te está dando de comer el club? Porque menuda racha.', 'A este paso no hay quien te siga el ritmo, illo.']
   },
   formaAlta:{
-    whatsapp:['Te veo en un momento de forma brutal, ¡a disfrutarlo!'],
-    instagram:['Nunca lo había visto tan en forma. Qué animal.', 'Rindiendo a un nivel altísimo esta temporada — se nota.'],
-    x:['qué forma física tiene esta temporada, una barbaridad'],
-    grupo:['Se te ve fino estos días, ¿qué estás haciendo distinto?', '¿Qué desayunas ahora mismo? Porque vaya rachita.']
+    whatsapp:['Te veo en un momento de forma brutal, ¡a disfrutarlo!', 'Se te ve fuerte y con hambre esta temporada, se nota mucho.', 'Menuda pinta física llevas este año, en serio.'],
+    instagram:['Nunca lo había visto tan en forma. Qué animal.', 'Rindiendo a un nivel altísimo esta temporada — se nota.', 'Físicamente en su mejor momento, se ve a la legua.'],
+    x:['qué forma física tiene esta temporada, una barbaridad', 'se le ve a otro nivel físicamente esta campaña', 'rindiendo a tope semana tras semana'],
+    grupo:['Se te ve fino estos días, ¿qué estás haciendo distinto?', '¿Qué desayunas ahora mismo? Porque vaya rachita.', 'Te veo con más chispa que nunca, en serio.', '¿Nuevo entrenador personal o qué te está pasando? 😂']
   },
   formaBaja:{
-    whatsapp:['Te veo un poco apagado últimamente, ¿todo bien?', '¿Necesitas desconectar unos días? Se te ve cansado.'],
-    instagram:['Se le nota falto de piernas, necesita descanso.'],
-    x:['se le ve cansado últimamente, necesita un respiro'],
-    grupo:['Te veo un poco apagado, ¿todo bien por casa?', '¿Necesitas unos días de desconexión? Se te ve la cara de cansado.']
+    whatsapp:['Te veo un poco apagado últimamente, ¿todo bien?', '¿Necesitas desconectar unos días? Se te ve cansado.', 'No fuerces la máquina, que el cuerpo también avisa.'],
+    instagram:['Se le nota falto de piernas, necesita descanso.', 'Un bajón físico normal en toda temporada larga.'],
+    x:['se le ve cansado últimamente, necesita un respiro', 'bajón físico que hay que vigilar de cerca'],
+    grupo:['Te veo un poco apagado, ¿todo bien por casa?', '¿Necesitas unos días de desconexión? Se te ve la cara de cansado.', 'Descansa lo que puedas, que el calendario no perdona.', '¿Duermes bien? Porque menuda cara de sueño se te ve.']
   },
   popularSube:{
     email:{ remitente:'Departamento de Comunicación', asunto:'Tu perfil está creciendo', cuerpoFn:j=>`Enhorabuena, ${primerNombre(j)}. Tu popularidad ha dado un salto — se nota en redes y en el interés de los medios por ti.` },
-    instagram:['🚀 Subiendo como la espuma, cada vez más gente habla de ti.', 'Empiezas a sonar en todas partes.'],
-    x:['cada vez suena más este nombre, tomad nota', 'de un tiempo a esta parte no se habla de otra cosa'],
-    grupo:['Cada vez te sigue más gente eh, cuidado con la fama 😏', 'Ya eres famoso y todo, no te olvides de nosotros.', 'Como sigas así vas a necesitar guardaespaldas para venir a vernos 😂']
+    instagram:['🚀 Subiendo como la espuma, cada vez más gente habla de ti.', 'Empiezas a sonar en todas partes.', 'Tu nombre ya suena en boca de todos, disfrútalo.'],
+    x:['cada vez suena más este nombre, tomad nota', 'de un tiempo a esta parte no se habla de otra cosa', 'está en boca de todos últimamente, y con razón'],
+    grupo:['Cada vez te sigue más gente eh, cuidado con la fama 😏', 'Ya eres famoso y todo, no te olvides de nosotros.', 'Como sigas así vas a necesitar guardaespaldas para venir a vernos 😂', '¿Ya te paran por la calle a pedirte fotos?', 'Cada día que pasa suenas más, illo, qué crack.']
+  },
+  // Los siguientes tres son el contexto real de la partida más allá de resultados/forma —
+  // fichaje, patrocinio y representante nuevos, detectados por cambio de valor (ver
+  // hayFichajeSinAvisar/hayPatrocinioSinAvisar/hayRepresentanteSinAvisar en
+  // generarNotificacionMovil). Sin nombres propios de club/marca/agencia dentro del texto a
+  // propósito (igual que 'lesion' no dice qué rodilla): mismo criterio que el resto de buckets,
+  // frases genéricas que igualmente se notan específicas del momento.
+  fichaje:{
+    whatsapp:['¿Fichaje nuevo? Cuéntamelo todo, no me lo esperaba.', 'Así que ahora es oficial, ¡qué salto!', 'Enhorabuena por el nuevo equipo, a por todas.', 'Menuda noticia la del fichaje, cuenta cuenta.', 'Nueva etapa, a ver qué tal se te da esta vez.'],
+    instagram:['🖊️ Nuevo equipo, nuevo reto. Bienvenido.', 'Fichaje anunciado, empieza una nueva etapa.', 'Cambio de aires con toda la ilusión del mundo.'],
+    x:['nuevo destino confirmado, a ver qué tal se adapta', 'cambio de aires, veremos cómo responde', 'fichaje oficializado, empieza etapa nueva'],
+    grupo:['¡Fichaje nuevo! Cuenta cuenta, ¿cómo ha ido todo?', 'Menudo notición lo del cambio de equipo.', 'Se te va a echar de menos por aquí, pero enhorabuena.', '¿Ya conoces a los nuevos compañeros o qué tal?', 'Nueva etapa, a comerte el mundo otra vez.']
+  },
+  patrocinioNuevo:{
+    whatsapp:['¿Patrocinio nuevo? Enhorabuena, te lo curras dentro y fuera del campo.', 'Vaya acuerdo te has firmado, qué crack.', 'Cada vez más grande esto tuyo, en serio.'],
+    instagram:['💼 Nuevo acuerdo de patrocinio, la marca ha elegido bien.', 'Otro paso más fuera del campo, enhorabuena.'],
+    x:['nuevo patrocinador para el jugador, sigue creciendo su marca', 'el dinero también entra fuera del campo, bien jugado'],
+    grupo:['¿Patrocinio nuevo? Cuenta, cuenta, que hay que celebrarlo.', 'Cada vez más grande esto tuyo, illo.', '¿Nos regalas algo de la marca o qué? 😏', 'Ya eres toda una marca aparte del fútbol.']
+  },
+  representanteNuevo:{
+    whatsapp:['Me han dicho que tienes representante nuevo, ¿qué tal la sensación?', 'Enhorabuena por el nuevo agente, seguro que te cuida bien.', 'Cambio de representación, a ver qué tal encajáis.'],
+    grupo:['¿Representante nuevo? Cuéntanos qué tal la primera impresión.', 'Espero que negocie mejor que el anterior 😂', 'Con un buen agente detrás, todo más fácil.']
   },
   // El bucket que más se dispara en la práctica (todo lo demás son estados puntuales) — por eso
   // lleva, con diferencia, el pool de "grupo" más grande: charla de la pandilla que no depende de
   // cómo te vaya a ti (planes, coña, fútbol en general), para que el grupo se sienta vivo por sí
   // mismo y no solo como un contestador que reacciona a tus resultados.
   generico:{
-    whatsapp:['¿Qué tal la semana? Aquí, dándole al día a día.', 'Oye, hace tiempo que no hablamos. ¿Todo en orden?', 'Cuéntame, ¿cómo va todo por el club?', '¿Viste el partidazo de ayer? Menuda locura de resultado.', 'Oye, ¿al final vienes estas navidades por aquí?'],
-    instagram:['Otra semana más dándolo todo. Vamos con esa. ⚽', 'El fútbol nunca duerme.', 'Entrenando duro, como siempre.'],
-    x:['semana tranquila de entrenamientos, toca seguir sumando', 'el día a día también cuenta, aunque no se vea'],
+    whatsapp:['¿Qué tal la semana? Aquí, dándole al día a día.', 'Oye, hace tiempo que no hablamos. ¿Todo en orden?', 'Cuéntame, ¿cómo va todo por el club?', '¿Viste el partidazo de ayer? Menuda locura de resultado.', 'Oye, ¿al final vienes estas navidades por aquí?', '¿Qué tal el ambiente en el vestuario estos días?', 'Cuánto tiempo, ¿todo bien por tu parte?'],
+    instagram:['Otra semana más dándolo todo. Vamos con esa. ⚽', 'El fútbol nunca duerme.', 'Entrenando duro, como siempre.', 'Rutina de siempre, pero con ganas intactas.'],
+    x:['semana tranquila de entrenamientos, toca seguir sumando', 'el día a día también cuenta, aunque no se vea', 'nada que contar hoy, solo trabajo de fondo'],
     grupo:[
       '¿Qué tal todo? Hace tiempo que no hablamos por aquí.', 'Cuándo quedamos un día de estos, en serio.',
       '¿Habéis visto el resultado de anoche? Menuda locura de partido.', 'Se me ha ocurrido que podríamos organizar algo para las vacaciones, ¿qué decís?',
@@ -14800,12 +14842,14 @@ function telAppVinculada(){
 const TEL_RESPUESTAS_GENERICAS = [
   { texto:'Todo bien, gracias por preguntar 🙂', respuesta:'Me alegro, cuídate.', relDelta:2 },
   { texto:'La verdad es que ha sido una semana rara', respuesta:'¿Qué ha pasado? Cuéntame.', relDelta:1 },
-  { texto:'Ahora mismo no puedo hablar mucho, luego te cuento', respuesta:'Sin prisa, hablamos luego.', relDelta:0 }
+  { texto:'Ahora mismo no puedo hablar mucho, luego te cuento', respuesta:'Sin prisa, hablamos luego.', relDelta:0 },
+  { texto:'Pues aquí, entre entrenos y partidos, como siempre', respuesta:'Esa rutina no falla nunca, ¿eh? 😄', relDelta:1 }
 ];
 const TEL_RESPUESTAS_GENERICAS_R2 = [
   { texto:'Nada grave, cosas del día a día', respuesta:'Menos mal, me habías preocupado 😅', relDelta:1 },
   { texto:'Oye, ¿y tú qué tal todo?', respuesta:'Yo tirando, como siempre. Nos vemos pronto.', relDelta:2 },
-  { texto:'Bueno, te dejo que sigo liado', respuesta:'Vale, hablamos 👋', relDelta:0 }
+  { texto:'Bueno, te dejo que sigo liado', respuesta:'Vale, hablamos 👋', relDelta:0 },
+  { texto:'Cuando tenga un hueco te llamo y hablamos con calma', respuesta:'Perfecto, aquí ando.', relDelta:1 }
 ];
 // Variantes de los mismos dos pools, pero con el tono que le pega a según quién escribe — la
 // pareja no habla como el representante. Solo estos dos contactos tienen voz propia de sobra
@@ -14814,24 +14858,177 @@ const TEL_RESPUESTAS_GENERICAS_R2 = [
 const TEL_RESPUESTAS_PAREJA = [
   { texto:'Todo bien, aunque te echo de menos ❤️', respuesta:'Y yo a ti — queda menos para verte.', relDelta:2 },
   { texto:'Cansado, pero contento con cómo va todo', respuesta:'Me alegro muchísimo, cuídate igual 🥰', relDelta:1 },
-  { texto:'Con la cabeza en el partido, luego te cuento con calma', respuesta:'Tranquilo, aquí estaré.', relDelta:0 }
+  { texto:'Con la cabeza en el partido, luego te cuento con calma', respuesta:'Tranquilo, aquí estaré.', relDelta:0 },
+  { texto:'Pensando en ti más de lo que debería en horas de entreno 😅', respuesta:'Eso me alegra el día, en serio.', relDelta:2 }
 ];
 const TEL_RESPUESTAS_PAREJA_R2 = [
   { texto:'De verdad, no cambiaría esto por nada', respuesta:'Qué cosas tan bonitas dices 🥹', relDelta:2 },
   { texto:'¿Qué tal tu semana por ahí?', respuesta:'Bien, ya te cuento con calma cuando nos veamos.', relDelta:1 },
-  { texto:'Te dejo que me llaman, hablamos luego', respuesta:'Vale, un beso 😘', relDelta:0 }
+  { texto:'Te dejo que me llaman, hablamos luego', respuesta:'Vale, un beso 😘', relDelta:0 },
+  { texto:'Solo quería decirte que te quiero, ya está', respuesta:'Y yo a ti, muchísimo 🥰', relDelta:2 }
 ];
 const TEL_RESPUESTAS_REPRESENTANTE = [
   { texto:'Dime, te escucho', respuesta:'Perfecto, sigo moviendo hilos por ti.', relDelta:1 },
   { texto:'Ahora mismo prefiero centrarme solo en jugar', respuesta:'Entendido, yo me encargo del resto.', relDelta:0 },
-  { texto:'¿Hay algo concreto que deba saber?', respuesta:'Todavía no, pero serás el primero en saberlo.', relDelta:1 }
+  { texto:'¿Hay algo concreto que deba saber?', respuesta:'Todavía no, pero serás el primero en saberlo.', relDelta:1 },
+  { texto:'Confío en que me avisarás si surge algo importante', respuesta:'Por descontado, siempre lo primero.', relDelta:1 }
 ];
 const TEL_RESPUESTAS_REPRESENTANTE_R2 = [
   { texto:'Confío en tu criterio para estas cosas', respuesta:'Así me gusta, para eso estoy.', relDelta:2 },
   { texto:'Mantenme al tanto de cualquier novedad', respuesta:'Por supuesto, en cuanto sepa algo te llamo.', relDelta:1 },
-  { texto:'Ahora tengo que dejarte, hablamos', respuesta:'Claro, éxito esta semana.', relDelta:0 }
+  { texto:'Ahora tengo que dejarte, hablamos', respuesta:'Claro, éxito esta semana.', relDelta:0 },
+  { texto:'Cualquier cosa rara antes de firmar nada, me avisas', respuesta:'Ni lo dudes, sin sorpresas.', relDelta:1 }
 ];
-function telPoolGenericoPara(contacto, ronda){
+// Respuestas propias de CADA bucket de TEL_PLANTILLAS_NOTIF — antes, un mensaje de "¡CAMPEONES!"
+// o de "¿cómo llevas la lesión?" se contestaba siempre con el mismo pool genérico de "qué tal la
+// semana" (TEL_RESPUESTAS_GENERICAS), sin ninguna relación con lo que te acababan de decir (bug
+// real reportado: "que tengan sentido en cuanto a las respuestas que se dan"). Con esto, la
+// respuesta habla de lo mismo que el mensaje entrante. Universal para cualquier contacto (no se
+// distingue pareja/representante/compañero aquí, a diferencia del bucket 'generico' — el contenido
+// ya es específico de sobra sin necesitar además un tono distinto por relación) — 'generico' sigue
+// usando TEL_RESPUESTAS_GENERICAS/PAREJA/REPRESENTANTE como hasta ahora. Sin entrada R2 propia,
+// telPoolGenericoPara cae a la R1 del mismo bucket antes que a la genérica.
+const TEL_RESPUESTAS_POR_BUCKET = {
+  campeon:{
+    r1:[
+      { texto:'¡Todavía no me lo creo! Menuda sensación', respuesta:'Y eso que la viviste tú desde dentro, imagínate.', relDelta:2 },
+      { texto:'La verdad es que nos lo hemos currado todo el año', respuesta:'Se nota, esto no ha sido casualidad.', relDelta:2 },
+      { texto:'Ahora mismo toca disfrutarlo, luego ya pensamos en lo siguiente', respuesta:'Faltaría más, os lo habéis ganado.', relDelta:1 }
+    ],
+    r2:[
+      { texto:'Todavía sigo de celebración, la verdad', respuesta:'Aprovecha, que estos momentos no se dan todos los años.', relDelta:2 },
+      { texto:'Ya toca centrarse en repetir el año que viene', respuesta:'Con esa mentalidad seguro que lo consigues.', relDelta:1 }
+    ]
+  },
+  mvp:{
+    r1:[
+      { texto:'La verdad es que contento con el premio', respuesta:'Y con razón, te lo has currado tú solo.', relDelta:2 },
+      { texto:'Es un poco cosa de todo el equipo también', respuesta:'Ese punto de humildad te honra, pero el mérito es tuyo.', relDelta:2 },
+      { texto:'Un empujón de moral para lo que queda de temporada', respuesta:'Con ese nivel no hace falta mucho más empujón.', relDelta:1 }
+    ],
+    r2:[
+      { texto:'Ahora toca no relajarse y seguir igual', respuesta:'Esa mentalidad es la que te ha traído hasta aquí.', relDelta:1 },
+      { texto:'Se lo dedico a la gente que confió desde el principio', respuesta:'Eso se agradece de verdad, tío.', relDelta:2 }
+    ]
+  },
+  ascenso:{
+    r1:[
+      { texto:'Currado toda la temporada, se nota el premio', respuesta:'Sin duda, no ha sido cosa de un partido suelto.', relDelta:2 },
+      { texto:'Ahora toca prepararse para el salto de nivel', respuesta:'Seguro que respondéis bien, os lo habéis ganado.', relDelta:1 },
+      { texto:'La afición se merecía esto desde hace tiempo', respuesta:'Y vaya si lo han disfrutado, menuda fiesta.', relDelta:2 }
+    ],
+    r2:[
+      { texto:'Da vértigo pensar en la categoría nueva, la verdad', respuesta:'Normal, pero seguro que os adaptáis rápido.', relDelta:1 },
+      { texto:'De momento toca disfrutar el momento, luego ya veremos', respuesta:'Eso es, un paso detrás de otro.', relDelta:1 }
+    ]
+  },
+  pichichi:{
+    r1:[
+      { texto:'La verdad es que este año se me ha dado muy bien de cara a puerta', respuesta:'Se nota, no hay quien te pare.', relDelta:2 },
+      { texto:'Es cosa de estar en el sitio correcto en el momento correcto', respuesta:'Eso también es mérito tuyo, no todos lo tienen.', relDelta:1 },
+      { texto:'A ver si sigo así hasta el final de temporada', respuesta:'Con ese olfato seguro que sí.', relDelta:1 }
+    ],
+    r2:[
+      { texto:'El objetivo ahora es no bajar el ritmo', respuesta:'Con esa mentalidad lo tienes fácil.', relDelta:1 },
+      { texto:'Algún gol se me ha escapado también, eh, no soy perfecto', respuesta:'Nadie lo es, pero a ti poco te falta esta temporada.', relDelta:2 }
+    ]
+  },
+  lesion:{
+    r1:[
+      { texto:'Tirando, poco a poco con la recuperación', respuesta:'Así se hace, sin prisa pero sin pausa.', relDelta:2 },
+      { texto:'Con ganas de volver ya, la verdad, se hace largo', respuesta:'Normal, pero mejor no forzar los tiempos.', relDelta:1 },
+      { texto:'Algo aburrido esto de no poder entrenar con el grupo', respuesta:'Seguro que el equipo te tiene presente igualmente.', relDelta:2 }
+    ],
+    r2:[
+      { texto:'Los médicos dicen que voy bien, así que tranquilo', respuesta:'Eso es lo que importa, hazles caso en todo.', relDelta:1 },
+      { texto:'Lo peor es la cabeza, más que la propia lesión', respuesta:'Es normal, cualquier cosa me dices y hablamos.', relDelta:2 }
+    ]
+  },
+  crisis:{
+    r1:[
+      { texto:'Ahí ando, dándole vueltas a lo que no está saliendo', respuesta:'Es normal, pero no te machaques más de la cuenta.', relDelta:2 },
+      { texto:'Se agradece el apoyo, la verdad, buena falta me hace', respuesta:'Para eso estamos, cuenta con ello siempre.', relDelta:2 },
+      { texto:'Toca reponerse cuanto antes, no me queda otra', respuesta:'Esa actitud es la que te va a sacar de esta.', relDelta:1 }
+    ],
+    r2:[
+      { texto:'Estoy trabajando en ello, no es fácil pero se puede', respuesta:'Seguro que se corta pronto, confío en ti.', relDelta:1 },
+      { texto:'Prefiero no hablar mucho del tema ahora mismo', respuesta:'Lo entiendo, aquí estoy cuando te apetezca.', relDelta:1 }
+    ]
+  },
+  racha:{
+    r1:[
+      { texto:'A ver si dura, jaja, de momento todo sale', respuesta:'Pues a disfrutarlo mientras tanto, te lo mereces.', relDelta:2 },
+      { texto:'La verdad es que estoy jugando sin pensar demasiado', respuesta:'Eso es buena señal, sigue así.', relDelta:1 },
+      { texto:'El grupo también está ayudando mucho, no es solo mío', respuesta:'Aun así, el que la mete eres tú.', relDelta:2 }
+    ],
+    r2:[
+      { texto:'Ojalá se mantenga hasta final de temporada', respuesta:'Con ese nivel no veo por qué no.', relDelta:1 },
+      { texto:'Intento no obsesionarme con mantener la racha', respuesta:'Buena mentalidad, así no se pone presión de más.', relDelta:1 }
+    ]
+  },
+  formaAlta:{
+    r1:[
+      { texto:'Sí, me encuentro genial ahora mismo, la verdad', respuesta:'Se te nota en cada partido, sigue así.', relDelta:2 },
+      { texto:'Currando fuerte en el gimnasio, se está notando', respuesta:'El esfuerzo siempre acaba dando sus frutos.', relDelta:1 }
+    ],
+    r2:[
+      { texto:'Espero mantener este nivel toda la temporada', respuesta:'Con esa base física, no veo motivo para no hacerlo.', relDelta:1 }
+    ]
+  },
+  formaBaja:{
+    r1:[
+      { texto:'Un poco tocado, la verdad, se me nota', respuesta:'Escucha al cuerpo, no fuerces nada.', relDelta:2 },
+      { texto:'Necesito unos días de descanso, sí', respuesta:'Pues tómatelos, el fútbol puede esperar un poco.', relDelta:2 }
+    ],
+    r2:[
+      { texto:'A ver si con unos días libres se me pasa', respuesta:'Seguro que sí, cuídate mientras tanto.', relDelta:1 }
+    ]
+  },
+  popularSube:{
+    r1:[
+      { texto:'Ya ves, una locura todo esto de un tiempo a esta parte', respuesta:'Pues a disfrutarlo, te lo has ganado.', relDelta:2 },
+      { texto:'Intento no pensar mucho en eso, la verdad', respuesta:'Bien hecho, lo importante sigue siendo el campo.', relDelta:1 }
+    ],
+    r2:[
+      { texto:'A veces pesa un poco tanta atención, si te soy sincero', respuesta:'Es normal, no dejes que te cambie.', relDelta:1 }
+    ]
+  },
+  fichaje:{
+    r1:[
+      { texto:'La verdad, todavía cayendo de la noticia', respuesta:'Normal, es un cambio grande, ya te irás acostumbrando.', relDelta:2 },
+      { texto:'Con ganas de empezar de cero en el sitio nuevo', respuesta:'Esa actitud es la que hace falta para adaptarse rápido.', relDelta:2 },
+      { texto:'Un poco de vértigo, si te soy sincero', respuesta:'Es normal, pero seguro que encajas enseguida.', relDelta:1 }
+    ],
+    r2:[
+      { texto:'De momento el ambiente en el vestuario nuevo pinta bien', respuesta:'Eso ayuda mucho a que el cambio sea más fácil.', relDelta:1 },
+      { texto:'Todavía echo de menos lo de antes, la verdad', respuesta:'Es normal al principio, ya se irá asentando todo.', relDelta:1 }
+    ]
+  },
+  patrocinioNuevo:{
+    r1:[
+      { texto:'La verdad, contento con el acuerdo', respuesta:'Te lo has ganado currándotelo dentro y fuera del campo.', relDelta:2 },
+      { texto:'Ya iba siendo hora de que algo así llegara', respuesta:'Con tu nivel, era cuestión de tiempo.', relDelta:1 },
+      { texto:'Ahora toca estar a la altura del acuerdo', respuesta:'Seguro que no defraudas, como siempre.', relDelta:1 }
+    ],
+    r2:[
+      { texto:'Espero que sea el primero de unos cuantos', respuesta:'Con ese nivel, seguro que no es el último.', relDelta:1 }
+    ]
+  },
+  representanteNuevo:{
+    r1:[
+      { texto:'De momento buena sensación con el cambio', respuesta:'Me alegro, espero que sea un acierto de verdad.', relDelta:2 },
+      { texto:'Necesitaba un cambio de aires en ese terreno', respuesta:'A veces hace falta, ojalá te vaya bien con él.', relDelta:1 }
+    ],
+    r2:[
+      { texto:'Por ahora parece que sabe lo que hace', respuesta:'Eso es lo importante, que te haga sentir en buenas manos.', relDelta:1 }
+    ]
+  }
+};
+function telPoolGenericoPara(contacto, ronda, bucket){
+  if(bucket && bucket !== 'generico' && TEL_RESPUESTAS_POR_BUCKET[bucket]){
+    const pool = TEL_RESPUESTAS_POR_BUCKET[bucket];
+    return ronda===2 ? (pool.r2 || pool.r1) : pool.r1;
+  }
   if(contacto && contacto.id === 'pareja') return ronda===2 ? TEL_RESPUESTAS_PAREJA_R2 : TEL_RESPUESTAS_PAREJA;
   if(contacto && contacto.id === 'representante') return ronda===2 ? TEL_RESPUESTAS_REPRESENTANTE_R2 : TEL_RESPUESTAS_REPRESENTANTE;
   return ronda===2 ? TEL_RESPUESTAS_GENERICAS_R2 : TEL_RESPUESTAS_GENERICAS;
@@ -14839,14 +15036,14 @@ function telPoolGenericoPara(contacto, ronda){
 // Segundo mensaje que a veces manda la MISMA persona justo detrás del primero (como cuando
 // alguien "dobla texto" en un chat real) — no necesita respuesta propia, solo alarga la
 // conversación antes de que te toque contestar.
-const TEL_SEGUIMIENTOS_WHATSAPP = ['¿Me has leído? 😅', 'Bueno, cuando puedas me dices', 'Perdona el rollo jaja', '¿Sigues ahí?', 'En fin, ya sabes dónde estoy'];
+const TEL_SEGUIMIENTOS_WHATSAPP = ['¿Me has leído? 😅', 'Bueno, cuando puedas me dices', 'Perdona el rollo jaja', '¿Sigues ahí?', 'En fin, ya sabes dónde estoy', 'Bueno, cuando tengas un rato', 'Vale, no te agobio más jaja', 'Dime algo cuando puedas, sin prisa'];
 // Réplica genérica de OTRO miembro del grupo reaccionando al primer mensaje — así el grupo
 // "habla solo" un poco aunque tú no digas nada, como pasaría de verdad.
-const TEL_RESPUESTAS_GRUPO_GENERICAS = ['jajajaja', 'Totalmente de acuerdo', 'Eso digo yo', '¿Tú qué opinas de esto?', 'Así es 💯', 'Ojalá', 'Qué fuerte', 'Ni que lo digas'];
+const TEL_RESPUESTAS_GRUPO_GENERICAS = ['jajajaja', 'Totalmente de acuerdo', 'Eso digo yo', '¿Tú qué opinas de esto?', 'Así es 💯', 'Ojalá', 'Qué fuerte', 'Ni que lo digas', 'Me parto 😂', 'Sin comentarios jaja', 'Eso mismo pensaba yo', 'No puede ser verdad jajaja', 'Vaya tela', 'Como para no reírse'];
 // Mensajes que el JUGADOR puede mandar al grupo (a diferencia de los contactos 1 a 1, aquí no
 // hay una pregunta concreta que contestar — es un chat abierto — así que el pool es de mensajes
 // sueltos, no pares pregunta/respuesta.
-const TEL_RESPUESTAS_GRUPO_JUGADOR = ['jajaja qué crack', 'Aquí ando, a lo mío', 'Contadme, que me lo estoy perdiendo', '¿Quedamos un día de estos?', 'Todo controlado por aquí 💪'];
+const TEL_RESPUESTAS_GRUPO_JUGADOR = ['jajaja qué crack', 'Aquí ando, a lo mío', 'Contadme, que me lo estoy perdiendo', '¿Quedamos un día de estos?', 'Todo controlado por aquí 💪', 'Qué ganas de veros, en serio', 'Menudo día llevo, luego os cuento', 'Ya me gustaría tener tiempo para todo eso 😂'];
 // Mismo criterio que elegirAutor() dentro de generarNotificacionMovil (ver más abajo, ahora
 // reutilizado también por telEnviarMensajeGrupo): quién "habla" en nombre del grupo depende de
 // qué grupo es — la pandilla tira de j.companeros entero, el vestuario solo de los que siguen
@@ -14884,7 +15081,7 @@ function telEnviarMensajeGrupo(grupo, texto){
     pintar();
     setTimeout(()=>{
       const autor = telAutorAleatorioGrupo(grupo, j, null);
-      const respuesta = TEL_RESPUESTAS_GRUPO_GENERICAS[Math.floor(Math.random()*TEL_RESPUESTAS_GRUPO_GENERICAS.length)];
+      const respuesta = elegirSinRepetir(TEL_RESPUESTAS_GRUPO_GENERICAS, 'reaccion_'+grupo.id);
       S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_r', autor, texto:respuesta, temporada:S.temporada, pasoIndex:S.pasoIndex||0, leido:true });
       S.movilGrupoEscribiendo = null;
       guardarPartida();
@@ -14961,6 +15158,12 @@ function telPintarIntercambio(thread, id, mapa, pool){
 // Llamada desde avanzarPaso(j): así cubre tanto los pasos con suceso normal como los de torneo,
 // sin tener que enganchar el generador a cada rama de BANCO_EVENTOS por separado.
 function generarNotificacionMovil(j){
+  // Sembrado del club de referencia SIEMPRE, antes incluso del corte de probabilidad de abajo —
+  // si se sembrara más abajo (con solo un 35% de posibilidades de llegar ahí en cada paso), un
+  // fichaje que ocurriera antes de la primera siembra se perdería sin avisar nunca (se tomaría
+  // como si fuera el club "de toda la vida"). Sembrar aquí garantiza que la primera vez que se ve
+  // el club de verdad es el de creación del personaje, nunca un fichaje ya en curso.
+  if(S._movilClubNotif === undefined) S._movilClubNotif = j.club && j.club.nombre;
   if(Math.random() > 0.35) return;
   S.movilBandeja = S.movilBandeja || telBandejaVacia();
   S.movilBandeja.grupos = S.movilBandeja.grupos || {};
@@ -14976,11 +15179,28 @@ function generarNotificacionMovil(j){
   const hayMvpSinAvisar = S.temporadaResumen && S.temporadaResumen.mvp && S._movilMvpNotifTemp !== S.temporada;
   const hayAscensoSinAvisar = S.temporadaResumen && S.temporadaResumen.ascenso && S._movilAscensoNotifTemp !== S.temporada;
   const hayPichichiSinAvisar = S.temporadaResumen && S.temporadaResumen.pichichi && S._movilPichichiNotifTemp !== S.temporada;
+  // Más contexto real de la partida, no solo estados de forma/resultados: fichaje por un club
+  // nuevo, patrocinio nuevo, representante nuevo. Mismo patrón "queda pendiente hasta que se
+  // consuma" que los hitos de arriba — se detecta el CAMBIO frente al último valor ya avisado
+  // (guardado en S._movil*Notif*) y solo se actualiza ese valor cuando el bucket se elige de
+  // verdad más abajo, para no perder el aviso si la tirada de probabilidad no le toca esta vez.
+  // El club ya se sembró sin avisar arriba del todo (antes del corte de probabilidad) la primera
+  // vez que se llamó a esta función — el club inicial de la carrera no es un "fichaje" del que
+  // nadie se entera de fuera, luego sí, cualquier cambio real.
+  const clubActual = j.club && j.club.nombre;
+  const hayFichajeSinAvisar = clubActual && S._movilClubNotif !== clubActual;
+  const patrocinioActual = j.patrocinio && j.patrocinio.marca;
+  const hayPatrocinioSinAvisar = !!patrocinioActual && S._movilPatrocinioNotif !== patrocinioActual;
+  const representanteActual = j.representante && j.representante.nombre;
+  const hayRepresentanteSinAvisar = !!representanteActual && S._movilRepresentanteNotif !== representanteActual;
   let bucket;
   if(hayTituloSinAvisar) bucket = 'campeon';
   else if(hayAscensoSinAvisar) bucket = 'ascenso';
   else if(hayMvpSinAvisar) bucket = 'mvp';
   else if(hayPichichiSinAvisar) bucket = 'pichichi';
+  else if(hayFichajeSinAvisar) bucket = 'fichaje';
+  else if(hayPatrocinioSinAvisar) bucket = 'patrocinioNuevo';
+  else if(hayRepresentanteSinAvisar) bucket = 'representanteNuevo';
   else if(j.lesionSemanas > 0) bucket = 'lesion';
   else if(j.estadoMental === 'crisis') bucket = 'crisis';
   else if(j.estadoMental === 'racha') bucket = 'racha';
@@ -14992,6 +15212,9 @@ function generarNotificacionMovil(j){
   if(bucket === 'mvp') S._movilMvpNotifTemp = S.temporada;
   if(bucket === 'ascenso') S._movilAscensoNotifTemp = S.temporada;
   if(bucket === 'pichichi') S._movilPichichiNotifTemp = S.temporada;
+  if(bucket === 'fichaje') S._movilClubNotif = clubActual;
+  if(bucket === 'patrocinioNuevo') S._movilPatrocinioNotif = patrocinioActual;
+  if(bucket === 'representanteNuevo') S._movilRepresentanteNotif = representanteActual;
   const plantillas = TEL_PLANTILLAS_NOTIF[bucket] || TEL_PLANTILLAS_NOTIF.generico;
   const contactos = telContactosDe(j);
   const grupos = telGruposDe(j);
@@ -15007,15 +15230,19 @@ function generarNotificacionMovil(j){
   const idBase = 'notif_' + S.temporada + '_' + paso + '_' + Math.random().toString(36).slice(2,8);
   if(canal === 'whatsapp'){
     const ct = contactos[Math.floor(Math.random()*contactos.length)];
-    const texto = plantillas.whatsapp[Math.floor(Math.random()*plantillas.whatsapp.length)];
-    S.movilBandeja.whatsapp.push({ id:idBase, contactoId:ct.id, texto, temporada:S.temporada, pasoIndex:paso });
+    const texto = elegirSinRepetir(plantillas.whatsapp, 'wa_'+bucket);
+    // bucket viaja con el mensaje para que, al abrir el hilo, la respuesta que se ofrezca sea la
+    // que tenga sentido con ESTE mensaje (ver telPoolGenericoPara) — antes cualquier extra usaba
+    // siempre el mismo pool genérico de "qué tal la semana", sin relación con lo que te acababan
+    // de decir (p. ej. un "¡CAMPEONES!" se contestaba igual que un "hace tiempo que no hablamos").
+    S.movilBandeja.whatsapp.push({ id:idBase, contactoId:ct.id, texto, bucket, temporada:S.temporada, pasoIndex:paso });
     // A veces la misma persona "dobla texto" justo detrás — conversaciones más largas y más
     // naturales que un único mensaje suelto cada vez. Llegan ya escritos (con su notificación
     // correspondiente): el "escribiendo…" es solo para cuando ESPERAS su respuesta, no para
     // mensajes que ya te avisaron que habían llegado.
     if(Math.random() < 0.45){
-      const seguimiento = TEL_SEGUIMIENTOS_WHATSAPP[Math.floor(Math.random()*TEL_SEGUIMIENTOS_WHATSAPP.length)];
-      S.movilBandeja.whatsapp.push({ id:idBase+'_b', contactoId:ct.id, texto:seguimiento, temporada:S.temporada, pasoIndex:paso });
+      const seguimiento = elegirSinRepetir(TEL_SEGUIMIENTOS_WHATSAPP, 'seguimiento');
+      S.movilBandeja.whatsapp.push({ id:idBase+'_b', contactoId:ct.id, texto:seguimiento, bucket, temporada:S.temporada, pasoIndex:paso });
     }
   } else if(canal === 'email'){
     const info = plantillas.email;
@@ -15023,23 +15250,23 @@ function generarNotificacionMovil(j){
     S.movilBandeja.email.push({ id:idBase, remitente:info.remitente, color:'#8a6dd6', asunto:info.asunto,
       preview: cuerpo.replace(/<[^>]+>/g,'').slice(0,64)+'…', cuerpo, temporada:S.temporada, pasoIndex:paso });
   } else if(canal === 'x'){
-    const texto = plantillas.x[Math.floor(Math.random()*plantillas.x.length)];
+    const texto = elegirSinRepetir(plantillas.x, 'x_'+bucket);
     S.movilBandeja.x.push({ id:idBase, texto, temporada:S.temporada, pasoIndex:paso, leido:false });
   } else if(canal === 'grupo'){
     const grupo = grupos[Math.floor(Math.random()*grupos.length)];
-    const texto = plantillas.grupo[Math.floor(Math.random()*plantillas.grupo.length)];
+    const texto = elegirSinRepetir(plantillas.grupo, 'grupo_'+grupo.id+'_'+bucket);
     const autor = telAutorAleatorioGrupo(grupo, j, null);
     S.movilBandeja.grupos[grupo.id] = S.movilBandeja.grupos[grupo.id] || [];
-    S.movilBandeja.grupos[grupo.id].push({ id:idBase, autor, texto, temporada:S.temporada, pasoIndex:paso, leido:false });
+    S.movilBandeja.grupos[grupo.id].push({ id:idBase, autor, texto, bucket, temporada:S.temporada, pasoIndex:paso, leido:false });
     // El grupo "habla solo": con bastante probabilidad, otro miembro reacciona al primer mensaje
     // aunque tú no digas nada — así se nota que la conversación sigue sin ti.
     if(Math.random() < 0.55){
       const autor2 = telAutorAleatorioGrupo(grupo, j, autor);
-      const respuesta = TEL_RESPUESTAS_GRUPO_GENERICAS[Math.floor(Math.random()*TEL_RESPUESTAS_GRUPO_GENERICAS.length)];
+      const respuesta = elegirSinRepetir(TEL_RESPUESTAS_GRUPO_GENERICAS, 'reaccion_'+grupo.id);
       S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_b', autor:autor2, texto:respuesta, temporada:S.temporada, pasoIndex:paso, leido:false });
     }
   } else {
-    const texto = plantillas.instagram[Math.floor(Math.random()*plantillas.instagram.length)];
+    const texto = elegirSinRepetir(plantillas.instagram, 'ig_'+bucket);
     S.movilBandeja.instagram.push({ id:idBase, texto, temporada:S.temporada, pasoIndex:paso, leido:false });
   }
   ['whatsapp','email','instagram','x'].forEach(k=>{
@@ -16013,10 +16240,16 @@ function renderMovilContenido(c, j){
       // los anteriores son historial ya cerrado (los contestaras o no en su momento).
       const extras = (S.movilBandeja && S.movilBandeja.whatsapp || []).filter(m=>m.contactoId===contacto.id);
       S.movilRespuestas = S.movilRespuestas || {};
-      const poolR1 = telPoolGenericoPara(contacto, 1), poolR2 = telPoolGenericoPara(contacto, 2);
+      // El pool de respuesta se calcula POR MENSAJE (según m.bucket, ver generarNotificacionMovil)
+      // en vez de uno fijo para todos los extras — así la respuesta habla de lo mismo que te
+      // acaban de decir (un "¡CAMPEONES!" se contesta con el pool de campeon, no con el genérico
+      // de "qué tal la semana"). bucket viaja también en el turno para reutilizarlo en la R2.
       const turnos = [
         { id: contacto.id, mapa: S.movilRespuestas, pool: contacto.opciones, aplicar:(idx)=>telAplicarRespuesta(contacto.id, idx) },
-        ...extras.map(m=>({ id: m.id, mapa: (S.movilRespuestasExtra=S.movilRespuestasExtra||{}), pool: poolR1, entrante: m.texto, aplicar:(idx)=>telResponderExtra(m.id, idx, contacto, poolR1) }))
+        ...extras.map(m=>{
+          const poolExtra = telPoolGenericoPara(contacto, 1, m.bucket);
+          return { id: m.id, mapa: (S.movilRespuestasExtra=S.movilRespuestasExtra||{}), pool: poolExtra, bucket: m.bucket, entrante: m.texto, aplicar:(idx)=>telResponderExtra(m.id, idx, contacto, poolExtra) };
+        })
       ];
       let activo = null;
       turnos.forEach((t,i)=>{
@@ -16035,6 +16268,7 @@ function renderMovilContenido(c, j){
         } else if(estado1 === 'cerrado'){
           const idR2 = t.id+'_r2';
           S.movilRespuestasExtra = S.movilRespuestasExtra || {};
+          const poolR2 = telPoolGenericoPara(contacto, 2, t.bucket);
           const estado2 = telPintarIntercambio(thread, idR2, S.movilRespuestasExtra, poolR2);
           activo = { estado:estado2, aplicar:(idx)=>telResponderExtra(idR2, idx, contacto, poolR2), pool:poolR2 };
         }
