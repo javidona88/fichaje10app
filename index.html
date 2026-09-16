@@ -776,6 +776,10 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .roll-result.show{ opacity:1; transform:translateY(0); }
 .roll-result.exito{ background:var(--green); }
 .roll-result.fallo{ background:var(--red); }
+/* En SCREENS.resultado (pantalla de consecuencias, ver más abajo) el mismo sello sale un poco
+   más pequeño que en SCREENS.tirando — ahí es lo único que hay en pantalla y pesa a propósito;
+   aquí ya comparte protagonismo con el texto de la consecuencia y los chips de efectos debajo. */
+.roll-result.consecuencia{ font-size:16px; padding:6px 16px; }
 
 /* ---- reveal a pantalla completa (temporada / ascenso / campeón) ---- */
 .season-reveal{ text-align:center; padding-top:8px; }
@@ -1576,11 +1580,6 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-stats-fact{ flex:1; text-align:center; }
 .tel-stats-fact .k{ font-family:'Inter',sans-serif; font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); }
 .tel-stats-fact .v{ font-family:'Inter',sans-serif; font-size:13.5px; font-weight:700; color:var(--ink); margin-top:3px; }
-.tel-stats-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.tel-stat-tile{ background:var(--panel2); border-radius:10px; padding:10px 12px; }
-.tel-stat-tile .v{ font-family:'Inter',sans-serif; font-weight:800; font-size:19px; color:var(--ink); font-variant-numeric:tabular-nums; }
-.tel-stat-tile .k{ font-family:'Inter',sans-serif; font-size:11px; color:var(--ink-soft); margin-top:2px; }
-.tel-stat-tile.gold .v{ color:var(--gold); }
 /* El dato más importante de la app: balance proyectado a fin de temporada (ver
    calcularBalanceProyectadoTemporada), con más peso visual que cualquier otra tarjeta de Banco —
    número grande arriba, desglose de por qué debajo. */
@@ -1668,6 +1667,14 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-bubble-row:not(.mine) .tel-bubble{ background:var(--panel2); border-bottom-left-radius:4px; }
 .tel-bubble-row.mine .tel-bubble{ background:rgba(76,175,109,0.22); border:1px solid rgba(76,175,109,0.4); border-bottom-right-radius:4px; }
 .tel-bubble-autor{ font-family:'Inter',sans-serif; font-size:10.5px; font-weight:700; color:var(--gold); margin-bottom:2px; display:block; }
+/* Línea "Mensajes nuevos" en un chat de grupo: ancla visual de por dónde empezaba lo que no
+   habías visto al entrar (ver S.movilGrupoNoLeidoDesde). Mismo criterio tipográfico que
+   .tel-choices-label (mayúsculas finas), con una raya a cada lado en vez de fondo propio. */
+.tel-unread-divider{
+  display:flex; align-items:center; gap:8px; margin:4px 0;
+  font-family:'Inter',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--gold);
+}
+.tel-unread-divider::before, .tel-unread-divider::after{ content:''; flex:1; height:1px; background:rgba(212,175,55,0.35); }
 /* Indicador de "escribiendo…": tres puntos que rebotan, mismo bocadillo gris de un mensaje
    recibido — se muestra en vez del mensaje real mientras telProgramarRevelado hace su cadena. */
 .tel-bubble.tel-typing{ display:flex; gap:4px; align-items:center; padding:12px 15px; }
@@ -11807,6 +11814,15 @@ function pintarMovilSheet(){
     const scrollNuevoElemento = pantalla.querySelector(':scope > .tel-hilo-scroll') || pantalla;
     scrollNuevoElemento.scrollTop = scrollPantallaRealPrevio;
   }
+  // Chats (hilo 1 a 1 y grupo de WhatsApp): por defecto se muestra el ÚLTIMO mensaje, no el
+  // primero — antes .tel-hilo-scroll nacía siempre con scrollTop 0 (arriba del todo) en cada
+  // repintado, así que había que bajar a mano cada vez que llegaba un mensaje nuevo o se
+  // respondía. Mismo motivo de fondo que el bloque de arriba: el scrollHeight real solo existe
+  // una vez el árbol está conectado, así que se fuerza aquí, después de raiz.appendChild(sheet).
+  if(S.movilVista === 'thread' || S.movilVista === 'grupo'){
+    const scrollChat = pantalla.querySelector(':scope > .tel-hilo-scroll');
+    if(scrollChat) scrollChat.scrollTop = scrollChat.scrollHeight;
+  }
   // Se pinta DESPUÉS de anexar sheet (no antes, ni dentro de device): al ser un hermano posterior
   // en el DOM dentro de la misma capa (#movil-root), queda por encima del aparato entero sin
   // necesidad de más trucos de z-index — ver .tel-notif-movil-wrap.
@@ -12691,6 +12707,58 @@ function seccionAtributos(j){
   return am;
 }
 
+// Extraídas de SCREENS.tabJugador para poder reutilizarlas tal cual (mismo aspecto, mismos
+// datos) en la app Estadísticas del móvil — ver "las estadísticas de Estadísticas que sean las
+// mismas que aparecen en Jugador".
+function cajaPatrocinio(j){
+  const cajaPatro = document.createElement('div');
+  cajaPatro.style.cssText = 'display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;';
+  const dur = j.patrocinio ? (j.patrocinio.duracionTemporadas||1) : 0;
+  cajaPatro.innerHTML = `
+    ${j.patrocinio ? logoMarca(j.patrocinio.marca, 22, j.patrocinio.colores) : iconoInline('dinero',22)}
+    <div style="flex:1;min-width:0;">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;">PATROCINIO</div>
+      ${j.patrocinio
+        ? `<div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-top:2px;">${j.patrocinio.marca}</div>
+           <div style="font-family:'Space Grotesk',sans-serif;font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.6;">${formatearDinero(j.patrocinio.cantidadAnual)}/temp. · ${dur} ${dur===1?'año':'años'} de contrato</div>`
+        : `<div style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);margin-top:3px;font-style:italic;">Sin patrocinio por ahora</div>`}
+    </div>`;
+  return cajaPatro;
+}
+function cajaRepresentante(j){
+  if(!j.representante) return null;
+  const nivelServicio = TIENDA_SERVICIOS.find(s=>s.familia==='representante').niveles.find(n=>n.comisionPct===j.representante.comision);
+  const beneficio = beneficioRepresentante(j);
+  const caja = document.createElement('div');
+  caja.style.cssText = 'display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;';
+  caja.innerHTML = `
+    ${iconoInline('agente',22)}
+    <div style="flex:1;min-width:0;">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;">REPRESENTANTE</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-top:2px;">${j.representante.nombre || 'Agencia sin nombre'}</div>
+      ${j.representante.agente ? `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--gold);margin-top:1px;">Tu agente: ${j.representante.agente.nombre}</div>` : ''}
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.6;">
+        ${nivelServicio ? Object.entries(nivelServicio.efectoTemporada).map(([k,v])=>`+${v} ${NICE_STAT[k]||k}/temp.`).join(' · ') : ''}<br>
+        +${beneficio.medidorBonus} disposición del club al negociar · cláusula de rescisión reducida al ${Math.round(beneficio.penalizacionClausula*100)}%
+      </div>
+    </div>`;
+  return caja;
+}
+// Mismo badge de convocatoria que se ve justo debajo de País/Edad/Demarcación en la ficha del
+// Jugador — el resumen "Selección" que pide la app Estadísticas es este mismo estado, no una
+// tabla aparte (esa ya vive dentro de seccionEstadisticas, sección SELECCIÓN).
+function badgeConvocatoriaSeleccion(j){
+  if(j.tuvoPrimeraConvocatoriaAbsoluta){
+    return el('div','badge token', `${iconoInline('estrella',11)}Internacional absoluto con España`);
+  } else if(j.tuvoPrimeraConvocatoriaSub23){
+    return el('div','badge token', `${iconoInline('estrella',11)}Internacional Sub-23 con España`);
+  } else if(j.tuvoPrimeraConvocatoriaSub21){
+    return el('div','badge token', `${iconoInline('estrella',11)}Internacional Sub-21 con España`);
+  }
+  const seguimiento = estadoSeguimientoSeleccion(j);
+  if(seguimiento) return el('div','badge', `${iconoInline('lupa',11)}En el radar de la selección`);
+  return el('div','badge', 'Sin convocatoria con la selección todavía');
+}
 function seccionEstadisticas(j){
   const secStats = seccionPlegable('ESTADÍSTICAS','estadisticas');
   if(S.fichaAcordeon.estadisticas){
@@ -12990,20 +13058,7 @@ SCREENS.tabJugador = function(){
     <div class="item"><span class="k">Edad</span><span class="v">${j.edad} años</span></div>
     <div class="item"><span class="k">Demarcación</span><span class="v">${j.posicion}</span></div>
   `));
-  if(j.tuvoPrimeraConvocatoriaAbsoluta){
-    c.appendChild(el('div','badge token', `${iconoInline('estrella',11)}Internacional absoluto con España`)).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
-  } else if(j.tuvoPrimeraConvocatoriaSub23){
-    c.appendChild(el('div','badge token', `${iconoInline('estrella',11)}Internacional Sub-23 con España`)).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
-  } else if(j.tuvoPrimeraConvocatoriaSub21){
-    c.appendChild(el('div','badge token', `${iconoInline('estrella',11)}Internacional Sub-21 con España`)).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
-  } else {
-    const seguimiento = estadoSeguimientoSeleccion(j);
-    if(seguimiento){
-      c.appendChild(el('div','badge', `${iconoInline('lupa',11)}En el radar de la selección`)).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
-    } else {
-      c.appendChild(el('div','badge', 'Sin convocatoria con la selección todavía')).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
-    }
-  }
+  c.appendChild(badgeConvocatoriaSeleccion(j)).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
   if(j.estadoMental === 'racha'){
     c.appendChild(el('div','badge token', '🔥 En racha: todo te está saliendo bien últimamente'));
   }
@@ -13037,39 +13092,9 @@ SCREENS.tabJugador = function(){
   c.appendChild(seccionEstado(j));
   c.appendChild(seccionAtributos(j));
   c.appendChild(graficaValorMercado(j));
-  {
-    const cajaPatro = document.createElement('div');
-    cajaPatro.style.cssText = 'display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;';
-    const dur = j.patrocinio ? (j.patrocinio.duracionTemporadas||1) : 0;
-    cajaPatro.innerHTML = `
-      ${j.patrocinio ? logoMarca(j.patrocinio.marca, 22, j.patrocinio.colores) : iconoInline('dinero',22)}
-      <div style="flex:1;min-width:0;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;">PATROCINIO</div>
-        ${j.patrocinio
-          ? `<div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-top:2px;">${j.patrocinio.marca}</div>
-             <div style="font-family:'Space Grotesk',sans-serif;font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.6;">${formatearDinero(j.patrocinio.cantidadAnual)}/temp. · ${dur} ${dur===1?'año':'años'} de contrato</div>`
-          : `<div style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);margin-top:3px;font-style:italic;">Sin patrocinio por ahora</div>`}
-      </div>`;
-    c.appendChild(cajaPatro);
-  }
-  if(j.representante){
-    const nivelServicio = TIENDA_SERVICIOS.find(s=>s.familia==='representante').niveles.find(n=>n.comisionPct===j.representante.comision);
-    const beneficio = beneficioRepresentante(j);
-    const cajaRepresentante = document.createElement('div');
-    cajaRepresentante.style.cssText = 'display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;';
-    cajaRepresentante.innerHTML = `
-      ${iconoInline('agente',22)}
-      <div style="flex:1;min-width:0;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;">REPRESENTANTE</div>
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-top:2px;">${j.representante.nombre || 'Agencia sin nombre'}</div>
-        ${j.representante.agente ? `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--gold);margin-top:1px;">Tu agente: ${j.representante.agente.nombre}</div>` : ''}
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.6;">
-          ${nivelServicio ? Object.entries(nivelServicio.efectoTemporada).map(([k,v])=>`+${v} ${NICE_STAT[k]||k}/temp.`).join(' · ') : ''}<br>
-          +${beneficio.medidorBonus} disposición del club al negociar · cláusula de rescisión reducida al ${Math.round(beneficio.penalizacionClausula*100)}%
-        </div>
-      </div>`;
-    c.appendChild(cajaRepresentante);
-  }
+  c.appendChild(cajaPatrocinio(j));
+  const cajaRep = cajaRepresentante(j);
+  if(cajaRep) c.appendChild(cajaRep);
   if(j.rival && j.rival.trayectoriaIniciada){
     const tier = tierRelacionRival(j.rival.relacion);
     const COLOR_TIER = { sana:'var(--ink-soft)', toxica:'var(--red)', reconciliacion:'var(--green)' };
@@ -14336,7 +14361,7 @@ const TEL_ICONO_APPSTORE = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" s
 const TEL_ICONO_PRENSA = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h13a2 2 0 0 1 2 2V18a1.5 1.5 0 0 1-1.5 1.5H6A2 2 0 0 1 4 17.5z"/><path d="M4 17.5V5.5M8 9h7M8 12.5h7M8 16h4"/></svg>';
 const TEL_ICONO_SCOUT = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3L21 21"/><path d="M7.5 10.5l2 2 3.5-4"/></svg>';
 const TEL_ICONO_RENDIMIENTO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>';
-const TEL_ICONO_ENTRENAMIENTO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M6.5 17.5l11-11"/><circle cx="5" cy="5" r="2.3"/><circle cx="19" cy="19" r="2.3"/><circle cx="5" cy="19" r="2.3"/><circle cx="19" cy="5" r="2.3"/></svg>';
+const TEL_ICONO_ENTRENAMIENTO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.3" y="9" width="3.2" height="6" rx="1"/><rect x="18.5" y="9" width="3.2" height="6" rx="1"/><path d="M5.5 12h13"/><path d="M8.3 10v4M15.7 10v4"/></svg>';
 const TEL_ICONO_ESTADISTICAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>';
 // Umbrales reales: los mismos NIVELES_POPULARIDAD que usa el resto del juego (Conocido/Popular/Ídolo).
 // Carpeta "Economía" (estilo iOS): agrupa las 3 apps de dinero. Banca es la única con pantalla
@@ -14810,6 +14835,58 @@ const TEL_SEGUIMIENTOS_WHATSAPP = ['¿Me has leído? 😅', 'Bueno, cuando pueda
 // Réplica genérica de OTRO miembro del grupo reaccionando al primer mensaje — así el grupo
 // "habla solo" un poco aunque tú no digas nada, como pasaría de verdad.
 const TEL_RESPUESTAS_GRUPO_GENERICAS = ['jajajaja', 'Totalmente de acuerdo', 'Eso digo yo', '¿Tú qué opinas de esto?', 'Así es 💯', 'Ojalá', 'Qué fuerte', 'Ni que lo digas'];
+// Mensajes que el JUGADOR puede mandar al grupo (a diferencia de los contactos 1 a 1, aquí no
+// hay una pregunta concreta que contestar — es un chat abierto — así que el pool es de mensajes
+// sueltos, no pares pregunta/respuesta.
+const TEL_RESPUESTAS_GRUPO_JUGADOR = ['jajaja qué crack', 'Aquí ando, a lo mío', 'Contadme, que me lo estoy perdiendo', '¿Quedamos un día de estos?', 'Todo controlado por aquí 💪'];
+// Mismo criterio que elegirAutor() dentro de generarNotificacionMovil (ver más abajo, ahora
+// reutilizado también por telEnviarMensajeGrupo): quién "habla" en nombre del grupo depende de
+// qué grupo es — la pandilla tira de j.companeros entero, el vestuario solo de los que siguen
+// jugando contigo ahora mismo (juntosActualmente); cualquier otro grupo no tiene miembros con
+// nombre propio en `j`, así que se queda en un genérico "Compañero". `excluir` evita que la
+// misma persona se responda a sí misma dos veces seguidas.
+function telAutorAleatorioGrupo(grupo, j, excluir){
+  if(grupo.id === 'grupo_pandilla' && (j.companeros||[]).length){
+    const pool = j.companeros.filter(c=>!excluir || (c.apodo||c.nombre)!==excluir);
+    const c = (pool.length?pool:j.companeros)[Math.floor(Math.random()*(pool.length?pool.length:j.companeros.length))];
+    return c.apodo || c.nombre;
+  }
+  if(grupo.id === 'grupo_vestuario'){
+    const enClub = (j.companeros||[]).filter(c=>c.juntosActualmente && (!excluir || (c.apodo||c.nombre)!==excluir));
+    if(enClub.length) return enClub[Math.floor(Math.random()*enClub.length)].apodo || enClub[0].nombre;
+  }
+  return 'Compañero';
+}
+// Manda un mensaje tuyo a un grupo de WhatsApp (a diferencia de los contactos 1 a 1, no hay un
+// turno de pregunta/respuesta que cerrar — es un chat abierto, así que se puede enviar en
+// cualquier momento). Tu mensaje se ve al instante; con bastante probabilidad, otro miembro
+// reacciona detrás con el mismo indicador de "escribiendo…" que usa telResponderConTyping,
+// pero sin depender de un `mapa` de turnos (S.movilGrupoEscribiendo basta, un solo grupo puede
+// estar "escribiendo" a la vez desde el punto de vista del jugador).
+function telEnviarMensajeGrupo(grupo, texto){
+  const j = S.jugador;
+  S.movilBandeja = S.movilBandeja || telBandejaVacia();
+  S.movilBandeja.grupos = S.movilBandeja.grupos || {};
+  S.movilBandeja.grupos[grupo.id] = S.movilBandeja.grupos[grupo.id] || [];
+  const idBase = 'tuyo_' + S.temporada + '_' + (S.pasoIndex||0) + '_' + Math.random().toString(36).slice(2,8);
+  S.movilBandeja.grupos[grupo.id].push({ id:idBase, autor:'Tú', texto, temporada:S.temporada, pasoIndex:S.pasoIndex||0, leido:true, mine:true });
+  guardarPartida();
+  if(Math.random() < 0.6){
+    S.movilGrupoEscribiendo = grupo.id;
+    pintar();
+    setTimeout(()=>{
+      const autor = telAutorAleatorioGrupo(grupo, j, null);
+      const respuesta = TEL_RESPUESTAS_GRUPO_GENERICAS[Math.floor(Math.random()*TEL_RESPUESTAS_GRUPO_GENERICAS.length)];
+      S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_r', autor, texto:respuesta, temporada:S.temporada, pasoIndex:S.pasoIndex||0, leido:true });
+      S.movilGrupoEscribiendo = null;
+      guardarPartida();
+      Sonido.movilNotif();
+      pintar();
+    }, 900 + Math.random()*700);
+  } else {
+    pintar();
+  }
+}
 // Aplica una respuesta tuya con "escribiendo…" de por medio antes de que llegue la suya — el
 // mensaje tuyo se ve al instante (como al enviar de verdad), pero la respuesta del otro lado
 // tarda un momento y se anuncia con los tres puntos, igual que en un chat real. `id` identifica
@@ -14943,25 +15020,13 @@ function generarNotificacionMovil(j){
   } else if(canal === 'grupo'){
     const grupo = grupos[Math.floor(Math.random()*grupos.length)];
     const texto = plantillas.grupo[Math.floor(Math.random()*plantillas.grupo.length)];
-    const elegirAutor = (excluir)=>{
-      if(grupo.id === 'grupo_pandilla' && (j.companeros||[]).length){
-        const pool = j.companeros.filter(c=>!excluir || (c.apodo||c.nombre)!==excluir);
-        const c = (pool.length?pool:j.companeros)[Math.floor(Math.random()*(pool.length?pool.length:j.companeros.length))];
-        return c.apodo || c.nombre;
-      }
-      if(grupo.id === 'grupo_vestuario'){
-        const enClub = (j.companeros||[]).filter(c=>c.juntosActualmente && (!excluir || (c.apodo||c.nombre)!==excluir));
-        if(enClub.length) return enClub[Math.floor(Math.random()*enClub.length)].apodo || enClub[0].nombre;
-      }
-      return 'Compañero';
-    };
-    const autor = elegirAutor(null);
+    const autor = telAutorAleatorioGrupo(grupo, j, null);
     S.movilBandeja.grupos[grupo.id] = S.movilBandeja.grupos[grupo.id] || [];
     S.movilBandeja.grupos[grupo.id].push({ id:idBase, autor, texto, temporada:S.temporada, pasoIndex:paso, leido:false });
     // El grupo "habla solo": con bastante probabilidad, otro miembro reacciona al primer mensaje
     // aunque tú no digas nada — así se nota que la conversación sigue sin ti.
     if(Math.random() < 0.55){
-      const autor2 = elegirAutor(autor);
+      const autor2 = telAutorAleatorioGrupo(grupo, j, autor);
       const respuesta = TEL_RESPUESTAS_GRUPO_GENERICAS[Math.floor(Math.random()*TEL_RESPUESTAS_GRUPO_GENERICAS.length)];
       S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_b', autor:autor2, texto:respuesta, temporada:S.temporada, pasoIndex:paso, leido:false });
     }
@@ -15587,58 +15652,19 @@ function renderMovilContenido(c, j){
     ficha.appendChild(facts);
     c.appendChild(ficha);
 
-    // Valor de mercado: mismo patrón de sparkline que usaba antes el Banco (ver telSvgSparkline),
-    // con las temporadas reales ya cerradas (j.historialTemporadas) + el valor actual.
-    const serieVM = (j.historialTemporadas||[]).map(h=>h.valorMercado).concat([j.stats.valorMercado||0]).filter(v=>v>0);
-    if(!serieVM.length) serieVM.push(j.stats.valorMercado||0, j.stats.valorMercado||0);
-    const cardVM = el('div','tel-bank-card');
-    cardVM.appendChild(el('p','tel-bank-card-title','Valor de mercado'));
-    const rowVM = el('div','tel-sparkline-row');
-    const figsVM = el('div','tel-sparkline-figs');
-    figsVM.appendChild(el('div','v', formatearDinero(j.stats.valorMercado||0)));
-    const valorMaximo = Math.max(j.carrera.valorMercadoMaximo||0, j.stats.valorMercado||0);
-    figsVM.appendChild(el('div','t', `Récord: ${formatearDinero(valorMaximo)}`)).style.color = 'var(--ink-soft)';
-    rowVM.appendChild(figsVM);
-    const svgWrapVM = el('div'); svgWrapVM.innerHTML = telSvgSparkline(serieVM);
-    rowVM.appendChild(svgWrapVM.firstElementChild);
-    cardVM.appendChild(rowVM);
-    c.appendChild(cardVM);
+    // Representante, Patrocinador y Selección: las mismas cajas/badge que ya se ven en la ficha
+    // del Jugador (ver cajaRepresentante/cajaPatrocinio/badgeConvocatoriaSeleccion, extraídas de
+    // SCREENS.tabJugador para poder reutilizarlas aquí tal cual, mismos datos).
+    c.appendChild(badgeConvocatoriaSeleccion(j)).style.cssText = 'display:flex;justify-content:center;margin:10px 0 0;';
+    const cajaRep = cajaRepresentante(j);
+    if(cajaRep) c.appendChild(cajaRep);
+    c.appendChild(cajaPatrocinio(j));
 
-    // Estadísticas de carrera: mismos contadores que ya usa el resumen de fin de carrera
-    // (SCREENS.final), aquí disponibles durante la partida sin tener que retirarse para verlos.
-    const cardCarrera = el('div','tel-bank-card');
-    cardCarrera.appendChild(el('p','tel-bank-card-title','Estadísticas de carrera'));
-    const gridCarrera = el('div','tel-stats-grid');
-    const golesPorPartido = j.carrera.partidos > 0 ? (j.carrera.goles / j.carrera.partidos).toFixed(2) : '0.00';
-    [
-      [j.carrera.partidos, 'Partidos', false], [j.carrera.goles, 'Goles', false],
-      [j.carrera.asistencias, 'Asistencias', false], [golesPorPartido, 'Goles/partido', false],
-      [j.carrera.titulos||0, 'Títulos', true], [j.carrera.ascensos||0, 'Ascensos', true],
-      [j.carrera.balonesDeOro||0, 'Balones de Oro', true], [j.carrera.trofeosIndividuales||0, 'Pichichis / MVP', true]
-    ].forEach(([valor,etiqueta,esLogro])=>{
-      const tile = el('div','tel-stat-tile'+(esLogro && valor>0 ? ' gold' : ''));
-      tile.innerHTML = `<div class="v">${valor}</div><div class="k">${etiqueta}</div>`;
-      gridCarrera.appendChild(tile);
-    });
-    cardCarrera.appendChild(gridCarrera);
-    c.appendChild(cardCarrera);
-
-    const titulosSel = (j.titulosSeleccion||[]).length;
-    if((j.carrera.partidosSeleccion||0) > 0 || titulosSel > 0){
-      const cardSel = el('div','tel-bank-card');
-      cardSel.appendChild(el('p','tel-bank-card-title','Con la selección'));
-      const gridSel = el('div','tel-stats-grid');
-      [
-        [j.carrera.partidosSeleccion||0, 'Partidos', false], [j.carrera.golesSeleccion||0, 'Goles', false],
-        [j.carrera.asistenciasSeleccion||0, 'Asistencias', false], [titulosSel, 'Títulos', true]
-      ].forEach(([valor,etiqueta,esLogro])=>{
-        const tile = el('div','tel-stat-tile'+(esLogro && valor>0 ? ' gold' : ''));
-        tile.innerHTML = `<div class="v">${valor}</div><div class="k">${etiqueta}</div>`;
-        gridSel.appendChild(tile);
-      });
-      cardSel.appendChild(gridSel);
-      c.appendChild(cardSel);
-    }
+    // Valor de mercado y estadísticas de carrera: MISMAS funciones que usa SCREENS.tabJugador
+    // (graficaValorMercado/seccionEstadisticas), a petición expresa — nada de cifras o layout
+    // propios que puedan desincronizarse de lo que ya se ve en la ficha del Jugador.
+    c.appendChild(graficaValorMercado(j));
+    c.appendChild(seccionEstadisticas(j));
   }
 
   else if(vista === 'economia'){
@@ -15852,7 +15878,14 @@ function renderMovilContenido(c, j){
           ${fila.hayNuevo ? `<span class="tel-email-unread"></span>` : ''}`;
         btn.onclick = ()=>{
           S.movilGrupoAbierto = g.id; S.movilVista='grupo';
-          ((S.movilBandeja && S.movilBandeja.grupos && S.movilBandeja.grupos[g.id]) || []).forEach(m=> m.leido = true);
+          // Se captura el primer mensaje sin leer ANTES de marcarlos todos como vistos (la línea
+          // "Mensajes nuevos" de más abajo, en la vista 'grupo', se ancla a ese id) — si se
+          // marcara primero, ya no quedaría ningún m.leido===false con el que ubicarla.
+          const dinamicosAntes = (S.movilBandeja && S.movilBandeja.grupos && S.movilBandeja.grupos[g.id]) || [];
+          const primerNoLeido = dinamicosAntes.find(m=>!m.leido);
+          S.movilGrupoNoLeidoDesde = S.movilGrupoNoLeidoDesde || {};
+          S.movilGrupoNoLeidoDesde[g.id] = primerNoLeido ? primerNoLeido.id : null;
+          dinamicosAntes.forEach(m=> m.leido = true);
           pintar();
         };
       } else {
@@ -15892,7 +15925,17 @@ function renderMovilContenido(c, j){
       const dinamicos = (S.movilBandeja && S.movilBandeja.grupos && S.movilBandeja.grupos[grupo.id]) || [];
       const thread = el('div','tel-thread');
       const todos = grupo.mensajesSemilla.concat(dinamicos);
-      todos.forEach(m=> thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble"><span class="tel-bubble-autor">${m.autor}</span>${m.texto}</div>`)));
+      // Línea "Mensajes nuevos": se ancla al primer mensaje que estaba sin leer al ENTRAR al
+      // grupo (capturado en el onclick de la lista de chats, antes de marcarlos todos como
+      // vistos) — los mensajes semilla nunca coinciden con ese id, así que nunca la llevan.
+      const primerNoLeidoId = S.movilGrupoNoLeidoDesde && S.movilGrupoNoLeidoDesde[grupo.id];
+      todos.forEach(m=>{
+        if(primerNoLeidoId && m.id === primerNoLeidoId){
+          thread.appendChild(el('div','tel-unread-divider','Mensajes nuevos'));
+        }
+        const esMio = m.autor === 'Tú';
+        thread.appendChild(el('div','tel-bubble-row'+(esMio?' mine':''), `<div class="tel-bubble">${esMio?'':`<span class="tel-bubble-autor">${m.autor}</span>`}${m.texto}</div>`));
+      });
       // Coherencia narrativa: si el suceso activo está ligado a ESTE grupo de WhatsApp, sus
       // opciones reales (las mismas de SCREENS.evento, misma tirada y efectos) se responden aquí
       // mismo, sin tener que cerrar el móvil para ir a la pantalla del suceso. Si además el
@@ -15909,12 +15952,28 @@ function renderMovilContenido(c, j){
         }
         S.eventoActual._mensajesGrupoResueltos.forEach(m=> thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble"><span class="tel-bubble-autor">${m.autor}</span>${m.texto}</div>`)));
       }
+      if(S.movilGrupoEscribiendo === grupo.id){
+        thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble tel-typing"><span></span><span></span><span></span></div>`));
+      }
       scroll.appendChild(thread);
       if(esteSucesoAqui){
         const choices = el('div','tel-choices');
         choices.appendChild(el('p','tel-choices-label','Tu respuesta'));
         scroll.appendChild(choices);
         renderizarOpcionesEvento(choices, S.eventoActual, j, {estiloChat:true});
+      } else if(S.movilGrupoEscribiendo !== grupo.id){
+        // Chat abierto, sin turno de pregunta/respuesta que cerrar — se puede escribir en
+        // cualquier momento, a diferencia de los contactos 1 a 1 (ver telEnviarMensajeGrupo).
+        const choices = el('div','tel-choices');
+        choices.appendChild(el('p','tel-choices-label','Escribe algo'));
+        TEL_RESPUESTAS_GRUPO_JUGADOR.forEach(texto=>{
+          const btn = document.createElement('button');
+          btn.className = 'tel-choice-btn';
+          btn.textContent = texto;
+          btn.onclick = ()=> telEnviarMensajeGrupo(grupo, texto);
+          choices.appendChild(btn);
+        });
+        scroll.appendChild(choices);
       }
     }
   }
@@ -20086,7 +20145,7 @@ SCREENS.resultado = function(){
   const c = el('div','suceso-plano');
   const box = el('div');
   if(r.roll){
-    const big = el('div','roll-result show'+(r.roll.exito?' exito':' fallo'), r.roll.exito?'ÉXITO':'FALLO');
+    const big = el('div','roll-result show consecuencia'+(r.roll.exito?' exito':' fallo'), r.roll.exito?'ÉXITO':'FALLO');
     big.style.marginTop = '0';
     big.style.marginBottom = '10px';
     box.appendChild(big);
