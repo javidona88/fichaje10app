@@ -173,10 +173,13 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* PRUEBA: los 6 atributos de jugador en el centro de la topbar en vez del logo (ver topbar()) —
    compacto a propósito, para que quepan los 6 sin invadir la ficha de la izquierda ni los botones
    de la derecha en un móvil estrecho. */
-.topbar-attrs{ display:flex; align-items:center; gap:5px; }
+.topbar-attrs{ display:flex; align-items:center; gap:6px; }
 .topbar-attr-item{ display:flex; flex-direction:column; align-items:center; line-height:1.1; }
 .topbar-attr-item .k{ font-family:'Space Grotesk',sans-serif; font-size:7px; font-weight:700; letter-spacing:.02em; color:var(--gold-dim); }
-.topbar-attr-item .v{ font-family:'Big Shoulders Display',sans-serif; font-size:13px; font-weight:700; color:var(--ink); }
+/* 'Space Grotesk' en vez de 'Big Shoulders Display' a propósito: esa solo trae el peso 800
+   cargado (ver @import de fuentes), así que no hay forma real de que se vea "más fina" con ella —
+   aquí sí hay pesos intermedios de verdad. */
+.topbar-attr-item .v{ font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:500; color:var(--ink); }
 .logo-wrap{ display:flex; align-items:center; gap:8px; }
 .logo-badge{ flex-shrink:0; display:flex; align-items:center; }
 .logo-badge svg{ display:block; }
@@ -307,6 +310,11 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .cromo-info-bar .item{ display:flex; flex-direction:column; align-items:center; flex:1; text-align:center; }
 .cromo-info-bar .k{ font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:3px; }
 .cromo-info-bar .v{ font-size:12.5px; font-weight:600; color:var(--ink); }
+/* Resumen de "lo que ya tienes" en Ofertas (sin el nombre del club, que ya se ve en la topbar):
+   4 cifras icono+abreviatura en una sola fila, para caber sin problema en un móvil estrecho. */
+.oferta-actual-resumen{ display:flex; flex-wrap:wrap; align-items:center; gap:5px 14px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; }
+.oferta-actual-item{ display:flex; align-items:center; font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600; color:var(--ink); white-space:nowrap; }
+.oferta-actual-item .icono-inline{ color:var(--gold-dim); }
 .historial-temporadas{ margin-top:4px; }
 .historial-club-header{ font-size:11px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.02em; margin:12px 0 4px; }
 .historial-club-header:first-child{ margin-top:2px; }
@@ -733,11 +741,12 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .dice-suma.natural20{ color:#D4AF37; letter-spacing:.03em; }
 .dice-suma.natural1{ color:#D9495C; letter-spacing:.03em; }
 .dice-caption{ margin-top:16px; font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--ink-soft); text-align:center; }
-/* Insignia compacta (texto blanco sobre fondo de color) en vez del texto suelto y grande de
-   antes — más discreta, y el color hace de fondo en vez de ser el único portador del mensaje. */
+/* Insignia (texto blanco sobre fondo de color) en vez del texto suelto de antes — el color hace
+   de fondo en vez de ser el único portador del mensaje. Esquina recta a propósito (mismo criterio
+   que las tarjetas de contrato/documento): es un sello de resultado, no un botón. */
 .roll-result{
-  display:inline-block; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
-  letter-spacing:.04em; text-transform:uppercase; color:#fff; padding:5px 14px; border-radius:999px;
+  display:inline-block; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px;
+  letter-spacing:.04em; text-transform:uppercase; color:#fff; padding:8px 20px; border-radius:0;
   margin-top:18px; opacity:0; transform:translateY(6px); transition: opacity .35s ease, transform .35s ease;
 }
 .roll-result.show{ opacity:1; transform:translateY(0); }
@@ -869,13 +878,6 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tienda-divisor-sub{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); margin-top:2px; }
 
 /* ---------- Compras: tienda online (SCREENS.compras, estilo Amazon) ---------- */
-.tienda-online-saldo{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  background:var(--panel2); border:1px solid var(--line); border-radius:12px;
-  padding:10px 14px; margin-bottom:16px;
-}
-.tienda-online-saldo .lbl{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); }
-.tienda-online-saldo .val{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:18px; color:var(--gold); }
 .tienda-cats{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; scrollbar-width:none; }
 .tienda-cats::-webkit-scrollbar{ display:none; }
 .tienda-cat-chip{
@@ -918,6 +920,20 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 }
 .staff-resumen .lbl{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); }
 .staff-resumen .val{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:18px; color:var(--gold); }
+/* El dato más importante de Servicios: mismo balance proyectado a fin de temporada que en Banco
+   (calcularBalanceProyectadoTemporada) — más grande y con color según signo, a diferencia del
+   resumen neutro de arriba, porque es lo que de verdad decide si puedes permitirte algo nuevo. */
+.staff-balance{
+  display:flex; flex-direction:column; gap:2px;
+  background:var(--panel2); border:1.5px solid var(--line); border-radius:12px;
+  padding:12px 14px; margin-bottom:12px;
+}
+.staff-balance.pos{ border-color:rgba(76,175,109,0.45); }
+.staff-balance.neg{ border-color:rgba(217,73,92,0.45); }
+.staff-balance .lbl{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); }
+.staff-balance .val{ font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:24px; }
+.staff-balance.pos .val{ color:var(--green); }
+.staff-balance.neg .val{ color:var(--red); }
 .staff-dept{
   display:flex; justify-content:space-between; align-items:center; width:100%;
   padding:10px 14px; margin:14px 0 0; border-radius:10px; border:1px solid var(--line);
@@ -1031,7 +1047,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .ltab.activo{ border-color:var(--gold); color:var(--gold); background:rgba(212,175,55,.1); }
 .logro-fila{ display:flex; gap:12px; padding:12px 2px; border-bottom:1px solid var(--line); }
 .logro-fila:last-child{ border-bottom:none; }
-.logro-ico{ width:42px; height:42px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:19px; }
+.logro-ico{ width:42px; height:42px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:19px; position:relative; }
+.logro-fila.conseguido{ cursor:pointer; }
 .logro-ico svg{ width:20px; height:20px; }
 .logro-fila.conseguido .logro-ico{ background:linear-gradient(160deg,rgba(212,175,55,.22),rgba(212,175,55,.06)); border:1px solid rgba(212,175,55,.45); color:var(--gold); }
 .logro-fila.bloqueado .logro-ico{ background:var(--bg2); border:1px solid var(--line); color:var(--ink-soft); }
@@ -1139,6 +1156,19 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .cromo-zoom-back li{ font-family:'Space Grotesk',sans-serif; font-size:13px; line-height:1.55; color:var(--ink); }
 .cromo-zoom-back li b{ color:var(--gold); }
 .cromo-zoom-back .volver{ font-family:'Space Grotesk',sans-serif; font-size:10.5px; color:var(--ink-soft); text-align:center; margin-top:12px; }
+
+/* Zoom de un logro conseguido: más simple que el de los cromos (sin FLIP desde la fila ni cara
+   trasera — un logro no tiene curiosidades que enseñar detrás), solo un fundido + escala desde
+   el centro. Esquina recta a propósito, mismo criterio que el resto de tarjetas "documento". */
+.logro-zoom-backdrop{ position:fixed; inset:0; z-index:71; background:rgba(6,7,10,.72); display:flex; align-items:center; justify-content:center; padding:24px; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+.logro-zoom-backdrop.activo{ opacity:1; pointer-events:auto; }
+.logro-zoom-card{ width:100%; max-width:340px; background:var(--panel); border:1px solid rgba(212,175,55,.5); border-radius:0; box-shadow:0 22px 50px rgba(0,0,0,.55); padding:28px 22px 22px; text-align:center; position:relative; transform:scale(.92); opacity:0; transition:transform .3s cubic-bezier(.2,.9,.3,1), opacity .25s ease; }
+.logro-zoom-backdrop.activo .logro-zoom-card{ transform:scale(1); opacity:1; }
+.logro-zoom-card .cerrar{ position:absolute; top:9px; right:9px; width:26px; height:26px; border-radius:50%; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; }
+.logro-zoom-card .ico-grande{ width:74px; height:74px; border-radius:18px; margin:0 auto 16px; display:flex; align-items:center; justify-content:center; font-size:34px; background:linear-gradient(160deg,rgba(212,175,55,.22),rgba(212,175,55,.06)); border:1px solid rgba(212,175,55,.45); color:var(--gold); }
+.logro-zoom-card .nombre{ font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; color:var(--ink); margin-bottom:9px; }
+.logro-zoom-card .desc{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; line-height:1.55; color:var(--ink); margin-bottom:16px; }
+.logro-zoom-card .meta{ font-family:'Space Grotesk',sans-serif; font-size:11.5px; font-weight:700; color:var(--gold-dim); text-transform:uppercase; letter-spacing:.04em; border-top:1px solid var(--line); padding-top:13px; }
 
 /* ---- SCREENS.menu: menú principal (nueva carrera / continuar / escudos / ajustes) ---- */
 .bg-anim{
@@ -1371,8 +1401,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    porque esas clases fijan su propia fuente explícita, con más peso que la heredada. Se
    sobrescriben aquí, solo dentro de .tel-screen, para que sea Inter SOLO cuando se ven desde el
    móvil, sin tocar su aspecto en la pantalla real. */
-.tel-screen .tienda-online-saldo .lbl, .tel-screen .staff-resumen .lbl, .tel-screen .staff-dept,
-.tel-screen .staff-nombre, .tel-screen .staff-mejora, .tel-screen .servicio-nombre,
+.tel-screen .staff-resumen .lbl, .tel-screen .staff-balance .lbl,
+.tel-screen .staff-dept, .tel-screen .staff-nombre, .tel-screen .staff-mejora, .tel-screen .servicio-nombre,
 .tel-screen .servicio-activo-tag, .tel-screen .servicio-desc, .tel-screen .tienda-cat-chip,
 .tel-screen .tienda-card-tag, .tel-screen .tienda-card-nombre, .tel-screen .tienda-card-efecto,
 .tel-screen .tienda-card-nota, .tel-screen .tienda-card-cta button{
@@ -1496,8 +1526,6 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-sparkline-figs .v{ font-family:'Inter',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
 .tel-sparkline-figs .t{ font-family:'Inter',sans-serif; font-size:11px; color:#8fe3ab; font-weight:600; margin-top:1px; }
 .tel-bank-split{ display:flex; gap:10px; margin-bottom:12px; }
-.tel-bank-neto{ font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; text-align:center; margin:-4px 0 18px; }
-.tel-bank-neto.pos{ color:#8fe3ab; } .tel-bank-neto.neg{ color:#f0a5ac; }
 .tel-split-card{ flex:1; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
 .tel-split-card .lbl{ font-family:'Inter',sans-serif; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); }
 .tel-split-card .amt{ font-family:'Inter',sans-serif; font-weight:800; font-size:17px; margin-top:2px; font-variant-numeric:tabular-nums; }
@@ -1505,6 +1533,16 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-split-card.gastos .amt{ color:#f0a5ac; }
 .tel-split-card .lines{ margin-top:8px; display:flex; flex-direction:column; gap:4px; }
 .tel-split-card .lines div{ font-family:'Inter',sans-serif; font-size:11px; color:var(--ink-soft); display:flex; justify-content:space-between; gap:6px; }
+/* El dato más importante de la app: balance proyectado a fin de temporada (ver
+   calcularBalanceProyectadoTemporada), con más peso visual que cualquier otra tarjeta de Banco —
+   número grande arriba, desglose de por qué debajo. */
+.tel-balance-card{ border-width:1.5px; }
+.tel-balance-card.pos{ border-color:rgba(76,175,109,0.45); }
+.tel-balance-card.neg{ border-color:rgba(217,73,92,0.45); }
+.tel-balance-num{ font-family:'Inter',sans-serif; font-weight:800; font-size:28px; font-variant-numeric:tabular-nums; margin:0 0 10px; }
+.tel-balance-num.pos{ color:#8fe3ab; } .tel-balance-num.neg{ color:#f0a5ac; }
+.tel-balance-lines{ display:flex; flex-direction:column; gap:5px; padding-top:10px; border-top:1px solid var(--line); }
+.tel-balance-lines div{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); display:flex; justify-content:space-between; gap:6px; }
 .tel-movements{ display:flex; flex-direction:column; }
 .tel-movement{ display:flex; align-items:center; gap:11px; padding:10px 2px; border-bottom:1px solid var(--line); }
 .tel-movement:last-child{ border-bottom:none; }
@@ -1534,6 +1572,14 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-screen.tel-vista-hilo > .tel-app-header{ flex-shrink:0; }
 .tel-hilo-scroll{ flex:1; min-height:0; overflow-y:auto; }
 .tel-back-btn{ background:none; border:1px solid var(--line); border-radius:8px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); cursor:pointer; flex-shrink:0; }
+.tel-back-btn.deshabilitado{ opacity:.35; cursor:not-allowed; }
+/* Barra de carga al publicar en Redes (vista 'redesPublicando', ver telPublicarPost) */
+.tel-publicando{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:70px 20px; }
+.tel-publicando .icono{ width:54px; height:54px; border-radius:14px; background:linear-gradient(150deg,#3f6fce,#233f80); display:flex; align-items:center; justify-content:center; }
+.tel-publicando .icono svg{ width:28px; height:28px; color:#fff; }
+.tel-publicando .texto{ font-family:'Inter',sans-serif; font-size:13px; font-weight:600; color:var(--ink-soft); }
+.tel-publicando .barra-track{ width:100%; max-width:210px; height:6px; border-radius:4px; background:rgba(255,255,255,0.08); overflow:hidden; }
+.tel-publicando .barra-fill{ height:100%; width:0%; border-radius:4px; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); transition:width 1.2s ease; }
 .tel-app-header .tel-title{ font-family:'Inter',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
 /* Pantallas reales incrustadas (Club/Ajustes/Casino/Servicios/Compras, ver telAbrirPantallaReal):
    sin esto, la .card genérica del juego (pensada para una pantalla completa) metía una segunda
@@ -1560,6 +1606,12 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 }
 .tel-contact-answered{ flex-shrink:0; color:#8fe3ab; }
 .tel-contact-answered svg{ width:16px; height:16px; }
+/* Pestaña Contactos de WhatsApp (telTodosLosConocidos): etiqueta de relación a la derecha de
+   cada fila, mismo criterio semántico verde/ámbar/rojo que el resto del juego. */
+.tel-relacion-tag{ flex-shrink:0; font-family:'Inter',sans-serif; font-size:10.5px; font-weight:700; padding:4px 9px; border-radius:20px; white-space:nowrap; }
+.tel-relacion-tag.pos{ background:rgba(76,175,109,0.16); color:#8fe3ab; }
+.tel-relacion-tag.warn{ background:rgba(224,147,46,0.16); color:#e0932e; }
+.tel-relacion-tag.neg{ background:rgba(217,73,92,0.16); color:#f0a5ac; }
 
 .tel-thread{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
 .tel-bubble-row{ display:flex; }
@@ -7021,12 +7073,12 @@ const PANTALLAS_SIN_MOVIL = new Set(['finTemporada','ruedaPrensa','ruedaPrensaRe
   // sin nada que hacer en el móvil mientras duran, así que se quita entero — quedan fuera
   // deliberadamente 'changelog','rankings','escudosPersonalizados', que son pantallas de
   // utilidad/menú (no cutscenes) donde el asomo desvaído sigue teniendo sentido como recordatorio
-  // de que hay una partida en curso. 'logros' (con su pestaña de Cromos) sí se quita del todo, a
-  // petición expresa — se lee mejor la colección sin el aparato asomando abajo.
+  // de que hay una partida en curso. 'logros' (con su pestaña de Cromos) y 'ajustes' sí se quitan
+  // del todo, a petición expresa — se leen mejor sin el aparato asomando abajo.
   'tutorial','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal',
   'nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal',
   'retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub',
-  'temporadaSinClub','sancionReveal','logros',
+  'temporadaSinClub','sancionReveal','logros','ajustes',
   'mundialIntro','mundialBombos','mundialSorteo','mundialPrensa','mundialGrupo','mundialGrupoTabla','mundialElim','mundialPenaltis','mundialCampeones','mundialEliminado',
   'eurocopaIntro','eurocopaBombos','eurocopaSorteo','eurocopaPrensa','eurocopaGrupo','eurocopaGrupoTabla','eurocopaElim','eurocopaPenaltis','eurocopaCampeones','eurocopaEliminado'
 ]);
@@ -8710,6 +8762,17 @@ function costeAnualServicios(j){
     if(infoNivel) total += infoNivel.costeAnual;
   });
   return total;
+}
+// Balance neto de la temporada, en HIPOTÉTICO: no suma lo ya cobrado/pagado hasta ahora, sino lo
+// que darán de sí un año entero de sueldo/patrocinio menos servicios/representante/nivel de vida
+// si nada cambia — igual que la vieja pantalla Economía antes de mudarse al móvil, y la misma
+// cuenta que ya usaba puedePagarServicio para decidir si puedes permitirte una suscripción nueva.
+function calcularBalanceProyectadoTemporada(j){
+  const ingresoTotal = (j.contrato.sueldoAnual||0) + (j.patrocinio ? j.patrocinio.cantidadAnual : 0);
+  const gastoServicios = costeAnualServicios(j);
+  const gastoRepresentante = j.representante ? Math.round((j.contrato.sueldoAnual||0) * j.representante.comision) : 0;
+  const gastoVida = costeVidaAnual(j);
+  return { ingresoTotal, gastoServicios, gastoRepresentante, gastoVida, neto: ingresoTotal - gastoServicios - gastoRepresentante - gastoVida };
 }
 function puedePagarServicio(j, familia, nuevoNivel){
   const servicio = TIENDA_SERVICIOS.find(s=>s.familia===familia);
@@ -12049,18 +12112,11 @@ function topbar(titulo){
   const centro = el('div');
   centro.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;';
 
-  // PRUEBA: en vez del logo, los 6 atributos de jugador de un vistazo (sin entrar en la ficha) —
-  // se decide aquí, no aparte, porque solo tiene sentido con una partida en curso (S.jugador).
-  if(S.jugador){
-    const attrRow = el('div','topbar-attrs');
-    [['fisico', S.jugador.atributos.fisico], ['velocidad', S.jugador.atributos.velocidad], ['tiro', S.jugador.atributos.tiro],
-     ['regate', S.jugador.atributos.regate], ['pase', S.jugador.atributos.pase], ['desmarque', S.jugador.atributos.desmarque]].forEach(([clave,valor])=>{
-      const item = el('span','topbar-attr-item');
-      item.innerHTML = `<span class="k">${ABREV_ATTR[clave]}</span><span class="v">${valor}</span>`;
-      attrRow.appendChild(item);
-    });
-    centro.appendChild(attrRow);
-  } else {
+  // Sin partida en curso (menú) el centro de la topbar sigue siendo el logo de siempre. Con
+  // partida en curso, los atributos del jugador viven ahora pegados a los botones de Logros/
+  // Ajustes (ver más abajo) en vez de centrados — quedan más cerca de esos iconos, y el centro
+  // queda libre.
+  if(!S.jugador){
     const logoWrap = el('div','logo-wrap logo-wrap-lg');
     const badge = el('div','logo-badge');
     badge.innerHTML = logoCamisetaCompacta(27);
@@ -12074,7 +12130,19 @@ function topbar(titulo){
 
   if(S.jugador){
     const botonesDcha = el('div');
-    botonesDcha.style.cssText = 'display:flex;gap:8px;flex-shrink:0;';
+    botonesDcha.style.cssText = 'display:flex;align-items:center;gap:10px;flex-shrink:0;';
+
+    const attrRow = el('div','topbar-attrs');
+    [['fisico', S.jugador.atributos.fisico], ['velocidad', S.jugador.atributos.velocidad], ['tiro', S.jugador.atributos.tiro],
+     ['regate', S.jugador.atributos.regate], ['pase', S.jugador.atributos.pase], ['desmarque', S.jugador.atributos.desmarque]].forEach(([clave,valor])=>{
+      const item = el('span','topbar-attr-item');
+      item.innerHTML = `<span class="k">${ABREV_ATTR[clave]}</span><span class="v">${valor}</span>`;
+      attrRow.appendChild(item);
+    });
+    botonesDcha.appendChild(attrRow);
+
+    const botonesIconos = el('div');
+    botonesIconos.style.cssText = 'display:flex;gap:5px;flex-shrink:0;';
 
     const logrosBtn = document.createElement('button');
     logrosBtn.innerHTML = ICONOS_SVG.trofeo;
@@ -12088,7 +12156,7 @@ function topbar(titulo){
       S.screen = 'logros';
       render();
     };
-    botonesDcha.appendChild(logrosBtn);
+    botonesIconos.appendChild(logrosBtn);
 
     // El botón de "Tu móvil" en la topbar se retiró: ahora se saca desde el asomo fijo al fondo
     // de pantalla (ver pintarMovilSheet) — un único sitio para entrar.
@@ -12102,7 +12170,8 @@ function topbar(titulo){
       S.screen = 'ajustes';
       render();
     };
-    botonesDcha.appendChild(ajustesBtn);
+    botonesIconos.appendChild(ajustesBtn);
+    botonesDcha.appendChild(botonesIconos);
     t.appendChild(botonesDcha);
   }
 
@@ -14740,7 +14809,9 @@ function generarNotificacionMovil(j){
 // feed automático de generarNotificacionMovil (rumores/menciones de fuera), estas son textos en
 // primera persona que el propio jugador puede elegir publicar — con contexto real de lo que
 // acaba de pasar en la partida (título recién ganado, MVP, pareja...) cuando lo hay, y genéricas
-// de repuesto para que siempre haya algo que publicar aunque no haya ningún hito reciente.
+// de repuesto para que siempre haya algo que publicar aunque no haya ningún hito reciente. Solo
+// se llega aquí si telHayAlgoDestacableParaPublicar(j) ya dio luz verde, así que las genéricas son
+// relleno para variar el texto, nunca la única razón para poder publicar.
 function telSugerenciasPost(j){
   const sug = [];
   const r = S.temporadaResumen;
@@ -14756,16 +14827,37 @@ function telSugerenciasPost(j){
   sug.push('Otro día más dándolo todo por este escudo ⚽', `Entrenando duro en ${j.club.nombre} — la temporada no da tregua`, 'Momento de desconectar antes del próximo partido 🌅');
   return sug;
 }
+// Puerta de entrada a "Publicar": solo se puede si ha pasado algo de verdad reciente (título,
+// distinción individual, lesión en curso) — a diferencia de "tienes pareja", que es un estado
+// permanente y no "acaba de pasar", así que no cuenta aquí (aunque sigue como sugerencia de texto
+// una vez que SÍ se puede publicar por otro motivo). Sin esto, el botón de publicar estaba
+// siempre disponible gracias al relleno genérico de telSugerenciasPost, y nunca se sentía que
+// publicar tuviera que ver con algo concreto de la partida.
+function telHayAlgoDestacableParaPublicar(j){
+  const r = S.temporadaResumen;
+  return !!((S.titulosTemporadaActual||[]).length || (r && r.mvp) || (r && r.pichichi) || (r && r.balonDeOroPuesto === 1) || j.lesionSemanas > 0);
+}
 // Publica un post propio en el feed de Redes (vista 'redesComponer', botón "Publicar") — a
 // diferencia de los posts de generarNotificacionMovil (aparecen solos, narrando algo que se dice
 // DE ti), estos los elige y publica el propio jugador, así que se marcan leídos de entrada.
+// Antes de aparecer en el feed pasa por 'redesPublicando' (barra de carga, ver renderMovilContenido)
+// — el propio texto se guarda en S.telPublicandoTexto mientras dura la animación.
 function telPublicarPost(texto){
   texto = (texto||'').trim();
+  if(!texto) return;
+  S.telPublicandoTexto = texto;
+  S.movilVista = 'redesPublicando';
+  pintar();
+  setTimeout(()=> telConfirmarPublicacion(), 1300);
+}
+function telConfirmarPublicacion(){
+  const texto = S.telPublicandoTexto;
   if(!texto) return;
   S.movilBandeja = S.movilBandeja || telBandejaVacia();
   const idBase = 'post_' + S.temporada + '_' + (S.pasoIndex||0) + '_' + Math.random().toString(36).slice(2,8);
   S.movilBandeja.instagram.push({ id:idBase, texto, temporada:S.temporada, pasoIndex:S.pasoIndex||0, leido:true });
   if(S.movilBandeja.instagram.length > 40) S.movilBandeja.instagram.splice(0, S.movilBandeja.instagram.length-40);
+  S.telPublicandoTexto = null;
   S.movilVista = 'redes';
   guardarPartida();
   pintar();
@@ -14850,6 +14942,64 @@ function telGruposDe(j){
   return lista;
 }
 function telIniciales(nombre){ return (nombre||'').slice(0,2).toUpperCase(); }
+// Etiqueta de relación a partir de un número 0-100 (la escala que usan compañeros/mentor/
+// protegido/representante/periodista) — para el rival, cuya escala es -100..100, se pasa esRival
+// y se reutiliza tierRelacionRival en vez de reinventar los cortes.
+function telEtiquetaRelacion(valor, esRival){
+  if(esRival){
+    const tier = tierRelacionRival(valor||0);
+    if(tier==='reconciliacion') return { texto:'Reconciliados', clase:'pos' };
+    if(tier==='toxica') return { texto:'Relación tóxica', clase:'neg' };
+    return { texto:'Rivalidad sana', clase:'warn' };
+  }
+  if(valor >= 75) return { texto:'Excelente', clase:'pos' };
+  if(valor >= 50) return { texto:'Buena', clase:'pos' };
+  if(valor >= 25) return { texto:'Regular', clase:'warn' };
+  return { texto:'Fría', clase:'neg' };
+}
+// Pestaña "Contactos" de WhatsApp: la agenda completa de quien aparece en esta partida, no solo
+// con quien se puede chatear de verdad (telContactosDe es un subconjunto, solo gente con
+// mensajes/opciones propias) — aquí el objetivo es de un vistazo "quién es" y "cómo va la
+// relación", no responder nada. Personajes sin relación numérica en el modelo (hermano,
+// padre/madre, amigo no fútbol, hijo) se listan igual, solo que sin la etiqueta de relación.
+function telTodosLosConocidos(j){
+  const lista = [];
+  if(j.representante){
+    const a = j.representante.agente;
+    lista.push({ nombre:a.apodo||a.nombre, rol:'Tu agente', color:'#6E88A8', relacion: telEtiquetaRelacion(a.relacion||0) });
+  }
+  if(j.tienePareja && j.pareja){
+    lista.push({ nombre:j.pareja.apodo||j.pareja.nombre, rol:'Tu pareja', color:'#D9495C', relacion: telEtiquetaRelacion(j.stats.felicidadPareja||0) });
+  }
+  (j.companeros||[]).forEach(c=>{
+    lista.push({ nombre:c.apodo||c.nombre, rol: c.juntosActualmente?'Compañero de cantera':'Excompañero de cantera', color:'#D4AF37', relacion: telEtiquetaRelacion(c.relacion||0) });
+  });
+  if(j.rival && j.rival.trayectoriaIniciada){
+    lista.push({ nombre:j.rival.apodo||j.rival.nombre, rol:'Tu rival', color:'#8a4a4a', relacion: telEtiquetaRelacion(j.rival.relacion||0, true) });
+  }
+  if(j.mentor){
+    lista.push({ nombre:j.mentor.apodo||j.mentor.nombre, rol:'Tu mentor', color:'#3f9e93', relacion: telEtiquetaRelacion(j.mentor.relacion||0) });
+  }
+  if(j.protegido){
+    lista.push({ nombre:j.protegido.apodo||j.protegido.nombre, rol:'Tu protegido', color:'#9b59b6', relacion: telEtiquetaRelacion(j.protegido.relacion||0) });
+  }
+  if(j.periodista){
+    lista.push({ nombre:j.periodista.apodo||j.periodista.nombre, rol:'Periodista de confianza', color:'#8a6dd6', relacion: telEtiquetaRelacion(j.periodista.relacion||0) });
+  }
+  if(j.hermano){
+    lista.push({ nombre:j.hermano.apodo||j.hermano.nombre, rol: j.hermano.genero==='f'?'Tu hermana':'Tu hermano', color:'#4f7fd9' });
+  }
+  if(j.padreMadre){
+    lista.push({ nombre:j.padreMadre.apodo||j.padreMadre.nombre, rol: j.padreMadre.genero==='f'?'Tu madre':'Tu padre', color:'#4f7fd9' });
+  }
+  if(j.amigoNoFutbol){
+    lista.push({ nombre:j.amigoNoFutbol.apodo||j.amigoNoFutbol.nombre, rol:`${j.amigoNoFutbol.genero==='f'?'Tu amiga':'Tu amigo'} · ${j.amigoNoFutbol.profesion}`, color:'#3f9e93' });
+  }
+  if(j.hijo){
+    lista.push({ nombre:j.hijo.nombre, rol: j.hijo.genero==='f'?'Tu hija':'Tu hijo', color:'#D9495C' });
+  }
+  return lista;
+}
 // Bandeja de Email: correspondencia formal/administrativa con datos reales de la partida — a
 // diferencia de WhatsApp, aquí no hay opciones ni efectos (es correo informativo, no una
 // subtrama de relación), así que la única interacción es abrir y leer. Cada correo solo aparece
@@ -14968,15 +15118,6 @@ function telDesglosePasoActual(j){
     else { gastos.push(mov); totalOut += Math.abs(mov.monto); }
   });
   return { ingresos, gastos, totalIn, totalOut };
-}
-// Balance de la temporada en curso: suma TODOS los movimientos reales con temporada===S.temporada
-// (no solo el último de cada categoría, como telDesglosePasoActual) — nómina, patrocinio, casino,
-// compras... todo lo que de verdad ha pasado por la cuenta este año.
-function telDesgloseAnual(j){
-  const delAnio = (j.movimientosBanca||[]).filter(m=>m.temporada===S.temporada);
-  let totalIn = 0, totalOut = 0;
-  delAnio.forEach(m=>{ if(m.tipo==='in') totalIn += m.monto; else totalOut += Math.abs(m.monto); });
-  return { totalIn, totalOut, neto: totalIn-totalOut, movimientos: delAnio };
 }
 function telSvgSparkline(serie){
   const W = 120, H = 46, PAD = 3;
@@ -15285,6 +15426,23 @@ function renderMovilContenido(c, j){
     scroll.appendChild(tabs);
 
     if(S.telBancoTab !== 'movimientos'){
+      // Balance de la temporada: HIPOTÉTICO, no la suma de lo ya cobrado/pagado hasta ahora (eso
+      // solo refleja el paso en el que vas, engaña temprano en la temporada) — proyecta un año
+      // entero de sueldo/patrocinio menos servicios/representante/nivel de vida, igual que hacía
+      // la vieja pantalla Economía. Es el dato más importante de la app, así que va primero y
+      // con letra grande, antes incluso que el valor de mercado.
+      const proyeccion = calcularBalanceProyectadoTemporada(j);
+      const cardBalance = el('div','tel-bank-card tel-balance-card '+(proyeccion.neto>=0?'pos':'neg'));
+      cardBalance.appendChild(el('p','tel-bank-card-title', `Balance estimado · fin de temporada ${temporadaAAnoCompleto(S.temporada)}`));
+      cardBalance.appendChild(el('p','tel-balance-num '+(proyeccion.neto>=0?'pos':'neg'), `${proyeccion.neto>=0?'+':''}${formatearEuros(proyeccion.neto)}`));
+      const lineasBalance = el('div','tel-balance-lines');
+      lineasBalance.appendChild(el('div',null,`<span>Ingresos (sueldo${j.patrocinio?' + patrocinio':''})</span><span>+${formatearEuros(proyeccion.ingresoTotal)}</span>`));
+      lineasBalance.appendChild(el('div',null,`<span>Servicios profesionales</span><span>−${formatearEuros(proyeccion.gastoServicios)}</span>`));
+      if(proyeccion.gastoRepresentante) lineasBalance.appendChild(el('div',null,`<span>Comisión del representante</span><span>−${formatearEuros(proyeccion.gastoRepresentante)}</span>`));
+      lineasBalance.appendChild(el('div',null,`<span>Nivel de vida</span><span>−${formatearEuros(proyeccion.gastoVida)}</span>`));
+      cardBalance.appendChild(lineasBalance);
+      scroll.appendChild(cardBalance);
+
       // Valor de mercado: temporadas reales ya cerradas (j.historialTemporadas) + el valor actual,
       // así el gráfico es un extracto real de tu progresión, no una serie inventada.
       const serie = (j.historialTemporadas||[]).map(h=>h.valorMercado).concat([j.stats.valorMercado||0]).filter(v=>v>0);
@@ -15303,22 +15461,6 @@ function renderMovilContenido(c, j){
       row.appendChild(svgWrap.firstElementChild);
       cardVM.appendChild(row);
       scroll.appendChild(cardVM);
-
-      const anual = telDesgloseAnual(j);
-      if(anual.movimientos.length){
-        scroll.appendChild(el('p','tel-bank-card-title', `Balance de la temporada ${temporadaAAnoCompleto(S.temporada)}`)).style.margin = '0 2px 8px';
-        const splitAnual = el('div','tel-bank-split');
-        const cardInA = el('div','ingresos tel-split-card');
-        cardInA.appendChild(el('div','lbl','Ingresos'));
-        cardInA.appendChild(el('div','amt', '+'+formatearEuros(anual.totalIn)));
-        const cardOutA = el('div','gastos tel-split-card');
-        cardOutA.appendChild(el('div','lbl','Gastos'));
-        cardOutA.appendChild(el('div','amt', '−'+formatearEuros(anual.totalOut)));
-        splitAnual.appendChild(cardInA); splitAnual.appendChild(cardOutA);
-        scroll.appendChild(splitAnual);
-        scroll.appendChild(el('p','tel-bank-neto '+(anual.neto>=0?'pos':'neg'),
-          `Balance neto de la temporada: ${anual.neto>=0?'+':''}${formatearEuros(anual.neto)}`));
-      }
 
       if(huboPaso){
         scroll.appendChild(el('p','tel-bank-card-title','Este paso')).style.margin = '0 2px 8px';
@@ -15373,6 +15515,39 @@ function renderMovilContenido(c, j){
     header.appendChild(back);
     header.appendChild(el('span','tel-title','WhatsApp'));
     c.appendChild(header);
+
+    if(S.movilWhatsappTab === undefined) S.movilWhatsappTab = 'mensajes';
+    const subTabs = el('div','tel-bank-tabs');
+    const tabMsj = document.createElement('button'); tabMsj.className='tel-bank-tab'+(S.movilWhatsappTab!=='contactos'?' active':''); tabMsj.textContent='Mensajes';
+    const tabCont = document.createElement('button'); tabCont.className='tel-bank-tab'+(S.movilWhatsappTab==='contactos'?' active':''); tabCont.textContent='Contactos';
+    tabMsj.onclick = ()=>{ S.movilWhatsappTab='mensajes'; pintar(); };
+    tabCont.onclick = ()=>{ S.movilWhatsappTab='contactos'; pintar(); };
+    subTabs.appendChild(tabMsj); subTabs.appendChild(tabCont);
+    c.appendChild(subTabs);
+
+    if(S.movilWhatsappTab === 'contactos'){
+      // Agenda completa: todo el mundo que aparece en la partida, no solo con quien puedes
+      // mandar mensajes de verdad (telContactosDe es un subconjunto de esto) — aquí interesa ver
+      // de un vistazo quién es cada uno y cómo va la relación, no responder nada.
+      const conocidos = telTodosLosConocidos(j);
+      if(!conocidos.length){
+        c.appendChild(el('p',null,'Todavía no conoces a nadie fuera del terreno de juego.')).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);padding:10px 4px;";
+      }
+      conocidos.forEach(p=>{
+        const fila = el('div','tel-contact');
+        fila.style.cursor = 'default';
+        fila.innerHTML = `
+          <span class="tel-avatar" style="background:${p.color}">${telIniciales(p.nombre)}</span>
+          <span class="tel-contact-body">
+            <span class="tel-contact-top"><span class="tel-contact-name">${p.nombre}</span></span>
+            <span class="tel-contact-sub">${p.rol}</span>
+          </span>
+          ${p.relacion ? `<span class="tel-relacion-tag ${p.relacion.clase}">${p.relacion.texto}</span>` : ''}`;
+        c.appendChild(fila);
+      });
+      return;
+    }
+
     const contactos = telContactosDe(j);
     const grupos = telGruposDe(j);
     if(!contactos.length && !grupos.length){
@@ -15624,10 +15799,16 @@ function renderMovilContenido(c, j){
     back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
     header.appendChild(el('span','tel-title','Redes'));
-    const btnComponer = document.createElement('button'); btnComponer.className='tel-back-btn'; btnComponer.innerHTML=TEL_ICONO_LAPIZ;
+    // Publicar solo tiene sentido si de verdad ha pasado algo — un título, una distinción
+    // individual, una lesión en curso — no como botón siempre a mano (ver
+    // telHayAlgoDestacableParaPublicar). Deshabilitado en vez de escondido, con el motivo en el
+    // title, mismo criterio que el resto de botones bloqueados del juego.
+    const puedePublicar = telHayAlgoDestacableParaPublicar(j);
+    const btnComponer = document.createElement('button'); btnComponer.className='tel-back-btn'+(puedePublicar?'':' deshabilitado'); btnComponer.innerHTML=TEL_ICONO_LAPIZ;
     btnComponer.style.marginLeft = 'auto';
-    btnComponer.title = 'Publicar algo';
-    btnComponer.onclick = ()=>{ S.movilVista = 'redesComponer'; pintar(); };
+    btnComponer.title = puedePublicar ? 'Publicar algo' : 'No ha pasado nada destacable últimamente';
+    btnComponer.disabled = !puedePublicar;
+    btnComponer.onclick = ()=>{ if(!puedePublicar) return; S.movilVista = 'redesComponer'; pintar(); };
     header.appendChild(btnComponer);
     c.appendChild(header);
     // Coherencia narrativa: si el suceso activo va de algo viral en redes, sus opciones reales se
@@ -15697,10 +15878,14 @@ function renderMovilContenido(c, j){
   }
 
   else if(vista === 'redesComponer'){
+    // Red de seguridad: si se llega aquí sin nada destacable (estado viejo, ruta directa), no
+    // hay nada que publicar — de vuelta al feed en vez de ofrecer solo el relleno genérico.
+    if(!telHayAlgoDestacableParaPublicar(j)){ S.movilVista = 'redes'; pintar(); return; }
     // Publicar algo tú, no un feed que solo aparece solo: unas cuantas sugerencias con contexto
     // real de la partida (título recién ganado, MVP, pareja...) cuando las hay, más un puñado
     // genéricas de repuesto, y la opción de escribir la propia con mostrarPromptTexto. Tocar una
-    // sugerencia la publica directamente — elegirla YA es la decisión de publicar.
+    // sugerencia la publica directamente — elegirla YA es la decisión de publicar (que ahora pasa
+    // primero por 'redesPublicando', ver más abajo).
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
     back.onclick = ()=>{ S.movilVista = 'redes'; pintar(); };
@@ -15727,6 +15912,21 @@ function renderMovilContenido(c, j){
       mostrarPromptTexto('¿Qué quieres publicar?', '', (texto)=> telPublicarPost(texto));
     };
     c.appendChild(btnPropia);
+  }
+
+  else if(vista === 'redesPublicando'){
+    // Pantalla transitoria mientras telPublicarPost espera (ver setTimeout, 1300ms): barra de
+    // carga que se anima de 0 a 100% arrancando la transición CSS un tick después de pintar (el
+    // primer render tiene que salir con width:0 de verdad, si no la transición no tiene "antes"
+    // desde el que animar), igual que .roll-result.show. Sin cabecera ni botón atrás a propósito
+    // — es un instante, no una pantalla en la que quedarse ni desde la que navegar.
+    const wrap = el('div','tel-publicando');
+    wrap.innerHTML = `
+      <div class="icono">${ICONOS_SVG.estrella}</div>
+      <div class="texto">Publicando…</div>
+      <div class="barra-track"><div class="barra-fill" id="tel-barra-publicar"></div></div>`;
+    c.appendChild(wrap);
+    setTimeout(()=>{ const f = document.getElementById('tel-barra-publicar'); if(f) f.style.width = '100%'; }, 30);
   }
 
   else if(vista === 'calendario'){
@@ -16101,14 +16301,21 @@ SCREENS.logros = function(){
   if(S.logrosVistaActiva === 'cromos'){
     pintarVistaCromos(c);
   }else{
+    // Los recién conseguidos se capturan ANTES de marcarLogrosVistos() (que los marca vistos de
+    // inmediato, al entrar en esta misma pantalla) para poder seguir señalándolos con un puntito
+    // en su propia fila durante esta visita — si se mirara .visto después de marcarlos, nunca se
+    // vería cuál acababas de desbloquear.
+    const guardadosAntes = cargarLogrosGuardados();
+    const idsRecienConseguidos = new Set(Object.keys(guardadosAntes).filter(id=>!guardadosAntes[id].visto));
     marcarLogrosVistos();
-    pintarVistaLogros(c);
+    pintarVistaLogros(c, idsRecienConseguidos);
   }
 
   app.appendChild(c);
 };
 
-function pintarVistaLogros(c){
+function pintarVistaLogros(c, idsRecienConseguidos){
+  idsRecienConseguidos = idsRecienConseguidos || new Set();
   const guardados = cargarLogrosGuardados();
   const total = LOGROS.length;
   const conseguidos = LOGROS.filter(l=>guardados[l.id]).length;
@@ -16127,12 +16334,14 @@ function pintarVistaLogros(c){
     LOGROS.filter(l=> S.logrosCategoriaActiva==='todos' || l.cat===S.logrosCategoriaActiva).forEach(l=>{
       const g = guardados[l.id];
       const fila = el('div','logro-fila '+(g?'conseguido':'bloqueado'));
-      fila.appendChild(el('div','logro-ico', g ? l.icono : '🔒'));
+      const icoHtml = (g ? l.icono : '🔒') + (g && idsRecienConseguidos.has(l.id) ? '<span class="tb-dot-logros"></span>' : '');
+      fila.appendChild(el('div','logro-ico', icoHtml));
       const txt = el('div','logro-txt');
       txt.appendChild(el('div','logro-nombre', l.nombre));
       txt.appendChild(el('div','logro-desc', g ? l.desc : '???'));
       if(g) txt.appendChild(el('div','logro-meta', `Conseguido · Temp. ${g.temporada}`));
       fila.appendChild(txt);
+      if(g) fila.onclick = ()=> abrirZoomLogro(l, g);
       listaLogros.appendChild(fila);
     });
   }
@@ -16145,6 +16354,32 @@ function pintarVistaLogros(c){
   c.appendChild(tabs);
   pintarListaLogros();
   c.appendChild(listaLogros);
+
+  const backdrop = el('div','logro-zoom-backdrop'); backdrop.id = 'logro-zoom-backdrop';
+  backdrop.onclick = (e)=>{ if(e.target === backdrop) cerrarZoomLogro(); };
+  const zoomCard = el('div','logro-zoom-card'); zoomCard.id = 'logro-zoom-card';
+  backdrop.appendChild(zoomCard);
+  c.appendChild(backdrop);
+}
+// Zoom simple (fundido + escala desde el centro) al tocar un logro ya conseguido — ver
+// .logro-zoom-backdrop. No es el FLIP-desde-la-fila de los cromos (ver abrirZoomCromo): un logro
+// no tiene una cara trasera de curiosidades que mostrar, así que no hacía falta esa complejidad.
+function abrirZoomLogro(l, g){
+  const backdrop = document.getElementById('logro-zoom-backdrop');
+  const card = document.getElementById('logro-zoom-card');
+  if(!backdrop || !card) return;
+  card.innerHTML = `
+    <button class="cerrar" type="button">✕</button>
+    <div class="ico-grande">${l.icono}</div>
+    <div class="nombre">${l.nombre}</div>
+    <div class="desc">${l.desc}</div>
+    <div class="meta">Conseguido · Temporada ${g.temporada}</div>`;
+  card.querySelector('.cerrar').onclick = cerrarZoomLogro;
+  backdrop.classList.add('activo');
+}
+function cerrarZoomLogro(){
+  const backdrop = document.getElementById('logro-zoom-backdrop');
+  if(backdrop) backdrop.classList.remove('activo');
 }
 
 function pintarVistaCromos(c){
@@ -17580,27 +17815,20 @@ SCREENS.ofertas = function(){
   c.appendChild(crearEyebrow('Pretemporada'));
   c.appendChild(el('h2',null,'Ofertas de otros clubes'));
 
-  // Referencia rápida de lo que ya tienes, para comparar antes de negociar nada — mismas 4
-  // claves que cada tarjeta de oferta (Salario/Contrato/Objetivo/Minutos), en pequeño. No tiene
-  // sentido si estás sin equipo (no hay contrato/objetivo/rol reales con los que comparar).
+  // Referencia rápida de lo que ya tienes, para comparar antes de negociar nada — sin el nombre
+  // del club (ya se ve en la topbar) para poder ir directa a las 4 cifras con icono+abreviatura,
+  // en una sola línea. No tiene sentido si estás sin equipo (no hay contrato/objetivo/rol reales
+  // con los que comparar).
   if(!j.club.sinEquipo){
-    const actual = el('div');
-    actual.style.cssText = 'background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px 6px;margin-bottom:14px;';
-    actual.appendChild(el('div',null,`Tu club actual: <b style="color:var(--ink);">${j.club.nombre}</b>`)).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--ink-soft);";
-    const filaActual = el('div','cromo-info-bar');
-    filaActual.style.cssText = 'margin:6px 0 0;padding:8px 0 0;border-top:none;border-bottom:none;';
+    const actual = el('div','oferta-actual-resumen');
     [
-      ['Salario', `${formatearDinero(j.contrato.sueldoAnual)}/temp.`],
-      ['Contrato', `${j.contrato.duracionTemporadas} ${j.contrato.duracionTemporadas===1?'año':'años'}`],
-      ['Objetivo', j.club.objetivoActual ? cap(j.club.objetivoActual.texto) : '—'],
-      ['Minutos', calcularRolTemporada(j).label]
-    ].forEach(([k,v])=>{
-      const item = el('div','item');
-      item.appendChild(el('span','k', k));
-      item.appendChild(el('span','v', v));
-      filaActual.appendChild(item);
+      ['dinero', `${formatearDinero(j.contrato.sueldoAnual)}/temp.`],
+      ['calendario', `${j.contrato.duracionTemporadas} ${j.contrato.duracionTemporadas===1?'año':'años'}`],
+      ['objetivo', j.club.objetivoActual ? (ABREVIATURA_OBJETIVO[j.club.objetivoActual.tipo] || cap(j.club.objetivoActual.texto)) : '—'],
+      ['camiseta', calcularRolTemporada(j).corto]
+    ].forEach(([icono,texto])=>{
+      actual.appendChild(el('span','oferta-actual-item', `${iconoInline(icono,13)}${texto}`));
     });
-    actual.appendChild(filaActual);
     c.appendChild(actual);
   }
 
@@ -18558,9 +18786,10 @@ function telGastoAnualServicios(j){
 // Acordeón propio (no comparte estado con el de SCREENS.gastos, para no desincronizar qué
 // categoría ves abierta en cada pantalla).
 function renderizarPlantillaServicios(j, contenedor){
-  const saldo = el('div','tienda-online-saldo');
-  saldo.innerHTML = `<span class="lbl">Tu saldo</span><span class="val">${formatearEuros(j.stats.dinero||0)}</span>`;
-  contenedor.appendChild(saldo);
+  const proyeccion = calcularBalanceProyectadoTemporada(j);
+  const balance = el('div','staff-balance '+(proyeccion.neto>=0?'pos':'neg'));
+  balance.innerHTML = `<span class="lbl">Balance estimado a fin de temporada</span><span class="val">${proyeccion.neto>=0?'+':''}${formatearEuros(proyeccion.neto)}</span>`;
+  contenedor.appendChild(balance);
 
   const gastoAnual = telGastoAnualServicios(j);
   const resumen = el('div','staff-resumen');
@@ -18810,10 +19039,6 @@ const TEL_CATS_TIENDA = [
 ];
 function renderizarTiendaOnline(j, contenedor){
   const filtro = S.tiendaFiltro || 'todo';
-
-  const saldo = el('div','tienda-online-saldo');
-  saldo.innerHTML = `<span class="lbl">Tu saldo</span><span class="val">${formatearEuros(j.stats.dinero||0)}</span>`;
-  contenedor.appendChild(saldo);
 
   const cats = el('div','tienda-cats');
   const chipTodo = document.createElement('button');
