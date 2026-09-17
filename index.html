@@ -185,8 +185,36 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    cualquier punto de la cápsula (los propios atributos o el icono) lleva a Entrenamiento. */
 .topbar-attrs-btn{ display:flex; align-items:center; gap:7px; background:none; border:1px solid var(--line); border-radius:8px; padding:3px 8px; cursor:pointer; flex-shrink:0; }
 .topbar-attrs-btn:hover{ border-color:var(--gold-dim); }
-.topbar-entreno-ic{ width:15px; height:15px; color:var(--gold); flex-shrink:0; }
-.topbar-entreno-ic svg{ width:100%; height:100%; display:block; }
+/* Media de los 6 atributos, al final de la cápsula, separada por una línea y en dorado para
+   distinguirla como el resumen del resto (antes había un icono de Entrenamiento suelto aquí). */
+.topbar-attr-media{ padding-left:7px; margin-left:1px; border-left:1px solid var(--line); }
+.topbar-attr-media .k{ color:var(--gold); }
+.topbar-attr-media .v{ color:var(--gold); font-weight:700; }
+
+/* Toolbar plegable de "ventajas" (representante, y cualquier otra caja que lo necesite) */
+.toolbar-ventajas-btn{
+  display:flex; align-items:center; justify-content:center; gap:6px; align-self:flex-start;
+  background:none; border:1px solid var(--line); border-radius:20px; padding:5px 12px;
+  font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:600; color:var(--gold);
+  cursor:pointer;
+}
+.toolbar-ventajas-btn:hover{ border-color:var(--gold-dim); }
+.toolbar-ventajas-btn .chevron{ font-size:9px; }
+
+/* App Estadísticas del móvil: Representante y Patrocinio a mitad de ancho cada uno (antes
+   apilados) y estados vacíos de las pestañas Club/Títulos cuando no hay nada que mostrar. */
+.tel-stats-mitad-mitad{ display:flex; gap:10px; margin-top:10px; align-items:stretch; }
+.tel-stats-mitad-mitad > *{ flex:1; min-width:0; }
+.caja-representante-vacia{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+  background:rgba(255,255,255,0.03); border:1px solid var(--line); border-radius:12px; padding:16px 14px;
+  text-align:center;
+}
+.tel-stats-tab-cont{ margin-top:4px; }
+.tel-stats-tab-vacio{
+  padding:22px 4px; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:13px;
+  color:var(--ink-soft); font-style:italic;
+}
 /* Menú hamburguesa (Logros y Cromos / Ajustes), en vez del icono de trofeo suelto de antes —
    ver S._topbarMenuAbierto en topbar(). Mismo aspecto de cápsula con borde que el resto de
    botones de la topbar. */
@@ -12292,7 +12320,15 @@ function topbar(titulo){
       attrRow.appendChild(item);
     });
     attrBtn.appendChild(attrRow);
-    attrBtn.appendChild(el('span','topbar-entreno-ic', TEL_ICONO_ENTRENAMIENTO));
+    {
+      // Media de los 6 atributos, en vez del icono de Entrenamiento suelto — mismo golpe de
+      // vista que un atributo más, pero en dorado para que se note que es el resumen del resto.
+      const atr = S.jugador.atributos;
+      const media = Math.round((atr.fisico + atr.velocidad + atr.tiro + atr.regate + atr.pase + atr.desmarque) / 6);
+      const mediaItem = el('span','topbar-attr-item topbar-attr-media');
+      mediaItem.innerHTML = `<span class="k">MEDIA</span><span class="v">${media}</span>`;
+      attrRow.appendChild(mediaItem);
+    }
     attrBtn.onclick = ()=>{
       S.movilVista = 'entrenamiento';
       S.movilAbierto = true;
@@ -12730,18 +12766,39 @@ function cajaRepresentante(j){
   const nivelServicio = TIENDA_SERVICIOS.find(s=>s.familia==='representante').niveles.find(n=>n.comisionPct===j.representante.comision);
   const beneficio = beneficioRepresentante(j);
   const caja = document.createElement('div');
-  caja.style.cssText = 'display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;';
-  caja.innerHTML = `
+  caja.className = 'caja-representante';
+  caja.style.cssText = 'display:flex;flex-direction:column;gap:9px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;';
+  const cabecera = document.createElement('div');
+  cabecera.style.cssText = 'display:flex;align-items:center;gap:12px;';
+  cabecera.innerHTML = `
     ${iconoInline('agente',22)}
     <div style="flex:1;min-width:0;">
       <div style="font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;">REPRESENTANTE</div>
       <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-top:2px;">${j.representante.nombre || 'Agencia sin nombre'}</div>
-      ${j.representante.agente ? `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--gold);margin-top:1px;">Tu agente: ${j.representante.agente.nombre}</div>` : ''}
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.6;">
-        ${nivelServicio ? Object.entries(nivelServicio.efectoTemporada).map(([k,v])=>`+${v} ${NICE_STAT[k]||k}/temp.`).join(' · ') : ''}<br>
-        +${beneficio.medidorBonus} disposición del club al negociar · cláusula de rescisión reducida al ${Math.round(beneficio.penalizacionClausula*100)}%
-      </div>
     </div>`;
+  caja.appendChild(cabecera);
+
+  // Ventajas detrás de un toolbar plegable en vez de siempre visibles: la caja ahora comparte
+  // fila al 50% con Patrocinio (ver seccionEstadisticas / vista 'estadisticas'), así que el
+  // texto de efectos + disposición + cláusula ya no cabe cómodo sin envolver mal.
+  const ventajas = [];
+  if(nivelServicio) Object.entries(nivelServicio.efectoTemporada).forEach(([k,v]) => ventajas.push(`+${v} ${NICE_STAT[k]||k}/temp.`));
+  ventajas.push(`+${beneficio.medidorBonus} disposición del club al negociar`);
+  ventajas.push(`Cláusula de rescisión reducida al ${Math.round(beneficio.penalizacionClausula*100)}%`);
+  const abierto = !!S._repVentajasAbiertas;
+
+  const toggle = document.createElement('button');
+  toggle.className = 'toolbar-ventajas-btn';
+  toggle.innerHTML = `<span>${abierto ? 'Ocultar ventajas' : 'Mostrar ventajas'}</span><span class="chevron">${abierto ? '▴' : '▾'}</span>`;
+  toggle.onclick = (e)=>{ e.stopPropagation(); S._repVentajasAbiertas = !abierto; pintar(); };
+  caja.appendChild(toggle);
+
+  if(abierto){
+    const lista = document.createElement('div');
+    lista.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:11.5px;color:var(--ink-soft);line-height:1.7;";
+    lista.innerHTML = ventajas.map(v=>`· ${v}`).join('<br>');
+    caja.appendChild(lista);
+  }
   return caja;
 }
 // Mismo badge de convocatoria que se ve justo debajo de País/Edad/Demarcación en la ficha del
@@ -12759,12 +12816,14 @@ function badgeConvocatoriaSeleccion(j){
   if(seguimiento) return el('div','badge', `${iconoInline('lupa',11)}En el radar de la selección`);
   return el('div','badge', 'Sin convocatoria con la selección todavía');
 }
-function seccionEstadisticas(j){
-  const secStats = seccionPlegable('ESTADÍSTICAS','estadisticas');
-  if(S.fichaAcordeon.estadisticas){
+// Las tres piezas de ESTADÍSTICAS (CLUBES / SELECCIÓN / PALMARÉS) viven en funciones propias que
+// reciben el contenedor donde pintarse (`cont`) — así las reutiliza tal cual tanto
+// seccionEstadisticas (el acordeón de siempre en la ficha de Jugador) como los tabs Club/Títulos
+// de la app Estadísticas del móvil (ver vista 'estadisticas'), sin duplicar el HTML.
+function bloqueClubesHistorial(cont, j){
     const historial = j.historialTemporadas || [];
     if(historial.length){
-      secStats.appendChild(el('div','stat-section-titulo','CLUBES'));
+      cont.appendChild(el('div','stat-section-titulo','CLUBES'));
       const tabla = el('div','historial-temporadas');
       const colHeads = el('div','trayectoria-grid trayectoria-col-heads');
       colHeads.innerHTML = `<span></span><span></span><span>${ICONOS_SVG.camiseta}</span><span>${ICONOS_SVG.tiro}</span><span>${ICONOS_SVG.pase}</span><span>${ICONOS_SVG.estrella}</span>`;
@@ -12846,15 +12905,17 @@ function seccionEstadisticas(j){
       statsTotal.appendChild(el('span','dato'+(totTrofeos>0?' oro':''), totTrofeos>0 ? `${iconoInline('estrella',12)}${totTrofeos}` : `${iconoInline('estrella',12)}—`));
       filaTotal.appendChild(statsTotal);
       tabla.appendChild(filaTotal);
-      secStats.appendChild(tabla);
+      cont.appendChild(tabla);
     }
-
+}
+function bloqueSeleccionHistorial(cont, j){
+    const historial = j.historialTemporadas || [];
     if(j.tuvoPrimeraConvocatoriaAbsoluta || j.tuvoPrimeraConvocatoriaSub21 || j.tuvoPrimeraConvocatoriaSub23 || (j.titulosSeleccion && j.titulosSeleccion.length)){
       const tituloSeleccion = document.createElement('div');
       tituloSeleccion.className = 'stat-section-titulo';
       tituloSeleccion.style.marginTop = historial.length ? '16px' : '0';
       tituloSeleccion.textContent = 'SELECCIÓN';
-      secStats.appendChild(tituloSeleccion);
+      cont.appendChild(tituloSeleccion);
       const bandera = banderaPais('España');
       const tablaSel = el('div','historial-temporadas');
       tablaSel.appendChild(el('div','historial-club-header', `Selección española ${bandera}`));
@@ -12909,7 +12970,7 @@ function seccionEstadisticas(j){
           });
         }
       }
-      secStats.appendChild(tablaSel);
+      cont.appendChild(tablaSel);
     } else {
       // Todavía sin convocatoria de ningún tipo: si las condiciones reales están cerca (sin llegar
       // a cumplirse), un aviso de que el seleccionador ya se está fijando en ti — ver
@@ -12920,13 +12981,14 @@ function seccionEstadisticas(j){
         tituloSeleccion.className = 'stat-section-titulo';
         tituloSeleccion.style.marginTop = historial.length ? '16px' : '0';
         tituloSeleccion.textContent = 'SELECCIÓN';
-        secStats.appendChild(tituloSeleccion);
+        cont.appendChild(tituloSeleccion);
         const avisoSeguimiento = el('div','historial-temporadas');
         avisoSeguimiento.innerHTML = `<div style="padding:10px 2px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;">${iconoInline('lupa',14)}${seguimiento.texto}</div>`;
-        secStats.appendChild(avisoSeguimiento);
+        cont.appendChild(avisoSeguimiento);
       }
     }
-
+}
+function bloquePalmares(cont, j){
     const titulosClub = [];
     (j.trayectoria||[]).forEach(etapa=>{
       (etapa.titulos||[]).forEach(t=>{
@@ -12939,7 +13001,7 @@ function seccionEstadisticas(j){
       tituloPalmares.className = 'stat-section-titulo';
       tituloPalmares.style.marginTop = '16px';
       tituloPalmares.textContent = 'PALMARÉS';
-      secStats.appendChild(tituloPalmares);
+      cont.appendChild(tituloPalmares);
 
       function filaPalmares(entrada){
         const fila = document.createElement('div');
@@ -12957,17 +13019,24 @@ function seccionEstadisticas(j){
         const subClub = document.createElement('div');
         subClub.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;margin:8px 0 4px;";
         subClub.textContent = 'CLUBES';
-        secStats.appendChild(subClub);
-        titulosClub.slice().reverse().forEach(t=>secStats.appendChild(filaPalmares(t)));
+        cont.appendChild(subClub);
+        titulosClub.slice().reverse().forEach(t=>cont.appendChild(filaPalmares(t)));
       }
       if(titulosNacionales.length){
         const subSel = document.createElement('div');
         subSel.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;margin:12px 0 4px;";
         subSel.textContent = 'SELECCIÓN';
-        secStats.appendChild(subSel);
-        titulosNacionales.slice().reverse().forEach(t=>secStats.appendChild(filaPalmares(t)));
+        cont.appendChild(subSel);
+        titulosNacionales.slice().reverse().forEach(t=>cont.appendChild(filaPalmares(t)));
       }
     }
+}
+function seccionEstadisticas(j){
+  const secStats = seccionPlegable('ESTADÍSTICAS','estadisticas');
+  if(S.fichaAcordeon.estadisticas){
+    bloqueClubesHistorial(secStats, j);
+    bloqueSeleccionHistorial(secStats, j);
+    bloquePalmares(secStats, j);
   }
   return secStats;
 }
@@ -14397,8 +14466,8 @@ const TEL_DOCK_APPS = [
   { id:'whatsapp', nombre:'WhatsApp', clase:'whatsapp', icono:TEL_ICONO_WHATSAPP, ir:()=>{ S.movilVista='chatlist'; pintar(); } },
   { id:'redes', nombre:'RRSS', clase:'redes', icono:TEL_ICONO_REDES, ir:()=>{ S.movilVista='redes'; pintar(); } },
   // Entrenamiento se quitó del dock: ahora se accede desde la topbar, junto a los atributos del
-  // jugador (ver topbar()) — TEL_ICONO_ENTRENAMIENTO sigue viviendo aquí porque esa cápsula lo
-  // reutiliza directamente. En su lugar en el dock: Estadísticas (estilo Transfermarkt).
+  // jugador (ver topbar()), pulsando la cápsula de atributos+media. En su lugar en el dock:
+  // Estadísticas (estilo Transfermarkt).
   { id:'estadisticas', nombre:'Estadísticas', clase:'estadisticas', icono:TEL_ICONO_ESTADISTICAS, ir:()=>{ S.movilVista='estadisticas'; pintar(); } },
   { id:'economia', nombre:'Economía', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ S.movilVista='economia'; pintar(); } },
   // 'ruleta' directo (primera pestaña del submenú), salvo menor de edad: SCREENS.casino es quien
@@ -14518,6 +14587,18 @@ function telAppTabsCasino(activa){
   [['ruleta','Ruleta'],['tragaperras','Tragaperras'],['blackjack','Blackjack']].forEach(([id,nombre])=>{
     const tab = document.createElement('button'); tab.className='tel-app-tab'+(activa===id?' active':''); tab.textContent=nombre;
     tab.onclick = ()=>{ telAbrirPantallaReal(id); };
+    appTabs.appendChild(tab);
+  });
+  return appTabs;
+}
+// Mismo patrón que telAppTabsEconomia/telAppTabsCasino, para la app Estadísticas: aquí no hay
+// pantallas reales detrás (todo es contenido nativo del móvil), así que el cambio de pestaña solo
+// guarda S.telStatsTab y repinta — ver vista 'estadisticas'.
+function telAppTabsEstadisticas(activa){
+  const appTabs = el('div','tel-app-tabs');
+  [['jugador','Jugador'],['club','Club'],['stats','Stats'],['titulos','Títulos']].forEach(([id,nombre])=>{
+    const tab = document.createElement('button'); tab.className='tel-app-tab'+(activa===id?' active':''); tab.textContent=nombre;
+    tab.onclick = ()=>{ S.telStatsTab = id; pintar(); };
     appTabs.appendChild(tab);
   });
   return appTabs;
@@ -15887,19 +15968,61 @@ function renderMovilContenido(c, j){
     ficha.appendChild(facts);
     c.appendChild(ficha);
 
-    // Representante, Patrocinador y Selección: las mismas cajas/badge que ya se ven en la ficha
-    // del Jugador (ver cajaRepresentante/cajaPatrocinio/badgeConvocatoriaSeleccion, extraídas de
-    // SCREENS.tabJugador para poder reutilizarlas aquí tal cual, mismos datos).
-    c.appendChild(badgeConvocatoriaSeleccion(j)).style.cssText = 'display:flex;justify-content:center;margin:10px 0 0;';
-    const cajaRep = cajaRepresentante(j);
-    if(cajaRep) c.appendChild(cajaRep);
-    c.appendChild(cajaPatrocinio(j));
+    // Submenú Jugador/Club/Stats/Títulos: reparte en pestañas lo que antes era una única
+    // pantalla larga (mismo patrón que telAppTabsEconomia/telAppTabsCasino).
+    const tabStats = S.telStatsTab || 'jugador';
+    c.appendChild(telAppTabsEstadisticas(tabStats));
 
-    // Valor de mercado y estadísticas de carrera: MISMAS funciones que usa SCREENS.tabJugador
-    // (graficaValorMercado/seccionEstadisticas), a petición expresa — nada de cifras o layout
-    // propios que puedan desincronizarse de lo que ya se ve en la ficha del Jugador.
-    c.appendChild(graficaValorMercado(j));
-    c.appendChild(seccionEstadisticas(j));
+    if(tabStats === 'jugador'){
+      // Representante, Patrocinador y Selección: las mismas cajas/badge que ya se ven en la ficha
+      // del Jugador (ver cajaRepresentante/cajaPatrocinio/badgeConvocatoriaSeleccion, extraídas de
+      // SCREENS.tabJugador para poder reutilizarlas aquí tal cual, mismos datos). Representante y
+      // Patrocinio van a mitad de ancho cada uno en vez de apilados, para aprovechar el ancho.
+      c.appendChild(badgeConvocatoriaSeleccion(j)).style.cssText = 'display:flex;justify-content:center;margin:10px 0 0;';
+      const fila5050 = el('div','tel-stats-mitad-mitad');
+      const cajaRep = cajaRepresentante(j) || el('div','caja-representante-vacia', `${iconoInline('agente',22)}<div style="font-family:'Space Grotesk',sans-serif;font-size:12.5px;color:var(--ink-soft);font-style:italic;">Sin representante por ahora</div>`);
+      const cajaPat = cajaPatrocinio(j);
+      cajaRep.style.marginTop = '0'; cajaPat.style.marginTop = '0';
+      fila5050.appendChild(cajaRep);
+      fila5050.appendChild(cajaPat);
+      c.appendChild(fila5050);
+    } else if(tabStats === 'club'){
+      // Historial temporada a temporada por club — MISMA función que seccionEstadisticas usa en
+      // la ficha de Jugador (bloqueClubesHistorial), sin duplicar el HTML.
+      const secClub = el('div','tel-stats-tab-cont');
+      bloqueClubesHistorial(secClub, j);
+      if(!secClub.children.length) secClub.innerHTML = `<div class="tel-stats-tab-vacio">Todavía no tienes temporadas registradas.</div>`;
+      c.appendChild(secClub);
+    } else if(tabStats === 'stats'){
+      // Valor de mercado: MISMA función que usa SCREENS.tabJugador (graficaValorMercado), a
+      // petición expresa — nada de cifras o layout propios que puedan desincronizarse de lo que
+      // ya se ve en la ficha del Jugador. Debajo, totales de carrera + el historial con la
+      // selección (bloqueSeleccionHistorial, misma pieza que seccionEstadisticas).
+      c.appendChild(graficaValorMercado(j));
+      const historialCarrera = j.historialTemporadas || [];
+      const notasCarrera = historialCarrera.filter(h=>h.nota!=null).map(h=>h.nota);
+      const mediaNotaCarrera = notasCarrera.length ? formatearNumero(notasCarrera.reduce((s,n)=>s+n,0)/notasCarrera.length) : '—';
+      const totalesTit = el('div','stat-section-titulo','TOTALES DE CARRERA');
+      totalesTit.style.marginTop = '16px';
+      c.appendChild(totalesTit);
+      const totalesRow = el('div','club-stats');
+      [[j.carrera.partidos||0,'PJ'],[j.carrera.goles||0,'Goles'],[j.carrera.asistencias||0,'Asist.'],[mediaNotaCarrera,'Nota']].forEach(([num,lbl])=>{
+        const st = el('div','stat');
+        st.appendChild(el('b',null,num));
+        st.appendChild(el('span',null,lbl));
+        totalesRow.appendChild(st);
+      });
+      c.appendChild(totalesRow);
+      const secSel = el('div','tel-stats-tab-cont');
+      secSel.style.marginTop = '6px';
+      bloqueSeleccionHistorial(secSel, j);
+      if(secSel.children.length) c.appendChild(secSel);
+    } else if(tabStats === 'titulos'){
+      const secTit = el('div','tel-stats-tab-cont');
+      bloquePalmares(secTit, j);
+      if(!secTit.children.length) secTit.innerHTML = `<div class="tel-stats-tab-vacio">Todavía sin títulos que enseñar.</div>`;
+      c.appendChild(secTit);
+    }
   }
 
   else if(vista === 'economia'){
@@ -18379,7 +18502,7 @@ SCREENS.ofertas = function(){
   if(j.edad >= 42){ S.screen = 'retiro'; return SCREENS.retiro(); }
   let respondiendo = false; // evita que un doble toque dispare dos veces "Negociar"/"Seguir" (260ms de transición)
   topbar("Mercado de fichajes");
-  const c = el('div','card');
+  const c = el('div','cromo-plano');
   c.appendChild(crearEyebrow('Pretemporada'));
   c.appendChild(el('h2',null,'Ofertas de otros clubes'));
 
