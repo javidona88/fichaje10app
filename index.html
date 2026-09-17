@@ -1129,6 +1129,17 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .logro-overlay-desc{ font-family:'Space Grotesk',sans-serif; font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:20px; }
 .logro-overlay-cerrar{ width:100%; padding:11px; border-radius:10px; border:none; background:var(--gold); color:#1a1408; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; cursor:pointer; }
 
+/* Aviso de crisis de confianza (ver construirOverlayCrisis) — mismo patrón que .logro-backdrop/
+   .logro-overlay pero en rojo, y se reconstruye en cada pintar() mientras dure la crisis en vez
+   de ser un aviso puntual que se descarta solo. */
+.crisis-overlay-backdrop{ position:fixed; inset:0; background:rgba(10,11,16,0); z-index:70; opacity:0; pointer-events:none; transition:background .3s ease, opacity .3s ease; }
+.crisis-overlay-backdrop.show{ background:rgba(10,11,16,.88); opacity:1; pointer-events:auto; backdrop-filter:blur(3px); }
+.crisis-overlay{ position:fixed; inset:0; z-index:71; display:flex; align-items:center; justify-content:center; padding:20px; pointer-events:none; }
+.crisis-overlay-card{ width:min(360px,92vw); background:var(--panel); border:1px solid rgba(217,73,92,.5); border-radius:20px; padding:26px 22px; box-shadow:0 24px 60px rgba(0,0,0,.6); transform:scale(.9) translateY(10px); opacity:0; transition:transform .3s cubic-bezier(.2,1.4,.4,1), opacity .25s ease; pointer-events:auto; }
+.crisis-overlay.show .crisis-overlay-card{ transform:scale(1) translateY(0); opacity:1; }
+.crisis-overlay-eyebrow{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--red); margin-bottom:8px; }
+.crisis-overlay-desc{ font-family:'Space Grotesk',sans-serif; font-size:13px; color:var(--ink-soft); line-height:1.55; }
+
 .logro-toast{ position:fixed; top:16px; right:16px; width:min(300px,calc(100% - 32px)); z-index:72; transform:translateX(130%); transition:transform .4s cubic-bezier(.16,1,.3,1); }
 .logro-toast.show{ transform:translateX(0); }
 .logro-toast-card{ position:relative; overflow:hidden; background:var(--panel); border:1px solid rgba(212,175,55,.5); border-radius:13px; padding:12px; display:flex; gap:11px; align-items:center; box-shadow:0 14px 34px rgba(0,0,0,.5); cursor:pointer; }
@@ -1341,9 +1352,9 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    degradados por app. Antes era justo al revés en escala de grises (blanco y negro) por defecto y
    a color solo con novedad — pero al pasar los degradados de base a pastel (ver .tel-icon.*), el
    reposo se quedaba literalmente en blanco y negro en vez de en su color pastel. */
-.tel-dock-app .tel-icon{ width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; transition:filter .2s ease; }
+.tel-dock-app .tel-icon{ width:49px; height:49px; border-radius:14px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; transition:filter .2s ease; }
 .tel-dock-app.pendiente .tel-icon{ filter:saturate(2.4) brightness(0.96); }
-.tel-dock-app .tel-icon svg{ width:21px; height:21px; }
+.tel-dock-app .tel-icon svg{ width:24px; height:24px; }
 .tel-dock-app .tel-label{ font-family:'Inter',sans-serif; font-size:10px; color:var(--ink-soft); text-align:center; }
 .tel-dock-app:active .tel-icon{ transform:scale(.92); }
 /* Oscurece TODA la pantalla real detrás del móvil abierto (incluida la franja de arriba, entre
@@ -1400,11 +1411,21 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   position:absolute; left:0; top:50%; transform:translateY(-50%);
   font-family:'Inter',sans-serif; font-weight:500; font-size:12px; color:rgba(255,255,255,0.92);
   letter-spacing:.01em; pointer-events:none; white-space:nowrap;
-  display:flex; align-items:baseline; gap:10px;
+  display:flex; align-items:center; gap:10px;
 }
 .tel-status-dinero{ font-weight:600; }
 .tel-status-dinero.positivo{ color:var(--green); }
 .tel-status-dinero.negativo{ color:var(--red); }
+/* Iconos de ventajas disponibles (objetos, ver seccionObjetos), en miniatura junto al dinero de
+   la barra de estado del móvil — solo decorativos aquí, el detalle sigue viviendo en la ficha. */
+.tel-status-ventajas{ display:flex; align-items:center; gap:4px; }
+.tel-status-ventaja{ position:relative; display:flex; align-items:center; justify-content:center; }
+.tel-status-ventaja .icono-insignia{ width:15px; height:15px; }
+.tel-status-ventaja .cnt{
+  position:absolute; bottom:-3px; right:-3px; background:var(--gold); color:#1a1408;
+  font-family:'Inter',sans-serif; font-size:8px; font-weight:800; min-width:10px; height:10px;
+  border-radius:50%; display:flex; align-items:center; justify-content:center; line-height:1;
+}
 .tel-status-iconos{
   position:absolute; right:0; top:50%; transform:translateY(-50%);
   display:flex; align-items:center; gap:5px; color:rgba(255,255,255,0.92); pointer-events:none;
@@ -1506,8 +1527,8 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-nombre-carpeta:focus{ outline:none; border-color:var(--gold-dim); }
 .tel-app-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px 10px; padding:4px 6px 8px; }
 .tel-app{ background:none; border:none; color:inherit; font-family:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; padding:0; }
-.tel-app .tel-icon{ width:54px; height:54px; border-radius:15px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; transition:filter .5s ease; }
-.tel-app .tel-icon svg{ width:26px; height:26px; }
+.tel-app .tel-icon{ width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; transition:filter .5s ease; }
+.tel-app .tel-icon svg{ width:29px; height:29px; }
 .tel-app .tel-label{ font-family:'Inter',sans-serif; font-size:10.5px; color:var(--ink-soft); text-align:center; }
 .tel-app:active .tel-icon{ transform:scale(.94); }
 .tel-app.locked .tel-icon{ filter:grayscale(1) brightness(.55); }
@@ -1564,9 +1585,9 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-icon.carpeta .mini.x{ background:linear-gradient(150deg,#3a3d44,#111214); }
 
 /* ---------- App Banca: extracto real (SCREENS.movil, vista 'banca') ---------- */
-.tel-bank-hero{ text-align:center; padding:6px 0 2px; }
+.tel-bank-hero{ text-align:right; padding:6px 0 2px; }
 .tel-bank-hero .k{ font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); }
-.tel-bank-hero .v{ font-family:'Inter',sans-serif; font-weight:800; font-size:32px; font-variant-numeric:tabular-nums; margin:2px 0; color:var(--ink); }
+.tel-bank-hero .v{ font-family:'Inter',sans-serif; font-weight:800; font-size:20px; font-variant-numeric:tabular-nums; margin:2px 0; color:var(--ink); }
 .tel-bank-hero .trend{ font-family:'Inter',sans-serif; font-size:12px; font-weight:600; }
 .tel-bank-hero .trend.pos{ color:#8fe3ab; } .tel-bank-hero .trend.neg{ color:#f0a5ac; }
 .tel-bank-tabs{ display:flex; gap:6px; background:var(--panel2); border-radius:11px; padding:3px; margin:14px 0 12px; }
@@ -9758,9 +9779,14 @@ const HITOS_SEGUIDORES = [1000, 10000, 50000, 100000, 500000, 1000000, 5000000, 
 function actualizarSeguidores(j){
   const pop = j.stats.popularidad || 0;
   const actuales = j.stats.seguidores || 0;
-  const factorFama = Math.pow(pop/45, 2.5);
-  const crecimientoBase = 350 * factorFama;
-  const crecimientoProporcional = actuales * Math.min(0.85, factorFama*0.32);
+  // Curva más agresiva que antes (antes se quedaba corta en general, sobre todo en los tramos
+  // altos de popularidad): cúbica sobre pop/40, así que Ídolo/Superestrella meten un empujón
+  // fijo grande CADA temporada (crecimientoBase) más un efecto bola de nieve real sobre lo que
+  // ya tengas (crecimientoProporcional, con techo del 55% por temporada para que no se dispare
+  // sin control de una temporada a otra).
+  const factorFama = Math.pow(pop/40, 3);
+  const crecimientoBase = 1200 * factorFama;
+  const crecimientoProporcional = actuales * Math.min(0.55, factorFama*0.28);
   const azar = 0.8 + Math.random()*0.5;
   const ganados = Math.max(0, Math.round((crecimientoBase + crecimientoProporcional) * azar));
   const nuevos = actuales + ganados;
@@ -13112,6 +13138,43 @@ function cromo(j){
   return c;
 }
 
+// Aviso de "En crisis de confianza" a pantalla completa (antes una caja más dentro de la ficha,
+// fácil de pasar por alto) — mismo patrón que mostrarLogroPantallaCompleta: backdrop + tarjeta
+// centrada, pero se reconstruye en CADA pintar() mientras dure la crisis (no es un aviso puntual
+// que se descarta solo, ver .crisis-overlay* en el CSS) y desaparece solo cuando j.estadoMental
+// deja de ser 'crisis' tras elegir una de las opciones.
+function construirOverlayCrisis(j){
+  const COSTE_PSICOLOGO = 2500;
+  const backdrop = el('div','crisis-overlay-backdrop');
+  const overlay = el('div','crisis-overlay');
+  const tarjeta = el('div','crisis-overlay-card');
+  tarjeta.innerHTML = `<div class="crisis-overlay-eyebrow">⚠️ En crisis de confianza</div><div class="crisis-overlay-desc">Una mala racha te ha pasado factura. No se resuelve sola: toca tomar una decisión.</div>`;
+  const opciones = [
+    { id:'psicologo', texto:`Ir al psicólogo deportivo (${formatearDinero(COSTE_PSICOLOGO)})`, disponible: j.stats.dinero >= COSTE_PSICOLOGO },
+    { id:'descanso', texto:'Pedir al entrenador descansar un partido', disponible:true },
+    { id:'capitan', texto:'Hablar con el capitán', disponible: j.stats.vestuario > 40 }
+  ];
+  opciones.forEach(o=>{
+    const btn = document.createElement('button');
+    btn.className = 'btn-main';
+    btn.style.cssText = 'margin-top:9px;font-size:13px;padding:9px;width:100%;' + (o.disponible ? '' : 'opacity:0.4;');
+    btn.textContent = o.texto;
+    btn.disabled = !o.disponible;
+    btn.onclick = ()=>{
+      if(o.id==='psicologo') j.stats.dinero -= COSTE_PSICOLOGO;
+      salirDeCrisis(j, o.id);
+      pintar();
+    };
+    tarjeta.appendChild(btn);
+  });
+  overlay.appendChild(tarjeta);
+  const frag = document.createDocumentFragment();
+  frag.appendChild(backdrop);
+  frag.appendChild(overlay);
+  requestAnimationFrame(()=>{ backdrop.classList.add('show'); overlay.classList.add('show'); });
+  return frag;
+}
+
 /* ---- pantallas ---- */
 const SCREENS = {};
 SCREENS.tabJugador = function(){
@@ -13130,31 +13193,6 @@ SCREENS.tabJugador = function(){
   c.appendChild(badgeConvocatoriaSeleccion(j)).style.cssText = 'display:flex;justify-content:center;margin-right:0;';
   if(j.estadoMental === 'racha'){
     c.appendChild(el('div','badge token', '🔥 En racha: todo te está saliendo bien últimamente'));
-  }
-  if(j.estadoMental === 'crisis'){
-    const COSTE_PSICOLOGO = 2500;
-    const crisisBox = document.createElement('div');
-    crisisBox.style.cssText = 'background:rgba(217,73,92,0.1);border:1px solid rgba(217,73,92,0.4);border-radius:12px;padding:14px;margin:10px 0;';
-    crisisBox.innerHTML = `<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--red);margin-bottom:4px;">⚠️ En crisis de confianza</div><div style="font-family:'Space Grotesk',sans-serif;font-size:12.5px;color:var(--ink-soft);line-height:1.5;">Una mala racha te ha pasado factura. No se resuelve sola: toca tomar una decisión.</div>`;
-    const opciones = [
-      { id:'psicologo', texto:`Ir al psicólogo deportivo (${formatearDinero(COSTE_PSICOLOGO)})`, disponible: j.stats.dinero >= COSTE_PSICOLOGO },
-      { id:'descanso', texto:'Pedir al entrenador descansar un partido', disponible:true },
-      { id:'capitan', texto:'Hablar con el capitán', disponible: j.stats.vestuario > 40 }
-    ];
-    opciones.forEach(o=>{
-      const btn = document.createElement('button');
-      btn.className = 'btn-main';
-      btn.style.cssText = 'margin-top:9px;font-size:13px;padding:9px;width:100%;' + (o.disponible ? '' : 'opacity:0.4;');
-      btn.textContent = o.texto;
-      btn.disabled = !o.disponible;
-      btn.onclick = ()=>{
-        if(o.id==='psicologo') j.stats.dinero -= COSTE_PSICOLOGO;
-        salirDeCrisis(j, o.id);
-        pintar();
-      };
-      crisisBox.appendChild(btn);
-    });
-    c.appendChild(crisisBox);
   }
   const secObj = seccionObjetos(j);
   if(secObj) c.appendChild(secObj);
@@ -13188,6 +13226,7 @@ SCREENS.tabJugador = function(){
   // el carné del jugador es ahora también su ficha estadística completa.
   c.appendChild(seccionEstadisticas(j));
   app.appendChild(c);
+  if(j.estadoMental === 'crisis') app.appendChild(construirOverlayCrisis(j));
 };
 
 SCREENS.tabClub = function(){
@@ -13291,8 +13330,9 @@ SCREENS.casino = function(){
     return;
   }
   topbar("Casino");
+  const embebido = S.movilVista === 'pantallaReal';
   const c = el('div','card');
-  c.appendChild(crearEyebrow('Sala de juegos'));
+  if(!embebido) c.appendChild(crearEyebrow('Sala de juegos'));
   c.appendChild(el('h2',null,'¿A qué te apetece jugar?'));
   const bannerReto0 = bannerRetoCasinoAmigo();
   if(bannerReto0) c.appendChild(bannerReto0);
@@ -13306,11 +13346,13 @@ SCREENS.casino = function(){
   const btnBlackjack = document.createElement('button'); btnBlackjack.className='btn-main'; btnBlackjack.style.marginTop='8px'; btnBlackjack.textContent='🃏 Blackjack';
   btnBlackjack.onclick = ()=>{ S.screen = 'blackjack'; render(); };
   c.appendChild(btnBlackjack);
-  const btnSalir = document.createElement('button'); btnSalir.className='btn-main';
-  btnSalir.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
-  btnSalir.textContent = 'Salir del casino';
-  btnSalir.onclick = ()=>{ S.screen = 'tabEconomia'; render(); };
-  c.appendChild(btnSalir);
+  if(!embebido){
+    const btnSalir = document.createElement('button'); btnSalir.className='btn-main';
+    btnSalir.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
+    btnSalir.textContent = 'Salir del casino';
+    btnSalir.onclick = ()=>{ S.screen = 'tabEconomia'; render(); };
+    c.appendChild(btnSalir);
+  }
   app.appendChild(c);
 };
 const TRAGA_SIMBOLOS = [
@@ -13358,8 +13400,9 @@ SCREENS.tragaperras = function(){
   S.tragaMensaje = S.tragaMensaje || 'Haz tu apuesta y dale a JUGAR';
   S.tragaBote = S.tragaBote || 0;
   topbar("Tragaperras");
+  const embebido = S.movilVista === 'pantallaReal';
   const c = el('div','card');
-  c.appendChild(crearEyebrow('Casino · Tragaperras'));
+  if(!embebido) c.appendChild(crearEyebrow('Casino · Tragaperras'));
   const bannerRetoT = bannerRetoCasinoAmigo();
   if(bannerRetoT) c.appendChild(bannerRetoT);
 
@@ -13545,23 +13588,35 @@ SCREENS.tragaperras = function(){
     c.appendChild(btnJugar);
   }
 
-  const btnVolver = document.createElement('button'); btnVolver.className='btn-main';
-  btnVolver.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
-  btnVolver.textContent = 'Volver al casino';
-  btnVolver.disabled = !!S.tragaGirando || enRiesgo;
-  btnVolver.onclick = ()=>{ S.screen = 'casino'; render(); };
-  c.appendChild(btnVolver);
+  if(!embebido){
+    const btnVolver = document.createElement('button'); btnVolver.className='btn-main';
+    btnVolver.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
+    btnVolver.textContent = 'Volver al casino';
+    btnVolver.disabled = !!S.tragaGirando || enRiesgo;
+    btnVolver.onclick = ()=>{ S.screen = 'casino'; render(); };
+    c.appendChild(btnVolver);
+  }
 
   app.appendChild(c);
 };
+// Paso de ajuste fino con las flechas +/- de apuesta (ruleta/blackjack): más grande cuanto mayor
+// sea la cifra actual, para no tener que pulsar decenas de veces con apuestas altas.
+function pasoApuestaCasino(v){
+  if(v < 100) return 10;
+  if(v < 500) return 50;
+  if(v < 2000) return 100;
+  if(v < 10000) return 500;
+  return 1000;
+}
 SCREENS.ruleta = function(){
   const j = S.jugador;
   S.ruletaApuestaTipo = S.ruletaApuestaTipo || 'rojo';
   S.ruletaApuestaNumero = S.ruletaApuestaNumero ?? 7;
   S.ruletaApuestaCantidad = S.ruletaApuestaCantidad || Math.max(10, Math.round(j.stats.dinero*0.02/10)*10);
   topbar("Ruleta");
+  const embebido = S.movilVista === 'pantallaReal';
   const c = el('div','card');
-  c.appendChild(crearEyebrow('Casino · Ruleta'));
+  if(!embebido) c.appendChild(crearEyebrow('Casino · Ruleta'));
   const bannerRetoR = bannerRetoCasinoAmigo();
   if(bannerRetoR) c.appendChild(bannerRetoR);
   const cajaDinero = el('div',null, `Dinero disponible: <b style="color:var(--gold);">${formatearDinero(j.stats.dinero)}</b>`);
@@ -13713,7 +13768,21 @@ SCREENS.ruleta = function(){
 
   const cantidadWrap = document.createElement('div');
   cantidadWrap.style.cssText = 'margin-bottom:14px;text-align:center;';
-  cantidadWrap.appendChild(el('div','lbl', `Apuesta: ${formatearDinero(S.ruletaApuestaCantidad)}`));
+  const cantidadLinea = document.createElement('div');
+  cantidadLinea.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:10px;';
+  const btnApuestaMenos = document.createElement('button'); btnApuestaMenos.textContent='−';
+  btnApuestaMenos.disabled = !!S.ruletaGirando || S.ruletaApuestaCantidad <= 10;
+  btnApuestaMenos.style.cssText = 'width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:15px;flex-shrink:0;';
+  btnApuestaMenos.onclick = ()=>{ S.ruletaApuestaCantidad = Math.max(10, S.ruletaApuestaCantidad - pasoApuestaCasino(S.ruletaApuestaCantidad)); pintar(); };
+  cantidadLinea.appendChild(btnApuestaMenos);
+  cantidadLinea.appendChild(el('div','lbl', `Apuesta: ${formatearDinero(S.ruletaApuestaCantidad)}`));
+  const btnApuestaMas = document.createElement('button'); btnApuestaMas.textContent='+';
+  const topeApuesta = Math.max(10, j.stats.dinero);
+  btnApuestaMas.disabled = !!S.ruletaGirando || S.ruletaApuestaCantidad >= topeApuesta;
+  btnApuestaMas.style.cssText = 'width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:15px;flex-shrink:0;';
+  btnApuestaMas.onclick = ()=>{ S.ruletaApuestaCantidad = Math.min(topeApuesta, S.ruletaApuestaCantidad + pasoApuestaCasino(S.ruletaApuestaCantidad)); pintar(); };
+  cantidadLinea.appendChild(btnApuestaMas);
+  cantidadWrap.appendChild(cantidadLinea);
   const botonesCantidad = document.createElement('div');
   botonesCantidad.style.cssText = 'display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:center;';
   const opcionesCantidad = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000].filter(v => v <= Math.max(10, j.stats.dinero));
@@ -13801,12 +13870,14 @@ SCREENS.ruleta = function(){
   };
   c.appendChild(btnGirar);
 
-  const btnSalir = document.createElement('button'); btnSalir.className='btn-main';
-  btnSalir.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
-  btnSalir.textContent = 'Volver al casino';
-  btnSalir.disabled = !!S.ruletaGirando;
-  btnSalir.onclick = ()=>{ S.screen = 'casino'; render(); };
-  c.appendChild(btnSalir);
+  if(!embebido){
+    const btnSalir = document.createElement('button'); btnSalir.className='btn-main';
+    btnSalir.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
+    btnSalir.textContent = 'Volver al casino';
+    btnSalir.disabled = !!S.ruletaGirando;
+    btnSalir.onclick = ()=>{ S.screen = 'casino'; render(); };
+    c.appendChild(btnSalir);
+  }
 
   app.appendChild(c);
 };
@@ -13912,6 +13983,7 @@ function resolverGiroRetoCasinoAmigo(j, netoGiro){
 function bannerRetoCasinoAmigo(){
   const reto = S.retoCasinoAmigo;
   if(!reto || !reto.activo) return null;
+  reto.visto = true; // apaga la notificación del dock (ver telAppsConPendiente) en cuanto se ve el banner
   const signo = reto.gananciaNeta > 0 ? '+' : '';
   const banner = el('div','badge token', `Reto de ${reto.amigoApodo}: te quedan ${reto.girosRestantes} de ${reto.girosTotales} manos · balance ${signo}${formatearDinero(reto.gananciaNeta)}`);
   banner.style.cssText += 'display:block;text-align:center;margin-bottom:14px;';
@@ -14096,8 +14168,9 @@ SCREENS.blackjack = function(){
   S.bjCrupierOculto = S.bjCrupierOculto === undefined ? true : S.bjCrupierOculto;
   S.bjCambios = S.bjCambios || [];
   topbar("Blackjack");
+  const embebido = S.movilVista === 'pantallaReal';
   const c = el('div','card');
-  c.appendChild(crearEyebrow('Casino · Blackjack'));
+  if(!embebido) c.appendChild(crearEyebrow('Casino · Blackjack'));
   c.appendChild(el('div','bj-dinero', `Dinero disponible: <b style="color:var(--gold);">${formatearDinero(j.stats.dinero)}</b>`));
 
   // ---- Mesa de fieltro ----
@@ -14157,7 +14230,21 @@ SCREENS.blackjack = function(){
 
   // ---- Zona de apuesta ----
   if(S.bjFase === 'apostando'){
-    c.appendChild(el('div','bj-apuesta-label', `Apuesta: <b>${formatearDinero(S.bjApuesta)}</b>`));
+    const apuestaLinea = document.createElement('div');
+    apuestaLinea.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;';
+    const bjBtnMenos = document.createElement('button'); bjBtnMenos.textContent='−';
+    bjBtnMenos.disabled = S.bjApuesta <= 50;
+    bjBtnMenos.style.cssText = 'width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:15px;flex-shrink:0;';
+    bjBtnMenos.onclick = ()=>{ S.bjApuesta = Math.max(50, S.bjApuesta - pasoApuestaCasino(S.bjApuesta)); pintar(); };
+    apuestaLinea.appendChild(bjBtnMenos);
+    apuestaLinea.appendChild(el('div','bj-apuesta-label', `Apuesta: <b>${formatearDinero(S.bjApuesta)}</b>`));
+    const bjTope = Math.max(50, j.stats.dinero);
+    const bjBtnMas = document.createElement('button'); bjBtnMas.textContent='+';
+    bjBtnMas.disabled = S.bjApuesta >= bjTope;
+    bjBtnMas.style.cssText = 'width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:15px;flex-shrink:0;';
+    bjBtnMas.onclick = ()=>{ S.bjApuesta = Math.min(bjTope, S.bjApuesta + pasoApuestaCasino(S.bjApuesta)); pintar(); };
+    apuestaLinea.appendChild(bjBtnMas);
+    c.appendChild(apuestaLinea);
     const row = el('div','bj-chips-row');
     [50,100,200,500,1000,2000,5000].filter(v => v <= Math.max(50, j.stats.dinero)).forEach(v=>{
       const b = document.createElement('button');
@@ -14209,7 +14296,7 @@ SCREENS.blackjack = function(){
   // sus botones de Seguir/Salir en la zona de mensaje, más arriba.
 
   const enJuego = ['repartiendo','jugando','crupier','interrupcion'].includes(S.bjFase);
-  if(!enJuego){
+  if(!enJuego && !embebido){
     const btnSalir = document.createElement('button'); btnSalir.className='btn-main';
     btnSalir.style.cssText = 'margin-top:8px;background:transparent;color:var(--ink-soft);border:1px solid var(--line);';
     btnSalir.textContent = 'Volver al casino';
@@ -14416,11 +14503,11 @@ SCREENS.ajustes = function(){
    aplica un efecto real (aplicarEfectos + relación), exactamente como una rama de suceso normal. */
 const TEL_ICONO_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 const TEL_ICONO_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
-const TEL_ICONO_WHATSAPP = '<svg viewBox="0 0 24 24" fill="none" stroke="#0c2013" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a8 8 0 0 0-6.9 12L4 21l6.2-1.1A8 8 0 1 0 12 3z"/><path d="M8.5 8.7c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5s.6 1.5.6 1.6c.1.1.1.3 0 .4-.1.2-.2.3-.3.5-.2.2-.3.3-.1.6.6 1 1.3 1.6 2.3 2 .2.1.4.1.5-.1.2-.2.5-.6.7-.8.2-.2.3-.2.5-.1.2.1 1.4.7 1.6.8.2.1.4.2.4.3.1.2.1.9-.2 1.4s-1.3.9-1.8.9c-.5 0-.9.1-3-.8-2.5-1.1-4-3.7-4.2-3.9-.1-.2-1-1.3-1-2.5 0-1.2.6-1.7.8-2z" fill="#0c2013" stroke="none"/></svg>';
+const TEL_ICONO_WHATSAPP = '<svg viewBox="0 0 24 24" fill="none" stroke="#0c2013" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a8 8 0 0 0-6.9 12L4 21l6.2-1.1A8 8 0 1 0 12 3z"/><g transform="translate(12,12) scale(0.78) translate(-12,-12)"><path d="M8.5 8.7c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5s.6 1.5.6 1.6c.1.1.1.3 0 .4-.1.2-.2.3-.3.5-.2.2-.3.3-.1.6.6 1 1.3 1.6 2.3 2 .2.1.4.1.5-.1.2-.2.5-.6.7-.8.2-.2.3-.2.5-.1.2.1 1.4.7 1.6.8.2.1.4.2.4.3.1.2.1.9-.2 1.4s-1.3.9-1.8.9c-.5 0-.9.1-3-.8-2.5-1.1-4-3.7-4.2-3.9-.1-.2-1-1.3-1-2.5 0-1.2.6-1.7.8-2z" fill="#0c2013" stroke="none"/></g></svg>';
 const TEL_ICONO_EMAIL = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="1.8"/><path d="M4.5 7l7.5 6 7.5-6"/></svg>';
 const TEL_ICONO_SERVICIOS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="1.5"/><path d="M9 8h6M9 12h6M9 16h3.5"/></svg>';
 const TEL_ICONO_COMPRAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
-const TEL_ICONO_CASINO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="9.5" r="1" fill="#fff" stroke="none"/><circle cx="12" cy="12" r="1" fill="#fff" stroke="none"/><circle cx="9" cy="14.5" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="14.5" r="1" fill="#fff" stroke="none"/></svg>';
+const TEL_ICONO_CASINO = '<svg viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M12 3C9 7.2 4 10.3 4 14.3C4 17.1 6.1 19 8.6 19C10 19 11.3 18.3 12 17.2C11.7 20.4 10.2 21 9.3 21.2C8.8 21.3 8.4 21.7 8.4 22.2H15.6C15.6 21.7 15.2 21.3 14.7 21.2C13.8 21 12.3 20.4 12 17.2C12.7 18.3 14 19 15.4 19C17.9 19 20 17.1 20 14.3C20 10.3 15 7.2 12 3Z"/></svg>';
 const TEL_ICONO_CROMOS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>';
 const TEL_ICONO_REDES = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="16.6" cy="7.4" r="1" fill="#fff" stroke="none"/></svg>';
 const TEL_ICONO_CALENDARIO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>';
@@ -14468,7 +14555,7 @@ const TEL_DOCK_APPS = [
   // Entrenamiento se quitó del dock: ahora se accede desde la topbar, junto a los atributos del
   // jugador (ver topbar()), pulsando la cápsula de atributos+media. En su lugar en el dock:
   // Estadísticas (estilo Transfermarkt).
-  { id:'estadisticas', nombre:'Estadísticas', clase:'estadisticas', icono:TEL_ICONO_ESTADISTICAS, ir:()=>{ S.movilVista='estadisticas'; pintar(); } },
+  { id:'estadisticas', nombre:'Transfermarkt', clase:'estadisticas', icono:TEL_ICONO_ESTADISTICAS, ir:()=>{ S.movilVista='estadisticas'; pintar(); } },
   { id:'economia', nombre:'Economía', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ S.movilVista='economia'; pintar(); } },
   // 'ruleta' directo (primera pestaña del submenú), salvo menor de edad: SCREENS.casino es quien
   // de verdad hace la comprobación de edad (ver su gate al principio) — ni ruleta ni tragaperras
@@ -14526,16 +14613,28 @@ function formatearDineroStatusMovil(valor){
   if(abs < 100000) return (valor<0?'-':'') + formatearMiles(abs) + ' €';
   return formatearDinero(valor);
 }
+// Ventajas activas (ver seccionObjetos) en miniatura, junto al dinero — mismas claves, sin
+// rachaGafada (esa es una desventaja, no algo que presumir en la barra de estado).
+const TEL_VENTAJAS_STATUS = ['inspiracion','vestuario','confianzaCiega','segundaOportunidad','avalNegociacion','fichaSuerte','rachaGoleador'];
 function telPintarStatusHora(){
-  const ahora = new Date();
   const wrap = el('div','tel-status-hora');
-  const hora = `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
-  // El dinero del jugador junto a la hora — de un vistazo, sin tener que entrar en Banca. Verde
-  // en números negros, rojo en números rojos (ver comprobarNumerosRojos/SCREENS.numerosRojosReveal).
-  wrap.appendChild(el('span',null, hora));
   if(S.jugador){
+    // El dinero del jugador de un vistazo, sin tener que entrar en Banca — sustituye a la hora
+    // real, que aquí no aportaba nada. Verde en números negros, rojo en números rojos (ver
+    // comprobarNumerosRojos/SCREENS.numerosRojosReveal).
     const dineroActual = S.jugador.stats.dinero||0;
     wrap.appendChild(el('span','tel-status-dinero '+(dineroActual<0?'negativo':'positivo'), formatearDineroStatusMovil(dineroActual)));
+    const objetos = S.jugador.objetos || {};
+    const conVentaja = TEL_VENTAJAS_STATUS.filter(clave => objetos[clave] > 0);
+    if(conVentaja.length){
+      const ventajasWrap = el('div','tel-status-ventajas');
+      conVentaja.forEach(clave=>{
+        const item = el('div','tel-status-ventaja');
+        item.innerHTML = `${iconoInsignia(clave,15)}<span class="cnt">${objetos[clave]}</span>`;
+        ventajasWrap.appendChild(item);
+      });
+      wrap.appendChild(ventajasWrap);
+    }
   }
   return wrap;
 }
@@ -14905,6 +15004,7 @@ function telAppsConPendiente(j){
   if(totalServicios > 0) mapa.servicios = totalServicios;
   const totalCompras = contarComprasUnicasDisponibles(j);
   if(totalCompras > 0) mapa.compras = totalCompras;
+  if(S.retoCasinoAmigo && S.retoCasinoAmigo.activo && !S.retoCasinoAmigo.visto) mapa.casino = 1;
   return mapa;
 }
 // Si el suceso activo está ligado a WhatsApp o a Redes (ev.vinculoMovil), da el id del icono del
@@ -15125,6 +15225,86 @@ const TEL_RESPUESTAS_GRUPO_GENERICAS = ['jajajaja', 'Totalmente de acuerdo', 'Es
 // hay una pregunta concreta que contestar — es un chat abierto — así que el pool es de mensajes
 // sueltos, no pares pregunta/respuesta.
 const TEL_RESPUESTAS_GRUPO_JUGADOR = ['jajaja qué crack', 'Aquí ando, a lo mío', 'Contadme, que me lo estoy perdiendo', '¿Quedamos un día de estos?', 'Todo controlado por aquí 💪', 'Qué ganas de veros, en serio', 'Menudo día llevo, luego os cuento', 'Ya me gustaría tener tiempo para todo eso 😂'];
+// Mismo criterio que TEL_RESPUESTAS_POR_BUCKET (contactos 1 a 1), pero para grupos: en vez de
+// pares pregunta/respuesta, cada bucket da un pool de mensajes SUELTOS que el JUGADOR puede
+// mandar (coherentes con lo último que se ha comentado en el grupo, ver el `bucket` que ya viaja
+// con cada mensaje de grupo desde generarNotificacionMovil) y otro de REACCIONES que puede soltar
+// otro miembro del grupo tras ese mensaje o tras la respuesta del jugador. Antes los dos pools
+// eran siempre TEL_RESPUESTAS_GRUPO_JUGADOR/TEL_RESPUESTAS_GRUPO_GENERICAS, sin relación alguna
+// con el bucket — un "¡CAMPEONES!" en el grupo se contestaba con las mismas opciones sueltas que
+// cualquier otra semana.
+const TEL_RESPUESTAS_GRUPO_POR_BUCKET = {
+  campeon:{
+    jugador:['¡Enhorabuena, campeón! Esto hay que celebrarlo', 'Qué temporada te has marcado, macho', 'Hay que quedar para celebrarlo como toca', 'Todavía no me creo la que habéis liado'],
+    reaccion:['Serás el primero en presumir de esto, ya lo veo venir jaja', 'Ya tocaba un título, con lo que curráis', 'Qué envidia sana, en serio']
+  },
+  mvp:{
+    jugador:['Mejor jugador, cómo no jaja, enhorabuena', 'Te lo tenías muy currado, se veía venir', 'Con ese nivel no me extraña el premio', 'A ver si compartes algo de esa suerte'],
+    reaccion:['Normal, si es que no falla ni una', 'Con esta temporada ya eres de la casa', 'Qué crack, en serio']
+  },
+  ascenso:{
+    jugador:['¡Ascenso! Menuda alegría, enhorabuena', 'Se lo merecía el equipo entero, no solo tú', 'Ahora toca prepararse para la categoría nueva', 'Qué ganas de veros en el nivel de arriba'],
+    reaccion:['Ya iba siendo hora, con lo que curráis', 'Menuda fiesta se habrá liado ahí', 'Se merecía esto la afición, de verdad']
+  },
+  pichichi:{
+    jugador:['Máximo goleador, cómo mola eso', 'A ver si sigues así hasta que acabe el año', 'Con ese olfato de cara a puerta no hay quien te pare', 'Menuda temporada llevas de cara a gol'],
+    reaccion:['Normal, no falla ni uno', 'Con esa puntería no me extraña', 'Qué animal estás hecho esta temporada']
+  },
+  lesion:{
+    jugador:['¿Cómo llevas la recuperación? Espero que bien', 'Cualquier cosa que necesites me dices', 'Ánimo con la rehabilitación, se hace largo pero se pasa', 'Se te echa de menos por el grupo, la verdad'],
+    reaccion:['Cuídate mucho, en serio', 'Menudo palo, espero que te recuperes rápido', 'Con calma, que no hay prisa']
+  },
+  crisis:{
+    jugador:['Ánimo, que las rachas malas se acaban pasando', 'Cualquier cosa que necesites, aquí me tienes', 'No te machaques demasiado, que ya se corta esto', 'Seguro que sales de esta más fuerte'],
+    reaccion:['Todos pasamos por rachas así, no te preocupes', 'Aquí estamos para lo que haga falta', 'Se te ve con cabeza para superarlo']
+  },
+  racha:{
+    jugador:['Qué racha llevas, macho, a ver si dura', 'Se te ve con muy buena pinta últimamente', 'Sigue así que vas que te sales', 'Ojalá se mantenga hasta final de temporada'],
+    reaccion:['No hay quien te pare ahora mismo', 'Qué nivel estás dando estas semanas', 'A ver si sigues así, en serio']
+  },
+  formaAlta:{
+    jugador:['Se te ve muy bien físicamente, en serio', 'Vaya puesta a punto llevas este año', 'Con esa forma no me extraña que rindas así', 'Sigue cuidándote que se nota mucho'],
+    reaccion:['Se te nota en cada partido, la verdad', 'Menuda forma física gastas ahora mismo', 'Vas que vuelas, macho']
+  },
+  formaBaja:{
+    jugador:['¿Qué tal andas? Te veo un poco tocado últimamente', 'Descansa lo que necesites, no fuerces', 'Cualquier cosa me dices, eh', 'Espero que se te pase pronto eso'],
+    reaccion:['Escucha al cuerpo, que es lo primero', 'Tómatelo con calma, no hay prisa', 'Cuídate, que se te ve algo bajo de fuelle']
+  },
+  popularSube:{
+    jugador:['Cada vez más famoso, macho, cuidado con la cabeza jaja', 'Se te ve por todos lados últimamente', 'A ver si te vamos a tener que pedir autógrafo', 'Menuda repercusión estás teniendo'],
+    reaccion:['No se te puede ni hablar ya de tan famoso jaja', 'Vaya nivel de repercusión te está dando esto', 'Que no se te suba a la cabeza, eh']
+  },
+  fichaje:{
+    jugador:['¡Enhorabuena por el fichaje! Menudo paso', 'A ver qué tal se te da el sitio nuevo', 'Con ganas de que arranques ahí, seguro que va bien', 'Qué cambio más grande, cuéntanos qué tal'],
+    reaccion:['Menudo salto, enhorabuena de verdad', 'Seguro que te adaptas rápido, como siempre', 'Qué ganas de ver cómo te va por ahí']
+  },
+  patrocinioNuevo:{
+    jugador:['¡Enhorabuena por el patrocinio! Te lo has currado bien', 'Menudo acuerdo te han ofrecido, qué crack', 'Con tu nivel era cuestión de tiempo', 'A ver si invitas ahora que te forras jaja'],
+    reaccion:['Con ese nivel no me extraña que llamen a la puerta', 'Vaya acuerdo te han hecho, enhorabuena', 'Ya te vale, no te olvides de los amigos jaja']
+  },
+  representanteNuevo:{
+    jugador:['¿Qué tal con el representante nuevo? Espero que bien', 'A ver si este te lleva mejor la carrera', 'Espero que sea un acierto el cambio', 'Cuéntanos qué tal las primeras impresiones'],
+    reaccion:['Ojalá te vaya bien con él, de verdad', 'A ver si acierta con las decisiones', 'Espero que sea buena mano para ti']
+  }
+};
+// Bucket del último mensaje real (no tuyo, no una reacción sin bucket propio) que haya llegado a
+// este grupo — decide qué pool de TEL_RESPUESTAS_GRUPO_POR_BUCKET usar. null si no hay ninguno
+// todavía (grupo recién descubierto, solo con la semilla fija) o si el último bucket fue
+// 'generico' (charla suelta, sin tema concreto que contestar).
+function telUltimoBucketGrupo(grupo){
+  const dinamicos = (S.movilBandeja && S.movilBandeja.grupos && S.movilBandeja.grupos[grupo.id]) || [];
+  for(let i=dinamicos.length-1; i>=0; i--){
+    if(dinamicos[i].bucket) return dinamicos[i].bucket === 'generico' ? null : dinamicos[i].bucket;
+  }
+  return null;
+}
+function telPoolGrupoJugador(grupo){
+  const bucket = telUltimoBucketGrupo(grupo);
+  return (bucket && TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket]) ? TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket].jugador : TEL_RESPUESTAS_GRUPO_JUGADOR;
+}
+function telPoolGrupoReaccion(bucket){
+  return (bucket && TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket]) ? TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket].reaccion : TEL_RESPUESTAS_GRUPO_GENERICAS;
+}
 // Mismo criterio que elegirAutor() dentro de generarNotificacionMovil (ver más abajo, ahora
 // reutilizado también por telEnviarMensajeGrupo): quién "habla" en nombre del grupo depende de
 // qué grupo es — la pandilla tira de j.companeros entero, el vestuario solo de los que siguen
@@ -15162,7 +15342,7 @@ function telEnviarMensajeGrupo(grupo, texto){
     pintar();
     setTimeout(()=>{
       const autor = telAutorAleatorioGrupo(grupo, j, null);
-      const respuesta = elegirSinRepetir(TEL_RESPUESTAS_GRUPO_GENERICAS, 'reaccion_'+grupo.id);
+      const respuesta = elegirSinRepetir(telPoolGrupoReaccion(telUltimoBucketGrupo(grupo)), 'reaccion_'+grupo.id);
       S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_r', autor, texto:respuesta, temporada:S.temporada, pasoIndex:S.pasoIndex||0, leido:true });
       S.movilGrupoEscribiendo = null;
       guardarPartida();
@@ -15343,7 +15523,7 @@ function generarNotificacionMovil(j){
     // aunque tú no digas nada — así se nota que la conversación sigue sin ti.
     if(Math.random() < 0.55){
       const autor2 = telAutorAleatorioGrupo(grupo, j, autor);
-      const respuesta = elegirSinRepetir(TEL_RESPUESTAS_GRUPO_GENERICAS, 'reaccion_'+grupo.id);
+      const respuesta = elegirSinRepetir(telPoolGrupoReaccion(bucket), 'reaccion_'+grupo.id);
       S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_b', autor:autor2, texto:respuesta, temporada:S.temporada, pasoIndex:paso, leido:false });
     }
   } else {
@@ -15948,7 +16128,7 @@ function renderMovilContenido(c, j){
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
     back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
-    header.appendChild(el('span','tel-title','Estadísticas'));
+    header.appendChild(el('span','tel-title','Transfermarkt'));
     c.appendChild(header);
 
     const ficha = el('div','tel-bank-card');
@@ -15986,19 +16166,43 @@ function renderMovilContenido(c, j){
       fila5050.appendChild(cajaRep);
       fila5050.appendChild(cajaPat);
       c.appendChild(fila5050);
+      // Valor de mercado al final del tab Jugador (antes vivía arriba del todo en Stats) — MISMA
+      // función que usa SCREENS.tabJugador (graficaValorMercado), nada propio que se pueda
+      // desincronizar de lo que ya se ve en la ficha.
+      const graf = el('div');
+      graf.style.marginTop = '14px';
+      graf.appendChild(graficaValorMercado(j));
+      c.appendChild(graf);
     } else if(tabStats === 'club'){
-      // Historial temporada a temporada por club — MISMA función que seccionEstadisticas usa en
-      // la ficha de Jugador (bloqueClubesHistorial), sin duplicar el HTML.
+      // Rediseñado: ya no el historial de temporadas por club (eso se mueve a Stats, ver abajo),
+      // sino el estado del club ACTUAL — misma cabecera (escudo/nombre/liga/país) y las mismas
+      // secciones PERFIL/CONTRATO que SCREENS.tabClub, reutilizadas tal cual.
+      const headClub = el('div');
+      headClub.style.cssText = 'display:flex;flex-direction:column;align-items:center;text-align:center;padding-bottom:6px;';
+      headClub.innerHTML = `${escudoSVG(j.club.nombre,44,j.club.colores)}`;
+      const nombreClub = el('div', null, j.club.nombre);
+      nombreClub.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;color:var(--ink);margin-top:10px;";
+      headClub.appendChild(nombreClub);
+      const ligaClub = el('div', null, `${logoLiga(j.club.extranjero ? j.club.liga : j.club.categoria, 16)} ${nombreLigaConDivision(j.club)}${j.enFilial ? ' · Filial' : ''}`);
+      ligaClub.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12.5px;color:var(--ink-soft);margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px;";
+      headClub.appendChild(ligaClub);
+      const paisClub = j.club.extranjero ? j.club.pais : 'España';
+      const paisClubEl = el('div', null, `${banderaPais(paisClub,13)} ${paisClub}`);
+      paisClubEl.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12.5px;color:var(--ink-soft);margin-top:4px;display:flex;align-items:center;justify-content:center;gap:5px;";
+      headClub.appendChild(paisClubEl);
+      headClub.style.marginTop = '10px';
+      c.appendChild(headClub);
+      c.appendChild(seccionPerfil(j));
+      c.appendChild(seccionContrato(j));
+    } else if(tabStats === 'stats'){
+      // Historial temporada a temporada por club (goles/asistencias/etc por equipo) — MISMA
+      // función que seccionEstadisticas usa en la ficha de Jugador (bloqueClubesHistorial), sin
+      // duplicar el HTML. Vivía en el tab Club; se traslada aquí a petición expresa.
       const secClub = el('div','tel-stats-tab-cont');
       bloqueClubesHistorial(secClub, j);
-      if(!secClub.children.length) secClub.innerHTML = `<div class="tel-stats-tab-vacio">Todavía no tienes temporadas registradas.</div>`;
-      c.appendChild(secClub);
-    } else if(tabStats === 'stats'){
-      // Valor de mercado: MISMA función que usa SCREENS.tabJugador (graficaValorMercado), a
-      // petición expresa — nada de cifras o layout propios que puedan desincronizarse de lo que
-      // ya se ve en la ficha del Jugador. Debajo, totales de carrera + el historial con la
-      // selección (bloqueSeleccionHistorial, misma pieza que seccionEstadisticas).
-      c.appendChild(graficaValorMercado(j));
+      if(secClub.children.length) c.appendChild(secClub);
+      // Debajo, totales de carrera + el historial con la selección (bloqueSeleccionHistorial,
+      // misma pieza que seccionEstadisticas).
       const historialCarrera = j.historialTemporadas || [];
       const notasCarrera = historialCarrera.filter(h=>h.nota!=null).map(h=>h.nota);
       const mediaNotaCarrera = notasCarrera.length ? formatearNumero(notasCarrera.reduce((s,n)=>s+n,0)/notasCarrera.length) : '—';
@@ -16324,7 +16528,7 @@ function renderMovilContenido(c, j){
         // cualquier momento, a diferencia de los contactos 1 a 1 (ver telEnviarMensajeGrupo).
         const choices = el('div','tel-choices');
         choices.appendChild(el('p','tel-choices-label','Escribe algo'));
-        TEL_RESPUESTAS_GRUPO_JUGADOR.forEach(texto=>{
+        telPoolGrupoJugador(grupo).forEach(texto=>{
           const btn = document.createElement('button');
           btn.className = 'tel-choice-btn';
           btn.textContent = texto;
@@ -16376,6 +16580,13 @@ function renderMovilContenido(c, j){
       ];
       let activo = null;
       turnos.forEach((t,i)=>{
+        // Línea "Mensajes nuevos", mismo criterio visual que en los grupos (ver vista 'grupo'):
+        // se ancla justo antes del ÚNICO turno que de verdad importa para responder — el último,
+        // si sigue pendiente. Los turnos anteriores ya son historial (se contestaran o no en su
+        // momento, ver el comentario más abajo), así que nunca la llevan.
+        if(i === turnos.length-1 && t.mapa[t.id] === undefined){
+          thread.appendChild(el('div','tel-unread-divider','Mensajes nuevos'));
+        }
         if(t.entrante) thread.appendChild(el('div','tel-bubble-row', `<div class="tel-bubble">${t.entrante}</div>`));
         const estado1 = telPintarIntercambio(thread, t.id, t.mapa, t.pool);
         activo = { estado:estado1, aplicar:t.aplicar, pool:t.pool };
@@ -16391,6 +16602,11 @@ function renderMovilContenido(c, j){
         } else if(estado1 === 'cerrado'){
           const idR2 = t.id+'_r2';
           S.movilRespuestasExtra = S.movilRespuestasExtra || {};
+          // Misma línea "Mensajes nuevos" que arriba, para cuando lo pendiente de verdad es esta
+          // segunda ronda (la primera ya está cerrada) y este es el último turno del hilo.
+          if(i === turnos.length-1 && S.movilRespuestasExtra[idR2] === undefined){
+            thread.appendChild(el('div','tel-unread-divider','Mensajes nuevos'));
+          }
           const poolR2 = telPoolGenericoPara(contacto, 2, t.bucket);
           const estado2 = telPintarIntercambio(thread, idR2, S.movilRespuestasExtra, poolR2);
           activo = { estado:estado2, aplicar:(idx)=>telResponderExtra(idR2, idx, contacto, poolR2), pool:poolR2 };
