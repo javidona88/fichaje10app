@@ -6346,21 +6346,22 @@ const PREGUNTAS_TRAMPA_RUEDA_PRENSA = [
 // real entre las 5 grandes ligas europeas y el resto es mucho más extrema de lo que sugería la
 // escala anterior (compresión de 0.25-1.65, ×6 de spread) — con datos reales el spread real es
 // más bien ×30 (Premier League ~2,4M de salario medio frente a ~60-95K en las ligas más modestas
-// de esta lista). Categorías españolas amateur/semipro (Tercera/Segunda/Primera RFEF) se quedan
-// igual: no hay datos de convenio reales para esas categorías, no son ligas profesionales de
-// verdad. "LaLiga2" (≈LaLiga Hypermotion) y "LaLiga" (resto de LaLiga, sin los 3 grandes) sí
-// tienen datos reales y se han escalado en consecuencia.
-const SUELDO_BASE_POR_CATEGORIA = { "Tercera RFEF":1500, "Segunda RFEF":3500, "Primera RFEF":9000, "LaLiga2":190000, "LaLiga":630000, "Extranjero":1000000, "Grande":3000000 };
+// de esta lista). "Primera RFEF" SÍ tiene datos reales (~20K-180K, "el escalón profesional de
+// bronce" — la liga española más baja que ya se considera profesional de verdad) y se escala en
+// consecuencia; Segunda/Tercera RFEF se quedan igual, son ligas regionales amateur/semiprofesional
+// sin convenio real. "LaLiga2" (≈LaLiga Hypermotion) y "LaLiga" (resto de LaLiga, sin los 3
+// grandes) también tienen datos reales y están escaladas.
+const SUELDO_BASE_POR_CATEGORIA = { "Tercera RFEF":1500, "Segunda RFEF":3500, "Primera RFEF":36000, "LaLiga2":190000, "LaLiga":630000, "Extranjero":1000000, "Grande":3000000 };
 const MULTIPLICADOR_SUELDO_LIGA = {
   // Premier League se queda como ancla (1.65, sin cambios) — el resto se recalcula relativo a
   // ella a partir del salario medio real de cada liga (Premier League ~2,4M de media).
   "Premier League":1.65, "Bundesliga":0.76, "Serie A":0.83, "Ligue 1":0.64,
   "Liga Portugal":0.17, "Eredivisie":0.16, "Süper Lig":0.23, "MLS":0.29, "Pro League":0.13,
-  "Brasileirão":0.14, "Scottish Premiership":0.09, "Liga MX":0.09, "Super League Greece":0.14,
-  "Primera División":0.10, "HNL":0.06, "Primera División Uruguay":0.05, "Swiss Football League":0.08,
-  "Ekstraklasa":0.06, "Bundesliga Austria":0.07, "Superliga":0.09,
-  "Championship":0.26, "2. Bundesliga":0.06, "Serie B":0.06,
-  "J1 League":0.09, "K League 1":0.07, "Primera División de Chile":0.05, "Chance Liga":0.06,
+  "Brasileirão":0.14, "Scottish Premiership":0.09, "Liga MX":0.09, "Super League Greece":0.08,
+  "Primera División":0.10, "HNL":0.05, "Primera División Uruguay":0.03, "Swiss Football League":0.08,
+  "Ekstraklasa":0.05, "Bundesliga Austria":0.07, "Superliga":0.08,
+  "Championship":0.26, "2. Bundesliga":0.06, "Serie B":0.10,
+  "J1 League":0.17, "K League 1":0.12, "Primera División de Chile":0.05, "Chance Liga":0.05,
   // Clave compuesta "país|liga": para ligas cuyo nombre real coincide con el de otra ya listada
   // (la Premier League de Ucrania se llama igual que la inglesa) — multiplicadorSueldoLiga()
   // mira primero esta clave compuesta antes de caer en el nombre de liga a secas.
