@@ -513,6 +513,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 
 /* ---- eventos ---- */
 .event-text{ font-family:'Space Grotesk',sans-serif; font-weight:400; font-size:16px; line-height:1.55; margin-bottom:20px; color:var(--ink); }
+.event-text.negociacion-log{ font-size:13px; line-height:1.5; color:var(--ink-soft); }
 .suceso-vinculo-movil{
   display:flex; align-items:center; gap:8px; width:100%; margin:-8px 0 20px; padding:11px 14px;
   border-radius:12px; border:1px solid var(--gold-dim); background:rgba(212,175,55,0.08);
@@ -534,10 +535,13 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   box-shadow: inset 0 0 14px rgba(0,0,0,0.85), 0 1px 0 rgba(255,255,255,0.06);
 }
 .marcador-fila{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; }
-.marcador-celda{ display:flex; flex-direction:column; align-items:center; gap:5px; min-width:0; }
-.marcador-equipo{ display:flex; flex-direction:column; align-items:center; gap:3px; width:100%; }
+/* Escudo pegado al lateral del panel y goles junto a él, los dos centrados verticalmente entre sí
+   — space-between separa ambos hacia los dos extremos de la celda (el escudo siempre el elemento
+   más externo, ver el orden invertido en renderContextoPartido para la celda del visitante). Sin
+   nombre de equipo: con el escudo ya identifica de sobra al club, y liberaba sitio para agrandarlo. */
+.marcador-celda{ display:flex; flex-direction:row; align-items:center; justify-content:space-between; gap:8px; min-width:0; }
+.marcador-equipo{ display:flex; align-items:center; flex-shrink:0; }
 .marcador-equipo svg,.marcador-equipo img{ display:block; flex-shrink:0; }
-.marcador-nombre{ font-family:'Space Grotesk',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.02em; color:#8b96a0; text-align:center; line-height:1.2; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .marcador-num{ font-family:'Oxanium',monospace; font-weight:800; font-size:32px; line-height:1; color:#3ce06a; text-shadow:0 0 6px rgba(60,224,106,0.85), 0 0 14px rgba(60,224,106,0.4); }
 .marcador-centro{ text-align:center; padding:0 2px; }
 .marcador-reloj{ font-family:'Oxanium',monospace; font-weight:800; font-size:21px; letter-spacing:.02em; color:#ef4b4b; text-shadow:0 0 6px rgba(239,75,75,0.85), 0 0 14px rgba(239,75,75,0.4); white-space:nowrap; }
@@ -644,10 +648,6 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .bj-mensaje{ font-size:13px; color:var(--ink-soft); text-align:center; margin-bottom:14px; line-height:1.5; }
 .bj-apuesta-label{ text-align:center; font-size:12.5px; color:var(--ink-soft); margin-bottom:8px; }
 .bj-apuesta-label b{ color:var(--ink); }
-.bj-chips-row{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:16px; }
-.bj-chip-btn{ padding:6px 10px; border-radius:8px; font-size:11px; font-family:'Space Grotesk',sans-serif; border:1px solid var(--line); background:transparent; color:var(--ink); cursor:pointer; }
-.bj-chip-btn.sel{ border-color:var(--gold); background:rgba(212,175,55,0.12); color:var(--gold); }
-.bj-chip-btn:disabled{ opacity:.3; cursor:not-allowed; }
 .bj-acciones-row{ display:flex; gap:7px; margin-top:2px; }
 .bj-accion-btn{ flex:1; padding:12px 4px; border-radius:10px; border:1.5px solid var(--line); background:transparent; color:var(--ink); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; cursor:pointer; }
 .bj-accion-btn.primaria{ background:var(--gold); color:#191507; border-color:var(--gold); }
@@ -770,6 +770,12 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 
 /* ---- transiciones (crossfade suave) ---- */
 @keyframes fadeIn{ 0%{opacity:0; transform:translateY(10px) scale(.99);} 100%{opacity:1; transform:translateY(0) scale(1);} }
+@keyframes escudoCustomFadeIn{ from{opacity:0;} to{opacity:1;} }
+/* Escudo/logo/bandera personalizado (mod local, ver escudoPersonalizado): sin esto, la imagen
+   subida por el usuario aparecía de golpe en cuanto el navegador la decodificaba, un corte duro
+   frente al resto del juego (todo con fundidos de 260ms). La animación corre siempre al pintarse,
+   decodifique rápido o lento la imagen. */
+.escudo-custom-img{ animation:escudoCustomFadeIn .35s ease; }
 @keyframes fadeOut{ 0%{opacity:1; transform:translateY(0) scale(1);} 100%{opacity:0; transform:translateY(-6px) scale(.99);} }
 @keyframes balonOroBurst{ 0%{ transform:scale(0.3) rotate(-15deg); opacity:0; } 55%{ transform:scale(1.25) rotate(6deg); opacity:1; } 100%{ transform:scale(1) rotate(0deg); opacity:1; } }
 @keyframes balonOroPulso{ 0%,100%{ box-shadow:0 0 0 rgba(212,175,55,0); } 50%{ box-shadow:0 0 45px rgba(212,175,55,0.55); } }
@@ -951,7 +957,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 /* Fijas mientras se hace scroll por la rejilla de productos de Compras (única pantalla que usa
    este componente, ver renderizarTiendaOnline) — position:sticky sobre su contenedor con scroll
    real (.tel-hilo-scroll), con fondo propio para no dejar ver las tarjetas por debajo. */
-.tienda-cats{ display:flex; gap:8px; overflow-x:auto; padding:4px 0; margin-bottom:16px; scrollbar-width:none; position:sticky; top:0; z-index:3; background:var(--bg2); }
+.tienda-cats{ display:flex; gap:8px; overflow-x:auto; padding:4px 0; margin-bottom:16px; scrollbar-width:none; position:sticky; top:0; z-index:3; background:inherit; }
 .tienda-cats::-webkit-scrollbar{ display:none; }
 .tienda-cat-chip{
   flex-shrink:0; background:var(--panel2); border:1px solid var(--line); color:var(--ink-soft);
@@ -4845,6 +4851,11 @@ const BANCO_EVENTOS = [
     texto: j => {
       const vuela = CATEGORIAS.indexOf(j.club.categoria) >= 3 || j.club.extranjero;
       if(!vuela) return "Una avería de última hora en el autobús del equipo amenaza con dejaros tirados a horas de un partido importante. El caos en la estación es total.";
+      // Un club de primer nivel no vuela en líneas de bajo coste sujetas a cancelaciones — viaja
+      // en un chárter privado del club, así que el contratiempo tiene que ser otro (un problema
+      // técnico del propio avión), nunca "vuelo de Ryanair cancelado".
+      const esTop = esClubGrande(j.club.nombre) || (PRESTIGIO_CLUB[j.club.nombre]||2) >= 4;
+      if(esTop) return "Un problema técnico de última hora en el avión chárter del club amenaza con dejaros tirados a horas de un partido importante. El caos en la pista es total.";
       const aerolineas = ['Ryanair','Vueling','easyJet'];
       const aerolinea = aerolineas[Math.floor(Math.random()*aerolineas.length)];
       return `Una cancelación de última hora del vuelo de ${aerolinea} amenaza con dejaros tirados a horas de un partido importante. El caos en el aeropuerto es total.`;
@@ -5981,7 +5992,7 @@ const PROMESAS_CLUB = [
   { id:'ascenso_2_temporadas', texto:'Pelearemos el ascenso en 2 temporadas', tipo:'ascenso_plazo', plazoTemporadas:2 }
 ];
 const OBJETIVOS_NEGOCIACION = [
-  { id:'titularidad', label:'Garantía de titularidad', coste:12, tipo:'titular' },
+  { id:'partidos_minimos', label:'Cláusula de partidos mínimos (jugar al menos 6 de cada 10)', coste:11, tipo:'partidos_minimos' },
   { id:'prima_gol', label:sueldo=>`Prima por gol (${formatearDinero(Math.round(sueldo*0.01/10)*10)}/gol)`, coste:8, tipo:'prima_gol', monto:sueldo=>Math.round(sueldo*0.01/10)*10 },
   { id:'prima_25goles', label:sueldo=>`Prima si llegas a 25 goles (${formatearDinero(Math.round(sueldo*0.35/50)*50)})`, coste:7, tipo:'prima_25goles', monto:sueldo=>Math.round(sueldo*0.35/50)*50 },
   { id:'prima_titulo', label:sueldo=>`Prima si el equipo gana un título (${formatearDinero(Math.round(sueldo*0.15/50)*50)})`, coste:6, tipo:'prima_titulo', monto:sueldo=>Math.round(sueldo*0.15/50)*50 },
@@ -6451,7 +6462,7 @@ const ICONOS_SECTOR_MARCA = {
 function logoMarca(nombre, tamano, colores){
   tamano = tamano || 30;
   const custom = escudoPersonalizado('marcas', nombre);
-  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" style="object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
+  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" class="escudo-custom-img" style="object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
   let primario = (colores && colores[0]) || colorDesdeTexto(nombre);
   // Un color de marca casi negro (Nike, Adidas...) se pierde sobre el fondo oscuro del juego:
   // por debajo de este umbral de luminancia se sustituye por un gris claro legible.
@@ -6472,8 +6483,7 @@ const OBJETIVOS_NEGOCIACION_PATROCINIO = [
       const siguienteNivel = NIVELES_POPULARIDAD.find(n => n.min > popActual) || NIVELES_POPULARIDAD[NIVELES_POPULARIDAD.length-1];
       return `Prima si alcanzas el nivel "${siguienteNivel.texto}" de popularidad (${formatearDinero(Math.round(sueldo*0.30/50)*50)})`;
     }, coste:8, tipo:'prima_popularidad', monto:sueldo=>Math.round(sueldo*0.30/50)*50 },
-  { id:'prima_mvp', label:sueldo=>`Prima si eres el mejor jugador de la liga (${formatearDinero(Math.round(sueldo*0.40/50)*50)})`, coste:9, tipo:'prima_mvp', monto:sueldo=>Math.round(sueldo*0.40/50)*50 },
-  { id:'exclusividad', label:'Cláusula de exclusividad total (imagen solo para ellos)', coste:10, tipo:'exclusividad' }
+  { id:'prima_mvp', label:sueldo=>`Prima si eres el mejor jugador de la liga (${formatearDinero(Math.round(sueldo*0.40/50)*50)})`, coste:9, tipo:'prima_mvp', monto:sueldo=>Math.round(sueldo*0.40/50)*50 }
 ];
 const OBJETIVOS_POR_CATEGORIA = {
   "Tercera RFEF": ["pelear el ascenso a 2ª RFEF","consolidarse en la categoría","evitar el descenso a División Regional"],
@@ -8587,7 +8597,7 @@ function escudoSVG(nombre, tamano, colores){
   const primero = primerEquipoDeFilial(nombre);
   if(primero) return escudoSVG(primero, tamano, coloresClubDelJuego(primero) || colores);
   const custom = escudoPersonalizado('clubes', nombre);
-  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" style="object-fit:contain;flex-shrink:0;">`;
+  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" class="escudo-custom-img" style="object-fit:contain;flex-shrink:0;">`;
   if(nombre === 'Real Madrid CF') return escudoRealMadrid(tamano);
   if(nombre === 'Atlético de Madrid') return escudoAtletico(tamano);
   if(nombre === 'FC Barcelona') return escudoBarcelona(tamano);
@@ -9159,7 +9169,7 @@ function evaluarPromesas(j){
     let cumplida = false;
     let montoPagado = 0;
     if(p.tipo === 'campeon') cumplida = (S.titulosTemporadaActual||[]).length > 0;
-    else if(p.tipo === 'titular') cumplida = !!(S.rolTemporada && S.rolTemporada.corto === 'Titular');
+    else if(p.tipo === 'partidos_minimos') cumplida = !!S.temporadaResumen && S.temporadaResumen.partidos >= Math.round((PARTIDOS_POR_CATEGORIA[j.club.categoria]||34) * 0.6);
     else if(p.tipo === 'ascenso_plazo') cumplida = !!(S.temporadaResumen && S.temporadaResumen.ascenso);
     else if(p.tipo === 'goleador') cumplida = !!(S.temporadaResumen && S.temporadaResumen.pichichi);
     else if(p.tipo === 'prima_gol'){
@@ -10876,7 +10886,7 @@ function logoLiga(nombre, tamano){
   const custom = escudoPersonalizado('ligas', nombre);
   if(!custom) return '';
   tamano = tamano || 18;
-  return `<img src="${custom}" alt="${nombre}" style="height:${tamano}px;width:auto;max-width:${Math.round(tamano*2.6)}px;object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
+  return `<img src="${custom}" alt="${nombre}" class="escudo-custom-img" style="height:${tamano}px;width:auto;max-width:${Math.round(tamano*2.6)}px;object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
 }
 
 // Bandera de un país (nacionalidad de un jugador o de un club) — geográfica, no se personaliza:
@@ -10896,7 +10906,7 @@ function banderaPais(pais, tamano){
 function escudoSeleccion(pais, tamano){
   tamano = tamano || 14;
   const custom = escudoPersonalizado('selecciones', pais);
-  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${pais}" style="object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
+  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${pais}" class="escudo-custom-img" style="object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
   return banderaPais(pais, tamano);
 }
 // Títulos con imagen propia opcional (pantallas de "Campeón") — mismos 6 nombres que aparecen en
@@ -10906,7 +10916,7 @@ const TITULOS_PERSONALIZABLES = ['LaLiga', 'Copa del Rey', 'Champions League', '
 function logoTitulo(nombre, tamano){
   tamano = tamano || 44;
   const custom = escudoPersonalizado('titulos', nombre);
-  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" style="object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
+  if(custom) return `<img src="${custom}" width="${tamano}" height="${tamano}" alt="${nombre}" class="escudo-custom-img" style="object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
   const logoComp = logoCompeticion(nombre, tamano);
   if(logoComp) return logoComp;
   return iconoInline('trofeo', tamano);
@@ -11147,6 +11157,11 @@ function calcularDuracionPatrocinio(j){
   let opciones = [1,1,2];
   if(j.stats.reputacion >= 30 || j.stats.popularidad >= 45) opciones = [1,2,2,3];
   if(j.stats.reputacion >= 55 || j.stats.popularidad >= 65) opciones = [2,2,3,3];
+  // Nunca más años de patrocinio de los que le quedan de carrera antes del retiro forzoso a los
+  // 42 (bug real: llegaban ofertas de 3 años con el jugador a las puertas de colgar las botas).
+  const maxTemporadasRestantes = Math.max(1, 42 - j.edad);
+  opciones = opciones.filter(v => v <= maxTemporadasRestantes);
+  if(!opciones.length) opciones = [1];
   return opciones[Math.floor(Math.random()*opciones.length)];
 }
 function calcularDuracionContrato(j){
@@ -11220,9 +11235,15 @@ function generarOfertas(j){
     let clubElegido;
     if(idxObjetivo === idxActual){
       const prestigioActual = PRESTIGIO_CLUB[j.club.nombre] || 2;
-      const prestigioMinimo = Math.max(1, prestigioActual - 1);
+      let prestigioMinimo = Math.max(1, prestigioActual - 1);
       const nivelJugador = j.stats.reputacion >= 70 ? 4 : (j.stats.reputacion >= 45 ? 3 : (j.stats.reputacion >= 20 ? 2 : 1));
-      const prestigioMaximo = Math.min(4, Math.max(prestigioActual, nivelJugador));
+      let prestigioMaximo = Math.min(4, Math.max(prestigioActual, nivelJugador));
+      // A partir de los 34, los equipos que se fijan en ti bajan de nivel poco a poco (ya no eres
+      // la apuesta de futuro de antes) — más marcado a partir de los 37.
+      if(j.edad >= 34){
+        prestigioMaximo = Math.max(1, prestigioMaximo - (j.edad >= 37 ? 2 : 1));
+        prestigioMinimo = Math.min(prestigioMinimo, prestigioMaximo);
+      }
       const candidatos = CLUBES_POR_CATEGORIA[categoria].filter(c => { const p = PRESTIGIO_CLUB[c.nombre]||2; return p >= prestigioMinimo && p <= prestigioMaximo; });
       clubElegido = candidatos.length ? candidatos[Math.floor(Math.random()*candidatos.length)] : clubAleatorio(categoria, undefined);
     } else {
@@ -11262,7 +11283,15 @@ function generarOfertas(j){
     if(j.club.categoria === "LaLiga") tierMax = j.stats.reputacion >= 60 ? 4 : (j.stats.reputacion >= 35 ? 3 : 2);
     else if(j.club.categoria === "LaLiga2") tierMax = 2;
     else tierMax = 1;
+    // Mismo criterio que en el mercado doméstico: a partir de los 34 el nivel de los clubes que
+    // se fijan en ti baja poco a poco.
+    if(j.edad >= 34) tierMax = Math.max(1, tierMax - (j.edad >= 37 ? 2 : 1));
     const tierMin = Math.max(1, tierMax - 1); // suelo mínimo, para que un jugador de nivel alto no reciba ofertas de clubes extranjeros flojos
+    // Cuanto más veterano, más probable que la oferta salte directamente a uno de los países de
+    // "última etapa" (PAISES_ULTIMA_ETAPA: Estados Unidos/Arabia Saudí — mucho dinero, nivel
+    // deportivo más discreto, el destino real de tantos futbolistas al final de su carrera),
+    // pasando por encima del filtro de prestigio de arriba.
+    const probUltimaEtapa = j.edad >= 33 ? Math.min(0.6, (j.edad-32)*0.12) : 0;
     // Países ya repartidos en esta misma ronda de ofertas (domésticas incluidas, aunque esas no
     // llevan país — solo importa aquí): evita que dos ofertas extranjeras del mismo lote caigan
     // siempre en el mismo país por pura coincidencia del sorteo, y reparte mejor entre los 26
@@ -11270,7 +11299,9 @@ function generarOfertas(j){
     const paisesUsados = new Set();
     for(let i=0; i<maxOfertasExtranjero; i++){
       if(Math.random() >= probExtranjero) continue;
-      let candidatosExt = CLUBES_EXTRANJERO.filter(c => { const p = PRESTIGIO_CLUB[c.nombre]||2; return p >= tierMin && p <= tierMax; });
+      let candidatosExt = Math.random() < probUltimaEtapa
+        ? CLUBES_EXTRANJERO.filter(c => PAISES_ULTIMA_ETAPA.includes(c.pais))
+        : CLUBES_EXTRANJERO.filter(c => { const p = PRESTIGIO_CLUB[c.nombre]||2; return p >= tierMin && p <= tierMax; });
       if(!candidatosExt.length) candidatosExt = CLUBES_EXTRANJERO.filter(c => (PRESTIGIO_CLUB[c.nombre]||2) <= tierMax);
       const candidatosPaisNuevo = candidatosExt.filter(c => !paisesUsados.has(c.pais) && !nombresUsados.has(c.nombre));
       const pool = candidatosPaisNuevo.length ? candidatosPaisNuevo : candidatosExt;
@@ -13691,6 +13722,36 @@ function pasoApuestaCasino(v){
   if(v < 10000) return 500;
   return 1000;
 }
+// Mantener pulsado un botón +/- de apuesta (ruleta/blackjack) repite `paso` cada 90ms tras 400ms
+// de espera, en vez de tener que tocar decenas de veces para mover una apuesta alta. El primer
+// paso se aplica al instante en mousedown/touchstart (así un toque suelto se siente como un click
+// normal), y los listeners que detectan "soltar" van en window, no en el propio botón — pintar()
+// reconstruye todo #app en cada paso, así que el botón original desaparece a media pulsación, pero
+// el temporizador vive en esta clausura de JS y sigue funcionando hasta que de verdad se suelta.
+function activarMantenerPulsado(btn, paso){
+  let timeoutId = null, intervalId = null;
+  const parar = ()=>{
+    if(timeoutId){ clearTimeout(timeoutId); timeoutId = null; }
+    if(intervalId){ clearInterval(intervalId); intervalId = null; }
+    window.removeEventListener('mouseup', parar);
+    window.removeEventListener('touchend', parar);
+    window.removeEventListener('touchcancel', parar);
+  };
+  const empezar = (e)=>{
+    if(btn.disabled) return;
+    e.preventDefault();
+    paso();
+    window.addEventListener('mouseup', parar);
+    window.addEventListener('touchend', parar);
+    window.addEventListener('touchcancel', parar);
+    timeoutId = setTimeout(()=>{
+      intervalId = setInterval(()=>{ if(btn.disabled){ parar(); return; } paso(); }, 90);
+    }, 400);
+  };
+  btn.addEventListener('mousedown', empezar);
+  btn.addEventListener('touchstart', empezar, {passive:false});
+  btn.addEventListener('keydown', e=>{ if((e.key==='Enter'||e.key===' ') && !btn.disabled){ e.preventDefault(); paso(); } });
+}
 SCREENS.ruleta = function(){
   const j = S.jugador;
   S.ruletaApuestaTipo = S.ruletaApuestaTipo || 'rojo';
@@ -13702,9 +13763,6 @@ SCREENS.ruleta = function(){
   if(!embebido) c.appendChild(crearEyebrow('Casino · Ruleta'));
   const bannerRetoR = bannerRetoCasinoAmigo();
   if(bannerRetoR) c.appendChild(bannerRetoR);
-  const cajaDinero = el('div',null, `Dinero disponible: <b style="color:var(--gold);">${formatearDinero(j.stats.dinero)}</b>`);
-  cajaDinero.style.cssText = "background:rgba(110,136,168,0.1);border-radius:8px;padding:14px 16px;margin-bottom:18px;font-family:'Space Grotesk',sans-serif;font-size:14.5px;line-height:1.55;color:var(--ink);";
-  c.appendChild(cajaDinero);
 
   // ---- Plato de la ruleta ----
   const wheelWrap = document.createElement('div');
@@ -13856,29 +13914,16 @@ SCREENS.ruleta = function(){
   const btnApuestaMenos = document.createElement('button'); btnApuestaMenos.textContent='−';
   btnApuestaMenos.disabled = !!S.ruletaGirando || S.ruletaApuestaCantidad <= 10;
   btnApuestaMenos.style.cssText = 'width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:15px;flex-shrink:0;';
-  btnApuestaMenos.onclick = ()=>{ S.ruletaApuestaCantidad = Math.max(10, S.ruletaApuestaCantidad - pasoApuestaCasino(S.ruletaApuestaCantidad)); pintar(); };
+  activarMantenerPulsado(btnApuestaMenos, ()=>{ S.ruletaApuestaCantidad = Math.max(10, S.ruletaApuestaCantidad - pasoApuestaCasino(S.ruletaApuestaCantidad)); pintar(); });
   cantidadLinea.appendChild(btnApuestaMenos);
   cantidadLinea.appendChild(el('div','lbl', `Apuesta: ${formatearDinero(S.ruletaApuestaCantidad)}`));
   const btnApuestaMas = document.createElement('button'); btnApuestaMas.textContent='+';
   const topeApuesta = Math.max(10, j.stats.dinero);
   btnApuestaMas.disabled = !!S.ruletaGirando || S.ruletaApuestaCantidad >= topeApuesta;
   btnApuestaMas.style.cssText = 'width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:15px;flex-shrink:0;';
-  btnApuestaMas.onclick = ()=>{ S.ruletaApuestaCantidad = Math.min(topeApuesta, S.ruletaApuestaCantidad + pasoApuestaCasino(S.ruletaApuestaCantidad)); pintar(); };
+  activarMantenerPulsado(btnApuestaMas, ()=>{ S.ruletaApuestaCantidad = Math.min(topeApuesta, S.ruletaApuestaCantidad + pasoApuestaCasino(S.ruletaApuestaCantidad)); pintar(); });
   cantidadLinea.appendChild(btnApuestaMas);
   cantidadWrap.appendChild(cantidadLinea);
-  const botonesCantidad = document.createElement('div');
-  botonesCantidad.style.cssText = 'display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:center;';
-  const opcionesCantidad = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000].filter(v => v <= Math.max(10, j.stats.dinero));
-  if(!opcionesCantidad.length) opcionesCantidad.push(10);
-  opcionesCantidad.forEach(v=>{
-    const btn = document.createElement('button');
-    btn.textContent = formatearDinero(v);
-    btn.disabled = !!S.ruletaGirando;
-    btn.style.cssText = `padding:6px 10px;border-radius:8px;font-size:11px;border:1px solid ${S.ruletaApuestaCantidad===v?'var(--gold)':'var(--line)'};background:transparent;color:var(--ink);`;
-    btn.onclick = ()=>{ S.ruletaApuestaCantidad = v; pintar(); };
-    botonesCantidad.appendChild(btn);
-  });
-  cantidadWrap.appendChild(botonesCantidad);
   c.appendChild(cantidadWrap);
 
   const noPuedeApostar = j.stats.dinero <= 0 || S.ruletaApuestaCantidad > j.stats.dinero;
@@ -14254,7 +14299,6 @@ SCREENS.blackjack = function(){
   const embebido = S.movilVista === 'pantallaReal';
   const c = el('div','card');
   if(!embebido) c.appendChild(crearEyebrow('Casino · Blackjack'));
-  c.appendChild(el('div','bj-dinero', `Dinero disponible: <b style="color:var(--gold);">${formatearDinero(j.stats.dinero)}</b>`));
 
   // ---- Mesa de fieltro ----
   const mesa = el('div','bj-mesa');
@@ -14318,25 +14362,16 @@ SCREENS.blackjack = function(){
     const bjBtnMenos = document.createElement('button'); bjBtnMenos.textContent='−';
     bjBtnMenos.disabled = S.bjApuesta <= 50;
     bjBtnMenos.style.cssText = 'width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:15px;flex-shrink:0;';
-    bjBtnMenos.onclick = ()=>{ S.bjApuesta = Math.max(50, S.bjApuesta - pasoApuestaCasino(S.bjApuesta)); pintar(); };
+    activarMantenerPulsado(bjBtnMenos, ()=>{ S.bjApuesta = Math.max(50, S.bjApuesta - pasoApuestaCasino(S.bjApuesta)); pintar(); });
     apuestaLinea.appendChild(bjBtnMenos);
     apuestaLinea.appendChild(el('div','bj-apuesta-label', `Apuesta: <b>${formatearDinero(S.bjApuesta)}</b>`));
     const bjTope = Math.max(50, j.stats.dinero);
     const bjBtnMas = document.createElement('button'); bjBtnMas.textContent='+';
     bjBtnMas.disabled = S.bjApuesta >= bjTope;
     bjBtnMas.style.cssText = 'width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:15px;flex-shrink:0;';
-    bjBtnMas.onclick = ()=>{ S.bjApuesta = Math.min(bjTope, S.bjApuesta + pasoApuestaCasino(S.bjApuesta)); pintar(); };
+    activarMantenerPulsado(bjBtnMas, ()=>{ S.bjApuesta = Math.min(bjTope, S.bjApuesta + pasoApuestaCasino(S.bjApuesta)); pintar(); });
     apuestaLinea.appendChild(bjBtnMas);
     c.appendChild(apuestaLinea);
-    const row = el('div','bj-chips-row');
-    [50,100,200,500,1000,2000,5000].filter(v => v <= Math.max(50, j.stats.dinero)).forEach(v=>{
-      const b = document.createElement('button');
-      b.className = 'bj-chip-btn' + (S.bjApuesta===v ? ' sel' : '');
-      b.textContent = formatearDinero(v);
-      b.onclick = ()=>{ S.bjApuesta = v; pintar(); };
-      row.appendChild(b);
-    });
-    c.appendChild(row);
   }
 
   const noPuede = j.stats.dinero <= 0 || S.bjApuesta > j.stats.dinero;
@@ -17356,7 +17391,7 @@ function svgBanderaCuadrada(pais){
   // Los cromos son de la SELECCIÓN nacional (curiosidades de su fútbol, apodo del equipo...),
   // no del país en abstracto — mismo tipo que escudoSeleccion.
   const custom = escudoPersonalizado('selecciones', pais);
-  if(custom) return `<img src="${custom}" alt="${pais}">`;
+  if(custom) return `<img src="${custom}" alt="${pais}" class="escudo-custom-img">`;
   const patron = BANDERAS_SVG[pais];
   if(!patron) return '';
   return `<svg viewBox="0 0 40 40">${patron}</svg>`;
@@ -17372,7 +17407,7 @@ function contenidoVisualCromo(pais){
   if(!custom) return svgBanderaCuadrada(pais);
   const patron = BANDERAS_SVG[pais];
   const fondo = patron ? `<svg viewBox="0 0 40 40" preserveAspectRatio="xMidYMid slice" class="cromo-bandera-fondo">${patron}</svg>` : '';
-  return `${fondo}<img src="${custom}" alt="${pais}" class="cromo-escudo-encima">`;
+  return `${fondo}<img src="${custom}" alt="${pais}" class="cromo-escudo-encima escudo-custom-img">`;
 }
 let _cromoZoomOrigenRect = null;
 
@@ -19090,13 +19125,25 @@ function enviarPropuestaNegociacion(){
   const partes = [];
   const sueldoInicioTurno = neg.sueldo;
 
+  // Riesgo real de pedir de más: cada turno en que subes el sueldo se cuenta (se reinicia en
+  // cuanto propones bajar, mantener o simplemente no tocas el sueldo) — 3 seguidos y el club da
+  // por terminada la ronda de propuestas, igual que si se agotaran los turnos (ver más abajo).
+  // Además, cada negociación arranca con un techo de sueldo preestablecido (neg.techoSueldo, ver
+  // SCREENS.negociacionFichaje) que el club no supera aunque la disposición sea máxima — pedir por
+  // encima de eso nunca se acerca del todo, por buena que sea la relación en la mesa.
+  neg.peticionesSueldoSeguidas = (p.sueldoDelta > 0) ? (neg.peticionesSueldoSeguidas||0) + 1 : 0;
+
   if(p.sueldoDelta !== 0){
     const objetivo = Math.round(neg.sueldo * (1+p.sueldoDelta) / 50) * 50;
     const costeSueldo = p.sueldoDelta * 45;
     const fracSueldo = costeSueldo <= 0 ? 1 : frac;
-    const nuevoSueldo = Math.round((neg.sueldo + (objetivo - neg.sueldo) * fracSueldo) / 50) * 50;
+    const objetivoTopado = p.sueldoDelta > 0 ? Math.min(objetivo, neg.techoSueldo) : objetivo;
+    const chocaConTecho = p.sueldoDelta > 0 && objetivo > neg.techoSueldo;
+    const nuevoSueldo = Math.round((neg.sueldo + (objetivoTopado - neg.sueldo) * fracSueldo) / 50) * 50;
     if(costeSueldo <= 0){
       partes.push(`Ofreces bajar a ${formatearDinero(objetivo)}, y lo aceptan encantados.`);
+    } else if(chocaConTecho && nuevoSueldo >= neg.techoSueldo - 50){
+      partes.push(`Te dejan claro que no pueden pasar de ${formatearDinero(neg.techoSueldo)}: tienen un tope marcado y no se van a mover de ahí por mucho que insistas.`);
     } else if(fracSueldo >= 0.8){
       partes.push(`Pides ${formatearDinero(objetivo)} y casi lo aceptan entero.`);
     } else if(fracSueldo >= 0.4){
@@ -19132,17 +19179,20 @@ function enviarPropuestaNegociacion(){
     }
   }
 
-  neg.log = partes.join(' ');
   neg.turno++;
   iniciarPropuestaNegociacion();
 
   if(neg.medidor <= 12){
     neg.terminado = 'roto';
+  } else if(neg.peticionesSueldoSeguidas >= 3 && !neg.sinMasPropuestas){
+    neg.sinMasPropuestas = true;
+    partes.push('Cansados de que sigas pidiendo más sueldo una y otra vez, cortan por lo sano: "Esta es nuestra última oferta, la tomas o la dejas."');
   } else if(neg.turno >= neg.maxTurnos){
     // Se agotan las propuestas, pero no se fuerza el fracaso: el club deja su última
     // oferta sobre la mesa y tú decides si la aceptas o te levantas.
     neg.sinMasPropuestas = true;
   }
+  neg.log = partes.join(' ');
 }
 function cerrarTratoNegociacion(){
   const neg = S.negociacion;
@@ -19206,7 +19256,25 @@ SCREENS.negociacionFichaje = function(){
   const neg = S.negociacion;
   if(!neg.medidor){
     neg.medidor = 55 + beneficioRepresentante(j).medidorBonus; neg.turno = 0; neg.maxTurnos = 6; neg.objetivosConseguidos = []; neg.objetivosMonto = {};
+    neg.peticionesSueldoSeguidas = 0;
+    // Tope preestablecido: por buena que sea la disposición, el club nunca ofrece más de esto —
+    // se nota en la mesa (ver enviarPropuestaNegociacion) cuando pides por encima.
+    neg.techoSueldo = Math.round(neg.sueldo * (1.3 + Math.random()*0.25) / 50) * 50;
     neg.log = `${neg.club.nombre} pone su primera oferta sobre la mesa: ${formatearDinero(neg.sueldo)}/temp., ${neg.duracion} ${neg.duracion===1?'año':'años'}.`;
+    // El club también puede blindarse desde el principio con alguna cláusula propia — más
+    // probable cuanto menos hayas demostrado todavía, para no arriesgar un sueldo alto sin saber
+    // si vas a rendir a ese nivel.
+    const probClausulaClub = j.stats.reputacion < 30 ? 0.55 : (j.stats.reputacion < 55 ? 0.35 : 0.15);
+    if(Math.random() < probClausulaClub){
+      const candidatas = OBJETIVOS_NEGOCIACION.filter(o=>['partidos_minimos','prima_gol','prima_titulo'].includes(o.id));
+      const elegida = candidatas[Math.floor(Math.random()*candidatas.length)];
+      if(elegida){
+        neg.objetivosConseguidos.push(elegida.id);
+        if(elegida.monto) neg.objetivosMonto[elegida.id] = elegida.monto(neg.sueldo);
+        const etiquetaClausula = typeof elegida.label === 'function' ? elegida.label(neg.sueldo) : elegida.label;
+        neg.log += ` Eso sí, quieren incluir de entrada: ${etiquetaClausula}.`;
+      }
+    }
     neg.terminado = null;
     neg.sinMasPropuestas = false;
     neg.propuesta = { sueldoDelta:0, duracionDelta:0, objetivo:null };
@@ -19380,7 +19448,7 @@ SCREENS.negociacionFichaje = function(){
     c.appendChild(cajaConseguidos);
   }
 
-  c.appendChild(el('div','event-text', neg.log));
+  c.appendChild(el('div','event-text negociacion-log', neg.log));
 
   // Objetos que ayudan en la negociación
   if((j.objetos.inspiracion>0 || j.objetos.vestuario>0 || j.objetos.avalNegociacion>0) && !neg.avalListo){
@@ -19568,7 +19636,6 @@ function aplicarPromesasPatrocinio(j, neg){
   if(!neg.objetivosConseguidos.length) return;
   j.promesasActivas = j.promesasActivas || [];
   neg.objetivosConseguidos.forEach(id=>{
-    if(id === 'exclusividad') return; // cláusula de efecto inmediato, no necesita evaluarse a fin de temporada
     const opcion = OBJETIVOS_NEGOCIACION_PATROCINIO.find(o=>o.id===id);
     const monto = (neg.objetivosMonto||{})[id];
     const promesa = { id: opcion.id, texto: (typeof opcion.label === 'function' ? opcion.label(neg.dinero) : opcion.label), tipo: opcion.tipo, plazoTemporadas:1, origen:'marca', temporadaLimite: S.temporada };
@@ -19650,9 +19717,8 @@ SCREENS.negociacionPatrocinio = function(){
   medidorWrap.style.marginBottom = '16px';
   const estTxt = neg.medidor>=70 ? {t:'Encantados',c:'var(--green)'} : neg.medidor>=45 ? {t:'Con buena disposición',c:'#E9C454'} : neg.medidor>=25 ? {t:'Dudando',c:'var(--amber)'} : {t:'A punto de romperlo',c:'var(--red)'};
   medidorWrap.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:var(--ink);">Disposición de la marca</span>
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${estTxt.c};">${estTxt.t}</span>
+    <div style="margin-bottom:6px;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:var(--ink);">Disposición de la marca: </span><span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${estTxt.c};">${estTxt.t}</span>
     </div>
     <div style="position:relative;height:10px;border-radius:6px;background:linear-gradient(90deg, var(--red) 0%, var(--amber) 35%, #E9C454 55%, var(--green) 100%);">
       <div style="position:absolute;top:50%;left:${neg.medidor}%;width:16px;height:16px;border-radius:50%;background:var(--ink);border:3px solid var(--panel2);box-shadow:0 1px 4px rgba(0,0,0,0.5);transform:translate(-50%,-50%);transition:left .35s ease;"></div>
@@ -19683,7 +19749,7 @@ SCREENS.negociacionPatrocinio = function(){
     c.appendChild(cajaConseguidos);
   }
 
-  c.appendChild(el('div','event-text', neg.log));
+  c.appendChild(el('div','event-text negociacion-log', neg.log));
 
   const bloqueSueldo = document.createElement('div');
   bloqueSueldo.style.marginBottom = '14px';
@@ -20495,7 +20561,7 @@ function renderContextoPartido(j, momento){
     <div class="marcador-panel">
       <div class="marcador-fila">
         <div class="marcador-celda">
-          <div class="marcador-equipo">${escudoSVG(local.nombre, 24, local.colores)}<span class="marcador-nombre">${local.nombre}</span></div>
+          <div class="marcador-equipo">${escudoSVG(local.nombre, 40, local.colores)}</div>
           <div class="marcador-num">${String(golesLocal).padStart(2,'0')}</div>
         </div>
         <div class="marcador-centro">
@@ -20503,8 +20569,8 @@ function renderContextoPartido(j, momento){
           <div class="marcador-periodo-linea">PERIODO ${periodo}</div>
         </div>
         <div class="marcador-celda">
-          <div class="marcador-equipo">${escudoSVG(visitante.nombre, 24, visitante.colores)}<span class="marcador-nombre">${visitante.nombre}</span></div>
           <div class="marcador-num">${String(golesVisitante).padStart(2,'0')}</div>
+          <div class="marcador-equipo">${escudoSVG(visitante.nombre, 40, visitante.colores)}</div>
         </div>
       </div>
     </div>
