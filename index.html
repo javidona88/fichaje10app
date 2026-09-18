@@ -2423,66 +2423,90 @@ function idxCategoriaServicio(j){ return CATEGORIAS_TIENDA_SERVICIOS.indexOf(j.c
 function porCategoria(idxMin){ return { desbloqueo: j => idxCategoriaServicio(j) >= idxMin, etiquetaBloqueo: `Disponible desde ${TIER_CATEGORIA[CATEGORIAS_TIENDA_SERVICIOS[idxMin]] || CATEGORIAS_TIENDA_SERVICIOS[idxMin]}` }; }
 function porReputacion(min){ return { desbloqueo: j => j.stats.reputacion >= min, etiquetaBloqueo: `Necesitas ${min}+ de reputación` }; }
 function porPopularidad(min){ return { desbloqueo: j => j.stats.popularidad >= min, etiquetaBloqueo: `Necesitas ${min}+ de popularidad` }; }
+// Precios y efectos recalibrados sobre el sueldo real por categoría (ver SUELDO_BASE_POR_CATEGORIA
+// / MULTIPLICADOR_SUELDO_LIGA): la brecha salarial real entre Primera RFEF (~35-55k), LaLiga2
+// (~300-350k) y LaLiga/extranjero/Grande (1,3-9M+) es tan grande que los precios de nivel 1-3
+// antiguos (250€-50.000€) se quedaban ridículos nada más llegar a LaLiga2 — sobraba dinero sin
+// nada en lo que gastarlo. Cada familia añade un NIVEL 4 (élite de verdad, no solo "categoría
+// alta"): como la categoría del club tope en `idxCategoriaServicio` es LaLiga (idx 4, igual que
+// extranjero y Grande), el nivel 4 se desbloquea por REPUTACIÓN en vez de categoría — así
+// distingue a un crack de fama mundial de un simple titular de LaLiga, igual que ya hacían
+// representante/comunicación con sus propios niveles. Los efectos de nivel 3 y 4 suben también,
+// pero la curva de progresión real la sigue marcando factorResistenciaAtributo/gananciaEscalada
+// (cuanto más alto el atributo/stat, menos sube cada punto) — subir el número de nivel 4 no la
+// rompe, solo hace que el dinero de fin de carrera tenga premium real en el que gastarse.
 const TIENDA_SERVICIOS = [
   { familia:'prepFisico', nombre:'Preparador físico personal', icono:'fisico', categoria:'Rendimiento y Cuidado Físico', niveles:[
     { nivel:1, costeAnual:2000, efectoTemporada:{fisico:0.5}, desc:'Trabajo complementario de fuerza y prevención de lesiones que no cubren las sesiones grupales del club.', ...porCategoria(1) },
-    { nivel:2, costeAnual:5500, efectoTemporada:{fisico:1}, desc:'Plan específico de potencia, con seguimiento más cercano.', ...porCategoria(2) },
-    { nivel:3, costeAnual:35000, efectoTemporada:{fisico:1.75}, desc:'Mensualidad alta o dedicación casi exclusiva. Métodos de última generación.', ...porCategoria(4) }
+    { nivel:2, costeAnual:7000, efectoTemporada:{fisico:1.1}, desc:'Plan específico de potencia, con seguimiento más cercano.', ...porCategoria(2) },
+    { nivel:3, costeAnual:90000, efectoTemporada:{fisico:2.2}, desc:'Mensualidad alta o dedicación casi exclusiva. Métodos de última generación.', ...porCategoria(4) },
+    { nivel:4, costeAnual:400000, efectoTemporada:{fisico:3}, desc:'Equipo entero dedicado a ti, como el de una selección nacional: tecnología punta y cero excusas.', ...porReputacion(70) }
   ]},
   { familia:'fisio', nombre:'Fisioterapeuta', icono:'fisio', categoria:'Rendimiento y Cuidado Físico', niveles:[
     { nivel:1, costeAnual:1400, efectoTemporada:{salud:15}, desc:'Descargas musculares puntuales y seguimiento básico de molestias.', ...porCategoria(0) },
-    { nivel:2, costeAnual:3800, efectoTemporada:{salud:25}, desc:'Recuperación acelerada tras partidos, con disponibilidad regular.', ...porCategoria(2) },
-    { nivel:3, costeAnual:22000, efectoTemporada:{salud:40}, desc:'Iguala mensual con disponibilidad total, prácticamente a tu servicio.', ...porCategoria(4) }
+    { nivel:2, costeAnual:5000, efectoTemporada:{salud:25}, desc:'Recuperación acelerada tras partidos, con disponibilidad regular.', ...porCategoria(2) },
+    { nivel:3, costeAnual:75000, efectoTemporada:{salud:45}, desc:'Iguala mensual con disponibilidad total, prácticamente a tu servicio.', ...porCategoria(4) },
+    { nivel:4, costeAnual:350000, efectoTemporada:{salud:55}, desc:'Equipo médico privado a tu entera disposición, el mismo nivel que un cuerpo técnico de selección.', ...porReputacion(70) }
   ]},
   { familia:'nutricionista', nombre:'Nutricionista deportivo', icono:'nutricionista', categoria:'Rendimiento y Cuidado Físico', niveles:[
     { nivel:1, costeAnual:900, efectoTemporada:{forma:8}, desc:'Plan de alimentación básico adaptado a tu rutina.', ...porCategoria(0) },
-    { nivel:2, costeAnual:2200, efectoTemporada:{forma:14}, desc:'Seguimiento mensual, estrategias de suplementación y recarga pre-partido.', ...porCategoria(1) },
-    { nivel:3, costeAnual:11000, efectoTemporada:{forma:22}, desc:'Planes diarios personalizados y ajuste fino de composición corporal.', ...porCategoria(3) }
+    { nivel:2, costeAnual:3200, efectoTemporada:{forma:15}, desc:'Seguimiento mensual, estrategias de suplementación y recarga pre-partido.', ...porCategoria(1) },
+    { nivel:3, costeAnual:45000, efectoTemporada:{forma:26}, desc:'Planes diarios personalizados y ajuste fino de composición corporal.', ...porCategoria(3) },
+    { nivel:4, costeAnual:220000, efectoTemporada:{forma:34}, desc:'Científico de la nutrición dedicado en exclusiva, con seguimiento biométrico diario.', ...porReputacion(65) }
   ]},
   { familia:'chef', nombre:'Chef privado', icono:'chef', categoria:'Rendimiento y Cuidado Físico', niveles:[
     { nivel:1, costeAnual:4500, efectoTemporada:{forma:4, salud:4}, desc:'Tápers y menús semanales adaptados a la pauta del nutricionista.', ...porCategoria(3) },
-    { nivel:2, costeAnual:9000, efectoTemporada:{forma:7, salud:7}, desc:'Servicio de mayor calidad, con más variedad y ajuste diario.', ...porCategoria(4) },
-    { nivel:3, costeAnual:50000, efectoTemporada:{forma:12, salud:12}, desc:'Chef en casa a tiempo completo, cocinando cada comida al detalle.', ...porCategoria(4) }
+    { nivel:2, costeAnual:14000, efectoTemporada:{forma:8, salud:8}, desc:'Servicio de mayor calidad, con más variedad y ajuste diario.', ...porCategoria(4) },
+    { nivel:3, costeAnual:160000, efectoTemporada:{forma:14, salud:14}, desc:'Chef en casa a tiempo completo, cocinando cada comida al detalle.', ...porCategoria(4) },
+    { nivel:4, costeAnual:600000, efectoTemporada:{forma:20, salud:20}, desc:'Chef con estrella, instalado en casa, con menús de precisión milimétrica para cada momento de la temporada.', ...porReputacion(72) }
   ]},
   { familia:'podologo', nombre:'Podólogo deportivo', icono:'podologo', categoria:'Rendimiento y Cuidado Físico', niveles:[
-    { nivel:1, costeAnual:250, efectoTemporada:{salud:5}, desc:'Estudio de la pisada y plantillas básicas.', ...porCategoria(0) },
-    { nivel:2, costeAnual:550, efectoTemporada:{salud:9}, desc:'Plantillas a medida y revisión periódica.', ...porCategoria(1) },
-    { nivel:3, costeAnual:2200, efectoTemporada:{salud:15}, desc:'Ajustes continuos e hiperpersonalización, minimizando cualquier sobrecarga.', ...porCategoria(2) }
+    { nivel:1, costeAnual:300, efectoTemporada:{salud:5}, desc:'Estudio de la pisada y plantillas básicas.', ...porCategoria(0) },
+    { nivel:2, costeAnual:900, efectoTemporada:{salud:10}, desc:'Plantillas a medida y revisión periódica.', ...porCategoria(1) },
+    { nivel:3, costeAnual:6000, efectoTemporada:{salud:17}, desc:'Ajustes continuos e hiperpersonalización, minimizando cualquier sobrecarga.', ...porCategoria(2) },
+    { nivel:4, costeAnual:45000, efectoTemporada:{salud:24}, desc:'El podólogo de referencia mundial del fútbol: biomecánica de precisión en cada pisada.', ...porReputacion(55) }
   ]},
   { familia:'analista', nombre:'Analista de rendimiento', icono:'analista', categoria:'Desarrollo Técnico y Análisis', niveles:[
     { nivel:1, costeAnual:1400, efectoTemporada:{reputacion:2}, desc:'Informes puntuales para corregir posicionamiento y toma de decisiones.', ...porCategoria(2) },
-    { nivel:2, costeAnual:3800, efectoTemporada:{reputacion:4}, desc:'Análisis regular de tus intervenciones y del rival de cada semana.', ...porCategoria(3) },
-    { nivel:3, costeAnual:22000, efectoTemporada:{reputacion:7}, desc:'Edición de vídeo semanal y scouting detallado de cada rival: se nota en cómo te perciben los ojeadores.', ...porCategoria(4) }
+    { nivel:2, costeAnual:6000, efectoTemporada:{reputacion:5}, desc:'Análisis regular de tus intervenciones y del rival de cada semana.', ...porCategoria(3) },
+    { nivel:3, costeAnual:70000, efectoTemporada:{reputacion:9}, desc:'Edición de vídeo semanal y scouting detallado de cada rival: se nota en cómo te perciben los ojeadores.', ...porCategoria(4) },
+    { nivel:4, costeAnual:320000, efectoTemporada:{reputacion:13}, desc:'Departamento de análisis propio: cada rival diseccionado al milímetro antes de saltar al campo.', ...porReputacion(68) }
   ]},
   { familia:'entrenTecnico', nombre:'Entrenador de tecnificación', icono:'entrenTecnico', categoria:'Desarrollo Técnico y Análisis', niveles:[
     { nivel:1, costeAnual:1800, efectoTemporada:{tecnica:0.75}, desc:'Trabajo individualizado de un aspecto muy concreto de tu juego.', ...porCategoria(2) },
-    { nivel:2, costeAnual:4500, efectoTemporada:{tecnica:1.5}, desc:'Sesiones individuales más frecuentes, puliendo detalles finos.', ...porCategoria(3) },
-    { nivel:3, costeAnual:27000, efectoTemporada:{tecnica:2.5}, desc:'Un especialista de prestigio trabaja contigo en exclusiva.', ...porCategoria(4) }
+    { nivel:2, costeAnual:7000, efectoTemporada:{tecnica:1.7}, desc:'Sesiones individuales más frecuentes, puliendo detalles finos.', ...porCategoria(3) },
+    { nivel:3, costeAnual:95000, efectoTemporada:{tecnica:3}, desc:'Un especialista de prestigio trabaja contigo en exclusiva.', ...porCategoria(4) },
+    { nivel:4, costeAnual:420000, efectoTemporada:{tecnica:4.2}, desc:'Un especialista de leyenda, sin compartir agenda con nadie más: trabajo técnico de altísimo nivel.', ...porReputacion(70) }
   ]},
   { familia:'psicologo', nombre:'Psicólogo deportivo', icono:'psicologo', categoria:'Salud Mental y Bienestar', niveles:[
     { nivel:1, costeAnual:1800, efectoTemporada:{mental:0.5}, desc:'Sesiones quincenales para gestionar la presión de cada semana.', ...porCategoria(1) },
-    { nivel:2, costeAnual:4500, efectoTemporada:{mental:1}, desc:'Trabajo mental más profundo, con sesiones periódicas.', ...porCategoria(2) },
-    { nivel:3, costeAnual:27000, efectoTemporada:{mental:1.75}, desc:'Acompañamiento continuo, incluida la gestión de crisis puntuales.', ...porCategoria(4) }
+    { nivel:2, costeAnual:6500, efectoTemporada:{mental:1.1}, desc:'Trabajo mental más profundo, con sesiones periódicas.', ...porCategoria(2) },
+    { nivel:3, costeAnual:85000, efectoTemporada:{mental:2.1}, desc:'Acompañamiento continuo, incluida la gestión de crisis puntuales.', ...porCategoria(4) },
+    { nivel:4, costeAnual:380000, efectoTemporada:{mental:3}, desc:'El psicólogo de referencia de las grandes selecciones, trabajando la cabeza al mismo nivel que el cuerpo.', ...porReputacion(70) }
   ]},
   { familia:'descanso', nombre:'Especialista en descanso', icono:'descanso', categoria:'Salud Mental y Bienestar', niveles:[
     { nivel:1, costeAnual:1100, efectoTemporada:{forma:5, salud:3}, desc:'Pautas básicas de higiene del sueño y cronobiología.', ...porCategoria(3) },
-    { nivel:2, costeAnual:2800, efectoTemporada:{forma:9, salud:6}, desc:'Seguimiento regular y ajuste de rutinas de recuperación.', ...porCategoria(4) },
-    { nivel:3, costeAnual:14000, efectoTemporada:{forma:14, salud:10}, desc:'Tecnología de recuperación en casa: presoterapia, crioterapia portátil.', ...porCategoria(4) }
+    { nivel:2, costeAnual:4500, efectoTemporada:{forma:9, salud:7}, desc:'Seguimiento regular y ajuste de rutinas de recuperación.', ...porCategoria(4) },
+    { nivel:3, costeAnual:50000, efectoTemporada:{forma:14, salud:12}, desc:'Tecnología de recuperación en casa: presoterapia, crioterapia portátil.', ...porCategoria(4) },
+    { nivel:4, costeAnual:260000, efectoTemporada:{forma:20, salud:18}, desc:'Suite de recuperación propia en casa, con la misma tecnología que usan los grandes clubes europeos.', ...porReputacion(68) }
   ]},
   { familia:'representante', nombre:'Agencia de representación', icono:'agente', esPorcentaje:true, categoria:'Gestión y Entorno Profesional', niveles:[
     { nivel:1, comisionPct:0.03, efectoTemporada:{popularidad:8, reputacion:1}, desc:'Intermediación básica y asesoramiento de carrera. Comisión mínima si tu sueldo aún es bajo.', ...porReputacion(20) },
     { nivel:2, comisionPct:0.06, efectoTemporada:{popularidad:14, reputacion:3}, desc:'Negociación activa de contratos y mejor visibilidad mediática.', ...porReputacion(40) },
-    { nivel:3, comisionPct:0.10, efectoTemporada:{popularidad:20, reputacion:5}, desc:'Una de las grandes agencias, con contactos en los mejores clubes.', ...porReputacion(65) }
+    { nivel:3, comisionPct:0.10, efectoTemporada:{popularidad:20, reputacion:5}, desc:'Una de las grandes agencias, con contactos en los mejores clubes.', ...porReputacion(65) },
+    { nivel:4, comisionPct:0.14, efectoTemporada:{popularidad:28, reputacion:8}, desc:'La superagencia que mueve los grandes fichajes del planeta, con contactos hasta en los despachos de la FIFA.', ...porReputacion(80) }
   ]},
   { familia:'asesorFiscal', nombre:'Asesor fiscal y financiero', icono:'asesorFiscal', categoria:'Gestión y Entorno Profesional', niveles:[
-    { nivel:1, costeAnual:550, efectoTemporada:{confianza:3}, desc:'Gestoría básica para la renta y las cuentas del año.', ...porCategoria(0) },
-    { nivel:2, costeAnual:1500, efectoTemporada:{confianza:6}, desc:'Planificación de inversiones y algo más de tranquilidad.', ...porCategoria(1) },
-    { nivel:3, costeAnual:11000, efectoTemporada:{confianza:10}, desc:'Gestión patrimonial completa: sociedades, imagen, inversiones. Ni un solo dolor de cabeza económico.', ...porCategoria(3) }
+    { nivel:1, costeAnual:600, efectoTemporada:{confianza:3}, desc:'Gestoría básica para la renta y las cuentas del año.', ...porCategoria(0) },
+    { nivel:2, costeAnual:2200, efectoTemporada:{confianza:7}, desc:'Planificación de inversiones y algo más de tranquilidad.', ...porCategoria(1) },
+    { nivel:3, costeAnual:40000, efectoTemporada:{confianza:12}, desc:'Gestión patrimonial completa: sociedades, imagen, inversiones. Ni un solo dolor de cabeza económico.', ...porCategoria(3) },
+    { nivel:4, costeAnual:180000, efectoTemporada:{confianza:17}, desc:'Gabinete de gestión patrimonial de primer nivel: inversiones, sociedades e imagen, todo blindado.', ...porReputacion(60) }
   ]},
   { familia:'comunicacion', nombre:'Community Manager', icono:'comunicacion', categoria:'Gestión y Entorno Profesional', niveles:[
     { nivel:1, costeAnual:1800, efectoTemporada:{popularidad:8}, desc:'Manejo básico de redes sociales.', ...porPopularidad(20) },
-    { nivel:2, costeAnual:4500, efectoTemporada:{popularidad:14}, desc:'Gestión activa de la imagen pública y notas de prensa.', ...porPopularidad(40) },
-    { nivel:3, costeAnual:27000, efectoTemporada:{popularidad:22, reputacion:3}, desc:'Agencia de comunicación integral a tu servicio.', ...porPopularidad(65) }
+    { nivel:2, costeAnual:6500, efectoTemporada:{popularidad:16}, desc:'Gestión activa de la imagen pública y notas de prensa.', ...porPopularidad(40) },
+    { nivel:3, costeAnual:90000, efectoTemporada:{popularidad:26, reputacion:4}, desc:'Agencia de comunicación integral a tu servicio.', ...porPopularidad(65) },
+    { nivel:4, costeAnual:380000, efectoTemporada:{popularidad:34, reputacion:7}, desc:'Agencia de comunicación de nivel mundial: tu imagen gestionada como la de una gran estrella global.', ...porPopularidad(82) }
   ]}
 ];
 // La confianza pesa mucho en las tiradas (evita el -2 de bono por debajo de 35), así que se deja
