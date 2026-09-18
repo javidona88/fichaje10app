@@ -15399,6 +15399,26 @@ const TEL_RESPUESTAS_GRUPO_POR_BUCKET = {
     reaccion:['Ojalá te vaya bien con él, de verdad', 'A ver si acierta con las decisiones', 'Espero que sea buena mano para ti']
   }
 };
+// Mismo problema que TEL_RESPUESTAS_GENERICO_POR_TEXTO (contactos 1 a 1), pero para el grupo: el
+// bucket 'generico' agrupa charla suelta MUY variada (planes, coña, una pregunta concreta sobre
+// una peli o el sorteo de Copa...), así que un pool único de mensajes sueltos para el jugador no
+// encajaba con la mitad de las plantillas (p. ej. "jajaja qué crack" como respuesta a "¿alguien
+// ha visto la peli nueva de fútbol?"). Cada entrada, keyed por el texto EXACTO de
+// TEL_PLANTILLAS_NOTIF.generico.grupo, da un pool de mensajes sueltos que sí contestan a eso.
+const TEL_RESPUESTAS_GRUPO_GENERICO_POR_TEXTO = {
+  '¿Qué tal todo? Hace tiempo que no hablamos por aquí.': ['Aquí ando, liado con la temporada', 'Todo bien, a ver si sacamos un rato para hablar más', 'Pues tirando, como siempre', 'Aquí seguimos, qué menos'],
+  'Cuándo quedamos un día de estos, en serio.': ['Cuando queráis, decidme fecha', 'Ahora mismo lo tengo complicado, pero pronto seguro', 'Vamos a por ello, a ver cuándo', 'Me apunto en cuanto digáis día'],
+  '¿Habéis visto el resultado de anoche? Menuda locura de partido.': ['Sí, no me lo podía creer', 'Me lo perdí, contadme qué tal', 'Vaya partidazo, sí señor', 'Algo vi, pero no entero'],
+  'Se me ha ocurrido que podríamos organizar algo para las vacaciones, ¿qué decís?': ['Me apunto seguro', 'Buena idea, a ver qué se os ocurre', 'Depende de fechas, pero con ganas', 'Contad conmigo si cuadra'],
+  'Acabo de ver que hay una peli nueva de fútbol, ¿alguien la ha visto ya?': ['Yo no, pero me apunto a verla', 'Ni idea, contadme si merece la pena', 'Esa la tengo pendiente', 'A ver si la vemos juntos algún día'],
+  '¿Alguien sabe algo del sorteo de la Copa? Dicen que sale hoy.': ['Ni idea, luego miro', 'Yo tampoco me he enterado todavía', 'A ver qué toca, qué nervios', 'Avisadme en cuanto salga'],
+  'Llevo toda la semana sin dormir bien, este calendario nos va a matar.': ['Te entiendo, menuda semana llevamos todos', 'Descansa lo que puedas, en serio', 'Ni que lo digas, vaya ritmo', 'A ver si aflojan pronto con los partidos'],
+  'Qué ganas de que lleguen las vacaciones, en serio.': ['Y que lo digas, hacen falta', 'Contando los días ya', 'Se necesita un descanso, sí', 'Ya queda menos'],
+  'Me acabo de comprar unas botas nuevas, a ver qué tal van.': ['Enséñanoslas', 'Espero que te den suerte', 'A estrenarlas ya', 'Cuéntame qué tal te sientan'],
+  '¿Al final quedamos este fin de semana o qué?': ['Por mí perfecto', 'Este finde lo tengo complicado', 'Decidme hora y ahí estoy', 'Me apunto, sin duda'],
+  'Vaya nivel el del rival del fin de semana, hay que andarse con ojo.': ['Hay que ir con todo, sí', 'Hay que prepararlo bien esta semana', 'Con cabeza se puede', 'Toca estar finos ese día'],
+  'Se me ha antojado una barbacoa este finde, ¿os apuntáis?': ['Me apunto fijo', 'Contad conmigo', 'Depende del finde, pero con ganas', 'Ahí estaré si puedo']
+};
 // Bucket del último mensaje real (no tuyo, no una reacción sin bucket propio) que haya llegado a
 // este grupo — decide qué pool de TEL_RESPUESTAS_GRUPO_POR_BUCKET usar. null si no hay ninguno
 // todavía (grupo recién descubierto, solo con la semilla fija) o si el último bucket fue
@@ -15410,9 +15430,21 @@ function telUltimoBucketGrupo(grupo){
   }
   return null;
 }
+// Texto exacto del último mensaje 'generico' (mismo recorrido que telUltimoBucketGrupo, pero se
+// queda con el texto en vez del nombre del bucket) — ver TEL_RESPUESTAS_GRUPO_GENERICO_POR_TEXTO.
+function telUltimoTextoGenericoGrupo(grupo){
+  const dinamicos = (S.movilBandeja && S.movilBandeja.grupos && S.movilBandeja.grupos[grupo.id]) || [];
+  for(let i=dinamicos.length-1; i>=0; i--){
+    if(dinamicos[i].bucket) return dinamicos[i].bucket === 'generico' ? dinamicos[i].texto : null;
+  }
+  return null;
+}
 function telPoolGrupoJugador(grupo){
   const bucket = telUltimoBucketGrupo(grupo);
-  return (bucket && TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket]) ? TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket].jugador : TEL_RESPUESTAS_GRUPO_JUGADOR;
+  if(bucket && TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket]) return TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket].jugador;
+  const textoGenerico = telUltimoTextoGenericoGrupo(grupo);
+  if(textoGenerico && TEL_RESPUESTAS_GRUPO_GENERICO_POR_TEXTO[textoGenerico]) return TEL_RESPUESTAS_GRUPO_GENERICO_POR_TEXTO[textoGenerico];
+  return TEL_RESPUESTAS_GRUPO_JUGADOR;
 }
 function telPoolGrupoReaccion(bucket){
   return (bucket && TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket]) ? TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket].reaccion : TEL_RESPUESTAS_GRUPO_GENERICAS;
