@@ -211,6 +211,20 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   text-align:center;
 }
 .tel-stats-tab-cont{ margin-top:4px; }
+/* Tabla de CLUBES dentro de Transfermarkt > Stats: a diferencia del mismo bloque dentro del
+   acordeón de la ficha (que sí quiere el margen de sobra, como una tarjeta más), aquí debe ocupar
+   todo el ancho disponible — sin la indentación extra de .trayectoria-fila/.trayectoria-col-heads/
+   .trayectoria-comp-tabla, el escudo cae justo en el borde izquierdo del contenido y la nota en el
+   derecho, igual que el resto de la app. */
+.tel-stats-tab-cont .trayectoria-col-heads{ padding-left:0; padding-right:0; }
+.tel-stats-tab-cont .trayectoria-fila{ padding-left:0; padding-right:0; }
+.tel-stats-tab-cont .trayectoria-comp-tabla{ padding-left:0; padding-right:0; }
+/* TOTALES DE CARRERA (misma pieza .club-stats que SCREENS.final/tabEstadisticas, donde sí quiere
+   quedarse pegado a la izquierda) — aquí sí debe repartirse en columnas iguales a todo el ancho. */
+.club-stats.tel-stats-totales{ display:grid; grid-template-columns:repeat(4,1fr); gap:0; }
+/* Cabecera + ficha + submenú de Transfermarkt quedan FIJOS arriba (mismo patrón .tel-vista-hilo/
+   .tel-hilo-scroll que Banco/WhatsApp) — solo el contenido de la pestaña activa scrollea debajo. */
+.tel-screen.tel-vista-hilo > .tel-bank-card, .tel-screen.tel-vista-hilo > .tel-app-tabs{ flex-shrink:0; }
 .tel-stats-tab-vacio{
   padding:22px 4px; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:13px;
   color:var(--ink-soft); font-style:italic;
@@ -1354,7 +1368,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    reposo se quedaba literalmente en blanco y negro en vez de en su color pastel. */
 .tel-dock-app .tel-icon{ width:49px; height:49px; border-radius:14px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; transition:filter .2s ease; }
 .tel-dock-app.pendiente .tel-icon{ filter:saturate(2.4) brightness(0.96); }
-.tel-dock-app .tel-icon svg{ width:24px; height:24px; }
+.tel-dock-app .tel-icon svg{ width:32px; height:32px; }
 .tel-dock-app .tel-label{ font-family:'Inter',sans-serif; font-size:10px; color:var(--ink-soft); text-align:center; }
 .tel-dock-app:active .tel-icon{ transform:scale(.92); }
 /* Oscurece TODA la pantalla real detrás del móvil abierto (incluida la franja de arriba, entre
@@ -1416,16 +1430,23 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-status-dinero{ font-weight:600; }
 .tel-status-dinero.positivo{ color:var(--green); }
 .tel-status-dinero.negativo{ color:var(--red); }
-/* Iconos de ventajas disponibles (objetos, ver seccionObjetos), en miniatura junto al dinero de
-   la barra de estado del móvil — solo decorativos aquí, el detalle sigue viviendo en la ficha. */
-.tel-status-ventajas{ display:flex; align-items:center; gap:4px; }
-.tel-status-ventaja{ position:relative; display:flex; align-items:center; justify-content:center; }
-.tel-status-ventaja .icono-insignia{ width:15px; height:15px; }
+/* Iconos de ventajas disponibles (objetos, ver seccionObjetos), junto al dinero de la barra de
+   estado del móvil — a diferencia del resto de la barra (decorativa, pointer-events:none), estos
+   SÍ son tocables: abren un tooltip propio con el nombre y la descripción (igual que en la ficha,
+   ver OBJETO_INFO), así que llevan su pointer-events:auto propio. */
+.tel-status-ventajas{ position:relative; display:flex; align-items:center; gap:8px; pointer-events:auto; }
+.tel-status-ventaja{ display:flex; align-items:center; gap:2px; cursor:pointer; }
+.tel-status-ventaja .icono-insignia{ width:22px; height:22px; }
 .tel-status-ventaja .cnt{
-  position:absolute; bottom:-3px; right:-3px; background:var(--gold); color:#1a1408;
-  font-family:'Inter',sans-serif; font-size:8px; font-weight:800; min-width:10px; height:10px;
-  border-radius:50%; display:flex; align-items:center; justify-content:center; line-height:1;
+  font-family:'Inter',sans-serif; font-size:11px; font-weight:700; color:var(--gold);
 }
+.tel-status-tooltip{
+  position:absolute; top:100%; left:0; margin-top:8px; z-index:50; width:max-content; max-width:230px;
+  background:var(--bg2); border:1px solid var(--gold); border-radius:10px; padding:9px 11px;
+  font-family:'Space Grotesk',sans-serif; font-size:11.5px; line-height:1.4; color:var(--ink);
+  box-shadow:0 10px 24px rgba(0,0,0,0.5);
+}
+.tel-status-tooltip b{ color:var(--gold); font-weight:700; display:block; margin-bottom:2px; }
 .tel-status-iconos{
   position:absolute; right:0; top:50%; transform:translateY(-50%);
   display:flex; align-items:center; gap:5px; color:rgba(255,255,255,0.92); pointer-events:none;
@@ -1528,7 +1549,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-app-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px 10px; padding:4px 6px 8px; }
 .tel-app{ background:none; border:none; color:inherit; font-family:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; padding:0; }
 .tel-app .tel-icon{ width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.35); position:relative; transition:filter .5s ease; }
-.tel-app .tel-icon svg{ width:29px; height:29px; }
+.tel-app .tel-icon svg{ width:40px; height:40px; }
 .tel-app .tel-label{ font-family:'Inter',sans-serif; font-size:10.5px; color:var(--ink-soft); text-align:center; }
 .tel-app:active .tel-icon{ transform:scale(.94); }
 .tel-app.locked .tel-icon{ filter:grayscale(1) brightness(.55); }
@@ -11690,8 +11711,14 @@ function pintarMovilSheet(){
   // posición al tocar un nivel" (ver _pantallaRealMovilPrevia) dejaría de funcionar para las dos.
   const scrollViejoElemento = pantallaRealVieja ? (pantallaRealVieja.querySelector(':scope > .tel-hilo-scroll') || pantallaRealVieja) : null;
   const scrollPantallaRealPrevio = scrollViejoElemento ? scrollViejoElemento.scrollTop : 0;
-  const mismaPantallaReal = S.movilVista === 'pantallaReal' && S.screen === _pantallaRealMovilPrevia;
-  _pantallaRealMovilPrevia = S.movilVista === 'pantallaReal' ? S.screen : null;
+  // Misma clave para pantallas reales incrustadas (Servicios/Compras/Casino...) Y para vistas
+  // nativas con su propio .tel-hilo-scroll (Transfermarkt, Banco): 'real:<screen>' o
+  // 'vista:<movilVista>' — así desplegar una fila de CLUBES en Transfermarkt > Stats (que llama a
+  // pintar() como cualquier acordeón) tampoco pierde la posición de scroll, mismo bug que ya
+  // estaba arreglado para Servicios/Compras.
+  const claveVistaMovilActual = S.movilAbierto ? (S.movilVista === 'pantallaReal' ? ('real:'+S.screen) : ('vista:'+S.movilVista)) : null;
+  const mismaPantallaReal = claveVistaMovilActual !== null && claveVistaMovilActual === _pantallaRealMovilPrevia;
+  _pantallaRealMovilPrevia = claveVistaMovilActual;
   raiz.innerHTML = '';
   if(!S.jugador || S.enFaseCreacion){ raiz.style.pointerEvents = 'none'; document.body.style.overflow = ''; return; }
   const pantallaEfectiva = (S.screen === 'ajustes' && S.pantallaAnteriorAjustes) ? S.pantallaAnteriorAjustes : S.screen;
@@ -11823,7 +11850,12 @@ function pintarMovilSheet(){
         pintar();
       };
       headerReal.appendChild(backReal);
-      headerReal.appendChild(el('span','tel-title', S._ultimoTituloTopbar || ''));
+      // Casino y Economía son "apps" de verdad con submenú propio (Ruleta/Tragaperras/Blackjack,
+      // Banco/Servicios/Compras) — el título de la cabecera del móvil debe ser siempre el nombre
+      // de la APP, no el de la pantalla real de turno (antes decía "Ruleta"/"Servicios"/"Compras",
+      // que cambiaba con cada pestaña y no dejaba claro en qué app estabas).
+      const tituloForzado = TEL_TITULO_PANTALLA_REAL_FORZADO[S.screen];
+      headerReal.appendChild(el('span','tel-title', tituloForzado || S._ultimoTituloTopbar || ''));
       pantalla.appendChild(headerReal);
       // Servicios/Compras (pestañas Banco/Servicios/Compras de la app Economía) y Ruleta/
       // Tragaperras/Blackjack (pestañas del Casino Online) llevan también un submenú para saltar
@@ -14519,6 +14551,7 @@ const TEL_ICONO_SCOUT = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stro
 const TEL_ICONO_RENDIMIENTO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>';
 const TEL_ICONO_ENTRENAMIENTO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.3" y="9" width="3.2" height="6" rx="1"/><rect x="18.5" y="9" width="3.2" height="6" rx="1"/><path d="M5.5 12h13"/><path d="M8.3 10v4M15.7 10v4"/></svg>';
 const TEL_ICONO_ESTADISTICAS = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>';
+const TEL_ICONO_ECONOMIA = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16.8 6.2c-1.2-1-2.7-1.6-4.3-1.6-3.7 0-6.7 3.3-6.7 7.4s3 7.4 6.7 7.4c1.6 0 3.1-.6 4.3-1.6"/><path d="M3.8 10.2h9M3.8 13.8h9"/></svg>';
 // Umbrales reales: los mismos NIVELES_POPULARIDAD que usa el resto del juego (Conocido/Popular/Ídolo).
 // Carpeta "Economía" (estilo iOS): agrupa las 3 apps de dinero. Banca es la única con pantalla
 // propia dentro del móvil (S.movilVista='banca', ver más abajo); Casino Online y Servicios
@@ -14556,7 +14589,7 @@ const TEL_DOCK_APPS = [
   // jugador (ver topbar()), pulsando la cápsula de atributos+media. En su lugar en el dock:
   // Estadísticas (estilo Transfermarkt).
   { id:'estadisticas', nombre:'Transfermarkt', clase:'estadisticas', icono:TEL_ICONO_ESTADISTICAS, ir:()=>{ S.movilVista='estadisticas'; pintar(); } },
-  { id:'economia', nombre:'Economía', clase:'economia', icono:ICONOS_SVG.tabEconomia, ir:()=>{ S.movilVista='economia'; pintar(); } },
+  { id:'economia', nombre:'Economía', clase:'economia', icono:TEL_ICONO_ECONOMIA, ir:()=>{ S.movilVista='economia'; pintar(); } },
   // 'ruleta' directo (primera pestaña del submenú), salvo menor de edad: SCREENS.casino es quien
   // de verdad hace la comprobación de edad (ver su gate al principio) — ni ruleta ni tragaperras
   // ni blackjack la repiten, así que hay que seguir pasando por el mostrador en ese caso.
@@ -14580,6 +14613,13 @@ const TEL_APP_STORE_CATALOGO = [
 // este set y el móvil siga abierto en vista 'pantallaReal', pintarMovilSheet() mueve el propio
 // #app (ya pintado por el pintar() normal) dentro de .tel-screen en vez de cerrar el móvil.
 const TEL_PANTALLAS_EMBEBIBLES = new Set(['tabClub','ajustes','casino','ruleta','tragaperras','blackjack','servicios','compras','logros']);
+// Título FORZADO de la cabecera del móvil para las pantallas reales que son en realidad
+// pestañas de una app con submenú propio — el título de la app, no el de la pestaña en la que
+// estás (ver pintarMovilSheet, headerReal).
+const TEL_TITULO_PANTALLA_REAL_FORZADO = {
+  casino:'Casino', ruleta:'Casino', tragaperras:'Casino', blackjack:'Casino',
+  servicios:'Economía', compras:'Economía'
+};
 // Abre una pantalla real DENTRO del móvil (sin cerrarlo). S.movilVistaAnterior guarda a qué
 // vista del móvil volver (home o carpeta_economia) cuando el usuario toque el botón atrás propio
 // del móvil — así Casino/Servicios/Compras vuelven a la carpeta y Club/Ajustes/Cromos a home.
@@ -14619,20 +14659,34 @@ const TEL_VENTAJAS_STATUS = ['inspiracion','vestuario','confianzaCiega','segunda
 function telPintarStatusHora(){
   const wrap = el('div','tel-status-hora');
   if(S.jugador){
-    // El dinero del jugador de un vistazo, sin tener que entrar en Banca — sustituye a la hora
-    // real, que aquí no aportaba nada. Verde en números negros, rojo en números rojos (ver
-    // comprobarNumerosRojos/SCREENS.numerosRojosReveal).
-    const dineroActual = S.jugador.stats.dinero||0;
-    wrap.appendChild(el('span','tel-status-dinero '+(dineroActual<0?'negativo':'positivo'), formatearDineroStatusMovil(dineroActual)));
-    const objetos = S.jugador.objetos || {};
+    const j = S.jugador;
+    // El balance ESTIMADO de fin de temporada (misma proyección que Banco/Servicios, ver
+    // calcularBalanceProyectadoTemporada), no el dinero que llevas encima ahora mismo — de un
+    // vistazo, sin tener que entrar en Economía. Sustituye a la hora real, que aquí no aportaba
+    // nada. Verde si el año va a cerrar en positivo, rojo si no.
+    const neto = calcularBalanceProyectadoTemporada(j).neto;
+    wrap.appendChild(el('span','tel-status-dinero '+(neto<0?'negativo':'positivo'), (neto>=0?'+':'')+formatearDineroStatusMovil(neto)));
+    const objetos = j.objetos || {};
     const conVentaja = TEL_VENTAJAS_STATUS.filter(clave => objetos[clave] > 0);
     if(conVentaja.length){
       const ventajasWrap = el('div','tel-status-ventajas');
       conVentaja.forEach(clave=>{
+        const cantidad = objetos[clave];
         const item = el('div','tel-status-ventaja');
-        item.innerHTML = `${iconoInsignia(clave,15)}<span class="cnt">${objetos[clave]}</span>`;
+        item.innerHTML = `${iconoInsignia(clave,22)}${cantidad>1?`<span class="cnt">×${cantidad}</span>`:''}`;
+        // Tooltip con nombre+descripción al tocar (mismo texto que OBJETO_INFO usa en la ficha) —
+        // stopPropagation para no disparar también el toggle de recoger/abrir el móvil del propio
+        // header al tocar encima.
+        item.onclick = (e)=>{ e.stopPropagation(); S.telStatusVentajaAbierta = (S.telStatusVentajaAbierta===clave) ? null : clave; pintar(); };
         ventajasWrap.appendChild(item);
       });
+      if(S.telStatusVentajaAbierta && conVentaja.includes(S.telStatusVentajaAbierta)){
+        const info = OBJETO_INFO[S.telStatusVentajaAbierta];
+        const tip = el('div','tel-status-tooltip');
+        tip.innerHTML = `<b>${info.nombre}</b>${info.desc}`;
+        tip.onclick = (e)=> e.stopPropagation();
+        ventajasWrap.appendChild(tip);
+      }
       wrap.appendChild(ventajasWrap);
     }
   }
@@ -16153,26 +16207,35 @@ function renderMovilContenido(c, j){
     const tabStats = S.telStatsTab || 'jugador';
     c.appendChild(telAppTabsEstadisticas(tabStats));
 
+    // Cabecera + ficha + submenú quedan FIJOS arriba (mismo patrón .tel-vista-hilo/.tel-hilo-scroll
+    // que Banco/WhatsApp, ver CSS): solo el contenido de la pestaña activa scrollea debajo. Al no
+    // reconstruirse nunca ese bloque superior, desplegar una fila de CLUBES en Stats ya no hace
+    // "saltar" la vista arriba del todo (bug real: el scroll de .tel-hilo-scroll se preserva igual
+    // que en cualquier otra app con este mismo patrón, ver pintarMovilSheet).
+    c.classList.add('tel-vista-hilo');
+    const scroll = el('div','tel-hilo-scroll');
+    c.appendChild(scroll);
+
     if(tabStats === 'jugador'){
       // Representante, Patrocinador y Selección: las mismas cajas/badge que ya se ven en la ficha
       // del Jugador (ver cajaRepresentante/cajaPatrocinio/badgeConvocatoriaSeleccion, extraídas de
       // SCREENS.tabJugador para poder reutilizarlas aquí tal cual, mismos datos). Representante y
       // Patrocinio van a mitad de ancho cada uno en vez de apilados, para aprovechar el ancho.
-      c.appendChild(badgeConvocatoriaSeleccion(j)).style.cssText = 'display:flex;justify-content:center;margin:10px 0 0;';
+      scroll.appendChild(badgeConvocatoriaSeleccion(j)).style.cssText = 'display:flex;justify-content:center;margin:10px 0 0;';
       const fila5050 = el('div','tel-stats-mitad-mitad');
       const cajaRep = cajaRepresentante(j) || el('div','caja-representante-vacia', `${iconoInline('agente',22)}<div style="font-family:'Space Grotesk',sans-serif;font-size:12.5px;color:var(--ink-soft);font-style:italic;">Sin representante por ahora</div>`);
       const cajaPat = cajaPatrocinio(j);
       cajaRep.style.marginTop = '0'; cajaPat.style.marginTop = '0';
       fila5050.appendChild(cajaRep);
       fila5050.appendChild(cajaPat);
-      c.appendChild(fila5050);
+      scroll.appendChild(fila5050);
       // Valor de mercado al final del tab Jugador (antes vivía arriba del todo en Stats) — MISMA
       // función que usa SCREENS.tabJugador (graficaValorMercado), nada propio que se pueda
       // desincronizar de lo que ya se ve en la ficha.
       const graf = el('div');
       graf.style.marginTop = '14px';
       graf.appendChild(graficaValorMercado(j));
-      c.appendChild(graf);
+      scroll.appendChild(graf);
     } else if(tabStats === 'club'){
       // Rediseñado: ya no el historial de temporadas por club (eso se mueve a Stats, ver abajo),
       // sino el estado del club ACTUAL — misma cabecera (escudo/nombre/liga/país) y las mismas
@@ -16191,16 +16254,16 @@ function renderMovilContenido(c, j){
       paisClubEl.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12.5px;color:var(--ink-soft);margin-top:4px;display:flex;align-items:center;justify-content:center;gap:5px;";
       headClub.appendChild(paisClubEl);
       headClub.style.marginTop = '10px';
-      c.appendChild(headClub);
-      c.appendChild(seccionPerfil(j));
-      c.appendChild(seccionContrato(j));
+      scroll.appendChild(headClub);
+      scroll.appendChild(seccionPerfil(j));
+      scroll.appendChild(seccionContrato(j));
     } else if(tabStats === 'stats'){
       // Historial temporada a temporada por club (goles/asistencias/etc por equipo) — MISMA
       // función que seccionEstadisticas usa en la ficha de Jugador (bloqueClubesHistorial), sin
       // duplicar el HTML. Vivía en el tab Club; se traslada aquí a petición expresa.
       const secClub = el('div','tel-stats-tab-cont');
       bloqueClubesHistorial(secClub, j);
-      if(secClub.children.length) c.appendChild(secClub);
+      if(secClub.children.length) scroll.appendChild(secClub);
       // Debajo, totales de carrera + el historial con la selección (bloqueSeleccionHistorial,
       // misma pieza que seccionEstadisticas).
       const historialCarrera = j.historialTemporadas || [];
@@ -16208,24 +16271,24 @@ function renderMovilContenido(c, j){
       const mediaNotaCarrera = notasCarrera.length ? formatearNumero(notasCarrera.reduce((s,n)=>s+n,0)/notasCarrera.length) : '—';
       const totalesTit = el('div','stat-section-titulo','TOTALES DE CARRERA');
       totalesTit.style.marginTop = '16px';
-      c.appendChild(totalesTit);
-      const totalesRow = el('div','club-stats');
+      scroll.appendChild(totalesTit);
+      const totalesRow = el('div','club-stats tel-stats-totales');
       [[j.carrera.partidos||0,'PJ'],[j.carrera.goles||0,'Goles'],[j.carrera.asistencias||0,'Asist.'],[mediaNotaCarrera,'Nota']].forEach(([num,lbl])=>{
         const st = el('div','stat');
         st.appendChild(el('b',null,num));
         st.appendChild(el('span',null,lbl));
         totalesRow.appendChild(st);
       });
-      c.appendChild(totalesRow);
+      scroll.appendChild(totalesRow);
       const secSel = el('div','tel-stats-tab-cont');
       secSel.style.marginTop = '6px';
       bloqueSeleccionHistorial(secSel, j);
-      if(secSel.children.length) c.appendChild(secSel);
+      if(secSel.children.length) scroll.appendChild(secSel);
     } else if(tabStats === 'titulos'){
       const secTit = el('div','tel-stats-tab-cont');
       bloquePalmares(secTit, j);
       if(!secTit.children.length) secTit.innerHTML = `<div class="tel-stats-tab-vacio">Todavía sin títulos que enseñar.</div>`;
-      c.appendChild(secTit);
+      scroll.appendChild(secTit);
     }
   }
 
@@ -19696,7 +19759,7 @@ function renderizarPlantillaServicios(j, contenedor){
   const fila = el('div','staff-balance-row');
   const proyeccion = calcularBalanceProyectadoTemporada(j);
   const balance = el('div','staff-balance '+(proyeccion.neto>=0?'pos':'neg'));
-  balance.innerHTML = `<span class="lbl">Balance estimado a fin de temporada</span><span class="val">${proyeccion.neto>=0?'+':''}${formatearEuros(proyeccion.neto)}</span>`;
+  balance.innerHTML = `<span class="lbl">Balance fin de temporada</span><span class="val">${proyeccion.neto>=0?'+':''}${formatearEuros(proyeccion.neto)}</span>`;
   fila.appendChild(balance);
 
   const gastoAnual = telGastoAnualServicios(j);
@@ -20071,7 +20134,6 @@ SCREENS.servicios = function(){
   app.appendChild(cVolver);
 
   const c = el('div','card');
-  c.appendChild(crearEyebrow('Tu plantilla'));
   renderizarPlantillaServicios(j, c);
   app.appendChild(c);
 };
@@ -20091,7 +20153,6 @@ SCREENS.compras = function(){
   app.appendChild(cVolver);
 
   const c = el('div','card');
-  c.appendChild(crearEyebrow('Tienda'));
   renderizarTiendaOnline(j, c);
   app.appendChild(c);
 };
