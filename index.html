@@ -705,7 +705,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .resumen-total .stat span{ font-family:'Space Grotesk',sans-serif; font-size:9px; color:var(--ink-soft); text-transform:uppercase; }
 
 /* ---- fin de carrera: legado personal (subtramas) ---- */
-.legado-personal{ margin-top:6px; }
+.legado-personal, .motivos-no-renovacion{ margin-top:6px; }
 .legado-item{ padding:13px 0; border-bottom:1px solid var(--line); }
 .legado-item:first-child{ padding-top:4px; }
 .legado-item:last-child{ border-bottom:none; padding-bottom:0; }
@@ -9969,6 +9969,9 @@ function procesarFinTemporada(j, ascensoPlayoff){
     nota: notaMostradaTemporada, carino: j.carinoAficion, valorMercado: j.stats.valorMercado, dinero: j.stats.dinero, edad: j.edad,
     titulos: (S.titulosTemporadaActual||[]).length, titulosNombres: (S.titulosTemporadaActual||[]).slice(), ascenso: !!S.temporadaResumen.ascenso,
     trofeosIndividuales: (S.temporadaResumen.pichichi?1:0) + (S.temporadaResumen.mvp?1:0) + (S.temporadaResumen.balonDeOroPuesto?1:0) + (S.temporadaResumen.botaOro?1:0),
+    // semanasLesion: usado por calcularMotivosNoRenovacion (motivo "historial_lesiones") para ver
+    // si las bajas se repiten temporada tras temporada, no solo en la actual.
+    semanasLesion: S.temporadaSemanasLesion || 0,
     competiciones: competicionesTemporada
   });
   if((S.titulosTemporadaActual||[]).length > 0){
@@ -10175,6 +10178,7 @@ function entrarEnParo(j){
   j.enParo = true;
   j.temporadasEnClub = 0;
   S.clubDeclinaRenovar = undefined;
+  S.motivosNoRenovacion = undefined;
   S.paroFase = 'intro';
   guardarPartida();
 }
@@ -23370,16 +23374,86 @@ SCREENS.temporadaSinClub = function(){
   c.appendChild(btn);
   app.appendChild(c);
 };
+// Suma de semanas de baja de las últimas 2 temporadas registradas en j.historialTemporadas (campo
+// semanasLesion, ver procesarFinTemporada) más lo que lleve lesionado en la actual — usado por el
+// motivo "historial_lesiones" de MOTIVOS_NO_RENOVACION para detectar un jugador con bajas que se
+// repiten curso tras curso, no solo una lesión puntual.
+function semanasLesionRecientes(j){
+  const ultimas = (j.historialTemporadas||[]).slice(-2);
+  const previas = ultimas.reduce((s,t)=> s + (t.semanasLesion||0), 0);
+  return previas + (S.temporadaSemanasLesion||0);
+}
+// Motivos reales por los que un club puede decidir no renovar — ver calcularMotivosNoRenovacion.
+// Cada uno se evalúa contra el estado ACTUAL del jugador (condicion), así que solo entran en juego
+// los que de verdad describen la partida en curso; nunca se inventan de la nada. `peso` es la
+// probabilidad que aporta ese motivo concreto a la decisión final (se suman los de todos los
+// motivos activos), no la probabilidad de que ese motivo en solitario decida la renovación.
+const MOTIVOS_NO_RENOVACION = [
+  // ---- 1. Rendimiento y criterios deportivos ----
+  { id:'declive_rendimiento', categoria:'Rendimiento deportivo', peso:0.24,
+    condicion: j => (j.ultimaNotaTemporada||6.5) < 5.8,
+    texto:'Tu rendimiento ha bajado de forma sostenida esta temporada.' },
+  { id:'incompatibilidad_tactica', categoria:'Rendimiento deportivo', peso:0.14,
+    condicion: j => (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) < 28,
+    texto:'No terminas de encajar en la idea de juego del cuerpo técnico actual.' },
+  { id:'rol_secundario', categoria:'Rendimiento deportivo', peso:0.12,
+    condicion: j => !j.enFilial && S.rolTemporada && S.rolTemporada.corto === 'Suplente' && (j.temporadasEnClub||0) >= 2,
+    texto:'Prefieren dar minutos a un perfil distinto antes que seguir pagando un rol tan secundario.' },
+  // ---- 2. Análisis económico y estructura salarial ----
+  { id:'inviable_salarial', categoria:'Análisis económico', peso:0.16,
+    condicion: j => j.contrato.sueldoAnual > calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 1.35,
+    texto:'Tu ficha se ha quedado por encima de lo que el club puede sostener sin desequilibrar la plantilla.' },
+  { id:'coste_por_minuto', categoria:'Análisis económico', peso:0.10,
+    condicion: j => (!S.rolTemporada || S.rolTemporada.corto !== 'Titular') && j.contrato.sueldoAnual > calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 1.1,
+    texto:'El coste de tu contrato no se justifica con los minutos que has disputado.' },
+  { id:'estrategia_mercado', categoria:'Análisis económico', peso:0.08,
+    condicion: j => (PRESTIGIO_CLUB[j.club.nombre]||2) <= 1 && j.contrato.sueldoAnual > calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.9,
+    texto:'Necesitan liberar ese espacio salarial para invertirlo en otras posiciones prioritarias.' },
+  // ---- 3. Factor médico y estado físico ----
+  { id:'historial_lesiones', categoria:'Factor médico', peso:0.14,
+    condicion: j => semanasLesionRecientes(j) >= 10,
+    texto:'Las lesiones recurrentes de las últimas temporadas te han hecho perder demasiada disponibilidad.' },
+  { id:'secuelas_recuperacion', categoria:'Factor médico', peso:0.08,
+    condicion: j => j.lesionSemanas > 0 && (j.stats.salud!=null?j.stats.salud:100) < 55,
+    texto:'No has terminado de recuperar tu nivel físico previo tras la última baja larga.' },
+  // ---- 4. Planificación de plantilla y relevo generacional ----
+  { id:'politica_edad', categoria:'Planificación de plantilla', peso:0.12,
+    condicion: j => j.edad >= 32,
+    texto:'Prefieren no comprometerse a varios años con un jugador de tu edad.' },
+  { id:'proyeccion_cantera', categoria:'Planificación de plantilla', peso:0.08,
+    condicion: j => !!FILIAL_DE_CLUB[j.club.nombre] && (!S.rolTemporada || S.rolTemporada.corto !== 'Titular'),
+    texto:'Hay un canterano del filial con proyección real para tu misma posición.' },
+  // ---- 5. Aspectos disciplinarios y gestión de vestuario ----
+  { id:'problemas_disciplina', categoria:'Vestuario y disciplina', peso:0.15,
+    condicion: j => (j.stats.vestuario!=null?j.stats.vestuario:55) < 30,
+    texto:'Ha habido más de un roce por disciplina o comportamiento dentro del vestuario.' },
+  { id:'impacto_negativo_grupo', categoria:'Vestuario y disciplina', peso:0.10,
+    condicion: j => (j.stats.vestuario!=null?j.stats.vestuario:55) < 40 && (j.confianzaEntrenador!=null?j.confianzaEntrenador:35) < 35,
+    texto:'Tu relación con el cuerpo técnico y con parte del grupo se ha ido deteriorando.' }
+];
+const BASE_PROB_NO_RENOVACION = 0.03; // aunque no haya ninguna bandera roja, siempre cabe la sorpresa
+const TOPE_PROB_NO_RENOVACION = 0.85; // nunca al 100%: hasta el caso más comprometido deja un resquicio
+function calcularMotivosNoRenovacion(j){
+  const activos = MOTIVOS_NO_RENOVACION.filter(m => m.condicion(j));
+  const probabilidad = Math.min(TOPE_PROB_NO_RENOVACION, BASE_PROB_NO_RENOVACION + activos.reduce((s,m)=>s+m.peso,0));
+  return { activos, probabilidad };
+}
 SCREENS.renovacion = function(){
   const j = S.jugador;
   if(j.edad >= 42){ S.screen = 'retiro'; return SCREENS.retiro(); }
   if(S.clubDeclinaRenovar === undefined){
-    const notaBaja = (j.ultimaNotaTemporada || 6.5) < 5.8;
-    const edadAvanzada = j.edad >= 33;
-    const clubHumilde = (PRESTIGIO_CLUB[j.club.nombre] || 2) <= 1;
-    const probDeclinar = (notaBaja ? 0.32 : 0.04) + (edadAvanzada ? 0.15 : 0) + (clubHumilde ? 0.08 : 0);
-    S.clubDeclinaRenovar = Math.random() < Math.min(0.6, probDeclinar);
-    S.razonNoRenovacion = notaBaja ? 'deportiva' : 'economica';
+    const { activos, probabilidad } = calcularMotivosNoRenovacion(j);
+    S.clubDeclinaRenovar = Math.random() < probabilidad;
+    if(S.clubDeclinaRenovar){
+      // 1 a 3 motivos, priorizando los de más peso entre los que de verdad aplican a esta partida
+      // (nunca todos a la vez, para no convertir el aviso en una lista interminable). Si por lo
+      // que sea no hay ninguno activo (decisión "sorpresa" solo por la probabilidad base), se cae
+      // en un motivo genérico — a veces un club simplemente decide no continuar.
+      const ordenados = activos.slice().sort((a,b)=>b.peso-a.peso);
+      const cuantos = Math.min(ordenados.length, 1 + Math.floor(Math.random()*3));
+      S.motivosNoRenovacion = cuantos > 0 ? ordenados.slice(0, cuantos)
+        : [{ categoria:'Decisión del club', texto:'A veces no hay un único motivo claro: la dirección deportiva prefiere simplemente no continuar, aunque no haya nada concreto que lo explique del todo.' }];
+    }
   }
   topbar("Renovación de contrato");
   const c = el('div','card');
@@ -23387,10 +23461,15 @@ SCREENS.renovacion = function(){
   if(S.clubDeclinaRenovar){
     c.appendChild(crearEyebrow('Tu contrato ha terminado'));
     c.appendChild(el('h2',null,'No hay renovación'));
-    const textoRazon = S.razonNoRenovacion === 'deportiva'
-      ? `El cuerpo técnico ${articuloClub(j.club.nombre)==='la'?'de la':'del'} ${j.club.nombre} decide no contar contigo la próxima temporada. No ha sido tu mejor año, y prefieren mirar hacia otro perfil.`
-      : `${articuloClub(j.club.nombre)==='la'?'La':'El'} ${j.club.nombre} te comunica que, por la situación económica del club, no pueden afrontar una renovación este verano. No es nada personal, son números.`;
-    c.appendChild(el('div','event-text', textoRazon));
+    c.appendChild(el('div','event-text', `${articuloClub(j.club.nombre)==='la'?'La':'El'} ${j.club.nombre} te comunica que no va a renovar tu contrato. Esto es lo que ha trasladado la dirección deportiva:`));
+    const lista = el('div','motivos-no-renovacion');
+    (S.motivosNoRenovacion||[]).forEach(m=>{
+      const item = el('div','legado-item');
+      item.appendChild(el('div','legado-tit', m.categoria));
+      item.appendChild(el('div','legado-txt', m.texto));
+      lista.appendChild(item);
+    });
+    c.appendChild(lista);
     const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Buscar un nuevo equipo →';
     btn.onclick = ()=>{
       S.clubDeclinaRenovar = undefined;
