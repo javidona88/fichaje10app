@@ -1749,7 +1749,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
    .tel-choices-label (mayúsculas finas), con una raya a cada lado en vez de fondo propio. */
 .tel-unread-divider{
   display:flex; align-items:center; gap:8px; margin:4px 0;
-  font-family:'Inter',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--gold);
+  font-family:'Inter',sans-serif; font-size:10.5px; font-weight:500; letter-spacing:.05em; text-transform:uppercase; color:var(--gold);
 }
 .tel-unread-divider::before, .tel-unread-divider::after{ content:''; flex:1; height:1px; background:rgba(212,175,55,0.35); }
 /* Indicador de "escribiendo…": tres puntos que rebotan, mismo bocadillo gris de un mensaje
@@ -15124,6 +15124,35 @@ const TEL_RESPUESTAS_GENERICAS_R2 = [
   { texto:'Bueno, te dejo que sigo liado', respuesta:'Vale, hablamos 👋', relDelta:0 },
   { texto:'Cuando tenga un hueco te llamo y hablamos con calma', respuesta:'Perfecto, aquí ando.', relDelta:1 }
 ];
+// Algunas de las plantillas de TEL_PLANTILLAS_NOTIF.generico.whatsapp no son charla neutra tipo
+// "qué tal todo" — hacen una pregunta CONCRETA (¿vienes por Navidad?, ¿viste el partido?...) que
+// TEL_RESPUESTAS_GENERICAS no contestaba de verdad (bug real, reportado con captura: la pregunta
+// de las Navidades se respondía con "Todo bien, gracias por preguntar"). Clave = el texto EXACTO
+// de la plantilla; solo para RONDA 1 (la R2 ya no repite la pregunta original, sigue siendo charla
+// abierta y le vale el pool genérico de siempre). Lo que no está aquí (las plantillas que sí son
+// charla neutra) cae al pool genérico sin más, ver telPoolGenericoPara.
+const TEL_RESPUESTAS_GENERICO_POR_TEXTO = {
+  'Cuéntame, ¿cómo va todo por el club?': [
+    { texto:'Bien, la verdad, contento con cómo va la temporada', respuesta:'Me alegro, se te ve con buena pinta.', relDelta:2 },
+    { texto:'Con altibajos, como siempre en esto', respuesta:'Normal, lo importante es no bajar los brazos.', relDelta:1 },
+    { texto:'Ahora mismo prefiero no hablar mucho del tema, la verdad', respuesta:'Vale, lo entiendo. Cuando quieras me cuentas.', relDelta:0 }
+  ],
+  '¿Viste el partidazo de ayer? Menuda locura de resultado.': [
+    { texto:'¡Qué locura, sí! No me lo esperaba para nada', respuesta:'Ya ves, se comentó bastante por aquí también.', relDelta:2 },
+    { texto:'La verdad es que no llegué a verlo, andaba liado', respuesta:'Pues búscalo luego, mereció la pena.', relDelta:1 },
+    { texto:'Algo me contaron, aunque no lo vi entero', respuesta:'Con lo que te perdiste, en serio.', relDelta:0 }
+  ],
+  'Oye, ¿al final vienes estas navidades por aquí?': [
+    { texto:'Sí, seguro, ya tengo ganas de veros a todos', respuesta:'¡Qué bien! Ya te organizamos algo para esos días.', relDelta:2 },
+    { texto:'Todavía no lo tengo claro, depende del calendario', respuesta:'Avísame en cuanto lo sepas, aunque sea tarde.', relDelta:1 },
+    { texto:'Este año lo veo complicado, la verdad', respuesta:'Vaya, qué pena. Para la próxima será.', relDelta:0 }
+  ],
+  '¿Qué tal el ambiente en el vestuario estos días?': [
+    { texto:'Muy bien, la verdad, hay buen rollo', respuesta:'Se nota, eso siempre ayuda a rendir mejor.', relDelta:2 },
+    { texto:'Normal, como siempre, ni fu ni fa', respuesta:'Bueno, mientras no haya líos...', relDelta:1 },
+    { texto:'Un poco raro últimamente, la verdad', respuesta:'Vaya, espero que se arregle pronto.', relDelta:0 }
+  ]
+};
 // Variantes de los mismos dos pools, pero con el tono que le pega a según quién escribe — la
 // pareja no habla como el representante. Solo estos dos contactos tienen voz propia de sobra
 // (uno personal, otro profesional); el resto (compañeros) se queda con el pool genérico de
@@ -15297,11 +15326,15 @@ const TEL_RESPUESTAS_POR_BUCKET = {
     ]
   }
 };
-function telPoolGenericoPara(contacto, ronda, bucket){
+function telPoolGenericoPara(contacto, ronda, bucket, textoEntrante){
   if(bucket && bucket !== 'generico' && TEL_RESPUESTAS_POR_BUCKET[bucket]){
     const pool = TEL_RESPUESTAS_POR_BUCKET[bucket];
     return ronda===2 ? (pool.r2 || pool.r1) : pool.r1;
   }
+  // Pregunta concreta dentro del pool "generico" (ver TEL_RESPUESTAS_GENERICO_POR_TEXTO) — prioridad
+  // sobre el tono por contacto (pareja/representante): una respuesta que sí viene a cuento pesa más
+  // que el tono, y da igual quién pregunte por las Navidades o por el partido de ayer.
+  if(ronda===1 && textoEntrante && TEL_RESPUESTAS_GENERICO_POR_TEXTO[textoEntrante]) return TEL_RESPUESTAS_GENERICO_POR_TEXTO[textoEntrante];
   if(contacto && contacto.id === 'pareja') return ronda===2 ? TEL_RESPUESTAS_PAREJA_R2 : TEL_RESPUESTAS_PAREJA;
   if(contacto && contacto.id === 'representante') return ronda===2 ? TEL_RESPUESTAS_REPRESENTANTE_R2 : TEL_RESPUESTAS_REPRESENTANTE;
   return ronda===2 ? TEL_RESPUESTAS_GENERICAS_R2 : TEL_RESPUESTAS_GENERICAS;
@@ -16675,7 +16708,7 @@ function renderMovilContenido(c, j){
       const turnos = [
         { id: contacto.id, mapa: S.movilRespuestas, pool: contacto.opciones, aplicar:(idx)=>telAplicarRespuesta(contacto.id, idx) },
         ...extras.map(m=>{
-          const poolExtra = telPoolGenericoPara(contacto, 1, m.bucket);
+          const poolExtra = telPoolGenericoPara(contacto, 1, m.bucket, m.texto);
           return { id: m.id, mapa: (S.movilRespuestasExtra=S.movilRespuestasExtra||{}), pool: poolExtra, bucket: m.bucket, entrante: m.texto, aplicar:(idx)=>telResponderExtra(m.id, idx, contacto, poolExtra) };
         })
       ];
