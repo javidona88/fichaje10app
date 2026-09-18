@@ -1435,19 +1435,22 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-status-dinero.negativo{ color:var(--red); }
 /* Iconos de ventajas disponibles (objetos, ver seccionObjetos), junto al dinero de la barra de
    estado del móvil — a diferencia del resto de la barra (decorativa, pointer-events:none), estos
-   SÍ son tocables: abren un tooltip propio con el nombre y la descripción (igual que en la ficha,
-   ver OBJETO_INFO), así que llevan su pointer-events:auto propio. */
-.tel-status-ventajas{ position:relative; display:flex; align-items:center; gap:8px; pointer-events:auto; }
-.tel-status-ventaja{ display:flex; align-items:center; gap:2px; cursor:pointer; }
-.tel-status-ventaja .icono-insignia{ width:22px; height:22px; background:none; border:none; }
+   SÍ son tocables: abren un tooltip propio con el nombre, la cantidad y la descripción (igual que
+   en la ficha, ver OBJETO_INFO), así que llevan su pointer-events:auto propio. Solo el icono aquí,
+   sin cifra — la cantidad se explica en el tooltip, no compite por espacio en la barra. */
+.tel-status-ventajas{ display:flex; align-items:center; gap:3px; pointer-events:auto; }
+.tel-status-ventaja{ display:flex; align-items:center; cursor:pointer; }
+.tel-status-ventaja .icono-insignia{ width:17px; height:17px; background:none; border:none; }
 .tel-status-ventaja .icono-insignia svg{ width:100%; height:100%; }
-.tel-status-ventaja .cnt{
-  font-family:'Inter',sans-serif; font-size:11px; font-weight:700; color:var(--gold);
-}
+/* A diferencia de antes (colgado del propio icono, pegado al notch), el tooltip es hermano de
+   .tel-device dentro de .tel-sheet (ver telPintarTooltipVentaja/pintarMovilSheet): flota justo
+   ENCIMA de todo el móvil, centrado, con sitio de sobra tanto recogido como abierto. .tel-sheet
+   tiene su propio transform, así que es el contenedor de referencia real para bottom:100%. */
 .tel-status-tooltip{
-  position:absolute; top:100%; left:0; margin-top:8px; z-index:50; width:max-content; max-width:230px;
-  background:var(--bg2); border:1px solid var(--gold); border-radius:10px; padding:9px 11px;
-  font-family:'Space Grotesk',sans-serif; font-size:11.5px; line-height:1.4; color:var(--ink);
+  position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:10px;
+  z-index:50; width:max-content; max-width:260px;
+  background:var(--bg2); border:1px solid var(--gold); border-radius:10px; padding:10px 12px;
+  font-family:'Space Grotesk',sans-serif; font-size:12px; line-height:1.4; color:var(--ink);
   box-shadow:0 10px 24px rgba(0,0,0,0.5);
 }
 .tel-status-tooltip b{ color:var(--gold); font-weight:700; display:block; margin-bottom:2px; }
@@ -6338,19 +6341,30 @@ const PREGUNTAS_TRAMPA_RUEDA_PRENSA = [
 ];
 
 /* ============ OFERTAS DE FICHAJE (pretemporada) ============ */
-const SUELDO_BASE_POR_CATEGORIA = { "Tercera RFEF":1500, "Segunda RFEF":3500, "Primera RFEF":9000, "LaLiga2":24000, "LaLiga":60000, "Extranjero":75000, "Grande":95000 };
+// Escala real (sept-2026): recalibrada a partir de salarios netos anuales reales por liga
+// (fuentes tipo Capology/Global Sports Salaries, retenciones fiscales ya aplicadas). La brecha
+// real entre las 5 grandes ligas europeas y el resto es mucho más extrema de lo que sugería la
+// escala anterior (compresión de 0.25-1.65, ×6 de spread) — con datos reales el spread real es
+// más bien ×30 (Premier League ~2,4M de salario medio frente a ~60-95K en las ligas más modestas
+// de esta lista). Categorías españolas amateur/semipro (Tercera/Segunda/Primera RFEF) se quedan
+// igual: no hay datos de convenio reales para esas categorías, no son ligas profesionales de
+// verdad. "LaLiga2" (≈LaLiga Hypermotion) y "LaLiga" (resto de LaLiga, sin los 3 grandes) sí
+// tienen datos reales y se han escalado en consecuencia.
+const SUELDO_BASE_POR_CATEGORIA = { "Tercera RFEF":1500, "Segunda RFEF":3500, "Primera RFEF":9000, "LaLiga2":190000, "LaLiga":630000, "Extranjero":1000000, "Grande":3000000 };
 const MULTIPLICADOR_SUELDO_LIGA = {
-  "Premier League":1.65, "Saudi Pro League":1.45, "Bundesliga":1.15, "Serie A":1.1, "Ligue 1":1.0,
-  "Liga Portugal":0.55, "Eredivisie":0.55, "Süper Lig":0.5, "MLS":0.5, "Pro League":0.5,
-  "Brasileirão":0.4, "Scottish Premiership":0.4, "Liga MX":0.4, "Super League Greece":0.35,
-  "Primera División":0.3, "HNL":0.28, "Primera División Uruguay":0.25, "Swiss Football League":0.35,
-  "Ekstraklasa":0.3, "Bundesliga Austria":0.4, "Superliga":0.45,
-  "Championship":0.32, "2. Bundesliga":0.35, "Serie B":0.3,
-  "J1 League":0.35, "K League 1":0.3, "Primera División de Chile":0.28, "Chance Liga":0.3,
+  // Premier League se queda como ancla (1.65, sin cambios) — el resto se recalcula relativo a
+  // ella a partir del salario medio real de cada liga (Premier League ~2,4M de media).
+  "Premier League":1.65, "Bundesliga":0.76, "Serie A":0.83, "Ligue 1":0.64,
+  "Liga Portugal":0.17, "Eredivisie":0.16, "Süper Lig":0.23, "MLS":0.29, "Pro League":0.13,
+  "Brasileirão":0.14, "Scottish Premiership":0.09, "Liga MX":0.09, "Super League Greece":0.14,
+  "Primera División":0.10, "HNL":0.06, "Primera División Uruguay":0.05, "Swiss Football League":0.08,
+  "Ekstraklasa":0.06, "Bundesliga Austria":0.07, "Superliga":0.09,
+  "Championship":0.26, "2. Bundesliga":0.06, "Serie B":0.06,
+  "J1 League":0.09, "K League 1":0.07, "Primera División de Chile":0.05, "Chance Liga":0.06,
   // Clave compuesta "país|liga": para ligas cuyo nombre real coincide con el de otra ya listada
   // (la Premier League de Ucrania se llama igual que la inglesa) — multiplicadorSueldoLiga()
   // mira primero esta clave compuesta antes de caer en el nombre de liga a secas.
-  "Ucrania|Premier League":0.25
+  "Ucrania|Premier League":0.05
 };
 function multiplicadorSueldoLiga(pais, liga){
   return MULTIPLICADOR_SUELDO_LIGA[pais+'|'+liga] ?? MULTIPLICADOR_SUELDO_LIGA[liga] ?? 0.5;
@@ -8854,12 +8868,19 @@ function clubConMasCarino(j){
   if(ultima.club === j.club.nombre) ultima.carino = Math.max(ultima.carino, j.carinoAficion||0);
   return entradas.reduce((mejor, e) => e.carino > mejor.carino ? e : mejor);
 }
+// Umbrales recalibrados junto con SUELDO_BASE_POR_CATEGORIA/MULTIPLICADOR_SUELDO_LIGA (ver su
+// comentario): con la escala salarial antigua, estos cortes (15K/60K/300K/2M) ya cubrían casi
+// toda la carrera; con la nueva (LaLiga ~630K de base, Grande ~3M, top real hasta 15-19M), se
+// quedaban obsoletos — cualquier fichaje mínimamente relevante entraba directo en "Élite" y el
+// coste de vida se volvía insignificante frente al sueldo, perdiendo toda la tensión económica
+// que este sistema busca. Los umbrales bajos (Tercera/Segunda/Primera RFEF, sin cambios) siguen
+// cubiertos por el primer escalón.
 function nivelDeVida(sueldoAnual){
-  if(sueldoAnual < 15000) return { id:'precario', nombre:'Precario', texto:'Compartes piso con dos compañeros del filial. El coche de segunda mano tose al arrancar.', costeAnual:600 };
-  if(sueldoAnual < 60000) return { id:'ajustado', nombre:'Ajustado', texto:'Ya tienes tu propio piso, nada lujoso, pero es tuyo.', costeAnual:3000 };
-  if(sueldoAnual < 300000) return { id:'comodo', nombre:'Cómodo', texto:'Un piso con vistas y margen para darte algún capricho.', costeAnual:12000 };
-  if(sueldoAnual < 2000000) return { id:'alto', nombre:'Alto nivel', texto:'Coche nuevo, casa amplia. Empiezas a notar quién se te acerca por interés.', costeAnual:45000 };
-  return { id:'elite', nombre:'Élite', texto:'Villa, coches de lujo, y una vida que ya no se parece en nada a la de tus amigos de infancia.', costeAnual:150000 };
+  if(sueldoAnual < 20000) return { id:'precario', nombre:'Precario', texto:'Compartes piso con dos compañeros del filial. El coche de segunda mano tose al arrancar.', costeAnual:800 };
+  if(sueldoAnual < 80000) return { id:'ajustado', nombre:'Ajustado', texto:'Ya tienes tu propio piso, nada lujoso, pero es tuyo.', costeAnual:4000 };
+  if(sueldoAnual < 500000) return { id:'comodo', nombre:'Cómodo', texto:'Un piso con vistas y margen para darte algún capricho.', costeAnual:20000 };
+  if(sueldoAnual < 3000000) return { id:'alto', nombre:'Alto nivel', texto:'Coche nuevo, casa amplia. Empiezas a notar quién se te acerca por interés.', costeAnual:130000 };
+  return { id:'elite', nombre:'Élite', texto:'Villa, coches de lujo, y una vida que ya no se parece en nada a la de tus amigos de infancia.', costeAnual:450000 };
 }
 function costeVidaAnual(j){
   return nivelDeVida(j.contrato.sueldoAnual).costeAnual;
@@ -11783,6 +11804,8 @@ function pintarMovilSheet(){
   }
   header.appendChild(el('div','tel-notch'));
   device.appendChild(header);
+  const tooltipVentaja = telPintarTooltipVentaja();
+  if(tooltipVentaja) sheet.appendChild(tooltipVentaja);
 
   // Con el móvil recogido (asomo alto, ver --tel-peek-h), 5 apps de acceso directo debajo del
   // notch, cada una con su nombre — un toque las abre YA dentro de esa app (sin pasar por una
@@ -14660,6 +14683,10 @@ function formatearDineroStatusMovil(valor){
 // Ventajas activas (ver seccionObjetos) en miniatura, junto al dinero — mismas claves, sin
 // rachaGafada (esa es una desventaja, no algo que presumir en la barra de estado).
 const TEL_VENTAJAS_STATUS = ['inspiracion','vestuario','confianzaCiega','segundaOportunidad','avalNegociacion','fichaSuerte','rachaGoleador'];
+function telVentajasActivas(j){
+  const objetos = (j && j.objetos) || {};
+  return TEL_VENTAJAS_STATUS.filter(clave => objetos[clave] > 0);
+}
 function telPintarStatusHora(){
   const wrap = el('div','tel-status-hora');
   if(S.jugador){
@@ -14669,31 +14696,38 @@ function telPintarStatusHora(){
     // comprobarNumerosRojos/SCREENS.numerosRojosReveal).
     const dineroActual = j.stats.dinero||0;
     wrap.appendChild(el('span','tel-status-dinero '+(dineroActual<0?'negativo':'positivo'), formatearDineroStatusMovil(dineroActual)));
-    const objetos = j.objetos || {};
-    const conVentaja = TEL_VENTAJAS_STATUS.filter(clave => objetos[clave] > 0);
+    const conVentaja = telVentajasActivas(j);
     if(conVentaja.length){
+      // Solo los iconos aquí, sin cantidad — la cantidad (×N) se explica en el tooltip que se abre
+      // al tocar (ver telPintarTooltipVentaja), justo encima del móvil entero, no aquí mismo.
       const ventajasWrap = el('div','tel-status-ventajas');
       conVentaja.forEach(clave=>{
-        const cantidad = objetos[clave];
         const item = el('div','tel-status-ventaja');
-        item.innerHTML = `${iconoInsignia(clave,22)}${cantidad>1?`<span class="cnt">×${cantidad}</span>`:''}`;
-        // Tooltip con nombre+descripción al tocar (mismo texto que OBJETO_INFO usa en la ficha) —
+        item.innerHTML = iconoInsignia(clave,17);
         // stopPropagation para no disparar también el toggle de recoger/abrir el móvil del propio
         // header al tocar encima.
         item.onclick = (e)=>{ e.stopPropagation(); S.telStatusVentajaAbierta = (S.telStatusVentajaAbierta===clave) ? null : clave; pintar(); };
         ventajasWrap.appendChild(item);
       });
-      if(S.telStatusVentajaAbierta && conVentaja.includes(S.telStatusVentajaAbierta)){
-        const info = OBJETO_INFO[S.telStatusVentajaAbierta];
-        const tip = el('div','tel-status-tooltip');
-        tip.innerHTML = `<b>${info.nombre}</b>${info.desc}`;
-        tip.onclick = (e)=> e.stopPropagation();
-        ventajasWrap.appendChild(tip);
-      }
       wrap.appendChild(ventajasWrap);
     }
   }
   return wrap;
+}
+// Tooltip de una ventaja de la barra de estado (nombre + descripción + cantidad) — a diferencia
+// de antes, ya NO cuelga del propio icono (quedaba pegado al notch, medio tapado); se pinta como
+// hermano de .tel-device dentro de .tel-sheet, con position:absolute; bottom:100% relativo a la
+// hoja entera, así aparece flotando justo ENCIMA de todo el móvil, con espacio de sobra.
+function telPintarTooltipVentaja(){
+  if(!S.jugador || !S.telStatusVentajaAbierta) return null;
+  const clave = S.telStatusVentajaAbierta;
+  const cantidad = (S.jugador.objetos||{})[clave] || 0;
+  if(!cantidad) return null;
+  const info = OBJETO_INFO[clave];
+  const tip = el('div','tel-status-tooltip');
+  tip.innerHTML = `<b>${info.nombre}${cantidad>1?` · ×${cantidad}`:''}</b>${info.desc}`;
+  tip.onclick = (e)=> e.stopPropagation();
+  return tip;
 }
 const TEL_ICONO_SENAL = `<svg viewBox="0 0 18 14" fill="currentColor"><rect x="0" y="9" width="3" height="5" rx="0.6"/><rect x="5" y="6" width="3" height="8" rx="0.6"/><rect x="10" y="3" width="3" height="11" rx="0.6"/><rect x="15" y="0" width="3" height="14" rx="0.6"/></svg>`;
 const TEL_ICONO_WIFI = `<svg viewBox="0 0 18 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 5.2a11.5 11.5 0 0 1 15 0"/><path d="M4.3 8.4a7.4 7.4 0 0 1 9.4 0"/><circle cx="9" cy="12" r="1.35" fill="currentColor" stroke="none"/></svg>`;
