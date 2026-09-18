@@ -1593,12 +1593,6 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
   font-family:'Inter',sans-serif; font-size:10.5px; font-weight:800; color:#0a2412; line-height:1;
   font-variant-numeric:tabular-nums;
 }
-/* Icono destacado (dorado) cuando el suceso activo está ligado a esta app — ver telAppVinculada()
-   y renderizarOpcionesEvento(), que deja responder la decisión real del suceso desde dentro. */
-.tel-dock-app.destacado .tel-icon{
-  filter:none; box-shadow:0 6px 14px rgba(0,0,0,0.35), 0 0 0 2px var(--gold), 0 0 16px rgba(212,175,55,0.65);
-}
-.tel-dock-app.destacado .tel-label{ color:var(--gold); font-weight:700; }
 /* Carpeta del móvil (estilo iOS): fondo translúcido con una previsualización 2x2 de los
    iconos que contiene — Economía agrupa Banca/Casino Online/Servicios/Compras, ver TEL_CARPETAS. */
 .tel-icon.carpeta{ background:rgba(255,255,255,0.09); display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(2,1fr); gap:4px; padding:8px; }
@@ -4098,6 +4092,10 @@ const BANCO_EVENTOS = [
   },
   {
     id:"amigo_no_futbolista_aparece", unico:true,
+    // vinculoMovil.forzar: igual que "salida_amigos_barrio", el primer contacto llega de verdad
+    // por WhatsApp — se abre el hilo con este candidato (ver telContactosDe, rama de
+    // S._amigoNoFutbolCandidato mientras j.amigoNoFutbol sigue sin fijar) y se responde ahí mismo.
+    vinculoMovil:{ app:'whatsapp', contactoId:'amigoNoFutbol', forzar:true },
     trigger:{ edadMin:19, probabilidad:0.2, condicion: j => !j.amigoNoFutbol },
     texto: j => {
       if(!S._amigoNoFutbolCandidato) S._amigoNoFutbolCandidato = generarAmigoNoFutbol(j);
@@ -4107,7 +4105,7 @@ const BANCO_EVENTOS = [
       return `${base.apodo}, tu ${etiqueta} de toda la vida de antes de que el fútbol lo ocupara todo, te escribe después de meses sin hablar: "¿Te acuerdas de mí? ${pronRelativo} no juega al fútbol", bromea.`;
     },
     opciones:[
-      { texto:"Quedar en cuanto tengas un hueco",
+      { texto:"Quedar en cuanto tengas un hueco", chatTexto:"Cómo no me voy a acordar de ti. En cuanto tenga un hueco quedamos seguro",
         resultado: j => {
           j.amigoNoFutbol = { nombre:S._amigoNoFutbolCandidato.nombre, apodo:S._amigoNoFutbolCandidato.apodo, profesion:S._amigoNoFutbolCandidato.profesion, genero:S._amigoNoFutbolCandidato.genero, relacion:65 };
           const pron = j.amigoNoFutbol.genero==='f' ? 'ella' : 'él';
@@ -4115,7 +4113,7 @@ const BANCO_EVENTOS = [
           return `Quedáis, y es como si no hubiera pasado el tiempo. ${j.amigoNoFutbol.apodo} sigue siendo ${j.amigoNoFutbol.profesion}, con una vida completamente distinta a la tuya, y eso es precisamente lo que más te gusta de ${pron}.`;
         },
         efectos:{mental:6,confianza:3} },
-      { texto:"Contestarle con cariño, pero sin encontrar hueco de verdad",
+      { texto:"Contestarle con cariño, pero sin encontrar hueco de verdad", chatTexto:"Qué alegría saber de ti! A ver si encontramos hueco pronto, que ando liadísimo",
         resultado:"Le escribes con buenas palabras, aunque sabes que no vas a hacer mucho más por encontrar ese hueco. La vida de cada uno tira para un lado distinto.",
         efectos:{mental:-2} }
     ]
@@ -11811,18 +11809,15 @@ function pintarMovilSheet(){
   // Con el móvil recogido (asomo alto, ver --tel-peek-h), 5 apps de acceso directo debajo del
   // notch, cada una con su nombre — un toque las abre YA dentro de esa app (sin pasar por una
   // pantalla de inicio, que de momento se aparca). En escala de grises salvo que tengan algo
-  // pendiente que ver (pendientesDock) o estén destacadas por el suceso activo (telAppVinculada),
-  // para que el color marque justo eso.
+  // pendiente que ver (pendientesDock), para que el color marque justo eso.
   if(!S.movilAbierto && !deshabilitada){
     const dockApps = el('div','tel-dock-apps');
     const pendientesDock = telAppsConPendiente(S.jugador);
-    const appVinculada = telAppVinculada();
     TEL_DOCK_APPS.forEach(a=>{
       const totalPendiente = (pendientesDock[a.id]||0) + (a.id==='redes' ? (pendientesDock.x||0) : 0)
         + (a.id==='economia' ? ((pendientesDock.servicios||0) + (pendientesDock.compras||0)) : 0);
-      const destacada = a.id === appVinculada;
       const btn = document.createElement('button');
-      btn.className = 'tel-dock-app'+(totalPendiente>0?' pendiente':'')+(destacada?' destacado':'');
+      btn.className = 'tel-dock-app'+(totalPendiente>0?' pendiente':'');
       btn.innerHTML = `<span class="tel-icon ${a.clase}">${a.icono}${totalPendiente>0?`<span class="tel-app-dot">${totalPendiente>99?'99+':totalPendiente}</span>`:''}</span><span class="tel-label">${a.nombre}</span>`;
       btn.onclick = (e)=>{
         e.stopPropagation();
@@ -15099,14 +15094,6 @@ function telAppsConPendiente(j){
   if(S.retoCasinoAmigo && S.retoCasinoAmigo.activo && !S.retoCasinoAmigo.visto) mapa.casino = 1;
   return mapa;
 }
-// Si el suceso activo está ligado a WhatsApp o a Redes (ev.vinculoMovil), da el id del icono del
-// dock que debe iluminarse en dorado para que el jugador sepa dónde responder — ver el color
-// dorado de .tel-dock-app.destacado y el enganche de renderizarOpcionesEvento dentro de cada app.
-function telAppVinculada(){
-  const vinc = S.eventoActual && S.eventoActual.vinculoMovil;
-  if(!vinc) return null;
-  return vinc.app === 'redes' ? 'redes' : 'whatsapp';
-}
 // Respuestas genéricas para los mensajes nuevos que van llegando con el avance de temporada
 // (a diferencia del primer intercambio de cada contacto, que sí tiene opciones a medida) — no
 // necesitan efecto de juego, solo dejar contestar de verdad en vez de dejar el mensaje "colgado".
@@ -15769,6 +15756,27 @@ function telContactosDe(j){
         { texto:'Todo controlado, esta noche descanso pronto', respuesta:'Así se hace, profesional hasta para dormir 😌', efectos:{forma:4} },
         { texto:'La verdad es que estoy nervioso', respuesta:'Es normal — se pasa en cuanto tocas el balón.', efectos:{felicidadPareja:5} }
       ] });
+  }
+  if(j.amigoNoFutbol){
+    const etq = j.amigoNoFutbol.genero==='f' ? 'tu amiga' : 'tu amigo';
+    lista.push({ id:'amigoNoFutbol', nombre:j.amigoNoFutbol.apodo||j.amigoNoFutbol.nombre,
+      sub: `${etq} de toda la vida`, color:'#3F9E93',
+      mensajes:['¿Qué tal todo? Hace tiempo que no sé nada de ti.', 'Que sepas que aquí sigo, aunque ahora mismo tengas la cabeza en otra cosa.'],
+      opciones:[
+        { texto:'Todo genial, aunque ando liadísimo', respuesta:'Me lo imagino, no hace falta que te disculpes.', relDelta:1 },
+        { texto:'La verdad es que te echo de menos', respuesta:'Y yo a ti. En cuanto puedas, quedamos de verdad.', relDelta:2 },
+        { texto:'Ahora mismo no tengo mucha cabeza para nada más', respuesta:'Lo entiendo, aquí sigo cuando quieras.', relDelta:0 }
+      ] });
+  } else if(S.eventoActual && S.eventoActual.id === 'amigo_no_futbolista_aparece' && S._amigoNoFutbolCandidato){
+    // Mientras el suceso de reencuentro sigue sin resolver, el contacto "existe" en WhatsApp con
+    // los datos del candidato (S._amigoNoFutbolCandidato) aunque j.amigoNoFutbol todavía no se
+    // haya fijado — eso solo ocurre si de verdad eliges quedar (ver opción del suceso).
+    const cand = S._amigoNoFutbolCandidato;
+    const pronRelativo = cand.genero==='f' ? 'La que' : 'El que';
+    lista.push({ id:'amigoNoFutbol', nombre:cand.apodo||cand.nombre,
+      sub: cand.genero==='f' ? 'tu amiga de toda la vida' : 'tu amigo de toda la vida', color:'#3F9E93',
+      mensajes:[`¿Te acuerdas de mí? ${pronRelativo} no juega al fútbol 😄`],
+      opciones:[] });
   }
   // OJO: sin filtrar por juntosActualmente — un compañero que ficha fuera no debe borrarte el
   // historial de conversación con él, igual que en un WhatsApp real no desaparece el chat con
