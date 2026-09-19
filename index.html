@@ -6421,7 +6421,10 @@ const PREGUNTAS_TRAMPA_RUEDA_PRENSA = [
 // consecuencia; Segunda/Tercera RFEF se quedan igual, son ligas regionales amateur/semiprofesional
 // sin convenio real. "LaLiga2" (≈LaLiga Hypermotion) y "LaLiga" (resto de LaLiga, sin los 3
 // grandes) también tienen datos reales y están escaladas.
-const SUELDO_BASE_POR_CATEGORIA = { "Tercera RFEF":1500, "Segunda RFEF":3500, "Primera RFEF":36000, "LaLiga2":190000, "LaLiga":630000, "Extranjero":1000000, "Grande":3000000 };
+// Sueldos un 20% por debajo de la escala real de Primera RFEF para arriba (Segunda/Tercera RFEF,
+// amateur/semiprofesional sin convenio real, se quedan igual) — a petición expresa, para que la
+// economía apriete algo más en cuanto se llega al fútbol semiprofesional/profesional de verdad.
+const SUELDO_BASE_POR_CATEGORIA = { "Tercera RFEF":1500, "Segunda RFEF":3500, "Primera RFEF":28800, "LaLiga2":152000, "LaLiga":504000, "Extranjero":800000, "Grande":2400000 };
 const MULTIPLICADOR_SUELDO_LIGA = {
   // Premier League se queda como ancla (1.65, sin cambios) — el resto se recalcula relativo a
   // ella a partir del salario medio real de cada liga (Premier League ~2,4M de media).
