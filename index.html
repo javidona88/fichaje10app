@@ -530,16 +530,15 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .contexto-comp svg,.contexto-comp img{ width:15px; height:15px; flex-shrink:0; }
 .contexto-fase{ font-family:'Space Grotesk',sans-serif; font-size:11px; color:var(--ink-soft); text-align:right; }
 .marcador-panel{
-  background:#0a0a0a; border-radius:8px; padding:12px 10px;
-  border:1px solid rgba(255,255,255,0.16);
+  background:#0a0a0a; padding:12px 0; margin:0 -14px;
   box-shadow: inset 0 0 14px rgba(0,0,0,0.85), 0 1px 0 rgba(255,255,255,0.06);
 }
 .marcador-fila{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; }
-/* Escudo pegado al lateral del panel y goles junto a él, los dos centrados verticalmente entre sí
-   — space-between separa ambos hacia los dos extremos de la celda (el escudo siempre el elemento
-   más externo, ver el orden invertido en renderContextoPartido para la celda del visitante). Sin
-   nombre de equipo: con el escudo ya identifica de sobra al club, y liberaba sitio para agrandarlo. */
-.marcador-celda{ display:flex; flex-direction:row; align-items:center; justify-content:space-between; gap:8px; min-width:0; }
+/* Escudo y goles van juntos como un mismo bloque, centrado en el hueco entre el borde del panel
+   y el reloj central (antes iban con space-between, cada uno pegado a un extremo de la celda,
+   separados entre sí en vez de leerse como una unidad). Sin nombre de equipo: con el escudo ya
+   identifica de sobra al club, y liberaba sitio para agrandarlo. */
+.marcador-celda{ display:flex; flex-direction:row; align-items:center; justify-content:center; gap:10px; min-width:0; }
 .marcador-equipo{ display:flex; align-items:center; flex-shrink:0; }
 .marcador-equipo svg,.marcador-equipo img{ display:block; flex-shrink:0; }
 .marcador-num{ font-family:'Oxanium',monospace; font-weight:800; font-size:32px; line-height:1; color:#3ce06a; text-shadow:0 0 6px rgba(60,224,106,0.85), 0 0 14px rgba(60,224,106,0.4); }
@@ -2107,43 +2106,64 @@ function grupoTerceraRFEFDeClub(nombreClub){
   const g = TERCERA_RFEF_GRUPOS.find(g => g.clubes.includes(nombreClub));
   return g ? g.grupo : null;
 }
-// Clubes reales de la temporada 2026-27 (Segunda RFEF: Grupo 5; Primera RFEF: Grupos 1 y 2).
-const CLUBES_POR_CATEGORIA = {
-  "Tercera RFEF": conColores(TERCERA_RFEF_GRUPOS.flatMap(g=>g.clubes)),
-  "Segunda RFEF": conColores([
-    // Grupo 1: Galicia, Asturias, Cantabria, Castilla y León
+// Grupos territoriales reales de Segunda RFEF (temporada 2026-27, 5 grupos) y Primera RFEF (2
+// grupos) — mismo patrón que TERCERA_RFEF_GRUPOS, para poder mostrar el grupo junto a la
+// categoría en el mercado de fichajes (ver categoriaCorta), no solo en Tercera RFEF.
+const SEGUNDA_RFEF_GRUPOS = [
+  { grupo:1, region:'Galicia, Asturias, Cantabria, Castilla y León', clubes:[
     "Atlético Astorga","Burgos CF Promesas","CD Numancia","Gimnástica Segoviana","Real Ávila","Valladolid Promesas","Salamanca UDS",
     "Bergantiños","Deportivo Fabril","Coruxo FC","Ourense CF","CD Sarriana",
     "CD Lealtad","Marino de Luanco","CD Langreo","Real Oviedo Vetusta",
-    "Rayo Cantabria","UD Sámano",
-    // Grupo 2: País Vasco, Navarra, La Rioja, Aragón
+    "Rayo Cantabria","UD Sámano"
+  ]},
+  { grupo:2, region:'País Vasco, Navarra, La Rioja, Aragón', clubes:[
     "CD Alfaro","Náxara CD","UD Logroñés","SD Logroñés",
     "CD Basconia","SD Gernika Club","Deportivo Alavés B","SD Amorebieta","SD Beasain","SD Eibar B","Real Unión Club","Sestao River Club",
     "CD Ebro","Real Zaragoza Deportivo Aragón","Utebo FC","SD Ejea",
-    "CA Mutilvera","CD Tudelano",
-    // Grupo 3: Cataluña, Baleares, Comunidad Valenciana
+    "CA Mutilvera","CD Tudelano"
+  ]},
+  { grupo:3, region:'Cataluña, Baleares, Comunidad Valenciana', clubes:[
     "UD Barbastro","Girona FC B","CD Atlético Baleares","Reus FC Reddis","CD Castellón B","UD Poblense","CD Alcoyano","CD Ibiza Islas Pitiusas",
-    "UE Sant Andreu","Club Lleida Esportiu","UE Porreres","RCD Espanyol B","Torrent CF","Terrassa FC","Valencia Mestalla","FC Barcelona Atlètic","UE Olot","CE Andratx",
-    // Grupo 4: Andalucía, Región de Murcia, Melilla, Extremadura
+    "UE Sant Andreu","Club Lleida Esportiu","UE Porreres","RCD Espanyol B","Torrent CF","Terrassa FC","Valencia Mestalla","FC Barcelona Atlètic","UE Olot","CE Andratx"
+  ]},
+  { grupo:4, region:'Andalucía, Región de Murcia, Melilla, Extremadura', clubes:[
     "UCAM Murcia CF","Águilas FC","FC La Unión Atlético","CD Minera","Yeclano Deportivo","CF Lorca Deportiva","UD Almería B",
-    "Linares Deportivo","Real Jaén CF","Salerm Puente Genil","CD Estepona","Atlético Malagueño","Atlético Antoniano","Xerez CD","RC Recreativo de Huelva","CD Extremadura","UD Melilla",
-    // Grupo 5: Comunidad de Madrid, Canarias, Castilla-La Mancha, Extremadura, Comunidad Valenciana
+    "Linares Deportivo","Real Jaén CF","Salerm Puente Genil","CD Estepona","Atlético Malagueño","Atlético Antoniano","Xerez CD","RC Recreativo de Huelva","CD Extremadura","UD Melilla"
+  ]},
+  { grupo:5, region:'Comunidad de Madrid, Canarias, Castilla-La Mancha, Extremadura, Comunidad Valenciana', clubes:[
     "Colonia Moscardó","CDA Navalcarnero","Rayo Vallecano B","Real Madrid C","RSD Alcalá","San Sebastián de los Reyes","Getafe CF B","CF Fuenlabrada","Rayo Majadahonda",
     "CD Coria","CF Intercity","Elche CF Ilicitano","Orihuela CF","CD Tenerife B","UD Las Palmas Atlético","Quintanar del Rey CF","CD Socuéllamos","UB Conquense"
-  ], 0),
+  ]}
+];
+const PRIMERA_RFEF_GRUPOS = [
+  { grupo:1, clubes:[
+    "Racing de Ferrol","Deportivo Fabril","Pontevedra CF","UD Ourense","CD Lugo",
+    "SD Ponferradina","Real Avilés","Cultural Leonesa","Zamora CF","Unionistas de Salamanca",
+    "CP Cacereño","AD Coria","CD Extremadura","AD Mérida","CD Mirandés",
+    "UD Logroñés","Barakaldo CF","Bilbao Athletic","Arenas de Getxo","Real Unión de Irún"
+  ]},
+  { grupo:2, clubes:[
+    "Águilas FC","Real Jaén CF","Algeciras CF","Real Murcia CF","Atlético Madrileño",
+    "Gimnàstic de Tarragona","FC Cartagena","Real Madrid Castilla","Hércules de Alicante CF","CD Teruel",
+    "UD Ibiza","Villarreal CF B","Juventud de Torremolinos CF","AD Alcorcón","CF Rayo Majadahonda",
+    "Antequera CF","UE Sant Andreu","SD Huesca","Real Zaragoza","CE Europa"
+  ]}
+];
+function grupoSegundaRFEFDeClub(nombreClub){
+  const g = SEGUNDA_RFEF_GRUPOS.find(g => g.clubes.includes(nombreClub));
+  return g ? g.grupo : null;
+}
+function grupoPrimeraRFEFDeClub(nombreClub){
+  const g = PRIMERA_RFEF_GRUPOS.find(g => g.clubes.includes(nombreClub));
+  return g ? g.grupo : null;
+}
+// Clubes reales de la temporada 2026-27 (Segunda RFEF: 5 grupos; Primera RFEF: 2 grupos).
+const CLUBES_POR_CATEGORIA = {
+  "Tercera RFEF": conColores(TERCERA_RFEF_GRUPOS.flatMap(g=>g.clubes)),
+  "Segunda RFEF": conColores(SEGUNDA_RFEF_GRUPOS.flatMap(g=>g.clubes), 0),
   "Primera RFEF": [
-    ...conColores([
-      "Racing de Ferrol","Deportivo Fabril","Pontevedra CF","UD Ourense","CD Lugo",
-      "SD Ponferradina","Real Avilés","Cultural Leonesa","Zamora CF","Unionistas de Salamanca",
-      "CP Cacereño","AD Coria","CD Extremadura","AD Mérida","CD Mirandés",
-      "UD Logroñés","Barakaldo CF","Bilbao Athletic","Arenas de Getxo","Real Unión de Irún"
-    ], 3),
-    ...conColores([
-      "Águilas FC","Real Jaén CF","Algeciras CF","Real Murcia CF","Atlético Madrileño",
-      "Gimnàstic de Tarragona","FC Cartagena","Real Madrid Castilla","Hércules de Alicante CF","CD Teruel",
-      "UD Ibiza","Villarreal CF B","Juventud de Torremolinos CF","AD Alcorcón","CF Rayo Majadahonda",
-      "Antequera CF","UE Sant Andreu","SD Huesca","Real Zaragoza","CE Europa"
-    ], 8)
+    ...conColores(PRIMERA_RFEF_GRUPOS[0].clubes, 3),
+    ...conColores(PRIMERA_RFEF_GRUPOS[1].clubes, 8)
   ],
   "LaLiga2": conColores([
     "Burgos CF","UD Almería","Cádiz CF","Real Sociedad B","AD Ceuta FC",
@@ -2262,7 +2282,7 @@ const PRESTIGIO_CLUB = {
   "Racing Club de Montevideo":1, "Montevideo Wanderers":1, "Cerro Largo FC":1, "Boston River":1, "Club Progreso":1, "Cerro Montevideo":1, "Deportivo Maldonado":1, "Torque":1, "Juventud de Las Piedras":1, "Central Español":1, "Albion FC":1,
   // Filiales que juegan como clubes independientes en categorías inferiores: prestigio propio por la reputación de su cantera, por encima de la media de su categoría aunque no lleguen al del primer equipo
   "Real Madrid Castilla":3, "Atlético Madrileño":3, "Bilbao Athletic":3,
-  "Villarreal CF C":2, "Real Sociedad B":2, "RC Celta Fortuna":2, "Levante UD B":2, "Deportivo Fabril":2,
+  "Villarreal CF C":2, "Real Sociedad B":2, "RC Celta Fortuna":2, "Atlético Levante UD":2, "Deportivo Fabril":2,
   // Filiales que juegan en Segunda RFEF (un peldaño más abajo, prestigio algo menor pero aún por encima de la media de la categoría)
   "FC Barcelona Atlètic":2, "Getafe CF B":1, "Valencia Mestalla":2, "RCD Espanyol B":1, "Rayo Vallecano B":1,
   "Deportivo Alavés B":1, "Elche CF Ilicitano":1, "Atlético Malagueño":1,
@@ -2310,7 +2330,7 @@ const FILIAL_DE_CLUB = {
   "Rayo Vallecano": "Rayo Vallecano B",
   "CA Osasuna": "CA Osasuna Promesas",
   "Deportivo Alavés": "Deportivo Alavés B",
-  "Levante UD": "Levante UD B",
+  "Levante UD": "Atlético Levante UD",
   "Elche CF": "Elche CF Ilicitano",
   "Real Racing Club": "Rayo Cantabria",
   "RC Deportivo": "Deportivo Fabril",
@@ -3583,7 +3603,9 @@ const BANCO_EVENTOS = [
   },
   {
     id:"racha_goleadora", cooldown:4, soloSiSano:true,
-    trigger:{ edadMin:18, probabilidad:0.18 },
+    // No tiene sentido que la prensa te compare con el pichichi si apenas juegas o tu tiro no
+    // da para una racha de verdad: exige ser titular y un mínimo de pegada.
+    trigger:{ edadMin:18, probabilidad:0.18, condicion: j => S.rolTemporada && S.rolTemporada.corto === 'Titular' && j.atributos.tiro >= 9 },
     texto:"Llevas varios partidos seguidos marcando y la prensa empieza a hablar de ti como el 'pichichi' de la categoría.",
     variantes:[
       "Otra semana más viendo puerta. Los medios ya no hablan de otra cosa que de tu racha goleadora.",
@@ -5992,12 +6014,27 @@ const PROMESAS_CLUB = [
   { id:'ascenso_2_temporadas', texto:'Pelearemos el ascenso en 2 temporadas', tipo:'ascenso_plazo', plazoTemporadas:2 }
 ];
 const OBJETIVOS_NEGOCIACION = [
-  { id:'partidos_minimos', label:'Cláusula de partidos mínimos (jugar al menos 6 de cada 10)', coste:11, tipo:'partidos_minimos' },
-  { id:'prima_gol', label:sueldo=>`Prima por gol (${formatearDinero(Math.round(sueldo*0.01/10)*10)}/gol)`, coste:8, tipo:'prima_gol', monto:sueldo=>Math.round(sueldo*0.01/10)*10 },
-  { id:'prima_25goles', label:sueldo=>`Prima si llegas a 25 goles (${formatearDinero(Math.round(sueldo*0.35/50)*50)})`, coste:7, tipo:'prima_25goles', monto:sueldo=>Math.round(sueldo*0.35/50)*50 },
-  { id:'prima_titulo', label:sueldo=>`Prima si el equipo gana un título (${formatearDinero(Math.round(sueldo*0.15/50)*50)})`, coste:6, tipo:'prima_titulo', monto:sueldo=>Math.round(sueldo*0.15/50)*50 },
-  { id:'prima_ascenso', label:sueldo=>`Prima si el equipo asciende (${formatearDinero(Math.round(sueldo*0.25/50)*50)})`, coste:9, tipo:'prima_ascenso', monto:sueldo=>Math.round(sueldo*0.25/50)*50, soloSiNoEsLaLiga:true }
+  // Bonus por jugar, no una garantía de titularidad: se paga si llegas al 60% de los partidos de
+  // la temporada, gracias a lo que ya calcula PARTIDOS_POR_CATEGORIA (ver evaluarPromesas).
+  { id:'partidos_minimos', label:sueldo=>`Bonus si juegas al menos el 60% de los partidos (${formatearDinero(Math.round(sueldo*0.15/50)*50)})`, coste:11, tipo:'prima_partidos', monto:sueldo=>Math.round(sueldo*0.15/50)*50 },
+  { id:'prima_gol', label:sueldo=>`Bonus por gol (${formatearDinero(Math.round(sueldo*0.01/10)*10)}/gol)`, coste:8, tipo:'prima_gol', monto:sueldo=>Math.round(sueldo*0.01/10)*10 },
+  { id:'prima_25goles', label:sueldo=>`Bonus si llegas a 25 goles (${formatearDinero(Math.round(sueldo*0.35/50)*50)})`, coste:7, tipo:'prima_25goles', monto:sueldo=>Math.round(sueldo*0.35/50)*50 },
+  { id:'prima_titulo', label:sueldo=>`Bonus si el equipo gana un título (${formatearDinero(Math.round(sueldo*0.15/50)*50)})`, coste:6, tipo:'prima_titulo', monto:sueldo=>Math.round(sueldo*0.15/50)*50 },
+  { id:'prima_ascenso', label:sueldo=>`Bonus si el equipo asciende (${formatearDinero(Math.round(sueldo*0.25/50)*50)})`, coste:9, tipo:'prima_ascenso', monto:sueldo=>Math.round(sueldo*0.25/50)*50, soloSiNoEsLaLiga:true }
 ];
+// El club puede llevar ya puesta una cláusula propia desde la primera oferta (más probable cuanto
+// menos hayas demostrado todavía — reputación baja — para no arriesgar un sueldo alto sin saber
+// si vas a rendir). Se calcula UNA vez por oferta, en generarOfertas, para que la lista del
+// mercado ya la enseñe junto al salario (ver SCREENS.ofertas); si acabas negociando esa oferta,
+// es esa MISMA cláusula (por id) la que se aplica de verdad en SCREENS.negociacionFichaje, nunca
+// una tirada nueva independiente.
+function idClausulaClubInicial(j){
+  const prob = j.stats.reputacion < 30 ? 0.55 : (j.stats.reputacion < 55 ? 0.35 : 0.15);
+  if(Math.random() >= prob) return null;
+  const candidatas = OBJETIVOS_NEGOCIACION.filter(o=>['partidos_minimos','prima_gol','prima_titulo'].includes(o.id));
+  const elegida = candidatas[Math.floor(Math.random()*candidatas.length)];
+  return elegida ? elegida.id : null;
+}
 const PROMESAS_JUGADOR = [
   { id:'campeon_temporada', texto:'Le prometo a la afición que seremos campeones esta temporada', tipo:'campeon', plazoTemporadas:1, bonoSueldo:0.15 },
   { id:'goleador_equipo', texto:'Voy a ser el máximo goleador del equipo', tipo:'goleador', plazoTemporadas:1, bonoSueldo:0.12 }
@@ -6481,9 +6518,9 @@ const OBJETIVOS_NEGOCIACION_PATROCINIO = [
       const jActual = S.jugador;
       const popActual = jActual ? (jActual.stats.popularidad||0) : 0;
       const siguienteNivel = NIVELES_POPULARIDAD.find(n => n.min > popActual) || NIVELES_POPULARIDAD[NIVELES_POPULARIDAD.length-1];
-      return `Prima si alcanzas el nivel "${siguienteNivel.texto}" de popularidad (${formatearDinero(Math.round(sueldo*0.30/50)*50)})`;
+      return `Bonus si alcanzas el nivel "${siguienteNivel.texto}" de popularidad (${formatearDinero(Math.round(sueldo*0.30/50)*50)})`;
     }, coste:8, tipo:'prima_popularidad', monto:sueldo=>Math.round(sueldo*0.30/50)*50 },
-  { id:'prima_mvp', label:sueldo=>`Prima si eres el mejor jugador de la liga (${formatearDinero(Math.round(sueldo*0.40/50)*50)})`, coste:9, tipo:'prima_mvp', monto:sueldo=>Math.round(sueldo*0.40/50)*50 }
+  { id:'prima_mvp', label:sueldo=>`Bonus si eres el mejor jugador de la liga (${formatearDinero(Math.round(sueldo*0.40/50)*50)})`, coste:9, tipo:'prima_mvp', monto:sueldo=>Math.round(sueldo*0.40/50)*50 }
 ];
 const OBJETIVOS_POR_CATEGORIA = {
   "Tercera RFEF": ["pelear el ascenso a 2ª RFEF","consolidarse en la categoría","evitar el descenso a División Regional"],
@@ -9169,7 +9206,6 @@ function evaluarPromesas(j){
     let cumplida = false;
     let montoPagado = 0;
     if(p.tipo === 'campeon') cumplida = (S.titulosTemporadaActual||[]).length > 0;
-    else if(p.tipo === 'partidos_minimos') cumplida = !!S.temporadaResumen && S.temporadaResumen.partidos >= Math.round((PARTIDOS_POR_CATEGORIA[j.club.categoria]||34) * 0.6);
     else if(p.tipo === 'ascenso_plazo') cumplida = !!(S.temporadaResumen && S.temporadaResumen.ascenso);
     else if(p.tipo === 'goleador') cumplida = !!(S.temporadaResumen && S.temporadaResumen.pichichi);
     else if(p.tipo === 'prima_gol'){
@@ -9194,6 +9230,10 @@ function evaluarPromesas(j){
     }
     else if(p.tipo === 'prima_mvp'){
       cumplida = !!(S.temporadaResumen && S.temporadaResumen.mvp);
+      if(cumplida) montoPagado = p.montoFijo || 0;
+    }
+    else if(p.tipo === 'prima_partidos'){
+      cumplida = !!S.temporadaResumen && S.temporadaResumen.partidos >= Math.round((PARTIDOS_POR_CATEGORIA[j.club.categoria]||34) * 0.6);
       if(cumplida) montoPagado = p.montoFijo || 0;
     }
 
@@ -10886,7 +10926,12 @@ function logoLiga(nombre, tamano){
   const custom = escudoPersonalizado('ligas', nombre);
   if(!custom) return '';
   tamano = tamano || 18;
-  return `<img src="${custom}" alt="${nombre}" class="escudo-custom-img" style="height:${tamano}px;width:auto;max-width:${Math.round(tamano*2.6)}px;object-fit:contain;vertical-align:middle;flex-shrink:0;">`;
+  // Envuelto en una caja con flex centrado: el logo se sube en un canvas 240×120 con letterbox
+  // (ver ajustarImagenLigaEnCanvas), así que el propio archivo puede llevar margen de sobra a un
+  // lado si el logo real no es exactamente 2:1 — centrarlo aquí con flex, en vez de fiarse solo
+  // del padding del PNG, garantiza que quede centrado pase lo que pase. Caja recortada a 2×alto
+  // (antes 2.6×, dejaba un hueco de sobra que nunca llegaba a usarse).
+  return `<span style="display:inline-flex;align-items:center;justify-content:center;height:${tamano}px;width:${Math.round(tamano*2)}px;vertical-align:middle;flex-shrink:0;"><img src="${custom}" alt="${nombre}" class="escudo-custom-img" style="max-height:100%;max-width:100%;object-fit:contain;display:block;"></span>`;
 }
 
 // Bandera de un país (nacionalidad de un jugador o de un club) — geográfica, no se personaliza:
@@ -11266,7 +11311,8 @@ function generarOfertas(j){
       nombre, categoria, ascenso, duracion, colores: clubElegido.colores, rivalDirecto: esRivalDirecto(j.club.nombre, nombre) || undefined,
       sueldo: calcularSueldoOferta(j, categoria, nombre),
       objetivo: objetivoReal ? objetivoReal.texto : OBJETIVOS_POR_CATEGORIA[categoria][1],
-      minutos: expectativaMinutos(j, ascenso)
+      minutos: expectativaMinutos(j, ascenso),
+      clausulaInicialId: idClausulaClubInicial(j)
     });
   }
 
@@ -11320,7 +11366,8 @@ function generarOfertas(j){
         categoria:"LaLiga", ascenso:ascensoExt, duracion, extranjero:true, grande: esGrandeExt || undefined, rivalDirecto: esRivalDirecto(j.club.nombre, clubExt.nombre) || undefined,
         sueldo: esGrandeExt ? calcularSueldoOferta(j, "Grande") : calcularSueldoOferta(j, "Extranjero", clubExt.nombre, multiplicadorSueldoLiga(clubExt.pais, clubExt.liga)),
         objetivo: objetivoExt ? objetivoExt.texto : OBJETIVOS_POR_CATEGORIA["Extranjero"][Math.floor(Math.random()*OBJETIVOS_POR_CATEGORIA["Extranjero"].length)],
-        minutos: expectativaMinutos(j, true)
+        minutos: expectativaMinutos(j, true),
+        clausulaInicialId: idClausulaClubInicial(j)
       });
     }
   }
@@ -18994,7 +19041,7 @@ SCREENS.ofertas = function(){
       izda.className = 'oferta-club';
       izda.style.cssText = 'display:inline-flex;align-items:center;gap:8px;';
       izda.innerHTML = `${escudoSVG(of.nombre,30,of.colores)} <span>${of.nombre}${of.ascenso ? ' <span style="color:var(--green);font-weight:400;">↑</span>' : ''}${primerEquipoDeFilial(of.nombre) ? `<div style="font-size:10px;color:var(--ink-soft);font-weight:400;">Filial del ${primerEquipoDeFilial(of.nombre)}</div>` : ''}</span>`;
-      const etiquetaCategoria = of.extranjero ? of.liga : (TIER_CATEGORIA[of.categoria] || of.categoria);
+      const etiquetaCategoria = categoriaCorta(of);
       const bandera = of.extranjero ? banderaPais(of.pais,15) : banderaPais('España',15);
       const dcha = document.createElement('span');
       dcha.style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--ink-soft);white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;";
@@ -19007,8 +19054,10 @@ SCREENS.ofertas = function(){
       }
       const lista = document.createElement('ul');
       lista.className = 'oferta-lista';
+      const clausulaOferta = of.clausulaInicialId ? OBJETIVOS_NEGOCIACION.find(o=>o.id===of.clausulaInicialId) : null;
       const filas = [
         ['Salario', `${formatearDinero(of.sueldo)}/temp.`],
+        ...(clausulaOferta ? [['Bonus', typeof clausulaOferta.label === 'function' ? clausulaOferta.label(of.sueldo) : clausulaOferta.label]] : []),
         ['Contrato', `${of.duracion} ${of.duracion===1?'año':'años'}`],
         ['Objetivo', cap(of.objetivo)],
         ['Minutos', of.minutos]
@@ -19026,7 +19075,7 @@ SCREENS.ofertas = function(){
         const nuevoClub = of.extranjero
           ? { nombre: of.nombre, categoria: "LaLiga", extranjero: true, pais: of.pais, liga: of.liga, colores: of.colores, ambicionNivel: ambicionInicial(of.nombre), ...(of.grande ? { grande:true } : {}) }
           : { nombre: of.nombre, categoria: of.categoria, colores: of.colores, ambicionNivel: ambicionInicial(of.nombre) };
-        S.negociacion = { club: nuevoClub, sueldo: of.sueldo, duracion: of.duracion };
+        S.negociacion = { club: nuevoClub, sueldo: of.sueldo, duracion: of.duracion, clausulaInicialId: of.clausulaInicialId };
         S.screen = 'negociacionFichaje';
         render();
       };
@@ -19240,7 +19289,7 @@ function aplicarPromesasNegociacion(j, neg){
     const monto = (neg.objetivosMonto||{})[id];
     const promesa = { id: opcion.id, texto: (typeof opcion.label === 'function' ? opcion.label(neg.sueldo) : opcion.label), tipo: opcion.tipo, plazoTemporadas:1, origen:'club', temporadaLimite: S.temporada };
     if(opcion.tipo === 'prima_gol') promesa.montoUnitario = monto;
-    else if(opcion.tipo !== 'titular') promesa.montoFijo = monto;
+    else promesa.montoFijo = monto;
     j.promesasActivas.push(promesa);
   });
 }
@@ -19263,17 +19312,16 @@ SCREENS.negociacionFichaje = function(){
     neg.log = `${neg.club.nombre} pone su primera oferta sobre la mesa: ${formatearDinero(neg.sueldo)}/temp., ${neg.duracion} ${neg.duracion===1?'año':'años'}.`;
     // El club también puede blindarse desde el principio con alguna cláusula propia — más
     // probable cuanto menos hayas demostrado todavía, para no arriesgar un sueldo alto sin saber
-    // si vas a rendir a ese nivel.
-    const probClausulaClub = j.stats.reputacion < 30 ? 0.55 : (j.stats.reputacion < 55 ? 0.35 : 0.15);
-    if(Math.random() < probClausulaClub){
-      const candidatas = OBJETIVOS_NEGOCIACION.filter(o=>['partidos_minimos','prima_gol','prima_titulo'].includes(o.id));
-      const elegida = candidatas[Math.floor(Math.random()*candidatas.length)];
-      if(elegida){
-        neg.objetivosConseguidos.push(elegida.id);
-        if(elegida.monto) neg.objetivosMonto[elegida.id] = elegida.monto(neg.sueldo);
-        const etiquetaClausula = typeof elegida.label === 'function' ? elegida.label(neg.sueldo) : elegida.label;
-        neg.log += ` Eso sí, quieren incluir de entrada: ${etiquetaClausula}.`;
-      }
+    // si vas a rendir a ese nivel. Para un fichaje nuevo es la MISMA cláusula que ya se enseñaba
+    // en la lista del mercado (neg.clausulaInicialId, ver SCREENS.ofertas), no una tirada nueva;
+    // una renovación no pasa por esa lista, así que ahí sí se decide aquí mismo.
+    const idClausula = neg.esRenovacion ? idClausulaClubInicial(j) : (neg.clausulaInicialId || null);
+    const clausulaInicial = idClausula ? OBJETIVOS_NEGOCIACION.find(o=>o.id===idClausula) : null;
+    if(clausulaInicial){
+      neg.objetivosConseguidos.push(clausulaInicial.id);
+      if(clausulaInicial.monto) neg.objetivosMonto[clausulaInicial.id] = clausulaInicial.monto(neg.sueldo);
+      const etiquetaClausula = typeof clausulaInicial.label === 'function' ? clausulaInicial.label(neg.sueldo) : clausulaInicial.label;
+      neg.log += ` Eso sí, quieren incluir de entrada: ${etiquetaClausula}.`;
     }
     neg.terminado = null;
     neg.sinMasPropuestas = false;
@@ -19415,9 +19463,8 @@ SCREENS.negociacionFichaje = function(){
   medidorWrap.style.marginBottom = '16px';
   const estTxt = neg.medidor>=70 ? {t:'Encantados',c:'var(--green)'} : neg.medidor>=45 ? {t:'Con buena disposición',c:'#E9C454'} : neg.medidor>=25 ? {t:'Dudando',c:'var(--amber)'} : {t:'A punto de romperlo',c:'var(--red)'};
   medidorWrap.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:var(--ink);">Disposición del club</span>
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${estTxt.c};">${estTxt.t}</span>
+    <div style="margin-bottom:6px;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:var(--ink);">Disposición del club: </span><span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${estTxt.c};">${estTxt.t}</span>
     </div>
     <div style="position:relative;height:10px;border-radius:6px;background:linear-gradient(90deg, var(--red) 0%, var(--amber) 35%, #E9C454 55%, var(--green) 100%);">
       <div style="position:absolute;top:50%;left:${neg.medidor}%;width:16px;height:16px;border-radius:50%;background:var(--ink);border:3px solid var(--panel2);box-shadow:0 1px 4px rgba(0,0,0,0.5);transform:translate(-50%,-50%);transition:left .35s ease;"></div>
@@ -19482,7 +19529,7 @@ SCREENS.negociacionFichaje = function(){
   bloqueSueldo.innerHTML = `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em;margin-bottom:7px;">SUELDO QUE PROPONES</div>`;
   const pillsSueldo = document.createElement('div');
   pillsSueldo.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;';
-  [[-0.15,'−15%'],[-0.05,'−5%'],[0,'Igual'],[0.10,'+10%'],[0.25,'+25%']].forEach(([id,label])=>{
+  [[-0.20,'−20%'],[-0.10,'−10%'],[0,'Igual'],[0.10,'+10%'],[0.20,'+20%']].forEach(([id,label])=>{
     const p = document.createElement('div');
     p.className = 'servicio-nivel-btn' + (neg.propuesta.sueldoDelta===id ? ' activo' : '');
     p.style.cssText = 'flex:1;min-width:60px;';
@@ -19498,7 +19545,7 @@ SCREENS.negociacionFichaje = function(){
   bloqueDuracion.innerHTML = `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em;margin-bottom:7px;">DURACIÓN QUE PROPONES</div>`;
   const pillsDuracion = document.createElement('div');
   pillsDuracion.style.cssText = 'display:flex;gap:6px;';
-  [[-1,'−1 año'],[0,'Igual'],[1,'+1 año']].forEach(([id,label])=>{
+  [[-2,'−2 años'],[-1,'−1 año'],[0,'Igual'],[1,'+1 año'],[2,'+2 años']].forEach(([id,label])=>{
     const p = document.createElement('div');
     p.className = 'servicio-nivel-btn' + (neg.propuesta.duracionDelta===id ? ' activo' : '');
     p.style.cssText = 'flex:1;';
@@ -19550,13 +19597,13 @@ SCREENS.negociacionFichaje = function(){
   filaFinal.style.cssText = 'display:flex;gap:8px;margin-top:10px;';
   const btnAceptar = document.createElement('div');
   btnAceptar.className = 'servicio-nivel-btn';
-  btnAceptar.style.cssText = 'flex:1;text-align:center;padding:10px;border-color:var(--green);color:var(--green);cursor:pointer;';
-  btnAceptar.innerHTML = `<div class="n">Aceptar oferta actual</div>`;
+  btnAceptar.style.cssText = 'flex:1;text-align:center;padding:10px;border-color:var(--green);cursor:pointer;';
+  btnAceptar.innerHTML = `<div class="n" style="color:var(--green);">Aceptar oferta actual</div>`;
   btnAceptar.onclick = ()=>{ neg.terminado = 'acuerdo'; pintar(); };
   const btnRomper = document.createElement('div');
   btnRomper.className = 'servicio-nivel-btn';
-  btnRomper.style.cssText = 'flex:1;text-align:center;padding:10px;cursor:pointer;border-color:var(--red);color:var(--red);';
-  btnRomper.innerHTML = `<div class="n">Levantarte de la mesa</div>`;
+  btnRomper.style.cssText = 'flex:1;text-align:center;padding:10px;cursor:pointer;border-color:var(--red);';
+  btnRomper.innerHTML = `<div class="n" style="color:var(--red);">Levantarte de la mesa</div>`;
   btnRomper.onclick = ()=>{ neg.terminado = 'sinAcuerdo'; pintar(); };
   filaFinal.appendChild(btnAceptar);
   filaFinal.appendChild(btnRomper);
@@ -19821,13 +19868,13 @@ SCREENS.negociacionPatrocinio = function(){
   filaFinal.style.cssText = 'display:flex;gap:8px;margin-top:10px;';
   const btnAceptar = document.createElement('div');
   btnAceptar.className = 'servicio-nivel-btn';
-  btnAceptar.style.cssText = 'flex:1;text-align:center;padding:10px;border-color:var(--green);color:var(--green);cursor:pointer;';
-  btnAceptar.innerHTML = `<div class="n">Aceptar oferta actual</div>`;
+  btnAceptar.style.cssText = 'flex:1;text-align:center;padding:10px;border-color:var(--green);cursor:pointer;';
+  btnAceptar.innerHTML = `<div class="n" style="color:var(--green);">Aceptar oferta actual</div>`;
   btnAceptar.onclick = ()=>{ neg.terminado = 'acuerdo'; pintar(); };
   const btnRomper = document.createElement('div');
   btnRomper.className = 'servicio-nivel-btn';
-  btnRomper.style.cssText = 'flex:1;text-align:center;padding:10px;cursor:pointer;border-color:var(--red);color:var(--red);';
-  btnRomper.innerHTML = `<div class="n">Levantarte de la mesa</div>`;
+  btnRomper.style.cssText = 'flex:1;text-align:center;padding:10px;cursor:pointer;border-color:var(--red);';
+  btnRomper.innerHTML = `<div class="n" style="color:var(--red);">Levantarte de la mesa</div>`;
   btnRomper.onclick = ()=>{ neg.terminado = 'sinAcuerdo'; pintar(); };
   filaFinal.appendChild(btnAceptar);
   filaFinal.appendChild(btnRomper);
@@ -20562,14 +20609,14 @@ function renderContextoPartido(j, momento){
       <div class="marcador-fila">
         <div class="marcador-celda">
           <div class="marcador-equipo">${escudoSVG(local.nombre, 40, local.colores)}</div>
-          <div class="marcador-num">${String(golesLocal).padStart(2,'0')}</div>
+          <div class="marcador-num">${golesLocal}</div>
         </div>
         <div class="marcador-centro">
           <div class="marcador-reloj">${minuto}:${String(segundos).padStart(2,'0')}</div>
           <div class="marcador-periodo-linea">PERIODO ${periodo}</div>
         </div>
         <div class="marcador-celda">
-          <div class="marcador-num">${String(golesVisitante).padStart(2,'0')}</div>
+          <div class="marcador-num">${golesVisitante}</div>
           <div class="marcador-equipo">${escudoSVG(visitante.nombre, 40, visitante.colores)}</div>
         </div>
       </div>
@@ -20594,6 +20641,14 @@ function renderizarOpcionesEvento(contenedor, ev, j, opts){
   // S.screen atascado (bug real: "Avanzar" sin efecto tras recargar en medio de este suceso).
   if(typeof ev.opciones === 'function') ev.opciones = ev.opciones(j);
   const opcionesEvento = ev.opciones;
+  const costeDeOpcion = op => (op.efectos && op.efectos.dinero < 0) ? Math.abs(op.efectos.dinero) : (typeof op.costeEstimado === 'function' ? op.costeEstimado(j) : 0);
+  // Si hay al menos una opción que SÍ te puedes permitir (o que no cuesta nada), las que no
+  // puedas pagar se bloquean del todo — antes se podían pulsar igual, gastando hasta el último
+  // euro y quedando encima con -reputación/-mental, aunque hubiera una alternativa asequible al
+  // lado (p. ej. la donación grande sin poder pagarla, con la donación pequeña sí a tu alcance).
+  // Si NINGUNA opción es asumible, se deja el mecanismo de siempre (pagar lo que haya y penalizar)
+  // para no dejar el suceso sin ninguna opción pulsable.
+  const hayAlternativaAsumible = opcionesEvento.some(o => j.stats.dinero >= costeDeOpcion(o));
   opcionesEvento.forEach(op=>{
     // estiloChat: se pinta como una burbuja de respuesta de WhatsApp (mismo aspecto que
     // .tel-choice-btn en el resto de hilos), con el texto en primera persona de op.chatTexto si
@@ -20601,10 +20656,20 @@ function renderizarOpcionesEvento(contenedor, ev, j, opts){
     // persona (op.texto) que se usa en la pantalla de suceso a página completa.
     const b = el('div', estiloChat ? 'tel-choice-btn' : 'opt');
     b.appendChild(document.createTextNode(estiloChat && op.chatTexto ? op.chatTexto : op.texto));
-    const costeDinero = (op.efectos && op.efectos.dinero < 0) ? Math.abs(op.efectos.dinero) : (typeof op.costeEstimado === 'function' ? op.costeEstimado(j) : 0);
+    const costeDinero = costeDeOpcion(op);
     const noPuedePagar = costeDinero > 0 && j.stats.dinero < costeDinero;
+    // Si te falta dinero y hay otra opción que sí puedes pagar, esta se bloquea del todo (antes
+    // se podía pulsar igual, vaciándote la cuenta con penalización aunque una alternativa
+    // asequible estuviera justo al lado). Si NINGUNA opción es asumible, se deja pulsable con el
+    // aviso de siempre, para no dejar el suceso sin ninguna salida.
+    const bloqueada = noPuedePagar && hayAlternativaAsumible;
     if(noPuedePagar){
       b.appendChild(el('span','tag-pill risk', `💸 No puedes permitírtelo (te faltan ${formatearDinero(costeDinero - j.stats.dinero)})`));
+    }
+    if(bloqueada){
+      b.classList.add('opt-inasequible');
+      b.style.opacity = '.45';
+      b.style.cursor = 'not-allowed';
     }
     if(op.tirada){
       const p = probabilidadExito(j, op.tirada);
@@ -20616,7 +20681,7 @@ function renderizarOpcionesEvento(contenedor, ev, j, opts){
       b.appendChild(tag);
     }
     b.onclick = ()=>{
-      if(respondiendo) return;
+      if(respondiendo || bloqueada) return;
       respondiendo = true;
       if(noPuedePagar){
         const efectosSinDinero = { dinero:-j.stats.dinero, reputacion:-4, mental:-3 };
@@ -21185,8 +21250,10 @@ function graficaValorMercado(j){
 function categoriaCorta(club){
   if(club.extranjero) return club.liga;
   const corta = TIER_CATEGORIA[club.categoria];
-  if(club.categoria !== 'Tercera RFEF') return corta;
-  const grupo = grupoTerceraRFEFDeClub(club.nombre);
+  let grupo = null;
+  if(club.categoria === 'Tercera RFEF') grupo = grupoTerceraRFEFDeClub(club.nombre);
+  else if(club.categoria === 'Segunda RFEF') grupo = grupoSegundaRFEFDeClub(club.nombre);
+  else if(club.categoria === 'Primera RFEF') grupo = grupoPrimeraRFEFDeClub(club.nombre);
   return grupo ? `${corta} ${grupo}` : corta;
 }
 function nombreLigaConDivision(club){
