@@ -6018,9 +6018,9 @@ const OBJETIVOS_NEGOCIACION = [
   // la temporada, gracias a lo que ya calcula PARTIDOS_POR_CATEGORIA (ver evaluarPromesas).
   { id:'partidos_minimos', label:sueldo=>`Bonus si juegas al menos el 60% de los partidos (${formatearDinero(Math.round(sueldo*0.15/50)*50)})`, coste:11, tipo:'prima_partidos', monto:sueldo=>Math.round(sueldo*0.15/50)*50 },
   { id:'prima_gol', label:sueldo=>`Bonus por gol (${formatearDinero(Math.round(sueldo*0.01/10)*10)}/gol)`, coste:8, tipo:'prima_gol', monto:sueldo=>Math.round(sueldo*0.01/10)*10 },
-  { id:'prima_25goles', label:sueldo=>`Bonus si llegas a 25 goles (${formatearDinero(Math.round(sueldo*0.35/50)*50)})`, coste:7, tipo:'prima_25goles', monto:sueldo=>Math.round(sueldo*0.35/50)*50 },
-  { id:'prima_titulo', label:sueldo=>`Bonus si el equipo gana un título (${formatearDinero(Math.round(sueldo*0.15/50)*50)})`, coste:6, tipo:'prima_titulo', monto:sueldo=>Math.round(sueldo*0.15/50)*50 },
-  { id:'prima_ascenso', label:sueldo=>`Bonus si el equipo asciende (${formatearDinero(Math.round(sueldo*0.25/50)*50)})`, coste:9, tipo:'prima_ascenso', monto:sueldo=>Math.round(sueldo*0.25/50)*50, soloSiNoEsLaLiga:true }
+  { id:'prima_25goles', label:sueldo=>`Bonus si llegas a 25 goles (${formatearDinero(Math.round(sueldo*0.20/50)*50)})`, coste:7, tipo:'prima_25goles', monto:sueldo=>Math.round(sueldo*0.20/50)*50 },
+  { id:'prima_titulo', label:sueldo=>`Bonus si el equipo gana un título (${formatearDinero(Math.round(sueldo*0.30/50)*50)})`, coste:6, tipo:'prima_titulo', monto:sueldo=>Math.round(sueldo*0.30/50)*50 },
+  { id:'prima_ascenso', label:sueldo=>`Bonus si el equipo asciende (${formatearDinero(Math.round(sueldo*0.40/50)*50)})`, coste:9, tipo:'prima_ascenso', monto:sueldo=>Math.round(sueldo*0.40/50)*50, soloSiNoEsLaLiga:true }
 ];
 // El club puede llevar ya puesta una cláusula propia desde la primera oferta (más probable cuanto
 // menos hayas demostrado todavía — reputación baja — para no arriesgar un sueldo alto sin saber
