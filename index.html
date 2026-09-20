@@ -19532,7 +19532,7 @@ SCREENS.negociacionFichaje = function(){
   bloqueSueldo.innerHTML = `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em;margin-bottom:7px;">SUELDO QUE PROPONES</div>`;
   const pillsSueldo = document.createElement('div');
   pillsSueldo.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;';
-  [[-0.20,'−20%'],[-0.10,'−10%'],[0,'Igual'],[0.10,'+10%'],[0.20,'+20%']].forEach(([id,label])=>{
+  [[-0.10,'−10%'],[-0.05,'−5%'],[0,'Igual'],[0.05,'+5%'],[0.10,'+10%']].forEach(([id,label])=>{
     const p = document.createElement('div');
     p.className = 'servicio-nivel-btn' + (neg.propuesta.sueldoDelta===id ? ' activo' : '');
     p.style.cssText = 'flex:1;min-width:60px;';
