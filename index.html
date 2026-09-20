@@ -8248,26 +8248,26 @@ function ambicionInicial(nombreClub){
   const valores = [1,1,2,2,2,3];
   return valores[Math.abs(hash) % valores.length];
 }
-const NOMBRES_PROTEGIDO = ["Álvaro","Mario","Iker","Pau","Hugo","Marc","Diego","Bruno","Rubén","Xabi","Marco","Iván","Samu","Dani","Gonzalo","Martín"];
-const APELLIDOS_PROTEGIDO = ["Ramos","Torres","Molina","Vidal","Castro","Herrera","Ortiz","Prieto","Cabrera","Nieto","Suárez","Delgado","Reyes","Peña"];
-const NOMBRES_PAREJA = ["Laura","Carlos","Elena","David","Sara","Pablo","Marta","Javier","Lucía","Alejandro","Claudia","Raúl","Irene","Beatriz","Álex"];
-const APELLIDOS_PAREJA = ["Serrano","Iglesias","Cano","Bravo","Rojas","Fuentes","Domínguez","Vega","Campos","Salas","Aguilar","Blanco"];
-const NOMBRES_HIJO_MASC = ["Mateo","Leo","Bruno","Diego","Hugo","Marco","Enzo"];
-const NOMBRES_HIJO_FEM = ["Martina","Vera","Chloe","Vega","Alma","Noa","Julia"];
+const NOMBRES_PROTEGIDO = ["Álvaro","Mario","Iker","Pau","Hugo","Marc","Diego","Bruno","Rubén","Xabi","Marco","Iván","Samu","Dani","Gonzalo","Martín","Eric","Nil","Aitor","Unai","Ander","Íñigo","Asier","Gorka","Izan","Thiago","Leandro","Fernando","Alonso","Nicolás","Gabriel","Joel","Alexis","Ignacio","Tomás","Lucas","Mauro","Cristian","Sebastián","Julio"];
+const APELLIDOS_PROTEGIDO = ["Ramos","Torres","Molina","Vidal","Castro","Herrera","Ortiz","Prieto","Cabrera","Nieto","Suárez","Delgado","Reyes","Peña","Gil","Soto","Marín","Vargas","Cortés","Guerrero","Medina","Aguirre","Carrasco","Pardo","Lozano","Sáenz","Bermejo","Camacho","Espinosa","Vera","Rico","Pastor","Bueno","Cordero","Serna","Montes","Cuesta","Alonso","Benítez","Escudero","Zamora"];
+const NOMBRES_PAREJA = ["Laura","Carlos","Elena","David","Sara","Pablo","Marta","Javier","Lucía","Alejandro","Claudia","Raúl","Irene","Beatriz","Álex","Ana","Miguel","Cristina","Jorge","Silvia","Rodrigo","Andrea","Patricia","Natalia","Alberto","Marina","Paula","Daniel","Verónica","Gonzalo"];
+const APELLIDOS_PAREJA = ["Serrano","Iglesias","Cano","Bravo","Rojas","Fuentes","Domínguez","Vega","Campos","Salas","Aguilar","Blanco","Navarro","Gimeno","Ibáñez","Cortés","Lara","Rivas","Cuevas","Soler","Pastor","Mora","Gallego","Vicente","Cerdá"];
+const NOMBRES_HIJO_MASC = ["Mateo","Leo","Bruno","Diego","Hugo","Marco","Enzo","Thiago","Izan","Daniel","Álvaro","Mario","Rodrigo","Nicolás","Lucas"];
+const NOMBRES_HIJO_FEM = ["Martina","Vera","Chloe","Vega","Alma","Noa","Julia","Sofía","Valeria","Emma","Daniela","Carla","Manuela","Olivia","Ainhoa"];
 function generarNombreHijo(){
   const esMasc = Math.random() < 0.5;
   const pool = esMasc ? NOMBRES_HIJO_MASC : NOMBRES_HIJO_FEM;
   return { nombre: pool[Math.floor(Math.random()*pool.length)], genero: esMasc ? 'm' : 'f' };
 }
-const NOMBRES_PERIODISTA = ["Sara","Elena","Marta","Nuria","Cristina","Silvia","Patricia","Andrea","Beatriz","Carmen"];
+const NOMBRES_PERIODISTA = ["Sara","Elena","Marta","Nuria","Cristina","Silvia","Patricia","Andrea","Beatriz","Carmen","Laura","Paula","Alba","Raquel","Noelia","Yolanda","Rocío","Inés","Lorena","Miriam"];
 function generarNombrePeriodista(){
   const nombre = NOMBRES_PERIODISTA[Math.floor(Math.random()*NOMBRES_PERIODISTA.length)];
   const apellido = APELLIDOS_PROTEGIDO[Math.floor(Math.random()*APELLIDOS_PROTEGIDO.length)];
   return { nombre: `${nombre} ${apellido}`, apodo: nombre };
 }
 const PROFESIONES_AMIGO = ["profesor de instituto","enfermero","dependienta de una tienda","mecánico","administrativa en un ayuntamiento","camarero","fontanero","auxiliar de enfermería","cartero","peluquera"];
-const AMIGO_NO_FUTBOL_MASC = { nombres:["Carlos","David","Pablo","Javier","Alejandro","Raúl"], profesiones:["profesor de instituto","enfermero","mecánico","camarero","fontanero","cartero","auxiliar de enfermería"] };
-const AMIGO_NO_FUTBOL_FEM = { nombres:["Laura","Elena","Sara","Marta","Lucía","Claudia","Irene","Beatriz"], profesiones:["profesora de instituto","enfermera","dependienta de una tienda","administrativa en un ayuntamiento","auxiliar de enfermería","peluquera"] };
+const AMIGO_NO_FUTBOL_MASC = { nombres:["Carlos","David","Pablo","Javier","Alejandro","Raúl","Fernando","Iván","Sergio","Rubén","Gonzalo","Óscar","Ismael","Tomás"], profesiones:["profesor de instituto","enfermero","mecánico","camarero","fontanero","cartero","auxiliar de enfermería"] };
+const AMIGO_NO_FUTBOL_FEM = { nombres:["Laura","Elena","Sara","Marta","Lucía","Claudia","Irene","Beatriz","Cristina","Silvia","Patricia","Andrea","Carmen","Alba","Raquel","Noelia"], profesiones:["profesora de instituto","enfermera","dependienta de una tienda","administrativa en un ayuntamiento","auxiliar de enfermería","peluquera"] };
 // Nombres ya en uso por otros personajes del jugador, para que el amigo nuevo no coincida con
 // ninguno (compañeros, rival, pareja, hermano, padre/madre, mentor, protegido, periodista).
 function nombresPersonajesEnUso(j){
@@ -8292,8 +8292,8 @@ function generarAmigoNoFutbol(j){
   const profesion = pool.profesiones[Math.floor(Math.random()*pool.profesiones.length)];
   return { nombre: `${nombre} ${apellido}`, apodo: nombre, profesion, genero: esMasc ? 'm' : 'f' };
 }
-const HERMANO_NOMBRES_MASC = ["Diego","Iker","Álvaro","Bruno","Rodrigo"];
-const HERMANO_NOMBRES_FEM = ["Alba","Vera","Noa","Clara","Aitana"];
+const HERMANO_NOMBRES_MASC = ["Diego","Iker","Álvaro","Bruno","Rodrigo","Nicolás","Gabriel","Thiago","Izan","Fernando","Sergio","Tomás","Lucas"];
+const HERMANO_NOMBRES_FEM = ["Alba","Vera","Noa","Clara","Aitana","Sofía","Valeria","Emma","Daniela","Carla","Manuela","Olivia","Martina"];
 function generarHermano(j){
   const partes = (j.nombre||'').trim().split(' ');
   const apellido = partes.slice(1).join(' ') || 'Ramos';
@@ -8302,8 +8302,8 @@ function generarHermano(j){
   const nombre = pool[Math.floor(Math.random()*pool.length)];
   return { nombre: `${nombre} ${apellido}`, apodo: nombre, genero: esMasc ? 'm' : 'f' };
 }
-const NOMBRES_AGENTE_MASC = ["Rubén","Óscar","Fran","Sergio","Ismael"];
-const NOMBRES_AGENTE_FEM = ["Sonia","Verónica","Lidia","Rocío","Almudena"];
+const NOMBRES_AGENTE_MASC = ["Rubén","Óscar","Fran","Sergio","Ismael","Alberto","Jorge","Daniel","Guillermo","Nacho","Enrique","Emilio","Julio"];
+const NOMBRES_AGENTE_FEM = ["Sonia","Verónica","Lidia","Rocío","Almudena","Marina","Cristina","Patricia","Silvia","Natalia","Alicia","Begoña","Yolanda"];
 function generarNombreAgente(){
   const esMasc = Math.random() < 0.5;
   const pool = esMasc ? NOMBRES_AGENTE_MASC : NOMBRES_AGENTE_FEM;
@@ -8314,8 +8314,8 @@ function generarNombreAgente(){
 function crearRepresentante(comision, nombreAgenciaExistente){
   return { comision, nombre: nombreAgenciaExistente || elegirAgenciaRepresentacion(), agente: generarNombreAgente() };
 }
-const NOMBRES_PADRE = ["Antonio","Manuel","José","Francisco","Ángel","Rafael"];
-const NOMBRES_MADRE = ["Pilar","Rosario","Isabel","Dolores","Encarnación","Mercedes"];
+const NOMBRES_PADRE = ["Antonio","Manuel","José","Francisco","Ángel","Rafael","Fernando","Enrique","Ramón","Ricardo","Julián","Emilio","Ignacio","Alfonso"];
+const NOMBRES_MADRE = ["Pilar","Rosario","Isabel","Dolores","Encarnación","Mercedes","Carmen","Ángeles","Concepción","Remedios","Amparo","Montserrat","Esperanza","Consuelo"];
 function generarPadreMadre(j){
   const partes = (j.nombre||'').trim().split(' ');
   const apellidoJugador = partes.slice(1).join(' ') || 'Ramos';
