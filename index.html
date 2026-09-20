@@ -2563,6 +2563,39 @@ const TIENDA_BOTAS = [
   { nivel:4, nombre:'Prototipo exclusivo de la marca', coste:250000, efecto:{tiro:8, velocidad:8, regate:8}, desc:'Un diseño que ni siquiera está a la venta, hecho a medida de tu pisada. Se nota en todo tu juego.', ...porCategoria(4) }
 ];
 
+// Colección de arte: se desbloquea para siempre en cuanto j.stats.dinero alcanza
+// UMBRAL_ARTE_DESBLOQUEO una vez (j.artesDesbloqueado, aunque el dinero baje después) — ver el
+// gate en iniciarTemporadaJuego. A diferencia de coches/motos/botas (compra directa a precio
+// fijo), cada pieza se consigue pujando en una subasta con un "valor justo" oculto que decide si
+// ganas o te quedas fuera (ver obraSubastaDeLaTemporada / SCREENS.subastaArte). Nunca cuadros ni
+// artistas reales — mismo criterio que los escudos genéricos de los clubes: piezas y autores
+// inventados, aunque suenen a época real.
+const UMBRAL_ARTE_DESBLOQUEO = 5000000;
+const MAX_RONDAS_SUBASTA = 6;
+const OBRAS_ARTE = [
+  { id:'bodegon_limones', nombre:'Bodegón con limones y cristal', autor:'Anónimo flamenco, s. XVII', descripcion:'Un óleo de bodegón menor, de un taller flamenco sin firmar. La luz sobre el cristal es lo que lo hace especial.', valorBase:450000 },
+  { id:'siesta_pastor', nombre:'La siesta del pastor', autor:'Costumbrismo rural, s. XIX', descripcion:'Escena costumbrista de las que decoraban salones burgueses de provincias, con una luz de siesta muy lograda.', valorBase:600000 },
+  { id:'atardecer_estuario', nombre:'Atardecer sobre el estuario', autor:'Escuela impresionista menor', descripcion:'Un paisaje de factura suelta, de una escuela impresionista de segunda fila que empieza a revalorizarse.', valorBase:700000 },
+  { id:'mascara_ritual', nombre:'Máscara ritual tallada', autor:'Pieza etnográfica, origen incierto', descripcion:'Madera de ébano tallada a mano, con la pátina que solo dan las décadas de uso ceremonial.', valorBase:800000 },
+  { id:'retrato_dama_abanico', nombre:'Retrato de una dama con abanico', autor:'Escuela española, s. XVIII', descripcion:'Retrato de corte con una factura impecable en los encajes, aunque nadie sepa ya quién era la retratada.', valorBase:900000 },
+  { id:'composicion_geometrica', nombre:'Composición geométrica nº7', autor:'Vanguardia de entreguerras', descripcion:'Un lienzo abstracto de líneas duras y colores planos, de una vanguardia menor de entreguerras.', valorBase:1100000 },
+  { id:'triptico_ciudad', nombre:'Tríptico de la ciudad nueva', autor:'Arte urbano contemporáneo', descripcion:'Tres paneles de gran formato, con firma reconocible en el circuito de galerías de la ciudad.', valorBase:1300000 },
+  { id:'bronce_atleta', nombre:'Bronce del atleta en reposo', autor:'Taller helenístico, réplica de época', descripcion:'Una escultura de bronce a tamaño natural, réplica de época de un original clásico perdido.', valorBase:1500000 },
+  { id:'naturaleza_instrumentos', nombre:'Naturaleza muerta con instrumentos', autor:'Escuela italiana, barroco tardío', descripcion:'Un barroco tardío de escuela italiana, con un violín y una partitura pintados con un detalle asombroso.', valorBase:2000000 },
+  { id:'jinete_dorado', nombre:'El jinete dorado', autor:'Obra maestra reconocida', descripcion:'La pieza que cualquier casa de subastas anuncia como la joya de la noche. Todo el mundo sabe de qué cuadro hablas con solo nombrarlo.', valorBase:3800000 }
+];
+// Elige la pieza de la temporada (o null si no toca ninguna): desbloquea el flag la primera vez
+// que el dinero llega al umbral (para siempre, aunque luego baje), y sortea entre las piezas que
+// todavía no están en la colección — las que se pierden en la subasta vuelven a la bolsa, así que
+// pueden volver a salir más adelante; solo las que de verdad se ganan quedan fuera para siempre.
+function obraSubastaDeLaTemporada(j){
+  if(!j.artesDesbloqueado && j.stats.dinero >= UMBRAL_ARTE_DESBLOQUEO) j.artesDesbloqueado = true;
+  if(!j.artesDesbloqueado) return null;
+  const disponibles = OBRAS_ARTE.filter(o => !(j.obrasArte||[]).some(x=>x.id===o.id));
+  if(!disponibles.length) return null;
+  return disponibles[Math.floor(Math.random()*disponibles.length)];
+}
+
 /* ============ LOGROS (colección de por vida, independiente de la partida) ============
    Se guardan en localStorage aparte de los guardados de partida (fichaje10_logros_v1), así que
    sobreviven a borrar personajes o empezar carreras nuevas — es "tu perfil", no la carrera.
@@ -7295,11 +7328,11 @@ const PANTALLAS_SIN_MOVIL = new Set(['finTemporada','ruedaPrensa','ruedaPrensaRe
   'tutorial','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal',
   'nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal',
   'retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub',
-  'temporadaSinClub','sancionReveal','logros','ajustes',
+  'temporadaSinClub','sancionReveal','logros','ajustes','subastaArte',
   'mundialIntro','mundialBombos','mundialSorteo','mundialPrensa','mundialGrupo','mundialGrupoTabla','mundialElim','mundialPenaltis','mundialCampeones','mundialEliminado',
   'eurocopaIntro','eurocopaBombos','eurocopaSorteo','eurocopaPrensa','eurocopaGrupo','eurocopaGrupoTabla','eurocopaElim','eurocopaPenaltis','eurocopaCampeones','eurocopaEliminado'
 ]);
-const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','sancionReveal','changelog','rankings','logros','escudosPersonalizados',
+const PANTALLAS_SIN_TABBAR = new Set(['tutorial','ruedaPrensa','ruedaPrensaResultado','tituloReveal','campeonReveal','ascensoReveal','europaReveal','balonDeOroReveal','nuevaTemporada','convocatoriaSeleccion','primeraConvocatoria','torneoFinalReveal','playoffFinalReveal','finTemporada','retiro','final','reencuentroAdrian','reencuentroCompaneros','legadoCarrera','regresoClub','temporadaSinClub','sancionReveal','changelog','rankings','logros','escudosPersonalizados','subastaArte',
   // Todo el Mundial es una secuencia sin cortes: mientras dura, no tiene sentido poder escaparse
   // al menú, a la tienda o al plan de entreno — como en las demás secuencias "de un tirón" de
   // esta misma lista (rueda de prensa, reveals de título...). Se reactiva solo al terminar
@@ -8840,6 +8873,8 @@ function migrarJugadorGuardado(j){
     if(j.rival.yaCompartioVestuario === undefined) j.rival.yaCompartioVestuario = false;
   }
   if(j.movimientosBanca === undefined) j.movimientosBanca = [];
+  if(j.artesDesbloqueado === undefined) j.artesDesbloqueado = false;
+  if(j.obrasArte === undefined) j.obrasArte = [];
 }
 function cargarPartida(slot){
   try{
@@ -8896,6 +8931,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia,estiloId
     confianzaEntrenador:35,
     comprasUnicas:[],
     cocheActual:0, motoActual:0, botasActual:0,
+    artesDesbloqueado:false, obrasArte:[],
     lesionSemanas:0, sancionActiva:false,
     avisoBancoPendiente:false,
     carinoAficion:20,
@@ -10388,7 +10424,11 @@ function iniciarTemporadaJuego(j){
     const prob = typeof cfg.probabilidad === 'function' ? cfg.probabilidad(j) : cfg.probabilidad;
     return Math.random() < prob;
   });
-  const continuarFlujoTemporada = ()=>{
+  // Subasta de arte de la temporada (si ya está desbloqueada y queda alguna pieza por conseguir)
+  // — se sortea aquí, junto al resto de "qué toca esta temporada", pero se muestra al final de la
+  // cadena de aperturas (continuarFlujoTemporada más abajo), justo antes de avanzarPaso.
+  const obraSubasta = obraSubastaDeLaTemporada(j);
+  const continuarFlujoTemporadaReal = ()=>{
     if(torneoVerano && sigueLesionadoEnVerano){
       S.torneoPerdidoPorLesion = { nombreCompeticion: nombreTorneoSeleccion(torneoVerano.tipo), semanasRestantes: j.lesionSemanas };
       S.screen = 'veranoLesionado';
@@ -10414,6 +10454,20 @@ function iniciarTemporadaJuego(j){
       avanzarPaso(j);
     }
     guardarPartida();
+  };
+  const continuarFlujoTemporada = ()=>{
+    if(obraSubasta){
+      // valorJusto es lo que de verdad está dispuesto a pagar el rival de la subasta (oculto,
+      // mismo patrón que neg.techoSueldo en la negociación de fichajes): entre el precio de
+      // salida y un 80% por encima. Llegar o superar esa cifra es lo que decide si ganas la
+      // puja, no una tirada de dados — esto es dinero, no una habilidad del jugador.
+      S.subastaArte = { obraId: obraSubasta.id, precioActual: obraSubasta.valorBase, valorJusto: Math.round(obraSubasta.valorBase * (1 + Math.random()*0.8) / 1000) * 1000, ronda:0, terminada:false };
+      S.trasSubastaArte = continuarFlujoTemporadaReal;
+      S.screen = 'subastaArte';
+      guardarPartida();
+    } else {
+      continuarFlujoTemporadaReal();
+    }
   };
   const continuarTrasCompaneros = ()=>{
     if(reencuentroConAdrian){
@@ -13422,6 +13476,31 @@ SCREENS.tabEconomia = function(){
   const c = el('div','cromo');
   c.appendChild(seccionEconomia(j));
   app.appendChild(c);
+
+  if(j.artesDesbloqueado){
+    const cArte = el('div','card');
+    cArte.appendChild(crearEyebrow('Patrimonio'));
+    cArte.appendChild(el('h2',null,'Colección de arte'));
+    if(!j.obrasArte.length){
+      cArte.appendChild(el('div','event-text', 'Desde que tu cuenta superó los 5M€, algunas casas de subastas empezaron a llamarte. Todavía no te has hecho con ninguna pieza — cada temporada te ofrecerán la oportunidad de pujar por una.'));
+    } else {
+      const lista = document.createElement('div');
+      lista.style.cssText = 'border:1px solid var(--line);border-radius:12px;padding:4px 14px;margin-bottom:10px;';
+      j.obrasArte.forEach(item=>{
+        const obra = OBRAS_ARTE.find(o=>o.id===item.id);
+        if(!obra) return;
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);';
+        row.innerHTML = `<span><span style="display:block;color:var(--ink);font-weight:600;font-size:13.5px;">${obra.nombre}</span><span style="display:block;color:var(--ink-soft);font-size:11.5px;">${obra.autor} · Temp. ${item.temporada}</span></span><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--gold);white-space:nowrap;">${formatearDinero(item.precio)}</span>`;
+        lista.appendChild(row);
+      });
+      lista.lastChild.style.borderBottom = 'none';
+      cArte.appendChild(lista);
+      const totalPagado = j.obrasArte.reduce((s,o)=>s+(o.precio||0), 0);
+      cArte.appendChild(el('div','event-text', `${j.obrasArte.length} de ${OBRAS_ARTE.length} piezas · ${formatearDinero(totalPagado)} invertidos en total.`));
+    }
+    app.appendChild(cArte);
+  }
 
   const cCasino = el('div','card');
   cCasino.appendChild(crearEyebrow('Ocio'));
@@ -21551,6 +21630,81 @@ SCREENS.reencuentroAdrian = function(){
     render();
   };
   c.appendChild(btn);
+  app.appendChild(c);
+};
+// Subasta de arte de la temporada (ver obraSubastaDeLaTemporada/UMBRAL_ARTE_DESBLOQUEO): un
+// coleccionista rival tiene un "valor justo" oculto para la pieza (S.subastaArte.valorJusto);
+// cada puja sube el precio un paso fijo, y llegar o superar ese valor te la lleva. Retirarte no
+// cuesta nada, pero la pieza se la lleva otro postor (sigue en la bolsa, puede volver a salir).
+SCREENS.subastaArte = function(){
+  const j = S.jugador;
+  const sub = S.subastaArte;
+  const obra = OBRAS_ARTE.find(o=>o.id===sub.obraId);
+  topbar("Fichaje 10");
+  const c = el('div','card');
+  c.appendChild(crearEyebrow('Casa de subastas'));
+  c.appendChild(el('h2',null, obra.nombre));
+  c.appendChild(el('div','lore-box', `${obra.autor}. ${obra.descripcion}`));
+
+  if(sub.terminada){
+    const msg = sub.ganada
+      ? `Te haces con la pieza por ${formatearDinero(sub.precioActual)}, entre aplausos discretos de la sala. Otra incorporación a tu colección privada.`
+      : `La puja se te escapa de las manos: la pieza acaba en manos de otro coleccionista. Puede que tengas otra oportunidad más adelante.`;
+    c.appendChild(el('div','event-text', msg));
+    const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Continuar →';
+    btn.onclick = ()=>{
+      const continuar = S.trasSubastaArte;
+      S.trasSubastaArte = null;
+      S.subastaArte = null;
+      if(continuar) continuar();
+      render();
+    };
+    c.appendChild(btn);
+    app.appendChild(c);
+    return;
+  }
+
+  c.appendChild(el('div','event-text', `Puja actual: ${formatearDinero(sub.precioActual)} · Ronda ${sub.ronda+1}/${MAX_RONDAS_SUBASTA}`));
+
+  const incremento = Math.max(10000, Math.round(obra.valorBase * 0.12 / 1000) * 1000);
+  const siguientePuja = sub.precioActual + incremento;
+  const noPuedePujar = j.stats.dinero < siguientePuja;
+  if(noPuedePujar){
+    c.appendChild(el('span','tag-pill risk', `💸 No puedes permitírtelo (te faltan ${formatearDinero(siguientePuja - j.stats.dinero)})`));
+  }
+
+  const btnPujar = document.createElement('button'); btnPujar.className='btn-main';
+  btnPujar.textContent = `Subir la puja a ${formatearDinero(siguientePuja)}`;
+  if(noPuedePujar){
+    btnPujar.style.opacity = '.5'; btnPujar.style.cursor = 'not-allowed';
+  }
+  btnPujar.onclick = ()=>{
+    if(noPuedePujar) return;
+    sub.precioActual = siguientePuja;
+    sub.ronda++;
+    if(sub.precioActual >= sub.valorJusto){
+      sub.terminada = true; sub.ganada = true;
+      aplicarEfectos(j, { dinero:-sub.precioActual, popularidad:2 });
+      j.obrasArte.push({ id: obra.id, temporada: S.temporada, precio: sub.precioActual });
+      mostrarNotificacion(`${iconoInline('dinero',15)}Nueva pieza: ${obra.nombre}`, 'objeto');
+    } else if(sub.ronda >= MAX_RONDAS_SUBASTA){
+      sub.terminada = true; sub.ganada = false;
+    }
+    guardarPartida();
+    pintar();
+  };
+  c.appendChild(btnPujar);
+
+  const btnRetirar = document.createElement('div'); btnRetirar.className='servicio-nivel-btn';
+  btnRetirar.style.cssText = 'display:block;text-align:center;padding:10px;margin-top:8px;cursor:pointer;';
+  btnRetirar.innerHTML = `<div class="n">Retirarte de la subasta</div>`;
+  btnRetirar.onclick = ()=>{
+    sub.terminada = true; sub.ganada = false;
+    guardarPartida();
+    pintar();
+  };
+  c.appendChild(btnRetirar);
+
   app.appendChild(c);
 };
 SCREENS.legadoCarrera = function(){
