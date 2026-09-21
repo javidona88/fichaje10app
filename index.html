@@ -15614,6 +15614,18 @@ const TEL_RESPUESTAS_GRUPO_JUGADOR = ['jajaja qué crack', 'Aquí ando, a lo mí
 // eran siempre TEL_RESPUESTAS_GRUPO_JUGADOR/TEL_RESPUESTAS_GRUPO_GENERICAS, sin relación alguna
 // con el bucket — un "¡CAMPEONES!" en el grupo se contestaba con las mismas opciones sueltas que
 // cualquier otra semana.
+// Título/ascenso son logros del EQUIPO, no solo tuyos — en el grupo del vestuario (grupo_vestuario)
+// tanto lo que dicen los compañeros como lo que puedes contestarles usan un pool propio, en
+// primera persona del plural ("lo hemos conseguido"), en vez del pool de amigos/familia (que sí
+// felicitan a título personal, con razón: ellos no lo han ganado, tú sí).
+const TEL_GRUPO_VESTUARIO_COLECTIVO = {
+  campeon:['¡LO HEMOS CONSEGUIDO, familia! Qué temporada.', 'Todavía no me creo que seamos campeones, en serio.', 'Esto hay que celebrarlo TODOS juntos, ya sabéis.', '¡CAMPEONES! Menudo grupo hemos sido este año.', 'Nos lo hemos currado entre todos, para que luego digan.'],
+  ascenso:['¡ASCENDEMOS! Qué temporada hemos hecho, en serio.', 'Ya somos de la categoría de arriba, todos juntos.', 'Nos lo hemos ganado entre todos, partido a partido.', 'Menudo año hemos hecho como equipo, para enmarcar.']
+};
+const TEL_RESPUESTAS_VESTUARIO_COLECTIVO = {
+  campeon:['¡Lo hemos conseguido entre todos, macho!', 'Menudo grupo hemos sido esta temporada', 'Esto hay que celebrarlo todos juntos', 'Vaya año nos hemos marcado como equipo'],
+  ascenso:['¡Lo hemos conseguido entre todos!', 'Menudo curro de equipo, en serio', 'A disfrutar todos de la categoría nueva', 'Nos lo hemos currado juntos todo el año']
+};
 const TEL_RESPUESTAS_GRUPO_POR_BUCKET = {
   campeon:{
     jugador:['¡Enhorabuena, campeón! Esto hay que celebrarlo', 'Qué temporada te has marcado, macho', 'Hay que quedar para celebrarlo como toca', 'Todavía no me creo la que habéis liado'],
@@ -15710,12 +15722,17 @@ function telUltimoTextoGenericoGrupo(grupo){
 }
 function telPoolGrupoJugador(grupo){
   const bucket = telUltimoBucketGrupo(grupo);
+  // El vestuario no te felicita como si un título/ascenso fuera cosa tuya en solitario — es un
+  // logro colectivo, así que ahí responde con un pool propio ("lo hemos conseguido"), distinto
+  // del de amigos/familia (que sí felicitan a título personal, con razón).
+  if(bucket && grupo.id === 'grupo_vestuario' && TEL_RESPUESTAS_VESTUARIO_COLECTIVO[bucket]) return TEL_RESPUESTAS_VESTUARIO_COLECTIVO[bucket];
   if(bucket && TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket]) return TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket].jugador;
   const textoGenerico = telUltimoTextoGenericoGrupo(grupo);
   if(textoGenerico && TEL_RESPUESTAS_GRUPO_GENERICO_POR_TEXTO[textoGenerico]) return TEL_RESPUESTAS_GRUPO_GENERICO_POR_TEXTO[textoGenerico];
   return TEL_RESPUESTAS_GRUPO_JUGADOR;
 }
-function telPoolGrupoReaccion(bucket){
+function telPoolGrupoReaccion(bucket, grupoId){
+  if(bucket && grupoId === 'grupo_vestuario' && TEL_RESPUESTAS_VESTUARIO_COLECTIVO[bucket]) return TEL_RESPUESTAS_VESTUARIO_COLECTIVO[bucket];
   return (bucket && TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket]) ? TEL_RESPUESTAS_GRUPO_POR_BUCKET[bucket].reaccion : TEL_RESPUESTAS_GRUPO_GENERICAS;
 }
 // Mismo criterio que elegirAutor() dentro de generarNotificacionMovil (ver más abajo, ahora
@@ -15736,12 +15753,12 @@ function telAutorAleatorioGrupo(grupo, j, excluir){
   }
   return 'Compañero';
 }
-// Manda un mensaje tuyo a un grupo de WhatsApp (a diferencia de los contactos 1 a 1, no hay un
-// turno de pregunta/respuesta que cerrar — es un chat abierto, así que se puede enviar en
-// cualquier momento). Tu mensaje se ve al instante; con bastante probabilidad, otro miembro
-// reacciona detrás con el mismo indicador de "escribiendo…" que usa telResponderConTyping,
-// pero sin depender de un `mapa` de turnos (S.movilGrupoEscribiendo basta, un solo grupo puede
-// estar "escribiendo" a la vez desde el punto de vista del jugador).
+// Manda un mensaje tuyo a un grupo de WhatsApp, siempre como respuesta a algo nuevo que te hayan
+// dicho (S.movilGrupoPendienteRespuesta — ver renderMovilContenido/generarNotificacionMovil), no
+// como un mensaje suelto sin venir a cuento. Tu mensaje se ve al instante; con bastante
+// probabilidad, otro miembro reacciona detrás con el mismo indicador de "escribiendo…" que usa
+// telResponderConTyping, pero sin depender de un `mapa` de turnos (S.movilGrupoEscribiendo basta,
+// un solo grupo puede estar "escribiendo" a la vez desde el punto de vista del jugador).
 function telEnviarMensajeGrupo(grupo, texto){
   const j = S.jugador;
   S.movilBandeja = S.movilBandeja || telBandejaVacia();
@@ -15749,13 +15766,14 @@ function telEnviarMensajeGrupo(grupo, texto){
   S.movilBandeja.grupos[grupo.id] = S.movilBandeja.grupos[grupo.id] || [];
   const idBase = 'tuyo_' + S.temporada + '_' + (S.pasoIndex||0) + '_' + Math.random().toString(36).slice(2,8);
   S.movilBandeja.grupos[grupo.id].push({ id:idBase, autor:'Tú', texto, temporada:S.temporada, pasoIndex:S.pasoIndex||0, leido:true, mine:true });
+  if(S.movilGrupoPendienteRespuesta) S.movilGrupoPendienteRespuesta[grupo.id] = false;
   guardarPartida();
   if(Math.random() < 0.6){
     S.movilGrupoEscribiendo = grupo.id;
     pintar();
     setTimeout(()=>{
       const autor = telAutorAleatorioGrupo(grupo, j, null);
-      const respuesta = elegirSinRepetir(telPoolGrupoReaccion(telUltimoBucketGrupo(grupo)), 'reaccion_'+grupo.id);
+      const respuesta = elegirSinRepetir(telPoolGrupoReaccion(telUltimoBucketGrupo(grupo), grupo.id), 'reaccion_'+grupo.id);
       S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_r', autor, texto:respuesta, temporada:S.temporada, pasoIndex:S.pasoIndex||0, leido:true });
       S.movilGrupoEscribiendo = null;
       guardarPartida();
@@ -15838,9 +15856,25 @@ function generarNotificacionMovil(j){
   // como si fuera el club "de toda la vida"). Sembrar aquí garantiza que la primera vez que se ve
   // el club de verdad es el de creación del personaje, nunca un fichaje ya en curso.
   if(S._movilClubNotif === undefined) S._movilClubNotif = j.club && j.club.nombre;
-  if(Math.random() > 0.35) return;
   S.movilBandeja = S.movilBandeja || telBandejaVacia();
   S.movilBandeja.grupos = S.movilBandeja.grupos || {};
+  // El "¿sigues ahí?" ya no llega pegado al mensaje original (mismo paso, sin darte tiempo a
+  // contestar) — se programa para 1-2 pasos más tarde (ver más abajo) y solo se entrega aquí,
+  // en un paso posterior de verdad, y solo si para entonces sigues sin responder de verdad.
+  if(S._pendienteSeguimientoWA){
+    S._pendienteSeguimientoWA.pasosRestantes--;
+    if(S._pendienteSeguimientoWA.pasosRestantes <= 0){
+      const pend = S._pendienteSeguimientoWA;
+      S._pendienteSeguimientoWA = null;
+      const ct = telContactosDe(j).find(c=>c.id===pend.contactoId);
+      if(ct && telContactoPendiente(ct)){
+        const seguimiento = elegirSinRepetir(TEL_SEGUIMIENTOS_WHATSAPP, 'seguimiento');
+        const idSeg = 'notif_seg_' + S.temporada + '_' + (S.pasoIndex||0) + '_' + Math.random().toString(36).slice(2,8);
+        S.movilBandeja.whatsapp.push({ id:idSeg, contactoId:ct.id, texto:seguimiento, bucket:'seguimiento', temporada:S.temporada, pasoIndex:S.pasoIndex||0 });
+      }
+    }
+  }
+  if(Math.random() > 0.35) return;
   const tierAntes = S._movilTierPopularidadVisto;
   const tierAhora = estadoPopularidad(j.stats.popularidad||0).texto;
   const subioPopularidad = !!tierAntes && tierAhora !== tierAntes;
@@ -15914,9 +15948,8 @@ function generarNotificacionMovil(j){
     // naturales que un único mensaje suelto cada vez. Llegan ya escritos (con su notificación
     // correspondiente): el "escribiendo…" es solo para cuando ESPERAS su respuesta, no para
     // mensajes que ya te avisaron que habían llegado.
-    if(Math.random() < 0.45){
-      const seguimiento = elegirSinRepetir(TEL_SEGUIMIENTOS_WHATSAPP, 'seguimiento');
-      S.movilBandeja.whatsapp.push({ id:idBase+'_b', contactoId:ct.id, texto:seguimiento, bucket, temporada:S.temporada, pasoIndex:paso });
+    if(Math.random() < 0.45 && !S._pendienteSeguimientoWA){
+      S._pendienteSeguimientoWA = { contactoId: ct.id, pasosRestantes: 1 + Math.floor(Math.random()*2) };
     }
   } else if(canal === 'email'){
     const info = plantillas.email;
@@ -15928,15 +15961,21 @@ function generarNotificacionMovil(j){
     S.movilBandeja.x.push({ id:idBase, texto, temporada:S.temporada, pasoIndex:paso, leido:false });
   } else if(canal === 'grupo'){
     const grupo = grupos[Math.floor(Math.random()*grupos.length)];
-    const texto = elegirSinRepetir(plantillas.grupo, 'grupo_'+grupo.id+'_'+bucket);
+    const poolGrupo = (grupo.id === 'grupo_vestuario' && TEL_GRUPO_VESTUARIO_COLECTIVO[bucket]) ? TEL_GRUPO_VESTUARIO_COLECTIVO[bucket] : plantillas.grupo;
+    const texto = elegirSinRepetir(poolGrupo, 'grupo_'+grupo.id+'_'+bucket);
     const autor = telAutorAleatorioGrupo(grupo, j, null);
     S.movilBandeja.grupos[grupo.id] = S.movilBandeja.grupos[grupo.id] || [];
     S.movilBandeja.grupos[grupo.id].push({ id:idBase, autor, texto, bucket, temporada:S.temporada, pasoIndex:paso, leido:false });
+    // Marca que este grupo tiene algo nuevo de verdad esperando tu respuesta — es lo único que
+    // habilita el panel "Escribe algo" (ver renderMovilContenido/telEnviarMensajeGrupo): antes se
+    // podía escribir en cualquier momento, aunque no hubiera nada nuevo que responder.
+    S.movilGrupoPendienteRespuesta = S.movilGrupoPendienteRespuesta || {};
+    S.movilGrupoPendienteRespuesta[grupo.id] = true;
     // El grupo "habla solo": con bastante probabilidad, otro miembro reacciona al primer mensaje
     // aunque tú no digas nada — así se nota que la conversación sigue sin ti.
     if(Math.random() < 0.55){
       const autor2 = telAutorAleatorioGrupo(grupo, j, autor);
-      const respuesta = elegirSinRepetir(telPoolGrupoReaccion(bucket), 'reaccion_'+grupo.id);
+      const respuesta = elegirSinRepetir(telPoolGrupoReaccion(bucket, grupo.id), 'reaccion_'+grupo.id);
       S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_b', autor:autor2, texto:respuesta, temporada:S.temporada, pasoIndex:paso, leido:false });
     }
   } else {
@@ -16966,11 +17005,12 @@ function renderMovilContenido(c, j){
         choices.appendChild(el('p','tel-choices-label','Tu respuesta'));
         scroll.appendChild(choices);
         renderizarOpcionesEvento(choices, S.eventoActual, j, {estiloChat:true});
-      } else if(S.movilGrupoEscribiendo !== grupo.id){
-        // Chat abierto, sin turno de pregunta/respuesta que cerrar — se puede escribir en
-        // cualquier momento, a diferencia de los contactos 1 a 1 (ver telEnviarMensajeGrupo).
+      } else if(S.movilGrupoEscribiendo !== grupo.id && S.movilGrupoPendienteRespuesta && S.movilGrupoPendienteRespuesta[grupo.id]){
+        // Solo se puede escribir cuando hay algo nuevo de verdad esperando respuesta
+        // (S.movilGrupoPendienteRespuesta, ver generarNotificacionMovil/telEnviarMensajeGrupo) —
+        // antes se podía escribir en cualquier momento, aunque nadie te hubiera dicho nada nuevo.
         const choices = el('div','tel-choices');
-        choices.appendChild(el('p','tel-choices-label','Escribe algo'));
+        choices.appendChild(el('p','tel-choices-label','Tu respuesta'));
         telPoolGrupoJugador(grupo).forEach(texto=>{
           const btn = document.createElement('button');
           btn.className = 'tel-choice-btn';
