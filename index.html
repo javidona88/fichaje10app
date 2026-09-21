@@ -2567,11 +2567,14 @@ const TIENDA_COCHES = [
   { nivel:3, nombre:'Deportivo de lujo', coste:150000, efecto:{confianza:3, popularidad:8}, desc:'El tipo de coche con el que la gente se gira al verlo pasar por la calle.', imagen:'img/coches/nivel3.jpg', ...porCategoria(3) },
   { nivel:4, nombre:'Superdeportivo exclusivo', coste:600000, efecto:{confianza:4, popularidad:14}, desc:'Una pieza de coleccionista, de las que solo se ven en las revistas de motor. Solo hay unos pocos como el tuyo en el mundo.', imagen:'img/coches/nivel4.jpg', ...porCategoria(4) }
 ];
+// Tercera categoría con imagen real por nivel (img/motos/nivelN.jpg) — mismo criterio que
+// TIENDA_RELOJES/COCHES: solo en SCREENS.compras/renderizarTiendaOnline, con zoom incluido
+// (abrirZoomProducto), nunca en la pantalla antigua SCREENS.gastos.
 const TIENDA_MOTOS = [
-  { nivel:1, nombre:'Scooter urbana', coste:2500, efecto:{confianza:1, popularidad:1}, desc:'Práctica para moverte por la ciudad sin depender de nadie. Nada llamativo, pero cumple.' },
-  { nivel:2, nombre:'Naked de gama media', coste:16000, efecto:{confianza:2, popularidad:3}, desc:'Empiezas a disfrutar de verdad de las salidas en moto los días libres.', ...porCategoria(1) },
-  { nivel:3, nombre:'Custom de alta gama', coste:65000, efecto:{confianza:2, popularidad:6}, desc:'Una moto con la que te paras a mirarla antes de arrancar. Se nota en cómo te miran también a ti.', ...porCategoria(3) },
-  { nivel:4, nombre:'Superbike de edición limitada', coste:260000, efecto:{confianza:3, popularidad:11}, desc:'Pocas unidades en el mundo, y una de ellas es tuya. Cada vez que sales con ella es un pequeño espectáculo.', ...porCategoria(4) }
+  { nivel:1, nombre:'Scooter urbana', coste:2500, efecto:{confianza:1, popularidad:1}, desc:'Práctica para moverte por la ciudad sin depender de nadie. Nada llamativo, pero cumple.', imagen:'img/motos/nivel1.jpg' },
+  { nivel:2, nombre:'Naked de gama media', coste:16000, efecto:{confianza:2, popularidad:3}, desc:'Empiezas a disfrutar de verdad de las salidas en moto los días libres.', imagen:'img/motos/nivel2.jpg', ...porCategoria(1) },
+  { nivel:3, nombre:'Custom de alta gama', coste:65000, efecto:{confianza:2, popularidad:6}, desc:'Una moto con la que te paras a mirarla antes de arrancar. Se nota en cómo te miran también a ti.', imagen:'img/motos/nivel3.jpg', ...porCategoria(3) },
+  { nivel:4, nombre:'Superbike de edición limitada', coste:260000, efecto:{confianza:3, popularidad:11}, desc:'Pocas unidades en el mundo, y una de ellas es tuya. Cada vez que sales con ella es un pequeño espectáculo.', imagen:'img/motos/nivel4.jpg', ...porCategoria(4) }
 ];
 // A diferencia de coches/motos (de cara a la galería: confianza/popularidad), las botas son la
 // única compra única que da una ventaja de juego de verdad — atributos reales, no narrativa. El
