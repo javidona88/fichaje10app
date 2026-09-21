@@ -1052,6 +1052,10 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .servicio-nivel-btn.activo{ border-color:var(--gold); background:rgba(212,175,55,0.12); }
 .servicio-nivel-btn.activo .n, .servicio-nivel-btn.activo .c{ color:var(--gold); }
 .servicio-nivel-btn.inasequible{ opacity:.4; cursor:not-allowed; }
+.servicio-nivel-btn.con-imagen{ padding:6px; }
+.servicio-nivel-btn.con-imagen .img-wrap{ width:100%; aspect-ratio:1/1; border-radius:6px; overflow:hidden; margin-bottom:6px; background:var(--panel2); }
+.servicio-nivel-btn.con-imagen .img-wrap img{ width:100%; height:100%; object-fit:cover; display:block; }
+.servicio-nivel-btn.con-imagen.activo .img-wrap{ box-shadow:0 0 0 2px var(--gold) inset; }
 .servicio-desc{ font-family:'Space Grotesk',sans-serif; font-size:11.5px; color:var(--ink-soft); margin-top:8px; line-height:1.5; }
 
 /* Pantalla de rankings (jugadores) */
@@ -2568,11 +2572,16 @@ const TIENDA_INMUEBLES = [
   { nivel:3, nombre:'Chalet con piscina', coste:750000, efecto:{confianza:3, popularidad:7}, desc:'Zona residencial, jardín y piscina propia. El tipo de casa con la que sueña cualquiera.', ...porCategoria(3) },
   { nivel:4, nombre:'Mansión de la zona alta', coste:2800000, efecto:{confianza:4, popularidad:12}, desc:'La propiedad con la que sales en las revistas de arquitectura, no solo en las deportivas.', ...porCategoria(4) }
 ];
+// Primera categoría de la tienda con imagen real por nivel (img/relojes/nivelN.jpg, 480×480,
+// formato 1:1 — ver .servicio-nivel-btn.con-imagen en renderizarRelojes). El resto de compras
+// únicas (coches, motos, botas, inmuebles) se quedan por ahora con el botón solo de texto; el
+// mismo patrón (comprobar `info.imagen` al construir el botón) se puede copiar a sus renderers
+// cuando tengan sus propias imágenes.
 const TIENDA_RELOJES = [
-  { nivel:1, nombre:'Reloj de acero', coste:3000, efecto:{confianza:1, popularidad:1}, desc:'Sencillo y fiable, el primer reloj bueno que te compras con tu propio sueldo.' },
-  { nivel:2, nombre:'Automático de gama media', coste:15000, efecto:{confianza:2, popularidad:3}, desc:'Mecanismo suizo, correa de piel. Ya no es solo para mirar la hora.', ...porCategoria(1) },
-  { nivel:3, nombre:'Alta relojería suiza', coste:60000, efecto:{confianza:2, popularidad:6}, desc:'Una de esas marcas que reconoce cualquiera con solo verlo en tu muñeca.', ...porCategoria(3) },
-  { nivel:4, nombre:'Pieza única de coleccionista', coste:220000, efecto:{confianza:3, popularidad:10}, desc:'Edición limitada, numerada, de las que se subastan cuando dejan de fabricarse.', ...porCategoria(4) }
+  { nivel:1, nombre:'Reloj de acero', coste:3000, efecto:{confianza:1, popularidad:1}, desc:'Sencillo y fiable, el primer reloj bueno que te compras con tu propio sueldo.', imagen:'img/relojes/nivel1.jpg' },
+  { nivel:2, nombre:'Automático de gama media', coste:15000, efecto:{confianza:2, popularidad:3}, desc:'Mecanismo suizo, correa de piel. Ya no es solo para mirar la hora.', imagen:'img/relojes/nivel2.jpg', ...porCategoria(1) },
+  { nivel:3, nombre:'Alta relojería suiza', coste:60000, efecto:{confianza:2, popularidad:6}, desc:'Una de esas marcas que reconoce cualquiera con solo verlo en tu muñeca.', imagen:'img/relojes/nivel3.jpg', ...porCategoria(3) },
+  { nivel:4, nombre:'Pieza única de coleccionista', coste:220000, efecto:{confianza:3, popularidad:10}, desc:'Edición limitada, numerada, de las que se subastan cuando dejan de fabricarse.', imagen:'img/relojes/nivel4.jpg', ...porCategoria(4) }
 ];
 
 // Colección de arte: se desbloquea para siempre en cuanto j.stats.dinero alcanza
@@ -20571,8 +20580,9 @@ function renderizarRelojes(j, contenedor){
     const desbloqueado = !info.desbloqueo || info.desbloqueo(j);
     const puedePagar = (j.stats.dinero||0) >= info.coste && (j.stats.dinero||0) >= 0;
     const asequible = !desbloqueado || yaComprado || esInferior || puedePagar;
-    const btn = el('div','servicio-nivel-btn'+(yaComprado?' activo':'')+(!desbloqueado||!asequible||esInferior?' inasequible':''));
-    btn.innerHTML = `<div class="n">${info.nombre}</div><div class="c">${formatearDinero(info.coste)}</div>`;
+    const btn = el('div','servicio-nivel-btn'+(info.imagen?' con-imagen':'')+(yaComprado?' activo':'')+(!desbloqueado||!asequible||esInferior?' inasequible':''));
+    const imgHtml = info.imagen ? `<div class="img-wrap"><img src="${info.imagen}" alt="${info.nombre}" loading="lazy"></div>` : '';
+    btn.innerHTML = `${imgHtml}<div class="n">${info.nombre}</div><div class="c">${formatearDinero(info.coste)}</div>`;
     if(!desbloqueado){
       btn.title = info.etiquetaBloqueo || 'Todavía no disponible';
     } else if(esInferior){
