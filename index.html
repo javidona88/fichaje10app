@@ -2582,11 +2582,13 @@ const TIENDA_MOTOS = [
 // acumularProgresoAtributo), así que un efecto de 8 equivale a 1 punto entero de golpe con el
 // atributo todavía bajo (≤8, factorResistenciaAtributo aún no frena) — con el atributo ya alto
 // pesa menos, igual que cualquier otra subida del juego; nunca un atajo incondicional.
+// Cuarta categoría con imagen real por nivel (img/botas/nivelN.jpg) — mismo criterio que
+// TIENDA_RELOJES/COCHES/MOTOS: solo en SCREENS.compras/renderizarTiendaOnline, con zoom incluido.
 const TIENDA_BOTAS = [
-  { nivel:1, nombre:'Botas de gama alta', coste:3000, efecto:{velocidad:8}, desc:'Ligeras y con buen agarre. Notas el cambio nada más calzártelas.' },
-  { nivel:2, nombre:'Botas de fibra de carbono', coste:18000, efecto:{velocidad:8, regate:8}, desc:'Suela rígida de competición: cada arrancada y cada cambio de ritmo salen un poco más limpios.', ...porCategoria(1) },
-  { nivel:3, nombre:'Botas de edición de profesional', coste:70000, efecto:{tiro:8, velocidad:8}, desc:'El mismo modelo que usan las estrellas de la categoría. El golpeo de balón gana precisión.', ...porCategoria(3) },
-  { nivel:4, nombre:'Prototipo exclusivo de la marca', coste:250000, efecto:{tiro:8, velocidad:8, regate:8}, desc:'Un diseño que ni siquiera está a la venta, hecho a medida de tu pisada. Se nota en todo tu juego.', ...porCategoria(4) }
+  { nivel:1, nombre:'Botas de gama alta', coste:3000, efecto:{velocidad:8}, desc:'Ligeras y con buen agarre. Notas el cambio nada más calzártelas.', imagen:'img/botas/nivel1.jpg' },
+  { nivel:2, nombre:'Botas de fibra de carbono', coste:18000, efecto:{velocidad:8, regate:8}, desc:'Suela rígida de competición: cada arrancada y cada cambio de ritmo salen un poco más limpios.', imagen:'img/botas/nivel2.jpg', ...porCategoria(1) },
+  { nivel:3, nombre:'Botas de edición de profesional', coste:70000, efecto:{tiro:8, velocidad:8}, desc:'El mismo modelo que usan las estrellas de la categoría. El golpeo de balón gana precisión.', imagen:'img/botas/nivel3.jpg', ...porCategoria(3) },
+  { nivel:4, nombre:'Prototipo exclusivo de la marca', coste:250000, efecto:{tiro:8, velocidad:8, regate:8}, desc:'Un diseño que ni siquiera está a la venta, hecho a medida de tu pisada. Se nota en todo tu juego.', imagen:'img/botas/nivel4.jpg', ...porCategoria(4) }
 ];
 // Mismo patrón que coches/motos/botas (compra única, de cara a la galería: confianza/popularidad),
 // dos garajes de lujo más — inmuebles y relojes — con el mismo campo en j (inmuebleActual/
