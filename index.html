@@ -973,10 +973,30 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tienda-card-foto.botas{ background:linear-gradient(155deg,#2f6b45,#14311f); }
 .tienda-card-foto.relojes{ background:linear-gradient(155deg,#5a4a2f,#241c0e); }
 .tienda-card-foto img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.tienda-card-foto.con-imagen{ cursor:zoom-in; }
+.tienda-card-foto .lupa-badge{
+  position:absolute; bottom:7px; right:7px; width:24px; height:24px; border-radius:50%;
+  background:rgba(10,11,16,.55); display:flex; align-items:center; justify-content:center; color:#fff;
+}
+.tienda-card-foto .lupa-badge svg{ width:13px; height:13px; }
 .tienda-card-tag{
   position:absolute; top:7px; left:7px; background:var(--green); color:#0e2115;
   font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:800; letter-spacing:.03em;
   padding:3px 7px; border-radius:6px; text-transform:uppercase;
+}
+/* Zoom a pantalla completa de la foto de un producto (coches, relojes, y lo que se añada
+   después) — mismo patrón fundido+escala que .logro-zoom-backdrop, ver abrirZoomProducto. */
+.producto-zoom-backdrop{ position:fixed; inset:0; z-index:71; background:rgba(6,7,10,.82); display:flex; align-items:center; justify-content:center; padding:28px 24px; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+.producto-zoom-backdrop.activo{ opacity:1; pointer-events:auto; }
+.producto-zoom-card{ position:relative; width:100%; max-width:400px; transform:scale(.92); opacity:0; transition:transform .3s cubic-bezier(.2,.9,.3,1), opacity .25s ease; }
+.producto-zoom-backdrop.activo .producto-zoom-card{ transform:scale(1); opacity:1; }
+.producto-zoom-card img{ width:100%; aspect-ratio:1; object-fit:cover; border-radius:16px; display:block; box-shadow:0 22px 50px rgba(0,0,0,.55); }
+.producto-zoom-card .nombre{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:700; color:var(--ink); text-align:center; margin-top:14px; }
+.producto-zoom-card .cerrar{
+  position:absolute; top:-14px; right:-14px; width:32px; height:32px; border-radius:50%;
+  border:1px solid var(--line); background:var(--panel2); color:var(--ink);
+  display:flex; align-items:center; justify-content:center; font-size:15px; cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,.4);
 }
 .tienda-card-body{ padding:11px 12px 12px; display:flex; flex-direction:column; gap:5px; flex:1; }
 .tienda-card-nombre{ font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:600; color:var(--ink); line-height:1.3; min-height:2.6em; }
@@ -2537,11 +2557,15 @@ const TIENDA_SERVICIOS = [
 // La confianza pesa mucho en las tiradas (evita el -2 de bono por debajo de 35), así que se deja
 // a propósito en poco por nivel — el efecto grande de comprar un coche/moto de gama alta es de
 // cara a la galería (popularidad), no un atajo para blindar tiradas.
+// Segunda categoría con imagen real por nivel (img/coches/nivelN.jpg, mismo criterio que
+// TIENDA_RELOJES — ver más abajo). Pintado y zoom a pantalla completa en renderizarTiendaOnline/
+// abrirZoomProducto (SCREENS.compras), NUNCA en renderizarTienda/SCREENS.gastos (la parada
+// obligatoria de texto de cada temporada, sin fotos — ver el comentario de TIENDA_RELOJES).
 const TIENDA_COCHES = [
-  { nivel:1, nombre:'Utilitario compacto', coste:8000, efecto:{confianza:1, popularidad:1}, desc:'Nada del otro mundo, pero es tuyo y te lleva a todas partes sin dar problemas.' },
-  { nivel:2, nombre:'Berlina de gama media', coste:35000, efecto:{confianza:2, popularidad:4}, desc:'Cómodo, con algo de estilo. Empiezas a sentir que las cosas te van bien de verdad.', ...porCategoria(1) },
-  { nivel:3, nombre:'Deportivo de lujo', coste:150000, efecto:{confianza:3, popularidad:8}, desc:'El tipo de coche con el que la gente se gira al verlo pasar por la calle.', ...porCategoria(3) },
-  { nivel:4, nombre:'Superdeportivo exclusivo', coste:600000, efecto:{confianza:4, popularidad:14}, desc:'Una pieza de coleccionista, de las que solo se ven en las revistas de motor. Solo hay unos pocos como el tuyo en el mundo.', ...porCategoria(4) }
+  { nivel:1, nombre:'Utilitario compacto', coste:8000, efecto:{confianza:1, popularidad:1}, desc:'Nada del otro mundo, pero es tuyo y te lleva a todas partes sin dar problemas.', imagen:'img/coches/nivel1.jpg' },
+  { nivel:2, nombre:'Berlina de gama media', coste:35000, efecto:{confianza:2, popularidad:4}, desc:'Cómodo, con algo de estilo. Empiezas a sentir que las cosas te van bien de verdad.', imagen:'img/coches/nivel2.jpg', ...porCategoria(1) },
+  { nivel:3, nombre:'Deportivo de lujo', coste:150000, efecto:{confianza:3, popularidad:8}, desc:'El tipo de coche con el que la gente se gira al verlo pasar por la calle.', imagen:'img/coches/nivel3.jpg', ...porCategoria(3) },
+  { nivel:4, nombre:'Superdeportivo exclusivo', coste:600000, efecto:{confianza:4, popularidad:14}, desc:'Una pieza de coleccionista, de las que solo se ven en las revistas de motor. Solo hay unos pocos como el tuyo en el mundo.', imagen:'img/coches/nivel4.jpg', ...porCategoria(4) }
 ];
 const TIENDA_MOTOS = [
   { nivel:1, nombre:'Scooter urbana', coste:2500, efecto:{confianza:1, popularidad:1}, desc:'Práctica para moverte por la ciudad sin depender de nadie. Nada llamativo, pero cumple.' },
@@ -20649,10 +20673,15 @@ function renderizarTiendaOnline(j, contenedor){
       const asequible = !desbloqueado || yaComprado || esInferior || puedePagar;
 
       const card = el('div','tienda-card');
-      const foto = el('div','tienda-card-foto '+cat.id);
-      // Con imagen real (ver TIENDA_RELOJES) se pinta esa foto de fondo; sin ella, el icono
-      // degradado de siempre — así las categorías sin fotos todavía no se quedan vacías.
+      const foto = el('div','tienda-card-foto '+cat.id+(info.imagen?' con-imagen':''));
+      // Con imagen real (ver TIENDA_RELOJES/TIENDA_COCHES) se pinta esa foto de fondo, con lupa
+      // para abrirla a pantalla completa (abrirZoomProducto); sin ella, el icono degradado de
+      // siempre — así las categorías sin fotos todavía no se quedan vacías ni clicables al vacío.
       foto.innerHTML = info.imagen ? `<img src="${info.imagen}" alt="${info.nombre}" loading="lazy">` : cat.icono;
+      if(info.imagen){
+        foto.appendChild(el('span','lupa-badge', ICONOS_SVG.lupa));
+        foto.onclick = ()=> abrirZoomProducto(info.imagen, info.nombre);
+      }
       if(yaComprado) foto.appendChild(el('span','tienda-card-tag','En uso'));
       card.appendChild(foto);
 
@@ -20692,6 +20721,32 @@ function renderizarTiendaOnline(j, contenedor){
     grid.appendChild(el('div',null,'No hay artículos en esta categoría.')).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);grid-column:1/-1;padding:20px 4px;text-align:center;";
   }
   contenedor.appendChild(grid);
+  // Backdrop del zoom a pantalla completa (ver abrirZoomProducto) — un único nodo por render de
+  // esta pantalla, igual que .logro-zoom-backdrop en SCREENS.logros: se crea vacío aquí y
+  // abrirZoomProducto solo rellena su contenido y lo muestra.
+  const backdropZoom = el('div','producto-zoom-backdrop'); backdropZoom.id = 'producto-zoom-backdrop';
+  backdropZoom.onclick = (e)=>{ if(e.target === backdropZoom) cerrarZoomProducto(); };
+  const zoomCard = el('div','producto-zoom-card'); zoomCard.id = 'producto-zoom-card';
+  backdropZoom.appendChild(zoomCard);
+  contenedor.appendChild(backdropZoom);
+}
+// Zoom simple (fundido + escala desde el centro, mismo patrón que abrirZoomLogro) para ver a
+// pantalla completa la foto de un producto de la Tienda online — coches, relojes, y cualquier
+// otra categoría de compras únicas que tenga imagen en el futuro (ver TIENDA_RELOJES/COCHES).
+function abrirZoomProducto(src, nombre){
+  const backdrop = document.getElementById('producto-zoom-backdrop');
+  const card = document.getElementById('producto-zoom-card');
+  if(!backdrop || !card) return;
+  card.innerHTML = `
+    <button class="cerrar" type="button">✕</button>
+    <img src="${src}" alt="${nombre}">
+    <div class="nombre">${nombre}</div>`;
+  card.querySelector('.cerrar').onclick = cerrarZoomProducto;
+  backdrop.classList.add('activo');
+}
+function cerrarZoomProducto(){
+  const backdrop = document.getElementById('producto-zoom-backdrop');
+  if(backdrop) backdrop.classList.remove('activo');
 }
 function renderizarTienda(j, contenedor){
   renderizarServiciosProfesionales(j, contenedor);
