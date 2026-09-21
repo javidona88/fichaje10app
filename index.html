@@ -972,6 +972,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tienda-card-foto.motos{ background:linear-gradient(155deg,#7a4a1f,#2c1c0a); }
 .tienda-card-foto.botas{ background:linear-gradient(155deg,#2f6b45,#14311f); }
 .tienda-card-foto.relojes{ background:linear-gradient(155deg,#5a4a2f,#241c0e); }
+.tienda-card-foto.inmuebles{ background:linear-gradient(155deg,#3f5a4a,#182b21); }
 .tienda-card-foto img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 .tienda-card-foto.con-imagen{ cursor:zoom-in; }
 .tienda-card-foto .lupa-badge{
@@ -2592,12 +2593,13 @@ const TIENDA_BOTAS = [
 ];
 // Mismo patrón que coches/motos/botas (compra única, de cara a la galería: confianza/popularidad),
 // dos garajes de lujo más — inmuebles y relojes — con el mismo campo en j (inmuebleActual/
-// relojActual, índice de nivel, 0 = ninguno).
+// relojActual, índice de nivel, 0 = ninguno). Última categoría en tener imagen real por nivel
+// (img/inmuebles/nivelN.jpg) — con esto las 5 compras únicas de SCREENS.compras tienen foto.
 const TIENDA_INMUEBLES = [
-  { nivel:1, nombre:'Piso en las afueras', coste:40000, efecto:{confianza:1, popularidad:1}, desc:'Nada lujoso, pero es tuyo: la primera propiedad de verdad de tu carrera.' },
-  { nivel:2, nombre:'Ático en el centro', coste:180000, efecto:{confianza:2, popularidad:4}, desc:'Vistas a la ciudad y un portal con conserje. Empiezas a vivir de otra manera.', ...porCategoria(1) },
-  { nivel:3, nombre:'Chalet con piscina', coste:750000, efecto:{confianza:3, popularidad:7}, desc:'Zona residencial, jardín y piscina propia. El tipo de casa con la que sueña cualquiera.', ...porCategoria(3) },
-  { nivel:4, nombre:'Mansión de la zona alta', coste:2800000, efecto:{confianza:4, popularidad:12}, desc:'La propiedad con la que sales en las revistas de arquitectura, no solo en las deportivas.', ...porCategoria(4) }
+  { nivel:1, nombre:'Piso en las afueras', coste:40000, efecto:{confianza:1, popularidad:1}, desc:'Nada lujoso, pero es tuyo: la primera propiedad de verdad de tu carrera.', imagen:'img/inmuebles/nivel1.jpg' },
+  { nivel:2, nombre:'Ático en el centro', coste:180000, efecto:{confianza:2, popularidad:4}, desc:'Vistas a la ciudad y un portal con conserje. Empiezas a vivir de otra manera.', imagen:'img/inmuebles/nivel2.jpg', ...porCategoria(1) },
+  { nivel:3, nombre:'Chalet con piscina', coste:750000, efecto:{confianza:3, popularidad:7}, desc:'Zona residencial, jardín y piscina propia. El tipo de casa con la que sueña cualquiera.', imagen:'img/inmuebles/nivel3.jpg', ...porCategoria(3) },
+  { nivel:4, nombre:'Mansión de la zona alta', coste:2800000, efecto:{confianza:4, popularidad:12}, desc:'La propiedad con la que sales en las revistas de arquitectura, no solo en las deportivas.', imagen:'img/inmuebles/nivel4.jpg', ...porCategoria(4) }
 ];
 // Primera categoría de la tienda "online" (SCREENS.compras, ver renderizarTiendaOnline) con
 // imagen real por nivel (img/relojes/nivelN.jpg, 480×480, formato 1:1 — .tienda-card-foto).
