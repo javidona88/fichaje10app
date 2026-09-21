@@ -2397,6 +2397,7 @@ const ICONOS_SVG = {
   coche: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l1.2-3.6a2 2 0 011.9-1.4h11.8a2 2 0 011.9 1.4L21 16"/><path d="M8.5 11l.8-2h5.4l1.5 2"/><rect x="2.5" y="16" width="19" height="2.6" rx="1.2"/><circle cx="7" cy="19.8" r="1.4" fill="currentColor" stroke="none"/><circle cx="17" cy="19.8" r="1.4" fill="currentColor" stroke="none"/></svg>',
   moto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.3" cy="18" r="2.6"/><circle cx="18.2" cy="18" r="2.6"/><path d="M7.8 18h6.6l2-5.2h2.5"/><path d="M9.3 18l2-5.4h3.6l1.7-2.8h2.1"/><path d="M5.3 18l2.8-5.4"/></svg>',
   botas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 4v7.2c0 1-.4 1.9-1.1 2.6L3 16.3c-.6.6-.9 1.3-.9 2.1V19a1 1 0 001 1h13.4a1 1 0 001-1v-1.6c0-1.9-1.2-3.6-3-4.3l-3-1.1a2.6 2.6 0 01-1.7-2.5V4z"/><path d="M6.5 4h6.8M21 19h-4.5M9 15.5l2.5 1.3"/></svg>',
+  reloj: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="1.6" width="6" height="3.4" rx="1"/><rect x="9" y="19" width="6" height="3.4" rx="1"/><circle cx="12" cy="12" r="6.8"/><path d="M12 8.5V12l2.4 1.5"/></svg>',
   comunicacion: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 011 1v9a1 1 0 01-1 1H9l-4 3v-3H4a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M12 14c-2.5-1.3-3.5-2.6-3.5-3.9a1.9 1.9 0 013.5-1.1 1.9 1.9 0 013.5 1.1c0 1.3-1 2.6-3.5 3.9z" fill="currentColor" stroke="none"/></svg>',
   vivienda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10v9a1 1 0 001 1h10a1 1 0 001-1v-9"/><rect x="10" y="14" width="4" height="6" fill="currentColor" stroke="none"/></svg>',
   vacaciones: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3"/><path d="M12 1.3v1.6M12 11v1.6M6.3 7h1.6M16.1 7h1.6M8 3l1.1 1.1M15 3l-1.1 1.1M8 11l1.1-1.1M15 11l-1.1-1.1"/><path d="M3.5 20c3-6.5 14-6.5 17 0"/></svg>',
@@ -2561,6 +2562,21 @@ const TIENDA_BOTAS = [
   { nivel:2, nombre:'Botas de fibra de carbono', coste:18000, efecto:{velocidad:8, regate:8}, desc:'Suela rígida de competición: cada arrancada y cada cambio de ritmo salen un poco más limpios.', ...porCategoria(1) },
   { nivel:3, nombre:'Botas de edición de profesional', coste:70000, efecto:{tiro:8, velocidad:8}, desc:'El mismo modelo que usan las estrellas de la categoría. El golpeo de balón gana precisión.', ...porCategoria(3) },
   { nivel:4, nombre:'Prototipo exclusivo de la marca', coste:250000, efecto:{tiro:8, velocidad:8, regate:8}, desc:'Un diseño que ni siquiera está a la venta, hecho a medida de tu pisada. Se nota en todo tu juego.', ...porCategoria(4) }
+];
+// Mismo patrón que coches/motos/botas (compra única, de cara a la galería: confianza/popularidad),
+// dos garajes de lujo más — inmuebles y relojes — con el mismo campo en j (inmuebleActual/
+// relojActual, índice de nivel, 0 = ninguno).
+const TIENDA_INMUEBLES = [
+  { nivel:1, nombre:'Piso en las afueras', coste:40000, efecto:{confianza:1, popularidad:1}, desc:'Nada lujoso, pero es tuyo: la primera propiedad de verdad de tu carrera.' },
+  { nivel:2, nombre:'Ático en el centro', coste:180000, efecto:{confianza:2, popularidad:4}, desc:'Vistas a la ciudad y un portal con conserje. Empiezas a vivir de otra manera.', ...porCategoria(1) },
+  { nivel:3, nombre:'Chalet con piscina', coste:750000, efecto:{confianza:3, popularidad:7}, desc:'Zona residencial, jardín y piscina propia. El tipo de casa con la que sueña cualquiera.', ...porCategoria(3) },
+  { nivel:4, nombre:'Mansión de la zona alta', coste:2800000, efecto:{confianza:4, popularidad:12}, desc:'La propiedad con la que sales en las revistas de arquitectura, no solo en las deportivas.', ...porCategoria(4) }
+];
+const TIENDA_RELOJES = [
+  { nivel:1, nombre:'Reloj de acero', coste:3000, efecto:{confianza:1, popularidad:1}, desc:'Sencillo y fiable, el primer reloj bueno que te compras con tu propio sueldo.' },
+  { nivel:2, nombre:'Automático de gama media', coste:15000, efecto:{confianza:2, popularidad:3}, desc:'Mecanismo suizo, correa de piel. Ya no es solo para mirar la hora.', ...porCategoria(1) },
+  { nivel:3, nombre:'Alta relojería suiza', coste:60000, efecto:{confianza:2, popularidad:6}, desc:'Una de esas marcas que reconoce cualquiera con solo verlo en tu muñeca.', ...porCategoria(3) },
+  { nivel:4, nombre:'Pieza única de coleccionista', coste:220000, efecto:{confianza:3, popularidad:10}, desc:'Edición limitada, numerada, de las que se subastan cuando dejan de fabricarse.', ...porCategoria(4) }
 ];
 
 // Colección de arte: se desbloquea para siempre en cuanto j.stats.dinero alcanza
@@ -8084,6 +8100,17 @@ const PAISES_UEFA = ["Alemania","Bélgica","España","Francia","Inglaterra","Ita
 function jugadorEnLigaUEFA(j){
   return !j.club.extranjero || PAISES_UEFA.includes(j.club.pais);
 }
+// Sistema de puntos real de la Bota de Oro europea: 2 puntos por gol en las 5 grandes ligas,
+// 1,5 en el resto de ligas UEFA que sí compiten por el premio (el resto de campeonatos, fuera
+// de PAISES_UEFA, quedan excluidos del todo por jugadorEnLigaUEFA). Así un goleador de una liga
+// modesta necesita muchos más goles reales para competir con uno de las 5 grandes, igual que en
+// la vida real.
+const PAISES_BOTA_ORO_2X = ["Alemania","España","Francia","Inglaterra","Italia"];
+function puntosBotaOro(club, goles){
+  const pais = club.extranjero ? club.pais : 'España';
+  const factor = PAISES_BOTA_ORO_2X.includes(pais) ? 2 : 1.5;
+  return Math.round(goles * factor);
+}
 // "Pichichi" es una etiqueta puramente española (Trofeo Pichichi, LaLiga) — cada país llama a su
 // propio máximo goleador de una forma distinta. Se usan los nombres reales donde hay uno amplia y
 // establemente conocido; el resto cae en el genérico "Máximo goleador" antes que inventarse un
@@ -8875,6 +8902,8 @@ function migrarJugadorGuardado(j){
   if(j.movimientosBanca === undefined) j.movimientosBanca = [];
   if(j.artesDesbloqueado === undefined) j.artesDesbloqueado = false;
   if(j.obrasArte === undefined) j.obrasArte = [];
+  if(j.inmuebleActual === undefined) j.inmuebleActual = 0;
+  if(j.relojActual === undefined) j.relojActual = 0;
 }
 function cargarPartida(slot){
   try{
@@ -8930,7 +8959,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia,estiloId
     filialProgreso:null,
     confianzaEntrenador:35,
     comprasUnicas:[],
-    cocheActual:0, motoActual:0, botasActual:0,
+    cocheActual:0, motoActual:0, botasActual:0, inmuebleActual:0, relojActual:0,
     artesDesbloqueado:false, obrasArte:[],
     lesionSemanas:0, sancionActiva:false,
     avisoBancoPendiente:false,
@@ -9487,8 +9516,13 @@ function calcularResumenTemporada(j, ascensoPlayoff){
     j.carrera.trofeosIndividuales = (j.carrera.trofeosIndividuales||0) + 1;
   }
   // Bota de Oro: no basta con ser Pichichi, hace falta ser de los máximos goleadores de toda
-  // Europa — un premio realmente paneuropeo, así que solo optan a él las ligas UEFA.
-  const probBotaOro = jugadorEnLigaUEFA(j) && pichichi && goles >= 28 ? Math.min(0.5, (goles-25)/20) : 0;
+  // Europa — un premio realmente paneuropeo, así que solo optan a él las ligas UEFA. Hoy en día
+  // un delantero de una liga top necesita 30-36 goles reales para competir en serio, y se
+  // pondera por puntos según el sistema real (puntosBotaOro): con menos de 30 goles ni se
+  // plantea, y por debajo de los ~60 puntos (30 goles a 2x, el mínimo real de un ganador) la
+  // probabilidad es nula — una liga de 1,5x necesita bastantes más goles para llegar ahí.
+  const puntosDeEsteJugador = puntosBotaOro(j.club, goles);
+  const probBotaOro = jugadorEnLigaUEFA(j) && pichichi && goles >= 30 ? Math.min(0.5, Math.max(0, (puntosDeEsteJugador-60)/40)) : 0;
   const botaOro = Math.random() < probBotaOro;
   if(botaOro){
     j.stats.reputacion = Math.min(99, j.stats.reputacion + 10);
@@ -20343,6 +20377,102 @@ function renderizarBotas(j, contenedor){
   }
   contenedor.appendChild(fila);
 }
+function renderizarInmuebles(j, contenedor){
+  contenedor.appendChild(el('div','stat-section-titulo','INMUEBLES'));
+  const fila = el('div','servicio-fila');
+  const cab = el('div','servicio-cab');
+  const nombreActual = j.inmuebleActual > 0 ? TIENDA_INMUEBLES.find(c=>c.nivel===j.inmuebleActual).nombre : null;
+  const efectoBaseInmueble = TIENDA_INMUEBLES[0].efecto || {};
+  const mejoraTxtInmueble = Object.keys(efectoBaseInmueble).map(k => NICE_ATTR[k] || NICE_STAT[k] || k).join(' · ');
+  const mejoraSpanInmueble = mejoraTxtInmueble ? ` <span class="servicio-mejora" style="font-weight:400;font-size:11px;color:var(--gold);white-space:nowrap;">↑ ${mejoraTxtInmueble}</span>` : '';
+  cab.innerHTML = `${iconoInsignia('vivienda',26)}<span class="servicio-nombre">Inmueble</span>${mejoraSpanInmueble}${nombreActual?`<span class="servicio-activo-tag">${nombreActual.toUpperCase()}</span>`:''}`;
+  fila.appendChild(cab);
+  const niveles = el('div','servicio-niveles');
+  TIENDA_INMUEBLES.forEach(info=>{
+    const yaComprado = j.inmuebleActual === info.nivel;
+    const esInferior = j.inmuebleActual > info.nivel;
+    const desbloqueado = !info.desbloqueo || info.desbloqueo(j);
+    const puedePagar = (j.stats.dinero||0) >= info.coste && (j.stats.dinero||0) >= 0;
+    const asequible = !desbloqueado || yaComprado || esInferior || puedePagar;
+    const btn = el('div','servicio-nivel-btn'+(yaComprado?' activo':'')+(!desbloqueado||!asequible||esInferior?' inasequible':''));
+    btn.innerHTML = `<div class="n">${info.nombre}</div><div class="c">${formatearDinero(info.coste)}</div>`;
+    if(!desbloqueado){
+      btn.title = info.etiquetaBloqueo || 'Todavía no disponible';
+    } else if(esInferior){
+      btn.title = 'Ya tienes un inmueble mejor que este';
+    } else if(!asequible && !yaComprado){
+      btn.title = (j.stats.dinero||0) < 0
+        ? 'No puedes comprar nada mientras tu cuenta esté en números rojos'
+        : `Te falta dinero para permitirte este inmueble (${formatearDinero(info.coste)})`;
+    }
+    if(desbloqueado && asequible && !yaComprado && !esInferior){
+      btn.onclick = ()=>{
+        aplicarEfectos(j, { dinero:-info.coste, ...info.efecto });
+        registrarMovimientoBanca(j, 'out', 'Compra', info.nombre, -info.coste);
+        j.inmuebleActual = info.nivel;
+        pintar();
+      };
+    }
+    niveles.appendChild(btn);
+  });
+  fila.appendChild(niveles);
+  const primerBloqueado = TIENDA_INMUEBLES.find(n => n.desbloqueo && !n.desbloqueo(j));
+  if(primerBloqueado && !j.inmuebleActual){
+    fila.appendChild(el('div','servicio-desc', `🔒 ${primerBloqueado.nombre}: ${primerBloqueado.etiquetaBloqueo}`));
+  } else {
+    const infoDesc = TIENDA_INMUEBLES.find(n=>n.nivel === (j.inmuebleActual || 1));
+    fila.appendChild(el('div','servicio-desc', infoDesc.desc));
+  }
+  contenedor.appendChild(fila);
+}
+function renderizarRelojes(j, contenedor){
+  contenedor.appendChild(el('div','stat-section-titulo','RELOJES'));
+  const fila = el('div','servicio-fila');
+  const cab = el('div','servicio-cab');
+  const nombreActual = j.relojActual > 0 ? TIENDA_RELOJES.find(c=>c.nivel===j.relojActual).nombre : null;
+  const efectoBaseReloj = TIENDA_RELOJES[0].efecto || {};
+  const mejoraTxtReloj = Object.keys(efectoBaseReloj).map(k => NICE_ATTR[k] || NICE_STAT[k] || k).join(' · ');
+  const mejoraSpanReloj = mejoraTxtReloj ? ` <span class="servicio-mejora" style="font-weight:400;font-size:11px;color:var(--gold);white-space:nowrap;">↑ ${mejoraTxtReloj}</span>` : '';
+  cab.innerHTML = `${iconoInsignia('reloj',26)}<span class="servicio-nombre">Reloj</span>${mejoraSpanReloj}${nombreActual?`<span class="servicio-activo-tag">${nombreActual.toUpperCase()}</span>`:''}`;
+  fila.appendChild(cab);
+  const niveles = el('div','servicio-niveles');
+  TIENDA_RELOJES.forEach(info=>{
+    const yaComprado = j.relojActual === info.nivel;
+    const esInferior = j.relojActual > info.nivel;
+    const desbloqueado = !info.desbloqueo || info.desbloqueo(j);
+    const puedePagar = (j.stats.dinero||0) >= info.coste && (j.stats.dinero||0) >= 0;
+    const asequible = !desbloqueado || yaComprado || esInferior || puedePagar;
+    const btn = el('div','servicio-nivel-btn'+(yaComprado?' activo':'')+(!desbloqueado||!asequible||esInferior?' inasequible':''));
+    btn.innerHTML = `<div class="n">${info.nombre}</div><div class="c">${formatearDinero(info.coste)}</div>`;
+    if(!desbloqueado){
+      btn.title = info.etiquetaBloqueo || 'Todavía no disponible';
+    } else if(esInferior){
+      btn.title = 'Ya tienes un reloj mejor que este';
+    } else if(!asequible && !yaComprado){
+      btn.title = (j.stats.dinero||0) < 0
+        ? 'No puedes comprar nada mientras tu cuenta esté en números rojos'
+        : `Te falta dinero para permitirte este reloj (${formatearDinero(info.coste)})`;
+    }
+    if(desbloqueado && asequible && !yaComprado && !esInferior){
+      btn.onclick = ()=>{
+        aplicarEfectos(j, { dinero:-info.coste, ...info.efecto });
+        registrarMovimientoBanca(j, 'out', 'Compra', info.nombre, -info.coste);
+        j.relojActual = info.nivel;
+        pintar();
+      };
+    }
+    niveles.appendChild(btn);
+  });
+  fila.appendChild(niveles);
+  const primerBloqueado = TIENDA_RELOJES.find(n => n.desbloqueo && !n.desbloqueo(j));
+  if(primerBloqueado && !j.relojActual){
+    fila.appendChild(el('div','servicio-desc', `🔒 ${primerBloqueado.nombre}: ${primerBloqueado.etiquetaBloqueo}`));
+  } else {
+    const infoDesc = TIENDA_RELOJES.find(n=>n.nivel === (j.relojActual || 1));
+    fila.appendChild(el('div','servicio-desc', infoDesc.desc));
+  }
+  contenedor.appendChild(fila);
+}
 // Tienda online estilo Amazon (SCREENS.compras): mismos datos y misma lógica de compra que
 // renderizarCoches/Motos/Botas (desbloqueo, asequibilidad, aplicarEfectos, registrarMovimientoBanca),
 // solo que en formato tarjeta de producto con foto/precio/CTA en vez de fila de niveles — para que
@@ -20350,7 +20480,9 @@ function renderizarBotas(j, contenedor){
 const TEL_CATS_TIENDA = [
   { id:'coches', nombre:'Coches', datos:TIENDA_COCHES, campo:'cocheActual', icono:ICONOS_SVG.coche },
   { id:'motos', nombre:'Motos', datos:TIENDA_MOTOS, campo:'motoActual', icono:ICONOS_SVG.moto },
-  { id:'botas', nombre:'Botas', datos:TIENDA_BOTAS, campo:'botasActual', icono:ICONOS_SVG.botas }
+  { id:'botas', nombre:'Botas', datos:TIENDA_BOTAS, campo:'botasActual', icono:ICONOS_SVG.botas },
+  { id:'inmuebles', nombre:'Inmuebles', datos:TIENDA_INMUEBLES, campo:'inmuebleActual', icono:ICONOS_SVG.vivienda },
+  { id:'relojes', nombre:'Relojes', datos:TIENDA_RELOJES, campo:'relojActual', icono:ICONOS_SVG.reloj }
 ];
 function renderizarTiendaOnline(j, contenedor){
   // Sin categoría "Todo": siempre una categoría concreta activa (la primera por defecto), nunca
@@ -20431,6 +20563,8 @@ function renderizarTienda(j, contenedor){
   renderizarCoches(j, contenedor);
   renderizarMotos(j, contenedor);
   renderizarBotas(j, contenedor);
+  renderizarInmuebles(j, contenedor);
+  renderizarRelojes(j, contenedor);
 }
 
 SCREENS.gastos = function(){
