@@ -2481,6 +2481,13 @@ function porPopularidad(min){ return { desbloqueo: j => j.stats.popularidad >= m
 // pero la curva de progresión real la sigue marcando factorResistenciaAtributo/gananciaEscalada
 // (cuanto más alto el atributo/stat, menos sube cada punto) — subir el número de nivel 4 no la
 // rompe, solo hace que el dinero de fin de carrera tenga premium real en el que gastarse.
+// Imagen propia por familia de servicio (en vez del icono SVG de ICONOS_SVG habitual) — clave
+// por `familia`, no por `icono`, porque esa clave sí se reutiliza en sitios ajenos al todo (p. ej.
+// 'fisico' es también el icono del atributo Físico del jugador en topbar/lesiones/estilo de
+// juego). De momento solo prepFisico (img/servicios/prep_fisico.png); pintado en
+// renderizarServiciosProfesionales y renderizarPlantillaServicios, los dos sitios donde se lista
+// un servicio con su icono.
+const ICONOS_IMAGEN_SERVICIO = { prepFisico: 'img/servicios/prep_fisico.png' };
 const TIENDA_SERVICIOS = [
   { familia:'prepFisico', nombre:'Preparador físico personal', icono:'fisico', categoria:'Rendimiento y Cuidado Físico', niveles:[
     { nivel:1, costeAnual:2000, efectoTemporada:{fisico:0.5}, desc:'Trabajo complementario de fuerza y prevención de lesiones que no cubren las sesiones grupales del club.', ...porCategoria(1) },
@@ -20232,7 +20239,11 @@ function renderizarServiciosProfesionales(j, contenedor){
     const efectoBase = (servicio.niveles[0] || {}).efectoTemporada || {};
     const mejoraTxt = Object.keys(efectoBase).map(k => NICE_ATTR[k] || NICE_STAT[k] || k).join(' · ');
     const mejoraSpan = mejoraTxt ? ` <span class="servicio-mejora" style="font-weight:400;font-size:11px;color:var(--gold);white-space:nowrap;">↑ ${mejoraTxt}</span>` : '';
-    cab.innerHTML = `${iconoInsignia(servicio.icono,26)}<span class="servicio-nombre">${servicio.nombre}</span>${mejoraSpan}${nivelActual>0?'<span class="servicio-activo-tag">ACTIVO</span>':''}`;
+    const imagenServicio = ICONOS_IMAGEN_SERVICIO[servicio.familia];
+    const iconoServicioHtml = imagenServicio
+      ? `<div class="icono-insignia" style="width:26px;height:26px;"><img src="${imagenServicio}" alt="" style="width:92%;height:92%;object-fit:contain;"></div>`
+      : iconoInsignia(servicio.icono,26);
+    cab.innerHTML = `${iconoServicioHtml}<span class="servicio-nombre">${servicio.nombre}</span>${mejoraSpan}${nivelActual>0?'<span class="servicio-activo-tag">ACTIVO</span>':''}`;
     fila.appendChild(cab);
     const niveles = el('div','servicio-niveles');
     servicio.niveles.forEach(info=>{
@@ -20348,8 +20359,13 @@ function renderizarPlantillaServicios(j, contenedor){
       const card = el('div','staff-card');
       const cab = el('div','staff-cab');
       const avatar = el('div','staff-avatar');
-      avatar.style.background = `linear-gradient(150deg,${colorClaro},${colorOscuro})`;
-      avatar.innerHTML = ICONOS_SVG[servicio.icono] || '';
+      const imagenServicio = ICONOS_IMAGEN_SERVICIO[servicio.familia];
+      if(imagenServicio){
+        avatar.innerHTML = `<img src="${imagenServicio}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      } else {
+        avatar.style.background = `linear-gradient(150deg,${colorClaro},${colorOscuro})`;
+        avatar.innerHTML = ICONOS_SVG[servicio.icono] || '';
+      }
       cab.appendChild(avatar);
       // Nombre + "↑ Físico" apilados en su propia columna (en vez de hermanos sueltos en la fila,
       // que con flex-wrap podían separarse de mala manera) — así la mejora queda SIEMPRE justo
