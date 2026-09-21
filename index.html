@@ -1773,7 +1773,7 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-email-de{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); }
 .tel-email-de b{ color:var(--ink); font-weight:600; }
 .tel-email-cuerpo{ font-family:'Inter',sans-serif; font-size:13.5px; line-height:1.65; color:var(--ink); }
-/* Instagram */
+/* Perfil de X (nombres de clase heredados de cuando había también un feed estilo Instagram) */
 .tel-ig-perfil{ display:flex; align-items:center; gap:18px; padding-bottom:12px; }
 .tel-ig-avatar{ width:64px; height:64px; font-size:20px; flex-shrink:0; background:linear-gradient(150deg,#e0507a,#8a1f4a); }
 .tel-ig-stats{ display:flex; gap:18px; flex:1; }
@@ -1781,19 +1781,15 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tel-ig-stat b{ font-family:'Inter',sans-serif; font-size:18px; color:var(--ink); font-weight:800; }
 .tel-ig-usuario{ font-family:'Inter',sans-serif; font-size:13.5px; font-weight:700; color:var(--ink); margin-top:2px; }
 .tel-ig-bio{ font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); margin:2px 0 16px; }
-.tel-ig-post{ margin-bottom:18px; }
 .tel-ig-post-foto{ width:100%; aspect-ratio:1; border-radius:12px; display:flex; align-items:center; justify-content:center; }
 .tel-ig-post-foto svg{ width:38px; height:38px; color:rgba(255,255,255,0.85); }
-.tel-ig-post-meta{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-family:'Inter',sans-serif; font-size:11.5px; }
-.tel-ig-post-likes{ font-weight:700; color:var(--ink); }
-.tel-ig-post-temp{ color:var(--ink-soft); }
-.tel-ig-post-txt{ font-family:'Inter',sans-serif; font-size:13px; line-height:1.5; color:var(--ink); margin-top:5px; }
-.tel-ig-post-txt b{ font-weight:700; }
 /* X */
 .tel-x-post{ border-bottom:1px solid var(--line); padding:12px 0; }
 .tel-x-post-cab{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
 .tel-x-post-txt{ font-family:'Inter',sans-serif; font-size:13.5px; line-height:1.5; color:var(--ink); }
 .tel-x-post-meta{ font-family:'Inter',sans-serif; font-size:11.5px; color:var(--ink-soft); margin-top:8px; display:flex; gap:14px; }
+.tel-x-logo-grande{ width:64px; height:64px; border-radius:16px; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-size:30px; margin:0 auto; }
+.tel-x-logo-grande.chico{ width:54px; height:54px; font-size:26px; border-radius:14px; }
 /* Calendario */
 .tel-cal-temporada{ font-family:'Inter',sans-serif; font-weight:800; font-size:19px; color:var(--ink); margin-bottom:14px; }
 .tel-cal-lista{ display:flex; flex-direction:column; gap:2px; margin-bottom:18px; }
@@ -3309,7 +3305,7 @@ const BANCO_EVENTOS = [
     trigger:{ probabilidad:0.25 },
     texto:"Una publicación tuya en X de hace tiempo se hace viral en el peor momento posible: justo antes de un partido importante.",
     variantes:[
-      "Una foto que subiste a Instagram hace tiempo vuelve a circular justo cuando menos te conviene.",
+      "Un tuit tuyo de hace tiempo vuelve a circular justo cuando menos te conviene.",
       () => {
         const citas = [
           "Si me ofrecen salir mañana, me voy sin pensarlo dos veces",
@@ -4017,7 +4013,7 @@ const BANCO_EVENTOS = [
       j => `${j.companeros[Math.floor(Math.random()*j.companeros.length)].apodo} te insiste en apuntarte a una cita a ciegas. Vas sin muchas expectativas, y sales con bastantes más de las que llevabas.`,
       "En una boda de un compañero de equipo, acabáis sentados en la misma mesa. Para cuando llega el baile, ya habéis hablado de todo menos de fútbol.",
       j => j.edad >= 18
-        ? "Empiezas a hablar con alguien por Instagram después de un comentario en una foto, y las conversaciones se alargan cada vez más."
+        ? "Empiezas a hablar con alguien por X después de comentar una de sus publicaciones, y las conversaciones se alargan cada vez más."
         : "Una amistad en común te presenta a alguien que, sin buscarlo, se te queda rondando la cabeza toda la semana.",
       j => j.edad >= 18
         ? "Le das una oportunidad a Tinder más por curiosidad que por otra cosa, y dais con una conversación que de verdad fluye."
@@ -8913,6 +8909,7 @@ function migrarJugadorGuardado(j){
   if(j.obrasArte === undefined) j.obrasArte = [];
   if(j.inmuebleActual === undefined) j.inmuebleActual = 0;
   if(j.relojActual === undefined) j.relojActual = 0;
+  if(j.xUsername === undefined) j.xUsername = null;
 }
 function cargarPartida(slot){
   try{
@@ -8970,6 +8967,7 @@ function nuevoJugador(nombre,pais,extra,clubInicial,localidad,provincia,estiloId
     comprasUnicas:[],
     cocheActual:0, motoActual:0, botasActual:0, inmuebleActual:0, relojActual:0,
     artesDesbloqueado:false, obrasArte:[],
+    xUsername:null,
     lesionSemanas:0, sancionActiva:false,
     avisoBancoPendiente:false,
     carinoAficion:20,
@@ -12047,7 +12045,7 @@ function pintarMovilSheet(){
     const dockApps = el('div','tel-dock-apps');
     const pendientesDock = telAppsConPendiente(S.jugador);
     TEL_DOCK_APPS.forEach(a=>{
-      const totalPendiente = (pendientesDock[a.id]||0) + (a.id==='redes' ? (pendientesDock.x||0) : 0)
+      const totalPendiente = (pendientesDock[a.id]||0)
         + (a.id==='economia' ? ((pendientesDock.servicios||0) + (pendientesDock.compras||0)) : 0);
       const btn = document.createElement('button');
       btn.className = 'tel-dock-app'+(totalPendiente>0?' pendiente':'');
@@ -15352,10 +15350,12 @@ function telAppsConPendiente(j){
   if(totalWhatsapp > 0) mapa.whatsapp = totalWhatsapp;
   const totalEmail = telTodosLosCorreos(j).filter(co=>!(S.telEmailsLeidos && S.telEmailsLeidos[co.id])).length;
   if(totalEmail > 0) mapa.email = totalEmail;
-  const totalIg = ((S.movilBandeja && S.movilBandeja.instagram) || []).filter(p=>!p.leido).length;
-  if(totalIg > 0) mapa.redes = totalIg;
+  // RRSS es ahora solo X, y solo con tus propias publicaciones (telConfirmarPublicacion las
+  // marca leídas de entrada), así que esto en la práctica se queda siempre en 0 — se deja el
+  // conteo real y no un 0 fijo por si en el futuro X vuelve a traer algo que de verdad haya que
+  // "ver" (una respuesta, una mención...).
   const totalX = ((S.movilBandeja && S.movilBandeja.x) || []).filter(p=>!p.leido).length;
-  if(totalX > 0) mapa.x = totalX;
+  if(totalX > 0) mapa.redes = totalX;
   const totalServicios = contarComprasDisponibles(j);
   if(totalServicios > 0) mapa.servicios = totalServicios;
   const totalCompras = contarComprasUnicasDisponibles(j);
@@ -15926,11 +15926,11 @@ function generarNotificacionMovil(j){
   const plantillas = TEL_PLANTILLAS_NOTIF[bucket] || TEL_PLANTILLAS_NOTIF.generico;
   const contactos = telContactosDe(j);
   const grupos = telGruposDe(j);
+  // Ya no hay canal 'instagram' ni 'x' aquí: X ahora es solo tu propio perfil (ver telConfirmarPublicacion
+  // y la vista 'redes'), no un sitio donde te lleguen reacciones de cuentas de fans inventadas.
   const canales = [];
   if(plantillas.whatsapp && contactos.length) canales.push('whatsapp');
   if(plantillas.email) canales.push('email');
-  if(plantillas.instagram) canales.push('instagram');
-  if(plantillas.x) canales.push('x');
   if(plantillas.grupo && grupos.length) canales.push('grupo');
   if(!canales.length) return;
   const canal = canales[Math.floor(Math.random()*canales.length)];
@@ -15956,9 +15956,6 @@ function generarNotificacionMovil(j){
     const cuerpo = info.cuerpoFn(j);
     S.movilBandeja.email.push({ id:idBase, remitente:info.remitente, color:'#8a6dd6', asunto:info.asunto,
       preview: cuerpo.replace(/<[^>]+>/g,'').slice(0,64)+'…', cuerpo, temporada:S.temporada, pasoIndex:paso });
-  } else if(canal === 'x'){
-    const texto = elegirSinRepetir(plantillas.x, 'x_'+bucket);
-    S.movilBandeja.x.push({ id:idBase, texto, temporada:S.temporada, pasoIndex:paso, leido:false });
   } else if(canal === 'grupo'){
     const grupo = grupos[Math.floor(Math.random()*grupos.length)];
     const poolGrupo = (grupo.id === 'grupo_vestuario' && TEL_GRUPO_VESTUARIO_COLECTIVO[bucket]) ? TEL_GRUPO_VESTUARIO_COLECTIVO[bucket] : plantillas.grupo;
@@ -15978,9 +15975,6 @@ function generarNotificacionMovil(j){
       const respuesta = elegirSinRepetir(telPoolGrupoReaccion(bucket, grupo.id), 'reaccion_'+grupo.id);
       S.movilBandeja.grupos[grupo.id].push({ id:idBase+'_b', autor:autor2, texto:respuesta, temporada:S.temporada, pasoIndex:paso, leido:false });
     }
-  } else {
-    const texto = elegirSinRepetir(plantillas.instagram, 'ig_'+bucket);
-    S.movilBandeja.instagram.push({ id:idBase, texto, temporada:S.temporada, pasoIndex:paso, leido:false });
   }
   ['whatsapp','email','instagram','x'].forEach(k=>{
     if(S.movilBandeja[k].length > 40) S.movilBandeja[k].splice(0, S.movilBandeja[k].length-40);
@@ -16041,12 +16035,88 @@ function telConfirmarPublicacion(){
   if(!texto) return;
   S.movilBandeja = S.movilBandeja || telBandejaVacia();
   const idBase = 'post_' + S.temporada + '_' + (S.pasoIndex||0) + '_' + Math.random().toString(36).slice(2,8);
-  S.movilBandeja.instagram.push({ id:idBase, texto, temporada:S.temporada, pasoIndex:S.pasoIndex||0, leido:true });
-  if(S.movilBandeja.instagram.length > 40) S.movilBandeja.instagram.splice(0, S.movilBandeja.instagram.length-40);
+  S.movilBandeja.x.push({ id:idBase, texto, temporada:S.temporada, pasoIndex:S.pasoIndex||0, leido:true });
+  if(S.movilBandeja.x.length > 40) S.movilBandeja.x.splice(0, S.movilBandeja.x.length-40);
   S.telPublicandoTexto = null;
   S.movilVista = 'redes';
   guardarPartida();
   pintar();
+}
+// Onboarding de X: la primera vez que se abre RRSS (sin j.xUsername todavía) no se ve el feed
+// directo — primero hay que "instalar" la app (barra de progreso, mismo espíritu que
+// telInstalarApp/vista 'appstore' pero autocontenido aquí, sin pasar por el catálogo genérico) y
+// elegir un nombre de usuario. S.telXPaso: undefined/'intro' -> 'instalando' -> 'usuario'. Una
+// vez fijado j.xUsername (persistente, en el modelo del jugador), este flujo no se vuelve a ver.
+function iniciarInstalacionX(){
+  if(S.telXPaso === 'instalando') return;
+  S.telXPaso = 'instalando';
+  S._telXProgreso = 0;
+  pintar();
+  const avanzar = ()=>{
+    if(S.telXPaso !== 'instalando') return; // se salió de la pantalla mientras instalaba
+    S._telXProgreso = Math.min(100, S._telXProgreso + 8 + Math.random()*18);
+    if(S._telXProgreso >= 100){
+      S.telXPaso = 'usuario';
+      Sonido.movilNotif();
+      pintar();
+      return;
+    }
+    pintar();
+    setTimeout(avanzar, 160 + Math.random()*180);
+  };
+  setTimeout(avanzar, 200);
+}
+function sugerenciaUsuarioX(j){
+  const base = (capitalizarNombre(j.nombre).split(' ')[0]||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  return (base || 'jugador') + Math.floor(10+Math.random()*90);
+}
+function confirmarUsuarioX(valor, j){
+  let limpio = (valor||'').trim().normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9_]/g,'');
+  if(limpio.length < 3) limpio = sugerenciaUsuarioX(j);
+  j.xUsername = limpio.slice(0,15);
+  S.telXPaso = null;
+  guardarPartida();
+  pintar();
+}
+function pintarOnboardingX(c, j){
+  const paso = S.telXPaso || 'intro';
+  if(paso === 'usuario'){
+    c.appendChild(el('div','tel-x-logo-grande','𝕏'));
+    c.appendChild(el('p','tel-choices-label','Elige tu nombre de usuario')).style.marginTop = '10px';
+    const input = document.createElement('input');
+    input.className = 'tel-nombre-carpeta';
+    input.placeholder = 'usuario';
+    input.value = sugerenciaUsuarioX(j);
+    input.maxLength = 15;
+    c.appendChild(input);
+    setTimeout(()=>{ input.focus(); input.select(); }, 50);
+    const btn = document.createElement('button');
+    btn.className = 'btn-main';
+    btn.textContent = 'Confirmar y entrar';
+    btn.onclick = ()=> confirmarUsuarioX(input.value, j);
+    input.onkeydown = (e)=>{ if(e.key === 'Enter') btn.click(); };
+    c.appendChild(btn);
+    return;
+  }
+  const wrap = el('div','tel-publicando');
+  if(paso === 'instalando'){
+    wrap.innerHTML = `
+      <div class="tel-x-logo-grande chico">𝕏</div>
+      <div class="texto">Instalando…</div>
+      <div class="barra-track"><div class="barra-fill" id="tel-barra-x" style="width:${Math.round(S._telXProgreso||0)}%;"></div></div>`;
+  } else {
+    wrap.innerHTML = `
+      <div class="tel-x-logo-grande chico">𝕏</div>
+      <div class="texto" style="text-align:center;max-width:230px;">Instala X para publicar y compartir tu carrera.</div>`;
+  }
+  c.appendChild(wrap);
+  if(paso !== 'instalando'){
+    const btn = document.createElement('button');
+    btn.className = 'btn-main';
+    btn.textContent = 'Instalar';
+    btn.onclick = ()=> iniciarInstalacionX();
+    c.appendChild(btn);
+  }
 }
 const TEL_PLANTILLAS_COMPANERO = {
   bromista: {
@@ -17172,16 +17242,24 @@ function renderMovilContenido(c, j){
   }
 
   else if(vista === 'redes'){
-    // App "RRSS": mismo perfil arriba para las dos redes (misma persona, un único móvil), pero
-    // el feed se ve por separado en dos pestañas (Instagram/X, mismo patrón .tel-bank-tabs que
-    // Banco Resumen/Movimientos y WhatsApp Mensajes/Contactos) — antes se mezclaban fotos estilo
-    // Instagram y tuits estilo X en un único feed cronológico; a petición expresa, ahora cada red
-    // se consulta aparte, como en la vida real.
+    // App "RRSS": de momento solo X, y solo tus propias publicaciones — ya no se mezclan fotos
+    // estilo Instagram con reacciones de cuentas de fans inventadas (eso generaba un feed que no
+    // era realmente "tuyo"). La primera vez que se abre, antes de ver nada, hay que "instalarla"
+    // y elegir un nombre de usuario (ver telXOnboardingPaso más abajo); a partir de ahí el feed
+    // muestra solo lo que tú has publicado (ver telConfirmarPublicacion), con RT/likes que
+    // dependen de tus seguidores reales (j.stats.seguidores, el mismo dato de la pestaña Jugador).
     const header = el('div','tel-app-header');
     const back = document.createElement('button'); back.className='tel-back-btn'; back.innerHTML=TEL_ICONO_BACK;
     back.onclick = ()=>{ cerrarMovilSheet(); };
     header.appendChild(back);
-    header.appendChild(el('span','tel-title','RRSS'));
+    header.appendChild(el('span','tel-title','X'));
+
+    if(!j.xUsername){
+      c.appendChild(header);
+      pintarOnboardingX(c, j);
+      return;
+    }
+
     // Publicar solo tiene sentido si de verdad ha pasado algo — un título, una distinción
     // individual, una lesión en curso — no como botón siempre a mano (ver
     // telHayAlgoDestacableParaPublicar). Deshabilitado en vez de escondido, con el motivo en el
@@ -17203,20 +17281,10 @@ function renderMovilContenido(c, j){
       c.appendChild(choicesRedes);
       renderizarOpcionesEvento(choicesRedes, S.eventoActual, j);
     }
-    if(S.movilRedesTab === undefined) S.movilRedesTab = 'instagram';
-    const tabsRedes = el('div','tel-bank-tabs');
-    const tabIg = document.createElement('button'); tabIg.className='tel-bank-tab'+(S.movilRedesTab!=='x'?' active':''); tabIg.textContent='Instagram';
-    const tabX = document.createElement('button'); tabX.className='tel-bank-tab'+(S.movilRedesTab==='x'?' active':''); tabX.textContent='X';
-    tabIg.onclick = ()=>{ S.movilRedesTab='instagram'; pintar(); };
-    tabX.onclick = ()=>{ S.movilRedesTab='x'; pintar(); };
-    tabsRedes.appendChild(tabIg); tabsRedes.appendChild(tabX);
-    c.appendChild(tabsRedes);
-    const enX = S.movilRedesTab === 'x';
-    // Al entrar se marca como visto solo lo de la pestaña activa — la otra se marca al cambiar a
-    // ella (el número de la burbuja del icono del dock, que suma las dos, baja en el momento justo).
-    (S.movilBandeja && S.movilBandeja[enX?'x':'instagram'] || []).forEach(p=> p.leido = true);
+    // Son tus propias publicaciones (telConfirmarPublicacion las marca leídas de entrada), así
+    // que aquí no hay nada que "marcar como visto" al entrar.
     const clave = p => (p.temporada||0)*10 + (p.pasoIndex||0);
-    const posts = ((S.movilBandeja && S.movilBandeja[enX?'x':'instagram']) || []).slice().sort((a,b)=> clave(b)-clave(a));
+    const posts = ((S.movilBandeja && S.movilBandeja.x) || []).slice().sort((a,b)=> clave(b)-clave(a));
     const perfil = el('div','tel-ig-perfil');
     perfil.appendChild(el('span','tel-avatar tel-ig-avatar', telIniciales(j.nombre)));
     const perfilStats = el('div','tel-ig-stats');
@@ -17230,40 +17298,27 @@ function renderMovilContenido(c, j){
     c.appendChild(perfil);
     const nombreUsuario = el('div','tel-ig-usuario', capitalizarNombre(j.nombre));
     c.appendChild(nombreUsuario);
-    c.appendChild(el('div','tel-ig-bio', `⚽ ${j.club.nombre} · Delantero`));
+    c.appendChild(el('div','tel-ig-bio', `⚽ ${j.club.nombre} · Delantero · @${j.xUsername}`));
     if(!posts.length){
-      c.appendChild(el('p',null,'Todavía no se habla mucho de ti por aquí — según vayas jugando, la cosa se anima.')).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);padding:14px 4px;";
+      c.appendChild(el('p',null,'Todavía no has publicado nada — en cuanto pase algo destacable, podrás compartirlo aquí.')).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink-soft);padding:14px 4px;";
     }
-    const gradientes = ['150deg,#e0507a,#8a1f4a', '150deg,#3f9e93,#1f5b53', '150deg,#e0932e,#8a531a', '150deg,#3f6fce,#233f80', '150deg,#7b2d8e,#341042'];
-    const nombresAficion = ['@futbol_total','@aficionrf','@datos_liga','@elgraderio','@balonpremium'];
-    posts.forEach((p,i)=>{
-      if(!enX){
-        const card = el('div','tel-ig-post');
-        const foto = el('div','tel-ig-post-foto');
-        foto.style.background = `linear-gradient(${gradientes[i%gradientes.length]})`;
-        foto.innerHTML = ICONOS_SVG.estrella;
-        card.appendChild(foto);
-        const likes = Math.round(20 + (j.stats.popularidad||0) * 3 + Math.random()*30);
-        const meta = el('div','tel-ig-post-meta');
-        meta.innerHTML = `<span class="tel-ig-post-likes">❤️ ${formatearMiles(likes)} me gusta</span><span class="tel-ig-post-temp">Temp. ${temporadaAAnoCompleto(p.temporada)}</span>`;
-        card.appendChild(meta);
-        card.appendChild(el('div','tel-ig-post-txt', `<b>${capitalizarNombre(j.nombre).split(' ')[0].toLowerCase()}</b> ${p.texto}`));
-        c.appendChild(card);
-      } else {
-        const card = el('div','tel-x-post');
-        const cab = el('div','tel-x-post-cab');
-        cab.appendChild(el('span','tel-avatar', '𝕏')).style.cssText = 'width:34px;height:34px;font-size:13px;background:#22252b;flex-shrink:0;';
-        const cabBody = el('div');
-        cabBody.appendChild(el('div',null, nombresAficion[i%nombresAficion.length])).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:700;color:var(--ink);";
-        cabBody.appendChild(el('div',null, `Temp. ${temporadaAAnoCompleto(p.temporada)}`)).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);";
-        cab.appendChild(cabBody);
-        card.appendChild(cab);
-        card.appendChild(el('div','tel-x-post-txt', p.texto));
-        const rt = Math.round(5 + (j.stats.popularidad||0)*0.6 + Math.random()*15);
-        const likes = Math.round(15 + (j.stats.popularidad||0)*1.4 + Math.random()*25);
-        card.appendChild(el('div','tel-x-post-meta', `🔁 ${rt} · ❤️ ${likes}`));
-        c.appendChild(card);
-      }
+    posts.forEach(p=>{
+      const card = el('div','tel-x-post');
+      const cab = el('div','tel-x-post-cab');
+      cab.appendChild(el('span','tel-avatar', '𝕏')).style.cssText = 'width:34px;height:34px;font-size:13px;background:#22252b;flex-shrink:0;';
+      const cabBody = el('div');
+      cabBody.appendChild(el('div',null, `@${j.xUsername}`)).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:700;color:var(--ink);";
+      cabBody.appendChild(el('div',null, `Temp. ${temporadaAAnoCompleto(p.temporada)}`)).style.cssText = "font-family:'Space Grotesk',sans-serif;font-size:10.5px;color:var(--ink-soft);";
+      cab.appendChild(cabBody);
+      card.appendChild(cab);
+      card.appendChild(el('div','tel-x-post-txt', p.texto));
+      // Escalado por seguidores reales (no por popularidad): un perfil con más seguidores mueve
+      // más interacción, como en una red social de verdad. Base pequeña + % de la audiencia.
+      const seguidores = j.stats.seguidores || 0;
+      const rt = Math.round(3 + seguidores * 0.006 * (0.7+Math.random()*0.6));
+      const likes = Math.round(8 + seguidores * 0.018 * (0.7+Math.random()*0.6));
+      card.appendChild(el('div','tel-x-post-meta', `🔁 ${formatearMiles(rt)} · ❤️ ${formatearMiles(likes)}`));
+      c.appendChild(card);
     });
   }
 
