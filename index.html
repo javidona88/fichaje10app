@@ -8254,6 +8254,15 @@ function clubAleatorio(categoria, excluir){
   const opciones = CLUBES_POR_CATEGORIA[categoria].filter(c => c.nombre !== excluir);
   return opciones[Math.floor(Math.random()*opciones.length)];
 }
+// Categoría doméstica ACTUAL de un club por nombre (puede haber subido o bajado desde que jugaste
+// ahí) — usado para que las ofertas de "vuelta a casa" en generarOfertas reflejen dónde está ese
+// club hoy, no la categoría que tenía cuando pasaste por él. null si no es un club doméstico.
+function categoriaActualDeClub(nombre){
+  for(const cat of CATEGORIAS){
+    if((CLUBES_POR_CATEGORIA[cat]||[]).some(c=>c.nombre===nombre)) return cat;
+  }
+  return null;
+}
 function articuloClub(nombre){
   if(!nombre) return 'el';
   if(/^UD /.test(nombre) || /^SD /.test(nombre) || /^UE /.test(nombre) || /^Real Sociedad/.test(nombre)) return 'la';
@@ -11368,24 +11377,49 @@ function generarOfertas(j){
   for(let i=0; i<maxOfertas; i++){
     if(Math.random() >= interesBase) continue;
     let idxObjetivo = idxActual;
-    if(idxActual < CATEGORIAS.length-1 && Math.random() < probPromocion) idxObjetivo = idxActual+1;
-    const categoria = CATEGORIAS[idxObjetivo];
-    let clubElegido;
-    if(idxObjetivo === idxActual){
-      const prestigioActual = PRESTIGIO_CLUB[j.club.nombre] || 2;
-      let prestigioMinimo = Math.max(1, prestigioActual - 1);
-      const nivelJugador = j.stats.reputacion >= 70 ? 4 : (j.stats.reputacion >= 45 ? 3 : (j.stats.reputacion >= 20 ? 2 : 1));
-      let prestigioMaximo = Math.min(4, Math.max(prestigioActual, nivelJugador));
-      // A partir de los 34, los equipos que se fijan en ti bajan de nivel poco a poco (ya no eres
-      // la apuesta de futuro de antes) — más marcado a partir de los 37.
-      if(j.edad >= 34){
-        prestigioMaximo = Math.max(1, prestigioMaximo - (j.edad >= 37 ? 2 : 1));
-        prestigioMinimo = Math.min(prestigioMinimo, prestigioMaximo);
+    let categoria, clubElegido;
+    // Cuanto más veterano, más probable que una de las ofertas sea "volver a casa": un club de tu
+    // propia trayectoria doméstica (con el doble de peso para el primero de todos, el de la
+    // cantera), en vez de siempre caras nuevas. Se usa la categoría REAL de ese club hoy (puede
+    // haber subido o bajado desde que jugaste ahí), no la que tenía entonces.
+    let clubVuelta = null;
+    if(j.edad >= 34 && (j.trayectoria||[]).length){
+      const probVolver = Math.min(0.45, (j.edad-33)*0.09);
+      if(Math.random() < probVolver){
+        const previos = (j.trayectoria||[]).filter(e => !e.extranjero && e.club !== j.club.nombre && !nombresUsados.has(e.club));
+        if(previos.length){
+          const primerClubNombre = j.trayectoria[0].club;
+          const extra = previos.filter(e=>e.club===primerClubNombre);
+          const pool = extra.length ? previos.concat(extra, extra) : previos;
+          const etapaElegida = pool[Math.floor(Math.random()*pool.length)];
+          const catActual = categoriaActualDeClub(etapaElegida.club);
+          if(catActual) clubVuelta = { nombre: etapaElegida.club, colores: etapaElegida.colores, categoria: catActual };
+        }
       }
-      const candidatos = CLUBES_POR_CATEGORIA[categoria].filter(c => { const p = PRESTIGIO_CLUB[c.nombre]||2; return p >= prestigioMinimo && p <= prestigioMaximo; });
-      clubElegido = candidatos.length ? candidatos[Math.floor(Math.random()*candidatos.length)] : clubAleatorio(categoria, undefined);
+    }
+    if(clubVuelta){
+      categoria = clubVuelta.categoria;
+      idxObjetivo = CATEGORIAS.indexOf(categoria);
+      clubElegido = clubVuelta;
     } else {
-      clubElegido = clubAleatorio(categoria, undefined);
+      if(idxActual < CATEGORIAS.length-1 && Math.random() < probPromocion) idxObjetivo = idxActual+1;
+      categoria = CATEGORIAS[idxObjetivo];
+      if(idxObjetivo === idxActual){
+        const prestigioActual = PRESTIGIO_CLUB[j.club.nombre] || 2;
+        let prestigioMinimo = Math.max(1, prestigioActual - 1);
+        const nivelJugador = j.stats.reputacion >= 70 ? 4 : (j.stats.reputacion >= 45 ? 3 : (j.stats.reputacion >= 20 ? 2 : 1));
+        let prestigioMaximo = Math.min(4, Math.max(prestigioActual, nivelJugador));
+        // A partir de los 34, los equipos que se fijan en ti bajan de nivel poco a poco (ya no eres
+        // la apuesta de futuro de antes) — más marcado a partir de los 37.
+        if(j.edad >= 34){
+          prestigioMaximo = Math.max(1, prestigioMaximo - (j.edad >= 37 ? 2 : 1));
+          prestigioMinimo = Math.min(prestigioMinimo, prestigioMaximo);
+        }
+        const candidatos = CLUBES_POR_CATEGORIA[categoria].filter(c => { const p = PRESTIGIO_CLUB[c.nombre]||2; return p >= prestigioMinimo && p <= prestigioMaximo; });
+        clubElegido = candidatos.length ? candidatos[Math.floor(Math.random()*candidatos.length)] : clubAleatorio(categoria, undefined);
+      } else {
+        clubElegido = clubAleatorio(categoria, undefined);
+      }
     }
     const nombre = clubElegido.nombre;
     if(nombresUsados.has(nombre)) continue;
@@ -23496,7 +23530,11 @@ SCREENS.finTemporada = function(){
     j.club.nivelEuropeo = r.nivelEuropeo || null;
     S.temporada += 1;
     const contratoTerminado = j.contrato.duracionTemporadas <= 0;
-    const probRetiro = j.edad >= 35 ? Math.min(1, (j.edad - 34) * 0.13) : 0;
+    // El físico entra en juego para que 42 sea el TOPE, no la norma: un cuerpo bien cuidado
+    // (fisico alto para la edad) aleja el momento de plantearse la retirada, uno castigado lo
+    // adelanta — con fisico medio (10) el cálculo queda igual que antes.
+    const factorFisico = Math.max(0.5, Math.min(1.8, 1 + (10 - j.atributos.fisico) * 0.06));
+    const probRetiro = j.edad >= 35 ? Math.min(1, (j.edad - 34) * 0.13 * factorFisico) : 0;
     const seRetira = j.edad >= 42 || (contratoTerminado && Math.random() < probRetiro);
     const ofreceMejoraPorAscenso = r.ascenso && !contratoTerminado && !seRetira;
     S.siguientePantalla = seRetira ? 'retiro' : (ofreceMejoraPorAscenso ? 'mejoraContratoAscenso' : (contratoTerminado ? 'renovacion' : 'ofertas'));
