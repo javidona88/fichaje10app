@@ -17155,11 +17155,11 @@ function renderMovilContenido(c, j){
         } else if(estado1 === 'cerrado'){
           const idR2 = t.id+'_r2';
           S.movilRespuestasExtra = S.movilRespuestasExtra || {};
-          // Misma línea "Mensajes nuevos" que arriba, para cuando lo pendiente de verdad es esta
-          // segunda ronda (la primera ya está cerrada) y este es el último turno del hilo.
-          if(i === turnos.length-1 && S.movilRespuestasExtra[idR2] === undefined){
-            thread.appendChild(el('div','tel-unread-divider','Mensajes nuevos'));
-          }
+          // A diferencia de la primera ronda, aquí NO se repite la línea "Mensajes nuevos": esta
+          // segunda ronda no trae una burbuja entrante propia (continúa sobre el cierre de la
+          // primera ronda, ya pintado arriba por telPintarIntercambio), así que la línea salía
+          // pegada justo encima de "Tu respuesta" sin ningún mensaje nuevo real debajo que
+          // anclarla — un divisor sin nada que dividir (bug real, reportado con captura).
           const poolR2 = telPoolGenericoPara(contacto, 2, t.bucket);
           const estado2 = telPintarIntercambio(thread, idR2, S.movilRespuestasExtra, poolR2);
           activo = { estado:estado2, aplicar:(idx)=>telResponderExtra(idR2, idx, contacto, poolR2), pool:poolR2 };
