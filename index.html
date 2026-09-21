@@ -966,11 +966,13 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .tienda-cat-chip.activo{ background:var(--gold); border-color:var(--gold); color:#1a1408; }
 .tienda-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .tienda-card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; }
-.tienda-card-foto{ aspect-ratio:1.9; display:flex; align-items:center; justify-content:center; position:relative; }
+.tienda-card-foto{ aspect-ratio:1; display:flex; align-items:center; justify-content:center; position:relative; }
 .tienda-card-foto svg{ width:38%; height:38%; color:rgba(255,255,255,0.92); }
 .tienda-card-foto.coches{ background:linear-gradient(155deg,#3a4560,#181d2c); }
 .tienda-card-foto.motos{ background:linear-gradient(155deg,#7a4a1f,#2c1c0a); }
 .tienda-card-foto.botas{ background:linear-gradient(155deg,#2f6b45,#14311f); }
+.tienda-card-foto.relojes{ background:linear-gradient(155deg,#5a4a2f,#241c0e); }
+.tienda-card-foto img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 .tienda-card-tag{
   position:absolute; top:7px; left:7px; background:var(--green); color:#0e2115;
   font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:800; letter-spacing:.03em;
@@ -1052,10 +1054,6 @@ h1,h2,h3{ font-family:'Space Grotesk',sans-serif; margin:0 0 12px; font-weight:6
 .servicio-nivel-btn.activo{ border-color:var(--gold); background:rgba(212,175,55,0.12); }
 .servicio-nivel-btn.activo .n, .servicio-nivel-btn.activo .c{ color:var(--gold); }
 .servicio-nivel-btn.inasequible{ opacity:.4; cursor:not-allowed; }
-.servicio-nivel-btn.con-imagen{ padding:6px; }
-.servicio-nivel-btn.con-imagen .img-wrap{ width:100%; aspect-ratio:1/1; border-radius:6px; overflow:hidden; margin-bottom:6px; background:var(--panel2); }
-.servicio-nivel-btn.con-imagen .img-wrap img{ width:100%; height:100%; object-fit:cover; display:block; }
-.servicio-nivel-btn.con-imagen.activo .img-wrap{ box-shadow:0 0 0 2px var(--gold) inset; }
 .servicio-desc{ font-family:'Space Grotesk',sans-serif; font-size:11.5px; color:var(--ink-soft); margin-top:8px; line-height:1.5; }
 
 /* Pantalla de rankings (jugadores) */
@@ -2572,11 +2570,14 @@ const TIENDA_INMUEBLES = [
   { nivel:3, nombre:'Chalet con piscina', coste:750000, efecto:{confianza:3, popularidad:7}, desc:'Zona residencial, jardín y piscina propia. El tipo de casa con la que sueña cualquiera.', ...porCategoria(3) },
   { nivel:4, nombre:'Mansión de la zona alta', coste:2800000, efecto:{confianza:4, popularidad:12}, desc:'La propiedad con la que sales en las revistas de arquitectura, no solo en las deportivas.', ...porCategoria(4) }
 ];
-// Primera categoría de la tienda con imagen real por nivel (img/relojes/nivelN.jpg, 480×480,
-// formato 1:1 — ver .servicio-nivel-btn.con-imagen en renderizarRelojes). El resto de compras
-// únicas (coches, motos, botas, inmuebles) se quedan por ahora con el botón solo de texto; el
-// mismo patrón (comprobar `info.imagen` al construir el botón) se puede copiar a sus renderers
-// cuando tengan sus propias imágenes.
+// Primera categoría de la tienda "online" (SCREENS.compras, ver renderizarTiendaOnline) con
+// imagen real por nivel (img/relojes/nivelN.jpg, 480×480, formato 1:1 — .tienda-card-foto).
+// OJO: hay dos pantallas de compra distintas — SCREENS.gastos/renderizarTienda (la parada
+// obligatoria de cada temporada, listas de texto tipo servicio-nivel-btn, SIN imágenes) y
+// SCREENS.compras/renderizarTiendaOnline (catálogo en tarjetas, con foto). Las imágenes van SOLO
+// en la segunda. El resto de compras únicas (coches, motos, botas, inmuebles) se quedan por
+// ahora con el icono degradado de siempre; el mismo patrón (comprobar `info.imagen` en
+// renderizarTiendaOnline) se puede copiar cuando tengan sus propias imágenes.
 const TIENDA_RELOJES = [
   { nivel:1, nombre:'Reloj de acero', coste:3000, efecto:{confianza:1, popularidad:1}, desc:'Sencillo y fiable, el primer reloj bueno que te compras con tu propio sueldo.', imagen:'img/relojes/nivel1.jpg' },
   { nivel:2, nombre:'Automático de gama media', coste:15000, efecto:{confianza:2, popularidad:3}, desc:'Mecanismo suizo, correa de piel. Ya no es solo para mirar la hora.', imagen:'img/relojes/nivel2.jpg', ...porCategoria(1) },
@@ -20580,9 +20581,8 @@ function renderizarRelojes(j, contenedor){
     const desbloqueado = !info.desbloqueo || info.desbloqueo(j);
     const puedePagar = (j.stats.dinero||0) >= info.coste && (j.stats.dinero||0) >= 0;
     const asequible = !desbloqueado || yaComprado || esInferior || puedePagar;
-    const btn = el('div','servicio-nivel-btn'+(info.imagen?' con-imagen':'')+(yaComprado?' activo':'')+(!desbloqueado||!asequible||esInferior?' inasequible':''));
-    const imgHtml = info.imagen ? `<div class="img-wrap"><img src="${info.imagen}" alt="${info.nombre}" loading="lazy"></div>` : '';
-    btn.innerHTML = `${imgHtml}<div class="n">${info.nombre}</div><div class="c">${formatearDinero(info.coste)}</div>`;
+    const btn = el('div','servicio-nivel-btn'+(yaComprado?' activo':'')+(!desbloqueado||!asequible||esInferior?' inasequible':''));
+    btn.innerHTML = `<div class="n">${info.nombre}</div><div class="c">${formatearDinero(info.coste)}</div>`;
     if(!desbloqueado){
       btn.title = info.etiquetaBloqueo || 'Todavía no disponible';
     } else if(esInferior){
@@ -20650,7 +20650,9 @@ function renderizarTiendaOnline(j, contenedor){
 
       const card = el('div','tienda-card');
       const foto = el('div','tienda-card-foto '+cat.id);
-      foto.innerHTML = cat.icono;
+      // Con imagen real (ver TIENDA_RELOJES) se pinta esa foto de fondo; sin ella, el icono
+      // degradado de siempre — así las categorías sin fotos todavía no se quedan vacías.
+      foto.innerHTML = info.imagen ? `<img src="${info.imagen}" alt="${info.nombre}" loading="lazy">` : cat.icono;
       if(yaComprado) foto.appendChild(el('span','tienda-card-tag','En uso'));
       card.appendChild(foto);
 
