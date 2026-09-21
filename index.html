@@ -10268,6 +10268,7 @@ function entrarEnParo(j){
   j.temporadasEnClub = 0;
   S.clubDeclinaRenovar = undefined;
   S.motivosNoRenovacion = undefined;
+  S.sinContratoActual = undefined;
   S.paroFase = 'intro';
   guardarPartida();
 }
@@ -10533,6 +10534,7 @@ function nivelExposicionClub(club){
 }
 function iniciarFichaje(j, nuevoClub, nuevoContrato, pantallaSiguiente){
   j.enParo = false;
+  S.sinContratoActual = undefined;
   const clubAnteriorNombre = j.club.nombre;
   const nivelExposicionAnterior = nivelExposicionClub(j.club);
   const etapasPrevias = (j.trayectoria||[]).filter(e => e.club === nuevoClub.nombre);
@@ -13472,6 +13474,11 @@ SCREENS.tabClub = function(){
 
 SCREENS.tabEconomia = function(){
   const j = S.jugador;
+  // El desbloqueo real (obraSubastaDeLaTemporada) solo se comprueba al empezar temporada —
+  // si llegas a los 5M€ a mitad de temporada, sin esto no verías la sección hasta la siguiente.
+  // Se comprueba también aquí para que aparezca en cuanto entras a Economía con el dinero ya
+  // superado, sin tener que esperar a la próxima temporada.
+  if(!j.artesDesbloqueado && j.stats.dinero >= UMBRAL_ARTE_DESBLOQUEO) j.artesDesbloqueado = true;
   topbar("Economía");
   const c = el('div','cromo');
   c.appendChild(seccionEconomia(j));
@@ -15270,7 +15277,9 @@ function telAppsConPendiente(j){
   const mapa = {};
   const pendientesContactos = telContactosDe(j).filter(telContactoPendiente).length;
   const gruposObj = (S.movilBandeja && S.movilBandeja.grupos) || {};
-  const pendientesGrupos = Object.values(gruposObj).reduce((n,lista)=> n + lista.filter(m=>!m.leido).length, 0);
+  // Cuenta CONVERSACIONES con algo sin leer (un contacto o un grupo), no el total de mensajes —
+  // un grupo con 5 mensajes sin leer suma 1, igual que un contacto con 1 solo mensaje.
+  const pendientesGrupos = Object.values(gruposObj).filter(lista => lista.some(m=>!m.leido)).length;
   const totalWhatsapp = pendientesContactos + pendientesGrupos;
   if(totalWhatsapp > 0) mapa.whatsapp = totalWhatsapp;
   const totalEmail = telTodosLosCorreos(j).filter(co=>!(S.telEmailsLeidos && S.telEmailsLeidos[co.id])).length;
@@ -19090,9 +19099,10 @@ SCREENS.ofertas = function(){
 
   // Referencia rápida de lo que ya tienes, para comparar antes de negociar nada — sin el nombre
   // del club (ya se ve en la topbar) para poder ir directa a las 4 cifras con icono+abreviatura,
-  // en una sola línea. No tiene sentido si estás sin equipo (no hay contrato/objetivo/rol reales
-  // con los que comparar).
-  if(!j.club.sinEquipo){
+  // en una sola línea. No tiene sentido si estás sin equipo, ni tampoco si tu club no te ha
+  // renovado y estás mirando mercado sin contrato de verdad (S.sinContratoActual, ver
+  // SCREENS.renovacion) — no hay contrato/objetivo/rol reales con los que comparar.
+  if(!j.club.sinEquipo && !S.sinContratoActual){
     const actual = el('div','oferta-actual-resumen');
     [
       ['dinero', `${formatearDinero(j.contrato.sueldoAnual)}/temp.`],
@@ -19111,8 +19121,8 @@ SCREENS.ofertas = function(){
   const valorDe = of => (of.sueldo || 0) * (of.duracion || 1);
   ofertas.sort((a,b) => prestigioDe(b) - prestigioDe(a) || valorDe(b) - valorDe(a));
   if(ofertas.length===0){
-    c.appendChild(el('p',null, j.club && j.club.sinEquipo
-      ? `<span style="color:var(--ink-soft)">Ningún club ha preguntado por ti. Puedes seguir entrenando por tu cuenta otra temporada más.</span>`
+    c.appendChild(el('p',null, (j.club && j.club.sinEquipo) || S.sinContratoActual
+      ? `<span style="color:var(--ink-soft)">Ningún club ha preguntado por ti. Vas a pasar la temporada como agente libre.</span>`
       : `<span style="color:var(--ink-soft)">Ningún club ha preguntado por ti esta pretemporada. Sigues en ${articuloClub(j.club.nombre)} ${j.club.nombre}.</span>`));
   } else {
     ofertas.forEach(of=>{
@@ -19167,11 +19177,12 @@ SCREENS.ofertas = function(){
   }
 
   const seguir = document.createElement('button'); seguir.className='btn-secondary';
-  if(j.club && j.club.sinEquipo){
-    seguir.textContent = 'Seguir otro año sin equipo';
+  if((j.club && j.club.sinEquipo) || S.sinContratoActual){
+    seguir.textContent = (j.club && j.club.sinEquipo) ? 'Seguir otro año sin equipo' : 'Quedarte sin equipo esta temporada';
     seguir.onclick = ()=>{
       if(respondiendo) return;
       respondiendo = true;
+      S.sinContratoActual = undefined;
       entrarEnParo(j); S.screen = 'temporadaSinClub'; render();
     };
   } else {
@@ -19488,8 +19499,7 @@ SCREENS.negociacionFichaje = function(){
       }
     } else {
       if(neg.esRenovacion){
-        const sueldoEmergencia = Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50;
-        c.appendChild(el('div','badge risk', `📋 El club te hace un contrato de emergencia de 1 año a ${formatearDinero(sueldoEmergencia)}/temp. mientras decides tu futuro`));
+        c.appendChild(el('div','badge risk', `📋 Tu contrato ${articuloClub(j.club.nombre)==='la'?'con la':'con el'} ${j.club.nombre} termina sin acuerdo. Tendrás que buscar equipo en el mercado.`));
       } else if(neg.terminado === 'roto'){
         j.clubesEnfriados = j.clubesEnfriados || {};
         j.clubesEnfriados[neg.club.nombre] = 2;
@@ -19500,18 +19510,11 @@ SCREENS.negociacionFichaje = function(){
       btnVolver.textContent = neg.esRenovacion ? 'Buscar otro club →' : (esNarrativa ? 'Seguir en tu club →' : 'Volver al mercado →');
       btnVolver.onclick = ()=>{
         if(neg.esRenovacion){
-          j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1, emergencia: true };
+          // No hay contrato de emergencia ni autorrenovación: sin acuerdo, sales al mercado sin
+          // contrato de verdad — si no fichas por nadie, SCREENS.ofertas te manda directo a
+          // "sin equipo" (S.sinContratoActual), nunca de vuelta a tu club actual.
+          S.sinContratoActual = true;
           S.ofertasActuales = generarOfertas(j);
-          if(S.ofertasActuales.length === 0){
-            const clubReserva = clubAleatorio(j.club.categoria, j.club.nombre);
-            S.ofertasActuales = [{
-              nombre: clubReserva.nombre, categoria: j.club.categoria, colores: clubReserva.colores,
-              ascenso:false, duracion: calcularDuracionContrato(j),
-              sueldo: calcularSueldoOferta(j, j.club.categoria, j.club.nombre),
-              objetivo: (elegirObjetivo({ club: { nombre: clubReserva.nombre, categoria: j.club.categoria, ambicionNivel: ambicionInicial(clubReserva.nombre) } })||{}).texto || OBJETIVOS_POR_CATEGORIA[j.club.categoria][1],
-              minutos: expectativaMinutos(j, false)
-            }];
-          }
           S.negociacion = null;
           S.screen = 'ofertas';
         } else if(esNarrativa){
@@ -19885,7 +19888,7 @@ SCREENS.negociacionPatrocinio = function(){
   bloqueSueldo.innerHTML = `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em;margin-bottom:7px;">CANTIDAD QUE PROPONES</div>`;
   const pillsSueldo = document.createElement('div');
   pillsSueldo.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;';
-  [[-0.15,'−15%'],[-0.05,'−5%'],[0,'Igual'],[0.10,'+10%'],[0.25,'+25%']].forEach(([id,label])=>{
+  [[-0.10,'−10%'],[-0.05,'−5%'],[0,'Igual'],[0.05,'+5%'],[0.10,'+10%']].forEach(([id,label])=>{
     const p = document.createElement('div');
     p.className = 'servicio-nivel-btn' + (neg.propuesta.sueldoDelta===id ? ' activo' : '');
     p.style.cssText = 'flex:1;min-width:60px;';
@@ -19901,7 +19904,7 @@ SCREENS.negociacionPatrocinio = function(){
   bloqueDuracion.innerHTML = `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em;margin-bottom:7px;">DURACIÓN QUE PROPONES</div>`;
   const pillsDuracion = document.createElement('div');
   pillsDuracion.style.cssText = 'display:flex;gap:6px;';
-  [[-1,'−1 año'],[0,'Igual'],[1,'+1 año']].forEach(([id,label])=>{
+  [[-2,'−2 años'],[-1,'−1 año'],[0,'Igual'],[1,'+1 año'],[2,'+2 años']].forEach(([id,label])=>{
     const p = document.createElement('div');
     p.className = 'servicio-nivel-btn' + (neg.propuesta.duracionDelta===id ? ' activo' : '');
     p.style.cssText = 'flex:1;';
@@ -23751,7 +23754,13 @@ SCREENS.renovacion = function(){
   if(S.clubDeclinaRenovar){
     c.appendChild(crearEyebrow('Tu contrato ha terminado'));
     c.appendChild(el('h2',null,'No hay renovación'));
-    c.appendChild(el('div','event-text', `${articuloClub(j.club.nombre)==='la'?'La':'El'} ${j.club.nombre} te comunica que no va a renovar tu contrato. Esto es lo que ha trasladado la dirección deportiva:`));
+    // Si el motivo es puramente económico (no se pueden permitir tu ficha), tiene más sentido que
+    // el club te ofrezca seguir con un sueldo mucho más bajo en vez de cortar por lo sano sin ni
+    // siquiera plantearlo — un problema de dinero se arregla con menos dinero, no dejándote ir.
+    const motivoEconomico = (S.motivosNoRenovacion||[]).some(m => m.categoria === 'Análisis económico');
+    c.appendChild(el('div','event-text', motivoEconomico
+      ? `${articuloClub(j.club.nombre)==='la'?'La':'El'} ${j.club.nombre} no puede permitirse tu ficha actual, pero antes de dejarte salir te plantean seguir con un contrato mucho más ajustado. Esto es lo que ha trasladado la dirección deportiva:`
+      : `${articuloClub(j.club.nombre)==='la'?'La':'El'} ${j.club.nombre} te comunica que no va a renovar tu contrato. Esto es lo que ha trasladado la dirección deportiva:`));
     const lista = el('div','motivos-no-renovacion');
     (S.motivosNoRenovacion||[]).forEach(m=>{
       const item = el('div','legado-item');
@@ -23760,31 +23769,34 @@ SCREENS.renovacion = function(){
       lista.appendChild(item);
     });
     c.appendChild(lista);
-    const btn = document.createElement('button'); btn.className='btn-main'; btn.textContent='Buscar un nuevo equipo →';
+
+    if(motivoEconomico){
+      const sueldoRecortado = Math.round(j.contrato.sueldoAnual * (0.5 + Math.random()*0.15) / 50) * 50;
+      const btnRecorte = document.createElement('button'); btnRecorte.className='btn-main';
+      btnRecorte.textContent = `Aceptar seguir por ${formatearDinero(sueldoRecortado)}/temp. →`;
+      btnRecorte.onclick = ()=>{
+        S.clubDeclinaRenovar = undefined;
+        j.contrato = { sueldoAnual: sueldoRecortado, duracionTemporadas: 1, duracionOriginal: 1 };
+        iniciarTemporadaJuego(j);
+        render();
+      };
+      c.appendChild(btnRecorte);
+    }
+
+    const btn = document.createElement('button'); btn.className= motivoEconomico ? 'btn-secondary' : 'btn-main';
+    if(motivoEconomico) btn.style.marginTop = '8px';
+    btn.textContent = 'Buscar un nuevo equipo →';
     btn.onclick = ()=>{
       S.clubDeclinaRenovar = undefined;
-      j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1, emergencia: true };
+      // Sin contrato de emergencia ni autorrenovación con el club que te ha dejado ir: sales
+      // directo al mercado sin contrato de verdad — si nadie te ficha, SCREENS.ofertas te manda
+      // a "sin equipo" (S.sinContratoActual), esa temporada queda cubierta por ese mecanismo.
+      S.sinContratoActual = true;
       S.ofertasActuales = generarOfertas(j);
-      if(S.ofertasActuales.length === 0){
-        const clubReserva = clubAleatorio(j.club.categoria, j.club.nombre);
-        S.ofertasActuales = [{
-          nombre: clubReserva.nombre, categoria: j.club.categoria, colores: clubReserva.colores,
-          ascenso:false, duracion: calcularDuracionContrato(j),
-          sueldo: calcularSueldoOferta(j, j.club.categoria, j.club.nombre),
-          objetivo: (elegirObjetivo({ club: { nombre: clubReserva.nombre, categoria: j.club.categoria, ambicionNivel: ambicionInicial(clubReserva.nombre) } })||{}).texto || OBJETIVOS_POR_CATEGORIA[j.club.categoria][1],
-          minutos: expectativaMinutos(j, false)
-        }];
-      }
       S.screen = 'ofertas';
       render();
     };
     c.appendChild(btn);
-
-    const btnParo = document.createElement('button'); btnParo.className='btn-secondary';
-    btnParo.style.marginTop = '8px';
-    btnParo.textContent = 'Quedarte sin equipo esta temporada';
-    btnParo.onclick = ()=>{ entrarEnParo(j); S.screen = 'temporadaSinClub'; render(); };
-    c.appendChild(btnParo);
 
     app.appendChild(c);
     return;
@@ -23809,33 +23821,17 @@ SCREENS.renovacion = function(){
   };
   c.appendChild(btn);
 
-  c.appendChild(el('p',null,`<span style="color:var(--ink-soft); font-size:12.5px;">Si no renuevas, ${articuloClub(j.club.nombre)} ${j.club.nombre} te hará un contrato provisional de 1 año a la baja mientras buscas otro equipo.</span>`));
+  c.appendChild(el('p',null,`<span style="color:var(--ink-soft); font-size:12.5px;">Si no renuevas, sales directo al mercado sin contrato — si nadie te ficha, te quedas sin equipo esta temporada.</span>`));
   const rechazar = document.createElement('button'); rechazar.className='btn-secondary';
   rechazar.textContent = 'No renovar, buscar otro club directamente';
   rechazar.onclick = ()=>{
     S.clubDeclinaRenovar = undefined;
-    j.contrato = { sueldoAnual: Math.round(calcularSueldoOferta(j, j.club.categoria, j.club.nombre) * 0.7 / 50) * 50, duracionTemporadas: 1, duracionOriginal: 1, emergencia: true };
+    S.sinContratoActual = true;
     S.ofertasActuales = generarOfertas(j);
-    if(S.ofertasActuales.length === 0){
-      const clubReserva = clubAleatorio(j.club.categoria, j.club.nombre);
-      S.ofertasActuales = [{
-        nombre: clubReserva.nombre, categoria: j.club.categoria, colores: clubReserva.colores,
-        ascenso:false, duracion: calcularDuracionContrato(j),
-        sueldo: calcularSueldoOferta(j, j.club.categoria, j.club.nombre),
-        objetivo: (elegirObjetivo({ club: { nombre: clubReserva.nombre, categoria: j.club.categoria, ambicionNivel: ambicionInicial(clubReserva.nombre) } })||{}).texto || OBJETIVOS_POR_CATEGORIA[j.club.categoria][1],
-        minutos: expectativaMinutos(j, false)
-      }];
-    }
     S.screen = 'ofertas';
     render();
   };
   c.appendChild(rechazar);
-
-  const btnParo = document.createElement('button'); btnParo.className='btn-secondary';
-  btnParo.style.marginTop = '8px';
-  btnParo.textContent = 'No renovar y quedarte sin equipo esta temporada';
-  btnParo.onclick = ()=>{ entrarEnParo(j); S.screen = 'temporadaSinClub'; render(); };
-  c.appendChild(btnParo);
 
   app.appendChild(c);
 };
