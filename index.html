@@ -2484,10 +2484,16 @@ function porPopularidad(min){ return { desbloqueo: j => j.stats.popularidad >= m
 // Imagen propia por familia de servicio (en vez del icono SVG de ICONOS_SVG habitual) — clave
 // por `familia`, no por `icono`, porque esa clave sí se reutiliza en sitios ajenos al todo (p. ej.
 // 'fisico' es también el icono del atributo Físico del jugador en topbar/lesiones/estilo de
-// juego). De momento solo prepFisico (img/servicios/prep_fisico.png); pintado en
+// juego). Los 4 servicios con imagen cubren la categoría "Rendimiento y Cuidado Físico" salvo
+// Podólogo deportivo, que se queda con su SVG de siempre. Pintado en
 // renderizarServiciosProfesionales y renderizarPlantillaServicios, los dos sitios donde se lista
 // un servicio con su icono.
-const ICONOS_IMAGEN_SERVICIO = { prepFisico: 'img/servicios/prep_fisico.png' };
+const ICONOS_IMAGEN_SERVICIO = {
+  prepFisico: 'img/servicios/prep_fisico.png',
+  fisio: 'img/servicios/fisio.png',
+  nutricionista: 'img/servicios/nutricionista.png',
+  chef: 'img/servicios/chef.png'
+};
 const TIENDA_SERVICIOS = [
   { familia:'prepFisico', nombre:'Preparador físico personal', icono:'fisico', categoria:'Rendimiento y Cuidado Físico', niveles:[
     { nivel:1, costeAnual:2000, efectoTemporada:{fisico:0.5}, desc:'Trabajo complementario de fuerza y prevención de lesiones que no cubren las sesiones grupales del club.', ...porCategoria(1) },
